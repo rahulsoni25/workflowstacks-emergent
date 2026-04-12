@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata = {
-  title: 'About ShowClawMart | AI Skills Marketplace',
-  description: 'ShowClawMart is the leading marketplace for AI skills, agent personas, and automation playbooks. Our mission is to make AI accessible to everyone.',
+  title: 'About WorkflowStacks | AI Skills Marketplace',
+  description: 'WorkflowStacks is the leading marketplace for AI skills, agent personas, and automation playbooks. Our mission is to make AI accessible to everyone.',
   alternates: { canonical: '/about' },
 }
 
@@ -22,7 +22,7 @@ export default function AboutPage() {
           <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-500/20">
             <Sparkles className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">About ShowClawMart</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">About WorkflowStacks</h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">Making AI accessible to every team, regardless of technical skill.</p>
         </div>
 
@@ -30,14 +30,14 @@ export default function AboutPage() {
           <Card className="bg-slate-900/60 border-slate-700/50">
             <CardContent className="py-6">
               <h2 className="text-2xl font-bold text-white mb-3">Our Mission</h2>
-              <p className="text-slate-300 leading-relaxed">We believe every founder, marketer, and business operator should be able to harness the power of AI without writing a single line of code. ShowClawMart bridges the gap between powerful AI tools and the people who need them most.</p>
+              <p className="text-slate-300 leading-relaxed">We believe every founder, marketer, and business operator should be able to harness the power of AI without writing a single line of code. WorkflowStacks bridges the gap between powerful AI tools and the people who need them most.</p>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-900/60 border-slate-700/50">
             <CardContent className="py-6">
               <h2 className="text-2xl font-bold text-white mb-3">What We Do</h2>
-              <p className="text-slate-300 leading-relaxed mb-4">ShowClawMart is an AI skills marketplace that automatically discovers the best AI tools from GitHub, enriches them with benefit-driven descriptions, and packages them into ready-to-use agent blueprints.</p>
+              <p className="text-slate-300 leading-relaxed mb-4">WorkflowStacks is an AI skills marketplace that automatically discovers the best AI tools from GitHub, enriches them with benefit-driven descriptions, and packages them into ready-to-use agent blueprints.</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   { n: '500+', label: 'AI skills indexed' },

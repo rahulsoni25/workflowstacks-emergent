@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata = {
-  title: 'What Is MCP (Model Context Protocol)? | ShowClawMart Learn',
+  title: 'What Is MCP (Model Context Protocol)? | WorkflowStacks Learn',
   description: 'MCP (Model Context Protocol) is the universal standard for connecting AI models to external tools and data. Learn how MCP servers work and why they matter.',
   alternates: { canonical: '/learn/mcp' },
 }

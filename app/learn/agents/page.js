@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata = {
-  title: 'What Are AI Agents? | ShowClawMart Learn',
+  title: 'What Are AI Agents? | WorkflowStacks Learn',
   description: 'AI agents are custom-configured AI assistants that combine multiple skills to accomplish complex goals. Learn how to build and deploy your own agents.',
   alternates: { canonical: '/learn/agents' },
 }
@@ -24,8 +24,8 @@ export default function LearnAgentsPage() {
         <div className="space-y-8">
           <Card className="bg-slate-900/60 border-slate-700/50">
             <CardContent className="py-6">
-              <h2 className="text-2xl font-bold text-white mb-3">How Agents Work on ShowClawMart</h2>
-              <p className="text-slate-300 leading-relaxed mb-4">An AI agent on ShowClawMart is a prompt blueprint that combines multiple skills into a coherent instruction set. When you paste this blueprint into ChatGPT, Claude, or Gemini, the AI becomes your specialized assistant.</p>
+              <h2 className="text-2xl font-bold text-white mb-3">How Agents Work on WorkflowStacks</h2>
+              <p className="text-slate-300 leading-relaxed mb-4">An AI agent on WorkflowStacks is a prompt blueprint that combines multiple skills into a coherent instruction set. When you paste this blueprint into ChatGPT, Claude, or Gemini, the AI becomes your specialized assistant.</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {['Pick Skills \u2192 Choose the capabilities your agent needs', 'Set a Goal \u2192 Describe what you want in plain English', 'Deploy \u2192 Copy the blueprint and paste into any AI tool'].map((s, i) => (
                   <div key={i} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">

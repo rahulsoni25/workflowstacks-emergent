@@ -1,8 +1,8 @@
-# ShowClawMart 🎯
+# WorkflowStacks 🎯
 
 > **Discover AI Skills from GitHub** - A marketplace for Claude Skills, Gemini Extensions, and MCP Servers automatically sourced from the best GitHub repositories.
 
-![ShowClawMart](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
+![WorkflowStacks](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
 ![MongoDB](https://img.shields.io/badge/MongoDB-6.6-green?style=for-the-badge&logo=mongodb)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-blue?style=for-the-badge&logo=tailwindcss)
 
@@ -130,7 +130,7 @@ Create an AI agent blueprint from multiple skills
 
 ```env
 MONGO_URL=mongodb://localhost:27017
-DB_NAME=showclawmart
+DB_NAME=workflowstacks
 NEXT_PUBLIC_BASE_URL=https://your-domain.com
 ```
 
@@ -275,4 +275,4 @@ MIT License - feel free to use this project!
 
 ---
 
-**ShowClawMart** - Discover the best AI skills from GitHub in one beautiful marketplace! 🚀
+**WorkflowStacks** - Discover the best AI skills from GitHub in one beautiful marketplace! 🚀

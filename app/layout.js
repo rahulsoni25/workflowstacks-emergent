@@ -2,24 +2,24 @@ import './globals.css'
 import Footer from '@/components/Footer'
 
 export const metadata = {
-  title: 'ShowClawMart — AI Skills & Agent Marketplace | Claude, Gemini, MCP Tools',
-  description: 'Discover 500+ AI skills, agent personas, and ready-to-use playbooks for Claude, Gemini, and MCP. Build custom AI agents without coding. Perfect for founders, marketers, and ecommerce operators.',
-  keywords: 'AI skills marketplace, Claude skills, Gemini extensions, MCP servers, AI agents, prompt engineering, AI automation, no-code AI, AI for founders, AI for marketers',
-  authors: [{ name: 'ShowClawMart' }],
-  creator: 'ShowClawMart',
-  publisher: 'ShowClawMart',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://showclawmart.com'),
+  title: 'WorkflowStacks — AI Skills & Agent Marketplace for OpenClaw, Claude & Gemini',
+  description: 'Install OpenClaw-style AI skills, agent personas, and ready-to-use playbooks for Claude, Gemini, and MCP. Build custom AI agents for SEO, outreach, and ecommerce ops — without writing code.',
+  keywords: 'WorkflowStacks, AI skills marketplace, OpenClaw skills, Claude skills, Gemini extensions, MCP servers, AI agents, prompt engineering, AI automation, no-code AI, AI for founders, AI for marketers, SEO automation, ecommerce AI',
+  authors: [{ name: 'WorkflowStacks' }],
+  creator: 'WorkflowStacks',
+  publisher: 'WorkflowStacks',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'),
   openGraph: {
-    title: 'ShowClawMart — AI Skills & Agent Marketplace',
-    description: 'Discover 500+ AI skills and build custom AI agents without coding. For Claude, Gemini, MCP and more.',
+    title: 'WorkflowStacks — AI Skills & Agent Marketplace for OpenClaw, Claude & Gemini',
+    description: 'Install OpenClaw-style AI skills and build custom AI agents for SEO, outreach, and ecommerce — without coding.',
     type: 'website',
     locale: 'en_US',
-    siteName: 'ShowClawMart',
+    siteName: 'WorkflowStacks',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ShowClawMart — AI Skills & Agent Marketplace',
-    description: 'Discover 500+ AI skills and build custom AI agents without coding.',
+    title: 'WorkflowStacks — AI Skills & Agent Marketplace for OpenClaw, Claude & Gemini',
+    description: 'Install OpenClaw-style AI skills and build custom AI agents for SEO, outreach, and ecommerce — without coding.',
   },
   robots: {
     index: true,
@@ -41,14 +41,14 @@ export default function RootLayout({ children }) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: 'ShowClawMart',
-    description: 'AI Skills & Agent Marketplace for Claude, Gemini, and MCP Tools',
-    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://showclawmart.com',
+    name: 'WorkflowStacks',
+    description: 'AI Skills & Agent Marketplace for OpenClaw, Claude, Gemini, and MCP Tools — by WorkflowStacks',
+    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com',
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://showclawmart.com'}/?search={search_term_string}`,
+        urlTemplate: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'}/?search={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },
@@ -57,13 +57,13 @@ export default function RootLayout({ children }) {
   const orgJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: 'ShowClawMart',
+    name: 'WorkflowStacks',
     description: 'The leading marketplace for AI skills, agent personas, and automation playbooks.',
-    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://showclawmart.com',
-    logo: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://showclawmart.com'}/logo.png`,
+    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com',
+    logo: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'}/logo.png`,
     sameAs: [
-      'https://twitter.com/showclawmart',
-      'https://github.com/showclawmart',
+      'https://twitter.com/workflowstacks',
+      'https://github.com/workflowstacks',
     ],
   }
 

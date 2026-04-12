@@ -40,9 +40,9 @@ const HomePage = () => {
       '@context': 'https://schema.org',
       '@type': 'FAQPage',
       mainEntity: [
-        { '@type': 'Question', name: 'What is ShowClawMart?', acceptedAnswer: { '@type': 'Answer', text: 'ShowClawMart is an AI skills marketplace where you can discover, combine, and deploy AI agent blueprints for Claude, ChatGPT, Gemini, and MCP tools — without writing any code.' } },
-        { '@type': 'Question', name: 'Do I need coding skills to use it?', acceptedAnswer: { '@type': 'Answer', text: 'No! ShowClawMart is designed for non-technical users. You simply browse skills, pick the ones you want, and our Agent Builder creates a ready-to-paste prompt blueprint for you.' } },
-        { '@type': 'Question', name: 'What AI tools does it work with?', acceptedAnswer: { '@type': 'Answer', text: 'ShowClawMart works with any AI chat tool including ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), and any tool that accepts system prompts or custom instructions.' } },
+        { '@type': 'Question', name: 'What is WorkflowStacks?', acceptedAnswer: { '@type': 'Answer', text: 'WorkflowStacks is an AI skills marketplace where you can discover, combine, and deploy AI agent blueprints for Claude, ChatGPT, Gemini, and MCP tools — without writing any code.' } },
+        { '@type': 'Question', name: 'Do I need coding skills to use it?', acceptedAnswer: { '@type': 'Answer', text: 'No! WorkflowStacks is designed for non-technical users. You simply browse skills, pick the ones you want, and our Agent Builder creates a ready-to-paste prompt blueprint for you.' } },
+        { '@type': 'Question', name: 'What AI tools does it work with?', acceptedAnswer: { '@type': 'Answer', text: 'WorkflowStacks works with any AI chat tool including ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), and any tool that accepts system prompts or custom instructions.' } },
         { '@type': 'Question', name: 'How are skills sourced?', acceptedAnswer: { '@type': 'Answer', text: 'Skills are automatically ingested from GitHub using our proprietary scraper that finds the highest-quality, most-starred AI repositories. We also curate premium skills from verified creators.' } },
         { '@type': 'Question', name: 'Is it free to use?', acceptedAnswer: { '@type': 'Answer', text: 'Yes! You can browse all skills and build up to 3 agents per month for free. Pro and Enterprise plans unlock unlimited builds, premium packs, and team features.' } },
       ]
@@ -134,7 +134,7 @@ const HomePage = () => {
   }
 
   const testimonials = [
-    { name: 'Sarah Chen', role: 'Founder, TechLaunch', quote: 'ShowClawMart cut our AI setup time from weeks to minutes. The playbooks are incredibly well-curated.', avatar: '👩‍💻' },
+    { name: 'Sarah Chen', role: 'Founder, TechLaunch', quote: 'WorkflowStacks cut our AI setup time from weeks to minutes. The playbooks are incredibly well-curated.', avatar: '👩‍💻' },
     { name: 'Marcus Rivera', role: 'Agency Director', quote: 'We use the Agent Builder daily. It\'s like having an AI solutions architect on the team 24/7.', avatar: '👨‍💼' },
     { name: 'Priya Patel', role: 'Ecommerce Ops', quote: 'The ecommerce starter pack automated 80% of our Shopify review responses. ROI was instant.', avatar: '👩‍🔬' },
   ]
@@ -149,7 +149,7 @@ const HomePage = () => {
               <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg shadow-teal-500/20">
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-white tracking-tight">ShowClaw<span className="text-teal-400">Mart</span></span>
+              <span className="text-xl font-bold text-white tracking-tight">Workflow<span className="text-teal-400">Stacks</span></span>
             </Link>
             <nav className="hidden md:flex items-center gap-1">
               <Link href="/personas">
@@ -221,12 +221,12 @@ const HomePage = () => {
             </motion.div>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-              Stop Googling AI Tools.
+              AI Skills & Agent Marketplace
               <br />
-              <span className="text-gradient-neptune">Start Shipping with Them.</span>
+              <span className="text-gradient-neptune">for OpenClaw, Claude & Gemini</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed">
-              The marketplace where founders, agencies, and ecommerce teams discover pre-vetted AI skills, combine them into custom agents, and deploy — <strong className="text-white">in under 2 minutes, zero code.</strong>
+              Built for startup founders and marketing agencies who want to install OpenClaw‑style skills, agents, and personas that handle SEO, outreach, and ecommerce ops — <strong className="text-white">without writing code.</strong>
             </p>
 
             {/* CTA Buttons */}
@@ -647,9 +647,9 @@ const HomePage = () => {
           </h2>
           <div className="space-y-4">
             {[
-              { q: 'What is ShowClawMart?', a: 'ShowClawMart is an AI skills marketplace where you can discover, combine, and deploy AI agent blueprints for Claude, ChatGPT, Gemini, and MCP tools — without writing any code.' },
-              { q: 'Do I need coding skills to use it?', a: 'No! ShowClawMart is designed for non-technical users. You simply browse skills, pick the ones you want, and our Agent Builder creates a ready-to-paste prompt blueprint for you.' },
-              { q: 'What AI tools does it work with?', a: 'ShowClawMart works with any AI chat tool including ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), and any tool that accepts system prompts or custom instructions.' },
+              { q: 'What is WorkflowStacks?', a: 'WorkflowStacks is an AI skills marketplace where you can discover, combine, and deploy AI agent blueprints for Claude, ChatGPT, Gemini, and MCP tools — without writing any code.' },
+              { q: 'Do I need coding skills to use it?', a: 'No! WorkflowStacks is designed for non-technical users. You simply browse skills, pick the ones you want, and our Agent Builder creates a ready-to-paste prompt blueprint for you.' },
+              { q: 'What AI tools does it work with?', a: 'WorkflowStacks works with any AI chat tool including ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), and any tool that accepts system prompts or custom instructions.' },
               { q: 'How are skills sourced?', a: 'Skills are automatically ingested from GitHub using our proprietary scraper that finds the highest-quality, most-starred AI repositories. We also curate premium skills from verified creators.' },
               { q: 'Is it free to use?', a: 'Yes! You can browse all skills and build up to 3 agents per month for free. Pro and Enterprise plans unlock unlimited builds, premium packs, and team features.' },
               { q: 'What are Playbooks and Personas?', a: 'Playbooks are step-by-step guides that combine AI skills to solve specific problems (like "Validate a Business Idea in 48 Hours"). Personas are pre-configured AI agent roles designed for specific audiences (Founders, Agencies, Ecommerce).' },

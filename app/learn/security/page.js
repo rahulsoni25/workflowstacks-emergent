@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata = {
-  title: 'Security & Trust | ShowClawMart',
-  description: 'Learn about ShowClawMart\'s security practices, data handling, and trust measures. We verify all skills and protect your data.',
+  title: 'Security & Trust | WorkflowStacks',
+  description: 'Learn about WorkflowStacks\'s security practices, data handling, and trust measures. We verify all skills and protect your data.',
   alternates: { canonical: '/learn/security' },
 }
 
@@ -27,9 +27,9 @@ export default function LearnSecurityPage() {
         <div className="space-y-6">
           {[
             { title: 'Skill Verification', desc: 'Every skill is sourced from public GitHub repositories. We check star counts, update frequency, and community activity as quality signals. Premium skills undergo additional manual review.', icon: '✅' },
-            { title: 'No Code Execution', desc: 'ShowClawMart generates text-based agent blueprints. We never execute code on your behalf or access your accounts. The blueprints are plain-text instructions that you paste into your own AI tools.', icon: '🔒' },
+            { title: 'No Code Execution', desc: 'WorkflowStacks generates text-based agent blueprints. We never execute code on your behalf or access your accounts. The blueprints are plain-text instructions that you paste into your own AI tools.', icon: '🔒' },
             { title: 'Data Privacy', desc: 'We don\'t store your conversations, agent outputs, or personal data beyond what\'s needed for your account. Your agent blueprints are generated on-demand and not stored unless you choose to save them.', icon: '🛡️' },
-            { title: 'Open Source Skills', desc: 'The majority of skills on ShowClawMart come from open-source repositories. You can inspect the source code before using any skill.', icon: '🔍' },
+            { title: 'Open Source Skills', desc: 'The majority of skills on WorkflowStacks come from open-source repositories. You can inspect the source code before using any skill.', icon: '🔍' },
             { title: 'Secure Infrastructure', desc: 'Our platform runs on enterprise-grade infrastructure with encryption in transit and at rest. We follow industry best practices for web application security.', icon: '🏢' },
           ].map((item, i) => (
             <Card key={i} className="bg-slate-900/60 border-slate-700/50">

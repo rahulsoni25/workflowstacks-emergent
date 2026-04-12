@@ -3,8 +3,8 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export const metadata = {
-  title: 'Privacy Policy | ShowClawMart',
-  description: 'ShowClawMart Privacy Policy. Learn how we collect, use, and protect your data on our AI skills marketplace.',
+  title: 'Privacy Policy | WorkflowStacks',
+  description: 'WorkflowStacks Privacy Policy. Learn how we collect, use, and protect your data on our AI skills marketplace.',
   alternates: { canonical: '/privacy' },
 }
 
@@ -58,12 +58,12 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">6. Your Rights</h2>
-            <p className="text-slate-300 leading-relaxed">You may request access to, correction of, or deletion of your personal data at any time by contacting privacy@showclawmart.com.</p>
+            <p className="text-slate-300 leading-relaxed">You may request access to, correction of, or deletion of your personal data at any time by contacting privacy@workflowstacks.com.</p>
           </section>
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">7. Contact</h2>
-            <p className="text-slate-300 leading-relaxed">For privacy inquiries, contact privacy@showclawmart.com.</p>
+            <p className="text-slate-300 leading-relaxed">For privacy inquiries, contact privacy@workflowstacks.com.</p>
           </section>
         </div>
       </div>

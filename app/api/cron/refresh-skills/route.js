@@ -7,7 +7,7 @@ let db;
 async function connectDB() {
   if (!db) {
     await client.connect();
-    db = client.db(process.env.DB_NAME || 'showclawmart');
+    db = client.db(process.env.DB_NAME || 'workflowstacks');
   }
   return db;
 }
@@ -29,7 +29,7 @@ async function scrapeGitHub(topicQueries, limit = 10) {
         {
           headers: {
             'Accept': 'application/vnd.github+json',
-            'User-Agent': 'ShowClawMart',
+            'User-Agent': 'WorkflowStacks',
             'Authorization': process.env.GITHUB_TOKEN ? `token ${process.env.GITHUB_TOKEN}` : undefined
           }
         }
@@ -49,7 +49,7 @@ async function scrapeGitHub(topicQueries, limit = 10) {
             {
               headers: {
                 'Accept': 'application/vnd.github.raw+json',
-                'User-Agent': 'ShowClawMart',
+                'User-Agent': 'WorkflowStacks',
                 'Authorization': process.env.GITHUB_TOKEN ? `token ${process.env.GITHUB_TOKEN}` : undefined
               }
             }

@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const metadata = {
-  title: 'How ShowClawMart Works | AI Skills Marketplace Guide',
-  description: 'Learn how ShowClawMart helps you discover AI skills, build custom agents, and deploy them to ChatGPT, Claude, and Gemini in under 2 minutes. No coding required.',
+  title: 'How WorkflowStacks Works | AI Skills Marketplace Guide',
+  description: 'Learn how WorkflowStacks helps you discover AI skills, build custom agents, and deploy them to ChatGPT, Claude, and Gemini in under 2 minutes. No coding required.',
   alternates: { canonical: '/learn/how-it-works' },
 }
 
@@ -25,7 +25,7 @@ export default function HowItWorksPage() {
         </div>
       </header>
       <div className="container mx-auto px-4 py-16 max-w-4xl">
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center">How ShowClawMart Works</h1>
+        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center">How WorkflowStacks Works</h1>
         <p className="text-xl text-slate-300 text-center mb-16 max-w-2xl mx-auto">From discovery to deployment in under 2 minutes. Here's exactly how it works.</p>
         <div className="space-y-8">
           {steps.map((s, i) => (

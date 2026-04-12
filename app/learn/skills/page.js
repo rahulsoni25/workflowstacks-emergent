@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata = {
-  title: 'What Are AI Skills? | ShowClawMart Learn',
-  description: 'AI skills are pre-built capabilities that you can add to AI agents. Learn about Claude Skills, Gemini Extensions, MCP Servers, and AI Prompts on ShowClawMart.',
+  title: 'What Are AI Skills? | WorkflowStacks Learn',
+  description: 'AI skills are pre-built capabilities that you can add to AI agents. Learn about Claude Skills, Gemini Extensions, MCP Servers, and AI Prompts on WorkflowStacks.',
   alternates: { canonical: '/learn/skills' },
 }
 

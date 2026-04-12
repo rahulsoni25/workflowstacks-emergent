@@ -26,7 +26,7 @@ export default function HelpPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl mb-4 shadow-lg shadow-emerald-500/20">
             <Play className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">How to Use ShowClawMart</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">How to Use WorkflowStacks</h1>
           <p className="text-xl text-slate-300">Complete guide for non-technical users — No coding required!</p>
         </motion.div>
 

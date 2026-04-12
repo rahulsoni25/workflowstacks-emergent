@@ -69,20 +69,20 @@ export default function Footer() {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold text-white tracking-tight">
-              ShowClaw<span className="text-teal-400">Mart</span>
+              Workflow<span className="text-teal-400">Stacks</span>
             </span>
           </Link>
           <p className="mt-4 text-sm text-slate-400 leading-relaxed">
             The marketplace for AI skills that launch offers, rank in AI search, and automate operations. No coding required.
           </p>
           <div className="flex items-center gap-3 mt-6">
-            <a href="https://twitter.com/showclawmart" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-slate-800/50 hover:bg-teal-500/20 border border-slate-700/50 hover:border-teal-500/30 flex items-center justify-center transition-all" aria-label="Twitter">
+            <a href="https://twitter.com/workflowstacks" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-slate-800/50 hover:bg-teal-500/20 border border-slate-700/50 hover:border-teal-500/30 flex items-center justify-center transition-all" aria-label="Twitter">
               <span className="text-slate-400 text-sm">𝕏</span>
             </a>
-            <a href="https://github.com/showclawmart" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-slate-800/50 hover:bg-teal-500/20 border border-slate-700/50 hover:border-teal-500/30 flex items-center justify-center transition-all" aria-label="GitHub">
+            <a href="https://github.com/workflowstacks" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-slate-800/50 hover:bg-teal-500/20 border border-slate-700/50 hover:border-teal-500/30 flex items-center justify-center transition-all" aria-label="GitHub">
               <span className="text-slate-400 text-sm">⚡</span>
             </a>
-            <a href="https://discord.gg/showclawmart" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-slate-800/50 hover:bg-teal-500/20 border border-slate-700/50 hover:border-teal-500/30 flex items-center justify-center transition-all" aria-label="Discord">
+            <a href="https://discord.gg/workflowstacks" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-slate-800/50 hover:bg-teal-500/20 border border-slate-700/50 hover:border-teal-500/30 flex items-center justify-center transition-all" aria-label="Discord">
               <span className="text-slate-400 text-sm">💬</span>
             </a>
           </div>
@@ -129,7 +129,7 @@ export default function Footer() {
       <div className="border-t border-slate-800/80">
         <div className="mx-auto max-w-7xl px-4 py-5">
           <div className="flex flex-col gap-3 text-center text-xs text-slate-500 md:flex-row md:justify-between md:text-left">
-            <p>&copy; {new Date().getFullYear()} ShowClawMart. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} WorkflowStacks. All rights reserved.</p>
             <div className="flex justify-center gap-6">
               <Link href="/terms" className="hover:text-teal-400 transition-colors">Terms</Link>
               <Link href="/privacy" className="hover:text-teal-400 transition-colors">Privacy</Link>

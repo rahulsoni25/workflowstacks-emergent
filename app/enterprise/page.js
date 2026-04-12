@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const metadata = {
-  title: 'Enterprise AI Solutions | ShowClawMart',
-  description: 'ShowClawMart Enterprise offers custom AI skill ingestion, white-label agents, API access, SSO, and dedicated support for agencies and large teams.',
+  title: 'Enterprise AI Solutions | WorkflowStacks',
+  description: 'WorkflowStacks Enterprise offers custom AI skill ingestion, white-label agents, API access, SSO, and dedicated support for agencies and large teams.',
   alternates: { canonical: '/enterprise' },
 }
 
@@ -20,7 +20,7 @@ export default function EnterprisePage() {
       <div className="container mx-auto px-4 py-16 max-w-5xl">
         <div className="text-center mb-16">
           <Building className="w-16 h-16 text-teal-400 mx-auto mb-4" />
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">ShowClawMart Enterprise</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">WorkflowStacks Enterprise</h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">Custom AI automation at scale for agencies and large teams.</p>
         </div>
 

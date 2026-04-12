@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata = {
-  title: 'For Creators — Share Your AI Skills | ShowClawMart',
-  description: 'Submit your AI skills, agents, and MCP servers to ShowClawMart. Reach thousands of founders, agencies, and ecommerce teams looking for AI automation solutions.',
+  title: 'For Creators — Share Your AI Skills | WorkflowStacks',
+  description: 'Submit your AI skills, agents, and MCP servers to WorkflowStacks. Reach thousands of founders, agencies, and ecommerce teams looking for AI automation solutions.',
   alternates: { canonical: '/learn/creators' },
 }
 
@@ -24,7 +24,7 @@ export default function LearnCreatorsPage() {
         <div className="space-y-8">
           <Card className="bg-gradient-to-br from-teal-500/10 to-cyan-500/10 border-teal-500/30">
             <CardContent className="py-6">
-              <h2 className="text-2xl font-bold text-white mb-3">Why List on ShowClawMart?</h2>
+              <h2 className="text-2xl font-bold text-white mb-3">Why List on WorkflowStacks?</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
                   { title: 'Reach', desc: '2,000+ active users looking for AI tools' },

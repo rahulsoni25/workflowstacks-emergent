@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const metadata = {
-  title: 'API Documentation | ShowClawMart',
-  description: 'ShowClawMart API documentation. Access skills, agents, packs, playbooks, and personas programmatically.',
+  title: 'API Documentation | WorkflowStacks',
+  description: 'WorkflowStacks API documentation. Access skills, agents, packs, playbooks, and personas programmatically.',
   alternates: { canonical: '/docs' },
 }
 
@@ -34,12 +34,12 @@ export default function DocsPage() {
         <div className="text-center mb-16">
           <Code2 className="w-16 h-16 text-teal-400 mx-auto mb-4" />
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">API Documentation</h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">Access ShowClawMart's marketplace data programmatically.</p>
+          <p className="text-xl text-slate-300 max-w-2xl mx-auto">Access WorkflowStacks's marketplace data programmatically.</p>
         </div>
 
         <Card className="bg-teal-500/10 border-teal-500/30 mb-8">
           <CardContent className="py-4">
-            <p className="text-teal-300 font-medium">Base URL: <code className="bg-slate-800/50 px-2 py-1 rounded text-white font-mono">{process.env.NEXT_PUBLIC_BASE_URL || 'https://showclawmart.com'}/api</code></p>
+            <p className="text-teal-300 font-medium">Base URL: <code className="bg-slate-800/50 px-2 py-1 rounded text-white font-mono">{process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'}/api</code></p>
           </CardContent>
         </Card>
 

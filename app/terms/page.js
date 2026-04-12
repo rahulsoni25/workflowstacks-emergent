@@ -3,8 +3,8 @@ import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export const metadata = {
-  title: 'Terms of Service | ShowClawMart',
-  description: 'ShowClawMart Terms of Service. Read our terms and conditions for using the AI skills marketplace.',
+  title: 'Terms of Service | WorkflowStacks',
+  description: 'WorkflowStacks Terms of Service. Read our terms and conditions for using the AI skills marketplace.',
   alternates: { canonical: '/terms' },
 }
 
@@ -23,12 +23,12 @@ export default function TermsPage() {
           
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">1. Acceptance of Terms</h2>
-            <p className="text-slate-300 leading-relaxed">By accessing or using ShowClawMart ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the Service.</p>
+            <p className="text-slate-300 leading-relaxed">By accessing or using WorkflowStacks ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, please do not use the Service.</p>
           </section>
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">2. Description of Service</h2>
-            <p className="text-slate-300 leading-relaxed">ShowClawMart is an AI skills marketplace that allows users to discover, combine, and deploy AI agent blueprints. The Service provides text-based agent configurations that users can paste into third-party AI tools.</p>
+            <p className="text-slate-300 leading-relaxed">WorkflowStacks is an AI skills marketplace that allows users to discover, combine, and deploy AI agent blueprints. The Service provides text-based agent configurations that users can paste into third-party AI tools.</p>
           </section>
 
           <section>
@@ -43,12 +43,12 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">4. Intellectual Property</h2>
-            <p className="text-slate-300 leading-relaxed">Open-source skills are subject to their respective licenses. Premium skills are licensed for personal or team use as specified. ShowClawMart's platform, branding, and curated content are our intellectual property.</p>
+            <p className="text-slate-300 leading-relaxed">Open-source skills are subject to their respective licenses. Premium skills are licensed for personal or team use as specified. WorkflowStacks's platform, branding, and curated content are our intellectual property.</p>
           </section>
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">5. Limitation of Liability</h2>
-            <p className="text-slate-300 leading-relaxed">ShowClawMart provides agent blueprints as-is. We are not responsible for the outputs or actions of AI tools when used with our blueprints. Use at your own discretion.</p>
+            <p className="text-slate-300 leading-relaxed">WorkflowStacks provides agent blueprints as-is. We are not responsible for the outputs or actions of AI tools when used with our blueprints. Use at your own discretion.</p>
           </section>
 
           <section>
@@ -58,7 +58,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">7. Contact</h2>
-            <p className="text-slate-300 leading-relaxed">For questions about these terms, please contact us at support@showclawmart.com.</p>
+            <p className="text-slate-300 leading-relaxed">For questions about these terms, please contact us at support@workflowstacks.com.</p>
           </section>
         </div>
       </div>
