@@ -225,7 +225,7 @@ const HomePage = () => {
                     </div>
                     <CardTitle className="text-white">{skill.title_human || skill.name}</CardTitle>
                     <CardDescription className="text-gray-400">
-                      {skill.description}
+                      {skill.description_human || skill.description}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
