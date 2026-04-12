@@ -12,7 +12,7 @@ async function connectDB() {
   return db;
 }
 
-// Enhanced GitHub scraper function - Latest & Most Popular
+// Enhanced GitHub scraper function - Latest & Most Popular (March 2026+)
 async function scrapeGitHub(topicQueries, limit = 15) {
   const skills = [];
   const seenRepos = new Set(); // Avoid duplicates
@@ -21,15 +21,17 @@ async function scrapeGitHub(topicQueries, limit = 15) {
     try {
       const { query, category, minStars = 50 } = queryConfig;
       
-      // Build query with filters for quality and recency
-      const searchQuery = `${query} stars:>${minStars} pushed:>2023-01-01`;
+      // Build query with filters for quality, recency, and March 2026+
+      const dateFilter = 'created:>=2026-03-01'; // Fresh skills from March 2026
+      const searchQuery = `${query} ${dateFilter} stars:>${minStars}`;
       
       const response = await fetch(
         `https://api.github.com/search/repositories?q=${encodeURIComponent(searchQuery)}&sort=stars&order=desc&per_page=${limit}`,
         {
           headers: {
             'Accept': 'application/vnd.github+json',
-            'User-Agent': 'ShowClawMart'
+            'User-Agent': 'ShowClawMart',
+            'Authorization': process.env.GITHUB_TOKEN ? `token ${process.env.GITHUB_TOKEN}` : undefined
           }
         }
       );
@@ -42,12 +44,9 @@ async function scrapeGitHub(topicQueries, limit = 15) {
       const data = await response.json();
       
       for (const repo of data.items || []) {
-        // Skip duplicates
-        if (seenRepos.has(repo.full_name)) continue;
+        // Skip duplicates and archived repos
+        if (seenRepos.has(repo.full_name) || repo.archived) continue;
         seenRepos.add(repo.full_name);
-        
-        // Skip archived or very old repos
-        if (repo.archived) continue;
         
         // Fetch README
         let readmePreview = '';
@@ -57,7 +56,8 @@ async function scrapeGitHub(topicQueries, limit = 15) {
             {
               headers: {
                 'Accept': 'application/vnd.github.raw+json',
-                'User-Agent': 'ShowClawMart'
+                'User-Agent': 'ShowClawMart',
+                'Authorization': process.env.GITHUB_TOKEN ? `token ${process.env.GITHUB_TOKEN}` : undefined
               }
             }
           );
@@ -69,10 +69,15 @@ async function scrapeGitHub(topicQueries, limit = 15) {
           console.log('Error fetching README:', e.message);
         }
         
-        // Calculate quality score
+        // Calculate popularity score (0-100)
         const daysSinceUpdate = (Date.now() - new Date(repo.updated_at)) / (1000 * 60 * 60 * 24);
-        const recencyBonus = daysSinceUpdate < 30 ? 0.5 : daysSinceUpdate < 90 ? 0.3 : 0;
-        const rating = Math.min(5, (repo.stargazers_count / 1000) + 3.5 + recencyBonus);
+        const recencyBonus = daysSinceUpdate < 7 ? 20 : daysSinceUpdate < 30 ? 10 : 0;
+        const starScore = Math.min(50, (repo.stargazers_count / 1000) * 10);
+        const forkScore = Math.min(20, (repo.forks_count / 100) * 10);
+        const popularityScore = starScore + forkScore + recencyBonus;
+        
+        // Quality rating
+        const rating = Math.min(5, (repo.stargazers_count / 1000) + 3.5 + (recencyBonus / 10));
         
         const skill = {
           id: uuidv4(),
@@ -87,6 +92,7 @@ async function scrapeGitHub(topicQueries, limit = 15) {
           github_stars: repo.stargazers_count,
           github_forks: repo.forks_count,
           github_topics: repo.topics || [],
+          popularity_score: parseFloat(popularityScore.toFixed(2)),
           creator: repo.owner.login,
           creator_avatar: repo.owner.avatar_url,
           is_premium: false,
@@ -303,6 +309,48 @@ export async function GET(request) {
       });
     }
     
+    // Get trending skills (high popularity score, recently updated)
+    if (path === '/trending') {
+      const skills = await database.collection('skills')
+        .find({ popularity_score: { $exists: true } })
+        .sort({ popularity_score: -1, last_updated: -1 })
+        .limit(12)
+        .toArray();
+      
+      return Response.json({ skills });
+    }
+    
+    // Get hot skills (most stars, updated in last 30 days)
+    if (path === '/hot') {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      
+      const skills = await database.collection('skills')
+        .find({ 
+          last_updated: { $gte: thirtyDaysAgo },
+          github_stars: { $exists: true }
+        })
+        .sort({ github_stars: -1 })
+        .limit(12)
+        .toArray();
+      
+      return Response.json({ skills });
+    }
+    
+    // Get new skills (added this week)
+    if (path === '/new') {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const skills = await database.collection('skills')
+        .find({ created_at: { $gte: sevenDaysAgo } })
+        .sort({ created_at: -1 })
+        .limit(12)
+        .toArray();
+      
+      return Response.json({ skills });
+    }
+    
     // Stats endpoint
     if (path === '/stats') {
       const totalSkills = await database.collection('skills').countDocuments();
@@ -476,6 +524,16 @@ export async function POST(request) {
           useCase: 'Validation',
           problem: 'You have a business idea but don\'t know if people will pay for it',
           skillIds: allSkills.slice(0, 3).map(s => s.id),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          title: 'Idea Validation with Market Research',
+          description: 'Comprehensive market research, competitor analysis, and customer discovery to validate your startup idea',
+          audience: 'Founder',
+          useCase: 'Market Research',
+          problem: 'Need to validate your idea with real market data before building anything',
+          skillIds: allSkills.slice(0, 4).map(s => s.id),
           created_at: new Date()
         },
         {
