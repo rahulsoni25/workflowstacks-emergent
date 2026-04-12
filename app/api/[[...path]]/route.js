@@ -319,6 +319,95 @@ export async function GET(request) {
       });
     }
     
+    // Get all packs
+    if (path === '/packs') {
+      const packs = await database.collection('skill_packs')
+        .find({})
+        .sort({ created_at: -1 })
+        .toArray();
+      
+      return Response.json({ packs });
+    }
+    
+    // Get pack by ID with skills
+    if (path.startsWith('/packs/')) {
+      const id = path.split('/')[2];
+      const pack = await database.collection('skill_packs').findOne({ id });
+      
+      if (!pack) {
+        return Response.json({ error: 'Pack not found' }, { status: 404 });
+      }
+      
+      // Fetch the skills in this pack
+      const skills = await database.collection('skills')
+        .find({ id: { $in: pack.skillIds } })
+        .toArray();
+      
+      return Response.json({ pack, skills });
+    }
+    
+    // Get all playbooks
+    if (path === '/playbooks') {
+      const playbooks = await database.collection('playbooks')
+        .find({})
+        .sort({ created_at: -1 })
+        .toArray();
+      
+      return Response.json({ playbooks });
+    }
+    
+    // Get playbook by ID with skills
+    if (path.startsWith('/playbooks/')) {
+      const id = path.split('/')[2];
+      const playbook = await database.collection('playbooks').findOne({ id });
+      
+      if (!playbook) {
+        return Response.json({ error: 'Playbook not found' }, { status: 404 });
+      }
+      
+      // Fetch the skills in this playbook
+      const skills = await database.collection('skills')
+        .find({ id: { $in: playbook.skillIds } })
+        .toArray();
+      
+      return Response.json({ playbook, skills });
+    }
+    
+    // Get public agent templates
+    if (path === '/agents') {
+      const agents = await database.collection('agent_templates')
+        .find({ isPublic: true })
+        .sort({ copyCount: -1, created_at: -1 })
+        .toArray();
+      
+      // For each agent, get dominant audience from skills
+      for (let agent of agents) {
+        const skills = await database.collection('skills')
+          .find({ id: { $in: agent.skillIds } })
+          .toArray();
+        agent.skills = skills;
+      }
+      
+      return Response.json({ agents });
+    }
+    
+    // Get agent template by ID
+    if (path.startsWith('/agents/')) {
+      const id = path.split('/')[2];
+      const agent = await database.collection('agent_templates').findOne({ id, isPublic: true });
+      
+      if (!agent) {
+        return Response.json({ error: 'Agent not found' }, { status: 404 });
+      }
+      
+      // Fetch the skills
+      const skills = await database.collection('skills')
+        .find({ id: { $in: agent.skillIds } })
+        .toArray();
+      
+      return Response.json({ agent, skills });
+    }
+    
     return Response.json({ error: 'Not found' }, { status: 404 });
     
   } catch (error) {
@@ -333,6 +422,97 @@ export async function POST(request) {
   
   try {
     const database = await connectDB();
+    
+    // Seed packs and playbooks
+    if (path === '/seed-packs') {
+      // Get some skill IDs for seeding
+      const allSkills = await database.collection('skills').find({}).limit(20).toArray();
+      
+      const packs = [
+        {
+          id: uuidv4(),
+          name: 'Founder Launch Pack',
+          description: 'Everything you need to validate and launch your startup idea quickly',
+          audience: 'Founder',
+          useCase: 'Product Launch',
+          skillIds: allSkills.slice(0, 4).map(s => s.id),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          name: 'Cold Email Pack',
+          description: 'Master outbound sales with AI-powered email campaigns',
+          audience: 'Agency',
+          useCase: 'Email Marketing',
+          skillIds: allSkills.slice(4, 7).map(s => s.id),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          name: 'Content Creator Pack',
+          description: 'Create, optimize, and distribute content at scale',
+          audience: 'Creator',
+          useCase: 'Content Creation',
+          skillIds: allSkills.slice(7, 11).map(s => s.id),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          name: 'Developer Productivity Pack',
+          description: 'Supercharge your coding workflow with AI assistance',
+          audience: 'Developer',
+          useCase: 'Development',
+          skillIds: allSkills.slice(11, 15).map(s => s.id),
+          created_at: new Date()
+        }
+      ];
+      
+      const playbooks = [
+        {
+          id: uuidv4(),
+          title: 'Validate a New Offer in 48 Hours',
+          description: 'Research, survey, and create landing pages to validate your business idea quickly',
+          audience: 'Founder',
+          useCase: 'Validation',
+          problem: 'You have a business idea but don\'t know if people will pay for it',
+          skillIds: allSkills.slice(0, 3).map(s => s.id),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          title: 'Warm Outreach for B2B Leads',
+          description: 'Build relationships and generate qualified leads through personalized outreach',
+          audience: 'Agency',
+          useCase: 'Lead Generation',
+          problem: 'Cold outreach is getting ignored, you need warmer approaches',
+          skillIds: allSkills.slice(3, 6).map(s => s.id),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          title: 'Turn Meetings into Action Items',
+          description: 'Capture, organize, and execute on meeting outcomes efficiently',
+          audience: 'Marketer',
+          useCase: 'Operations',
+          problem: 'Meeting notes get lost and action items fall through the cracks',
+          skillIds: allSkills.slice(6, 9).map(s => s.id),
+          created_at: new Date()
+        }
+      ];
+      
+      // Clear and insert
+      await database.collection('skill_packs').deleteMany({});
+      await database.collection('playbooks').deleteMany({});
+      
+      await database.collection('skill_packs').insertMany(packs);
+      await database.collection('playbooks').insertMany(playbooks);
+      
+      return Response.json({ 
+        success: true,
+        packs: packs.length,
+        playbooks: playbooks.length
+      });
+    }
     
     // Upload skill
     if (path === '/upload') {
@@ -363,7 +543,7 @@ export async function POST(request) {
     // Create Agent Template
     if (path === '/agent-templates') {
       const body = await request.json();
-      const { goal, selectedSkillIds } = body;
+      const { goal, selectedSkillIds, isPublic } = body;
       
       if (!goal || !selectedSkillIds || selectedSkillIds.length === 0) {
         return Response.json({ 
@@ -422,6 +602,8 @@ export async function POST(request) {
         skillIds: selectedSkillIds,
         skills: selectedSkills.map(s => ({ id: s.id, name: s.name, category: s.category })),
         agentBlueprint: agentBlueprint,
+        isPublic: isPublic || false,
+        copyCount: 0,
         created_at: new Date()
       };
       
@@ -431,6 +613,19 @@ export async function POST(request) {
         success: true, 
         template 
       });
+    }
+    
+    // Increment copy count for agent
+    if (path === '/agent-templates/copy') {
+      const body = await request.json();
+      const { agentId } = body;
+      
+      await database.collection('agent_templates').updateOne(
+        { id: agentId },
+        { $inc: { copyCount: 1 } }
+      );
+      
+      return Response.json({ success: true });
     }
     
     return Response.json({ error: 'Not found' }, { status: 404 });

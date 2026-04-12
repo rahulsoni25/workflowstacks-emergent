@@ -102,15 +102,20 @@ const HomePage = () => {
               <h1 className="text-2xl font-bold text-white">ShowClawMart</h1>
             </Link>
             <nav className="flex items-center gap-4">
+              <Link href="/packs">
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  Starter Packs
+                </Button>
+              </Link>
+              <Link href="/playbooks">
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  Playbooks
+                </Button>
+              </Link>
               <Link href="/builder">
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
                   <Zap className="w-4 h-4 mr-2" />
                   Build Agent
-                </Button>
-              </Link>
-              <Link href="/upload">
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
-                  Upload Skill
                 </Button>
               </Link>
               <Button 
@@ -118,7 +123,7 @@ const HomePage = () => {
                 disabled={ingesting}
                 className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
               >
-                {ingesting ? 'Ingesting...' : '🔄 Sync GitHub'}
+                {ingesting ? 'Ingesting...' : '🔄 Sync'}
               </Button>
             </nav>
           </div>
