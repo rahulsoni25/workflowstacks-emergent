@@ -12,14 +12,20 @@ async function connectDB() {
   return db;
 }
 
-// GitHub scraper function
-async function scrapeGitHub(topics, limit = 10) {
+// Enhanced GitHub scraper function - Latest & Most Popular
+async function scrapeGitHub(topicQueries, limit = 15) {
   const skills = [];
+  const seenRepos = new Set(); // Avoid duplicates
   
-  for (const topic of topics) {
+  for (const queryConfig of topicQueries) {
     try {
+      const { query, category, minStars = 50 } = queryConfig;
+      
+      // Build query with filters for quality and recency
+      const searchQuery = `${query} stars:>${minStars} pushed:>2023-01-01`;
+      
       const response = await fetch(
-        `https://api.github.com/search/repositories?q=topic:${topic}&sort=stars&order=desc&per_page=${limit}`,
+        `https://api.github.com/search/repositories?q=${encodeURIComponent(searchQuery)}&sort=stars&order=desc&per_page=${limit}`,
         {
           headers: {
             'Accept': 'application/vnd.github+json',
@@ -28,11 +34,21 @@ async function scrapeGitHub(topics, limit = 10) {
         }
       );
       
-      if (!response.ok) continue;
+      if (!response.ok) {
+        console.log(`GitHub API error for ${query}: ${response.status}`);
+        continue;
+      }
       
       const data = await response.json();
       
       for (const repo of data.items || []) {
+        // Skip duplicates
+        if (seenRepos.has(repo.full_name)) continue;
+        seenRepos.add(repo.full_name);
+        
+        // Skip archived or very old repos
+        if (repo.archived) continue;
+        
         // Fetch README
         let readmePreview = '';
         try {
@@ -47,37 +63,48 @@ async function scrapeGitHub(topics, limit = 10) {
           );
           if (readmeResponse.ok) {
             const readmeText = await readmeResponse.text();
-            readmePreview = readmeText.substring(0, 500);
+            readmePreview = readmeText.substring(0, 600);
           }
         } catch (e) {
           console.log('Error fetching README:', e.message);
         }
         
+        // Calculate quality score
+        const daysSinceUpdate = (Date.now() - new Date(repo.updated_at)) / (1000 * 60 * 60 * 24);
+        const recencyBonus = daysSinceUpdate < 30 ? 0.5 : daysSinceUpdate < 90 ? 0.3 : 0;
+        const rating = Math.min(5, (repo.stargazers_count / 1000) + 3.5 + recencyBonus);
+        
         const skill = {
           id: uuidv4(),
           name: repo.name,
           description: repo.description || 'No description available',
-          category: topic,
+          category: category,
           price: 0,
-          rating: Math.min(5, (repo.stargazers_count / 200) + 3.5),
-          installs: Math.floor(repo.stargazers_count * 1.5),
+          rating: parseFloat(rating.toFixed(1)),
+          installs: Math.floor(repo.stargazers_count * 2.5 + repo.forks_count * 10),
           source_url: repo.html_url,
           github_url: repo.html_url,
           github_stars: repo.stargazers_count,
+          github_forks: repo.forks_count,
           github_topics: repo.topics || [],
           creator: repo.owner.login,
           creator_avatar: repo.owner.avatar_url,
           is_premium: false,
           readme_preview: readmePreview,
           language: repo.language,
+          last_updated: new Date(repo.updated_at),
           created_at: new Date(repo.created_at),
           updated_at: new Date(repo.updated_at)
         };
         
         skills.push(skill);
       }
+      
+      // Small delay to avoid rate limits
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
     } catch (error) {
-      console.error(`Error scraping topic ${topic}:`, error.message);
+      console.error(`Error scraping query ${queryConfig.query}:`, error.message);
     }
   }
   
@@ -233,30 +260,46 @@ export async function GET(request) {
       return Response.json({ skill });
     }
     
-    // Ingest from GitHub
+    // Ingest from GitHub - Latest & Most Popular
     if (path === '/ingest') {
-      const topics = [
-        'claude-skill',
-        'mcp-server',
-        'gemini-extension',
-        'anthropic-claude',
-        'ai-prompt'
+      // Enhanced topic queries with better targeting
+      const topicQueries = [
+        // Claude Skills & MCP Servers (most popular)
+        { query: 'topic:mcp-server OR topic:model-context-protocol', category: 'mcp-server', minStars: 10 },
+        { query: 'topic:claude-skill OR anthropic claude tool', category: 'claude-skill', minStars: 20 },
+        
+        // AI Agents & Automation (trending)
+        { query: 'ai-agent OR autonomous-agent llm', category: 'ai-agent', minStars: 100 },
+        { query: 'langchain OR langgraph agent', category: 'ai-agent', minStars: 50 },
+        
+        // Gemini & Google AI
+        { query: 'gemini-extension OR google-gemini', category: 'gemini-extension', minStars: 10 },
+        
+        // AI Prompts & Templates
+        { query: 'prompt-engineering OR awesome-prompts', category: 'prompt', minStars: 100 },
+        
+        // ChatGPT Plugins & Tools
+        { query: 'chatgpt-plugin OR gpt-plugin', category: 'ai-tool', minStars: 50 }
       ];
       
-      const scrapedSkills = await scrapeGitHub(topics, 5);
+      const scrapedSkills = await scrapeGitHub(topicQueries, 10);
       const allSkills = [...agentPowersSkills, ...scrapedSkills];
       
       // Clear existing and insert new
       await database.collection('skills').deleteMany({});
-      await database.collection('skills').insertMany(allSkills);
+      
+      if (allSkills.length > 0) {
+        await database.collection('skills').insertMany(allSkills);
+      }
       
       return Response.json({ 
-        message: 'Ingestion complete', 
+        message: 'Ingestion complete - Latest & most popular skills loaded!', 
         count: allSkills.length,
         breakdown: {
           agentPowers: agentPowersSkills.length,
           github: scrapedSkills.length
-        }
+        },
+        note: 'Skills filtered for quality (min stars) and recency (updated since 2023)'
       });
     }
     

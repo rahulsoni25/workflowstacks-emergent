@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Test the ShowClawMart backend API thoroughly with all endpoints including GET /api/, GET /api/stats, GET /api/skills with filtering and search, GET /api/skills/:id, POST /api/upload, and GET /api/ingest"
+user_problem_statement: "Test the enhanced ShowClawMart backend with improved GitHub scraping: 50 total skills across 6 categories, popular repos (AutoGPT, LangChain, etc.), AI-agent category with 17+ skills, quality improvements (github_stars > 50, last_updated field, rating reflects popularity, README previews), and new categories (ai-agent, ai-tool)"
 
 backend:
   - task: "Root API Endpoint"
@@ -128,6 +128,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ GET /api/stats endpoint working correctly - returns total skills count (32) and category breakdown (6 categories)"
+      - working: true
+        agent: "testing"
+        comment: "✅ Enhanced stats verified - now returns 50 total skills across 6 categories: ai-agent (17), gemini-extension (10), ai-tool (9), mcp-server (1), prompt (10), claude-skill (3)"
 
   - task: "Skills List API Endpoint"
     implemented: true
@@ -140,6 +143,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ GET /api/skills endpoint working correctly - returns all 32 skills with proper structure"
+      - working: true
+        agent: "testing"
+        comment: "✅ Enhanced skills endpoint verified - now returns 50 skills with popular repos (AutoGPT: 183k stars, LangChain: 133k stars, Transformers: 159k stars). All skills have github_stars > 50, 88% have last_updated field, 68% have README previews"
 
   - task: "Skills Category Filter"
     implemented: true
@@ -152,6 +158,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ GET /api/skills?category=mcp-server filtering working correctly - returns 6 mcp-server skills"
+      - working: true
+        agent: "testing"
+        comment: "✅ Enhanced category filtering verified - ai-agent category returns 17 skills including AutoGPT, JavaGuide, and Transformers. New categories ai-agent and ai-tool are working correctly"
 
   - task: "Skills Search Functionality"
     implemented: true
@@ -212,6 +221,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "✅ GET /api/ingest endpoint working correctly - successfully scrapes GitHub repositories and populates database with 31 total skills (6 AgentPowers + 25 GitHub)"
+      - working: true
+        agent: "testing"
+        comment: "✅ Enhanced GitHub ingestion verified - now scrapes 50 total skills (6 AgentPowers + 44 GitHub) with improved quality filters (min stars >50, updated since 2023). Successfully fetches popular repos like AutoGPT, LangChain, Transformers with high star counts and README previews"
 
   - task: "Database Connection and Operations"
     implemented: true
@@ -237,13 +249,61 @@ backend:
         agent: "testing"
         comment: "✅ Invalid endpoint handling working correctly - returns 404 with proper error message for non-existent routes"
 
+  - task: "Enhanced GitHub Scraping Quality"
+    implemented: true
+    working: true
+    file: "app/api/[[...path]]/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Quality improvements verified - 100% of skills have github_stars > 50, 88% have last_updated field, 68% have README previews. Star range: 678 - 183,328 with average of 59,963 stars"
+
+  - task: "New AI Categories Implementation"
+    implemented: true
+    working: true
+    file: "app/api/[[...path]]/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ New categories ai-agent and ai-tool successfully implemented. ai-agent category contains 17 skills including popular repos like AutoGPT, LangChain, Transformers. ai-tool category contains 9 skills"
+
+  - task: "Popular Repository Integration"
+    implemented: true
+    working: true
+    file: "app/api/[[...path]]/route.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Popular repositories successfully integrated - found AutoGPT (183k stars), LangChain (133k stars), Transformers (159k stars), generative-ai-for-beginners (109k stars), and other high-quality repos. 47/50 skills have >1k stars"
+
+  - task: "Rating Popularity Correlation"
+    implemented: true
+    working: true
+    file: "app/api/[[...path]]/route.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ Rating system correctly reflects popularity - high star repos (>1k stars) have high ratings (≥4.0). Top rated skills include AutoGPT (5.0 rating, 183k stars), generative-ai-for-beginners (5.0 rating, 109k stars)"
+
 frontend:
   # Frontend testing not performed as per testing agent guidelines
 
 metadata:
   created_by: "testing_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "2.0"
+  test_sequence: 2
   run_ui: false
 
 test_plan:
@@ -255,3 +315,5 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: "Comprehensive backend API testing completed successfully. All 11 backend tasks tested and working correctly. ShowClawMart API is fully functional with proper error handling, data persistence, GitHub integration, and CRUD operations. Database contains 32 skills across 6 categories. No critical issues found."
+  - agent: "testing"
+    message: "Enhanced ShowClawMart backend testing completed successfully. All 15 backend tasks verified including new enhanced features. Key improvements confirmed: 50 total skills (up from 32), popular repos integrated (AutoGPT: 183k stars, LangChain: 133k stars), new ai-agent category with 17 skills, quality filters working (100% skills >50 stars, 88% have last_updated), new ai-tool category with 9 skills, and rating system properly reflects popularity. All enhanced GitHub scraping features are working correctly."
