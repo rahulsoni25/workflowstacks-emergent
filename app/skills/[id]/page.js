@@ -107,7 +107,7 @@ export default function SkillDetailPage() {
                     </Badge>
                   )}
                 </div>
-                <CardTitle className="text-4xl text-white mb-2">{skill.name}</CardTitle>
+                <CardTitle className="text-4xl text-white mb-2">{skill.title_human || skill.name}</CardTitle>
                 <CardDescription className="text-xl text-gray-300">
                   {skill.description}
                 </CardDescription>

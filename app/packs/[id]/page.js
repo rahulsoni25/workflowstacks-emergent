@@ -133,7 +133,7 @@ export default function PackDetailPage() {
                       {skill.category}
                     </Badge>
                   </div>
-                  <CardTitle className="text-white">{skill.name}</CardTitle>
+                  <CardTitle className="text-white">{skill.title_human || skill.name}</CardTitle>
                   <CardDescription className="text-gray-400">
                     {skill.description}
                   </CardDescription>

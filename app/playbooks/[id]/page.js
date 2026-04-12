@@ -82,7 +82,7 @@ export default function PlaybookDetailPage() {
             {skills.map((skill) => (
               <Card key={skill.id} className="bg-black/40 border-white/10 backdrop-blur-xl">
                 <CardHeader>
-                  <CardTitle className="text-white">{skill.name}</CardTitle>
+                  <CardTitle className="text-white">{skill.title_human || skill.name}</CardTitle>
                   <CardDescription className="text-gray-400">{skill.description}</CardDescription>
                 </CardHeader>
                 <CardContent>

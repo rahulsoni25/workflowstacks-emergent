@@ -219,7 +219,7 @@ export default function BuilderPage() {
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2">
-                          <h3 className="text-white font-semibold">{skill.name}</h3>
+                          <h3 className="text-white font-semibold">{skill.title_human || skill.name}</h3>
                           <Badge className={getCategoryColor(skill.category)}>
                             {skill.category}
                           </Badge>
