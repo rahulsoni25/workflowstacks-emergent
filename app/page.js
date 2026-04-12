@@ -102,6 +102,12 @@ const HomePage = () => {
               <h1 className="text-2xl font-bold text-white">ShowClawMart</h1>
             </Link>
             <nav className="flex items-center gap-4">
+              <Link href="/builder">
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Zap className="w-4 h-4 mr-2" />
+                  Build Agent
+                </Button>
+              </Link>
               <Link href="/upload">
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
                   Upload Skill

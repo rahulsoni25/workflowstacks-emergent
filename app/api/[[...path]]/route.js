@@ -360,6 +360,79 @@ export async function POST(request) {
       return Response.json({ success: true, skill });
     }
     
+    // Create Agent Template
+    if (path === '/agent-templates') {
+      const body = await request.json();
+      const { goal, selectedSkillIds } = body;
+      
+      if (!goal || !selectedSkillIds || selectedSkillIds.length === 0) {
+        return Response.json({ 
+          success: false, 
+          error: 'Goal and at least one skill required' 
+        }, { status: 400 });
+      }
+      
+      // Fetch selected skills
+      const selectedSkills = await database.collection('skills')
+        .find({ id: { $in: selectedSkillIds } })
+        .toArray();
+      
+      if (selectedSkills.length === 0) {
+        return Response.json({ 
+          success: false, 
+          error: 'No valid skills found' 
+        }, { status: 400 });
+      }
+      
+      // Build agent blueprint
+      let agentBlueprint = `You are an AI agent that helps with: ${goal}\n\n`;
+      agentBlueprint += `Use the following skills to accomplish this goal:\n\n`;
+      
+      selectedSkills.forEach((skill, index) => {
+        agentBlueprint += `---\n`;
+        agentBlueprint += `Skill ${index + 1}: ${skill.name}\n`;
+        agentBlueprint += `Category: ${skill.category}\n`;
+        agentBlueprint += `Description: ${skill.description}\n\n`;
+        
+        if (skill.readme_preview) {
+          agentBlueprint += `Instructions:\n${skill.readme_preview}\n\n`;
+        }
+        
+        if (skill.github_url) {
+          agentBlueprint += `Source: ${skill.github_url}\n`;
+        }
+        
+        agentBlueprint += `\n`;
+      });
+      
+      agentBlueprint += `---\n\n`;
+      agentBlueprint += `Your task is to combine these ${selectedSkills.length} skills to: ${goal}\n\n`;
+      agentBlueprint += `When responding:\n`;
+      agentBlueprint += `1. Use the appropriate skill based on the user's request\n`;
+      agentBlueprint += `2. Combine multiple skills when needed\n`;
+      agentBlueprint += `3. Be helpful, accurate, and follow the instructions from each skill\n`;
+      agentBlueprint += `4. If you need more information, ask the user\n`;
+      
+      // Create agent template record
+      const template = {
+        id: uuidv4(),
+        name: goal.substring(0, 100),
+        description: `Agent with ${selectedSkills.length} skills`,
+        goal: goal,
+        skillIds: selectedSkillIds,
+        skills: selectedSkills.map(s => ({ id: s.id, name: s.name, category: s.category })),
+        agentBlueprint: agentBlueprint,
+        created_at: new Date()
+      };
+      
+      await database.collection('agent_templates').insertOne(template);
+      
+      return Response.json({ 
+        success: true, 
+        template 
+      });
+    }
+    
     return Response.json({ error: 'Not found' }, { status: 404 });
     
   } catch (error) {
