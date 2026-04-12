@@ -144,25 +144,83 @@ const HomePage = () => {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <h2 className="text-5xl md:text-7xl font-bold text-white mb-6">
-            Discover AI Skills
+            Install AI Skills That
             <br />
             <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              From GitHub
+              Launch Your Offer, Rank in AI Search & Automate Your Ops
             </span>
           </h2>
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Browse Claude Skills, Gemini Extensions, and MCP Servers automatically sourced from the best GitHub repositories
+          <p className="text-xl text-gray-300 mb-12 max-w-3xl mx-auto">
+            Ready-to-use AI agents for founders, agencies, and ecommerce operators. No coding required - just copy, paste into ChatGPT/Claude, and start saving 10+ hours per week.
           </p>
           
+          {/* 3 Big CTA Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 max-w-6xl mx-auto">
+            <Link href="/personas">
+              <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/30 backdrop-blur-xl hover:border-purple-500 transition-all cursor-pointer group">
+                <CardHeader>
+                  <div className="text-4xl mb-3">🚀</div>
+                  <CardTitle className="text-white text-2xl">I'm a Founder</CardTitle>
+                  <CardDescription className="text-gray-300 text-base">
+                    Launch & validate offers, automate research, get your first customers
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 group-hover:from-purple-600 group-hover:to-pink-600">
+                    See Founder Agents →
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/personas">
+              <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-blue-500/30 backdrop-blur-xl hover:border-blue-500 transition-all cursor-pointer group">
+                <CardHeader>
+                  <div className="text-4xl mb-3">📈</div>
+                  <CardTitle className="text-white text-2xl">I'm an Agency</CardTitle>
+                  <CardDescription className="text-gray-300 text-base">
+                    Rank in AI Overviews, scale SEO/AEO/GEO, 10x your client results
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 group-hover:from-blue-600 group-hover:to-cyan-600">
+                    See Agency Agents →
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/personas">
+              <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/30 backdrop-blur-xl hover:border-green-500 transition-all cursor-pointer group">
+                <CardHeader>
+                  <div className="text-4xl mb-3">🛍️</div>
+                  <CardTitle className="text-white text-2xl">I Run Ecommerce</CardTitle>
+                  <CardDescription className="text-gray-300 text-base">
+                    Automate Shopify ops, respond to reviews, sync inventory across platforms
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 group-hover:from-green-600 group-hover:to-emerald-600">
+                    See Ecommerce Agents →
+                  </Button>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+          
           {stats && (
-            <div className="flex justify-center gap-8 mb-12">
+            <div className="flex justify-center gap-8 mb-8">
               <div className="text-center">
                 <div className="text-4xl font-bold text-white">{stats.totalSkills}</div>
-                <div className="text-gray-400">Total Skills</div>
+                <div className="text-gray-400">AI Skills</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-purple-400">{Object.keys(stats.categories).length}</div>
-                <div className="text-gray-400">Categories</div>
+                <div className="text-4xl font-bold text-purple-400">4</div>
+                <div className="text-gray-400">Agent Personas</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-green-400">8</div>
+                <div className="text-gray-400">Playbooks</div>
               </div>
             </div>
           )}
@@ -172,12 +230,40 @@ const HomePage = () => {
       {/* Search and Filter */}
       <section className="px-4 pb-8">
         <div className="container mx-auto max-w-6xl">
+          {/* Trending & New Sections */}
+          <div className="mb-12 space-y-8">
+            {/* Trending Today */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-3xl">🔥</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">Trending Skills (Auto-Synced from GitHub)</h3>
+                  <p className="text-gray-400">Most popular skills updated in the last 30 days</p>
+                </div>
+              </div>
+              {/* Will show trending skills here - for now shows placeholder */}
+              <div className="text-gray-500 text-sm">Loading trending skills...</div>
+            </div>
+
+            {/* New This Week */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="text-3xl">🆕</div>
+                <div>
+                  <h3 className="text-2xl font-bold text-white">New Skills This Week</h3>
+                  <p className="text-gray-400">Fresh additions from the AI ecosystem</p>
+                </div>
+              </div>
+              <div className="text-gray-500 text-sm">Check back after next sync...</div>
+            </div>
+          </div>
+
           <div className="bg-black/40 backdrop-blur-xl rounded-2xl p-6 border border-white/10">
             <div className="flex flex-col md:flex-row gap-4 mb-6">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <Input
-                  placeholder="Search skills..."
+                  placeholder="Search skills by outcome: 'automate reviews', 'rank in AI search', 'qualify leads'..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-gray-500"
