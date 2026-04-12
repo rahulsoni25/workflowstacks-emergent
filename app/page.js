@@ -102,6 +102,11 @@ const HomePage = () => {
               <h1 className="text-2xl font-bold text-white">ShowClawMart</h1>
             </Link>
             <nav className="flex items-center gap-4">
+              <Link href="/help">
+                <Button variant="ghost" className="border-white/20 text-white hover:bg-white/10">
+                  📖 How to Use
+                </Button>
+              </Link>
               <Link href="/packs">
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
                   Starter Packs

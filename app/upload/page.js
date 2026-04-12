@@ -87,11 +87,19 @@ export default function UploadPage() {
           <CardHeader>
             <CardTitle className="text-white">Skill Details</CardTitle>
             <CardDescription className="text-gray-400">
-              Fill in the information about your skill
+              Fill in the information about your skill. <Link href="/help" className="text-purple-400 underline">Need help?</Link>
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4 mb-6">
+                <h3 className="text-blue-400 font-semibold mb-2">💡 What is a "Skill"?</h3>
+                <p className="text-gray-300 text-sm">
+                  A skill is a specific capability you want AI to have. Examples: "Write cold emails", "Analyze data", "Generate code". 
+                  You can create skills from your own prompts or workflows!
+                </p>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-white">Skill Name *</Label>
                 <Input
@@ -100,8 +108,9 @@ export default function UploadPage() {
                   value={formData.name}
                   onChange={(e) => handleChange('name', e.target.value)}
                   className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
-                  placeholder="e.g., Code Reviewer Pro"
+                  placeholder="Example: Email Marketing Assistant"
                 />
+                <p className="text-gray-500 text-sm">Give it a clear, descriptive name</p>
               </div>
 
               <div className="space-y-2">
@@ -112,8 +121,9 @@ export default function UploadPage() {
                   value={formData.description}
                   onChange={(e) => handleChange('description', e.target.value)}
                   className="bg-white/5 border-white/10 text-white placeholder:text-gray-500 min-h-[100px]"
-                  placeholder="Describe what your skill does..."
+                  placeholder="Example: Helps create engaging email campaigns with subject lines, body copy, and call-to-actions that convert"
                 />
+                <p className="text-gray-500 text-sm">Explain what this skill does in 1-2 sentences</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -131,8 +141,11 @@ export default function UploadPage() {
                       <SelectItem value="gemini-extension">Gemini Extension</SelectItem>
                       <SelectItem value="mcp-server">MCP Server</SelectItem>
                       <SelectItem value="prompt">AI Prompt</SelectItem>
+                      <SelectItem value="ai-agent">AI Agent</SelectItem>
+                      <SelectItem value="ai-tool">AI Tool</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-gray-500 text-sm">Pick the closest match</p>
                 </div>
 
                 <div className="space-y-2">
@@ -147,11 +160,12 @@ export default function UploadPage() {
                     className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
                     placeholder="0 for free"
                   />
+                  <p className="text-gray-500 text-sm">Leave as 0 to make it free</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="creator" className="text-white">Creator Name</Label>
+                <Label htmlFor="creator" className="text-white">Your Name (Optional)</Label>
                 <Input
                   id="creator"
                   value={formData.creator}
@@ -159,10 +173,11 @@ export default function UploadPage() {
                   className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
                   placeholder="Your name or organization"
                 />
+                <p className="text-gray-500 text-sm">So others know who created this skill</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="github_url" className="text-white">GitHub URL</Label>
+                <Label htmlFor="github_url" className="text-white">GitHub URL (Optional)</Label>
                 <Input
                   id="github_url"
                   type="url"
@@ -171,18 +186,27 @@ export default function UploadPage() {
                   className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
                   placeholder="https://github.com/username/repo"
                 />
+                <p className="text-gray-500 text-sm">Link to code repository if you have one</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="source_url" className="text-white">Source URL (if different from GitHub)</Label>
+                <Label htmlFor="source_url" className="text-white">Source URL (Optional)</Label>
                 <Input
                   id="source_url"
                   type="url"
                   value={formData.source_url}
                   onChange={(e) => handleChange('source_url', e.target.value)}
                   className="bg-white/5 border-white/10 text-white placeholder:text-gray-500"
-                  placeholder="https://..."
+                  placeholder="https://your-website.com/skill-info"
                 />
+                <p className="text-gray-500 text-sm">Link to documentation or your website</p>
+              </div>
+
+              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                <h3 className="text-green-400 font-semibold mb-2">✅ Ready to Upload?</h3>
+                <p className="text-gray-300 text-sm">
+                  Once you upload, your skill will be available for others to use in their AI agents!
+                </p>
               </div>
 
               <div className="pt-4">
