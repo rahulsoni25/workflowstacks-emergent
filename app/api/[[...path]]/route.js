@@ -367,6 +367,33 @@ export async function GET(request) {
       });
     }
     
+    // Get all personas
+    if (path === '/personas') {
+      const personas = await database.collection('personas')
+        .find({})
+        .sort({ created_at: -1 })
+        .toArray();
+      
+      return Response.json({ personas });
+    }
+    
+    // Get persona by ID
+    if (path.startsWith('/personas/')) {
+      const id = path.split('/')[2];
+      const persona = await database.collection('personas').findOne({ id });
+      
+      if (!persona) {
+        return Response.json({ error: 'Persona not found' }, { status: 404 });
+      }
+      
+      // Fetch the skills in this persona
+      const skills = await database.collection('skills')
+        .find({ id: { $in: persona.skillIds } })
+        .toArray();
+      
+      return Response.json({ persona, skills });
+    }
+    
     // Get all packs
     if (path === '/packs') {
       const packs = await database.collection('skill_packs')

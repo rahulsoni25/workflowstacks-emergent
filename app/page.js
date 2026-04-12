@@ -107,6 +107,11 @@ const HomePage = () => {
                   📖 How to Use
                 </Button>
               </Link>
+              <Link href="/personas">
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  🎭 Personas
+                </Button>
+              </Link>
               <Link href="/packs">
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
                   Starter Packs
