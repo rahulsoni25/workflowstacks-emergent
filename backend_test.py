@@ -1,296 +1,263 @@
 #!/usr/bin/env python3
+"""
+ShowClawMart Backend API Test Suite
+Tests all backend endpoints after major frontend redesign
+"""
 
 import requests
 import json
-import time
+import sys
 from datetime import datetime
 
-# Test configuration
-BASE_URL = "https://claude-exchange.preview.emergentagent.com/api"
+# Base URL from environment
+BASE_URL = "https://agent-builder-dev-2.preview.emergentagent.com"
+API_BASE = f"{BASE_URL}/api"
 
-def test_enhanced_showclawmart_backend():
-    """Test the enhanced ShowClawMart backend with improved GitHub scraping"""
+def test_api_endpoint(method, endpoint, data=None, expected_status=200, description=""):
+    """Test a single API endpoint"""
+    url = f"{API_BASE}{endpoint}"
     
-    print("🚀 Testing Enhanced ShowClawMart Backend")
-    print("=" * 60)
-    
-    results = {
-        'total_tests': 0,
-        'passed': 0,
-        'failed': 0,
-        'issues': []
-    }
-    
-    def run_test(test_name, test_func):
-        results['total_tests'] += 1
-        print(f"\n📋 Testing: {test_name}")
+    try:
+        print(f"\n🧪 Testing {method} {endpoint}")
+        print(f"   Description: {description}")
+        print(f"   URL: {url}")
+        
+        if method == "GET":
+            response = requests.get(url, timeout=30)
+        elif method == "POST":
+            response = requests.post(url, json=data, timeout=30)
+        else:
+            print(f"❌ Unsupported method: {method}")
+            return False
+            
+        print(f"   Status: {response.status_code}")
+        
+        if response.status_code != expected_status:
+            print(f"❌ Expected status {expected_status}, got {response.status_code}")
+            print(f"   Response: {response.text[:500]}")
+            return False
+            
+        # Try to parse JSON response
         try:
-            success = test_func()
-            if success:
-                results['passed'] += 1
-                print(f"✅ {test_name} - PASSED")
-            else:
-                results['failed'] += 1
-                print(f"❌ {test_name} - FAILED")
-        except Exception as e:
-            results['failed'] += 1
-            results['issues'].append(f"{test_name}: {str(e)}")
-            print(f"❌ {test_name} - ERROR: {str(e)}")
-    
-    # Test 1: Ingest enhanced data first
-    def test_ingest_enhanced_data():
-        print("   Triggering enhanced GitHub ingestion...")
-        response = requests.get(f"{BASE_URL}/ingest", timeout=60)
-        
-        if response.status_code != 200:
-            print(f"   ❌ Ingest failed with status {response.status_code}")
-            return False
+            json_data = response.json()
+            print(f"   ✅ Valid JSON response")
             
-        data = response.json()
-        print(f"   📊 Ingestion result: {data.get('count', 0)} total skills")
-        print(f"   📊 Breakdown: {data.get('breakdown', {})}")
-        
-        # Wait for ingestion to complete
-        time.sleep(2)
-        return True
-    
-    # Test 2: Verify 50 total skills across 6 categories
-    def test_stats_50_skills():
-        response = requests.get(f"{BASE_URL}/stats")
-        
-        if response.status_code != 200:
-            print(f"   ❌ Stats endpoint failed with status {response.status_code}")
-            return False
-            
-        data = response.json()
-        total_skills = data.get('totalSkills', 0)
-        categories = data.get('categories', {})
-        
-        print(f"   📊 Total skills: {total_skills}")
-        print(f"   📊 Categories: {categories}")
-        print(f"   📊 Category count: {len(categories)}")
-        
-        # Check if we have around 50 skills (allowing some variance due to API limits)
-        if total_skills < 40:
-            print(f"   ❌ Expected ~50 skills, got {total_skills}")
-            return False
-            
-        # Check if we have 6+ categories
-        if len(categories) < 6:
-            print(f"   ❌ Expected 6+ categories, got {len(categories)}")
-            return False
-            
-        return True
-    
-    # Test 3: Verify skills with popular repos
-    def test_popular_repos():
-        response = requests.get(f"{BASE_URL}/skills")
-        
-        if response.status_code != 200:
-            print(f"   ❌ Skills endpoint failed with status {response.status_code}")
-            return False
-            
-        data = response.json()
-        skills = data.get('skills', [])
-        
-        print(f"   📊 Retrieved {len(skills)} skills")
-        
-        # Check for popular repos (AutoGPT, LangChain, etc.)
-        popular_repos_found = []
-        high_star_skills = []
-        
-        for skill in skills:
-            name = skill.get('name', '').lower()
-            stars = skill.get('github_stars', 0)
-            
-            # Look for popular repo names
-            if any(popular in name for popular in ['autogpt', 'langchain', 'langgraph', 'gpt', 'claude']):
-                popular_repos_found.append(f"{skill.get('name')} ({stars} stars)")
-            
-            # Track high star count skills
-            if stars > 1000:
-                high_star_skills.append(f"{skill.get('name')} ({stars} stars)")
-        
-        print(f"   📊 Popular repos found: {len(popular_repos_found)}")
-        for repo in popular_repos_found[:5]:  # Show first 5
-            print(f"      - {repo}")
-            
-        print(f"   📊 High star skills (>1k): {len(high_star_skills)}")
-        for skill in high_star_skills[:3]:  # Show top 3
-            print(f"      - {skill}")
-        
-        return len(popular_repos_found) > 0 or len(high_star_skills) > 0
-    
-    # Test 4: Test AI-agent category filtering
-    def test_ai_agent_category():
-        response = requests.get(f"{BASE_URL}/skills?category=ai-agent")
-        
-        if response.status_code != 200:
-            print(f"   ❌ AI-agent category filter failed with status {response.status_code}")
-            return False
-            
-        data = response.json()
-        skills = data.get('skills', [])
-        
-        print(f"   📊 AI-agent skills found: {len(skills)}")
-        
-        # Show some examples
-        for skill in skills[:3]:
-            print(f"      - {skill.get('name')} ({skill.get('github_stars', 0)} stars)")
-        
-        # Check if we have a reasonable number of AI agent skills
-        if len(skills) < 5:
-            print(f"   ⚠️  Expected more AI-agent skills, got {len(skills)}")
-            return False
-            
-        return True
-    
-    # Test 5: Verify skill quality improvements
-    def test_skill_quality():
-        response = requests.get(f"{BASE_URL}/skills")
-        
-        if response.status_code != 200:
-            print(f"   ❌ Skills endpoint failed with status {response.status_code}")
-            return False
-            
-        data = response.json()
-        skills = data.get('skills', [])
-        
-        quality_checks = {
-            'has_github_stars': 0,
-            'stars_over_50': 0,
-            'has_last_updated': 0,
-            'has_readme_preview': 0,
-            'updated_since_2023': 0
-        }
-        
-        for skill in skills:
-            # Check github_stars field exists and > 50
-            if 'github_stars' in skill:
-                quality_checks['has_github_stars'] += 1
-                if skill['github_stars'] > 50:
-                    quality_checks['stars_over_50'] += 1
-            
-            # Check last_updated field exists
-            if 'last_updated' in skill:
-                quality_checks['has_last_updated'] += 1
-                
-                # Check if updated since 2023
-                try:
-                    last_updated = skill['last_updated']
-                    if isinstance(last_updated, str):
-                        update_year = int(last_updated[:4])
-                        if update_year >= 2023:
-                            quality_checks['updated_since_2023'] += 1
-                except:
-                    pass
-            
-            # Check README preview exists
-            if skill.get('readme_preview'):
-                quality_checks['has_readme_preview'] += 1
-        
-        print(f"   📊 Quality metrics:")
-        for metric, count in quality_checks.items():
-            percentage = (count / len(skills) * 100) if skills else 0
-            print(f"      - {metric}: {count}/{len(skills)} ({percentage:.1f}%)")
-        
-        # Quality thresholds
-        min_stars_threshold = 0.7  # 70% should have >50 stars
-        min_updated_threshold = 0.8  # 80% should have last_updated
-        
-        stars_ratio = quality_checks['stars_over_50'] / len(skills) if skills else 0
-        updated_ratio = quality_checks['has_last_updated'] / len(skills) if skills else 0
-        
-        if stars_ratio < min_stars_threshold:
-            print(f"   ⚠️  Only {stars_ratio:.1%} of skills have >50 stars (expected >{min_stars_threshold:.0%})")
-        
-        if updated_ratio < min_updated_threshold:
-            print(f"   ⚠️  Only {updated_ratio:.1%} of skills have last_updated field (expected >{min_updated_threshold:.0%})")
-        
-        return stars_ratio >= 0.5 and updated_ratio >= 0.5  # Relaxed thresholds
-    
-    # Test 6: Test new categories exist
-    def test_new_categories():
-        response = requests.get(f"{BASE_URL}/stats")
-        
-        if response.status_code != 200:
-            print(f"   ❌ Stats endpoint failed with status {response.status_code}")
-            return False
-            
-        data = response.json()
-        categories = data.get('categories', {})
-        
-        expected_categories = ['ai-agent', 'ai-tool']
-        found_categories = []
-        
-        for category in expected_categories:
-            if category in categories:
-                found_categories.append(f"{category} ({categories[category]} skills)")
-        
-        print(f"   📊 New categories found: {len(found_categories)}/{len(expected_categories)}")
-        for cat in found_categories:
-            print(f"      - {cat}")
-        
-        return len(found_categories) >= 1  # At least one new category should exist
-    
-    # Test 7: Verify rating reflects popularity
-    def test_rating_popularity():
-        response = requests.get(f"{BASE_URL}/skills")
-        
-        if response.status_code != 200:
-            print(f"   ❌ Skills endpoint failed with status {response.status_code}")
-            return False
-            
-        data = response.json()
-        skills = data.get('skills', [])
-        
-        # Check correlation between stars and rating
-        high_star_high_rating = 0
-        total_high_star = 0
-        
-        for skill in skills:
-            stars = skill.get('github_stars', 0)
-            rating = skill.get('rating', 0)
-            
-            if stars > 1000:  # High star repos
-                total_high_star += 1
-                if rating >= 4.0:  # Should have high rating
-                    high_star_high_rating += 1
+            # Print key information based on endpoint
+            if endpoint == "/" or endpoint == "":
+                print(f"   Message: {json_data.get('message', 'N/A')}")
+            elif endpoint == "/stats":
+                total = json_data.get('totalSkills', 0)
+                categories = json_data.get('categories', {})
+                print(f"   Total Skills: {total}")
+                print(f"   Categories: {len(categories)} ({', '.join(categories.keys())})")
+            elif "/skills" in endpoint:
+                skills = json_data.get('skills', [])
+                skill = json_data.get('skill')
+                if skills:
+                    print(f"   Skills returned: {len(skills)}")
+                    if len(skills) > 0:
+                        print(f"   First skill: {skills[0].get('name', 'N/A')}")
+                elif skill:
+                    print(f"   Single skill: {skill.get('name', 'N/A')}")
+            elif endpoint in ["/personas", "/packs", "/playbooks", "/trending"]:
+                items = json_data.get('personas', json_data.get('packs', json_data.get('playbooks', json_data.get('skills', []))))
+                print(f"   Items returned: {len(items)}")
+            elif endpoint == "/agent-templates":
+                success = json_data.get('success', False)
+                template = json_data.get('template', {})
+                print(f"   Success: {success}")
+                if template:
+                    print(f"   Template ID: {template.get('id', 'N/A')}")
                     
-        print(f"   📊 High star repos with high ratings: {high_star_high_rating}/{total_high_star}")
+        except json.JSONDecodeError:
+            print(f"❌ Invalid JSON response")
+            print(f"   Response: {response.text[:200]}")
+            return False
+            
+        print(f"   ✅ Test passed")
+        return True
         
-        # Show top rated skills
-        sorted_skills = sorted(skills, key=lambda x: x.get('rating', 0), reverse=True)
-        print(f"   📊 Top rated skills:")
-        for skill in sorted_skills[:3]:
-            print(f"      - {skill.get('name')} (Rating: {skill.get('rating', 0)}, Stars: {skill.get('github_stars', 0)})")
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Request failed: {str(e)}")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def test_frontend_page(path, description=""):
+    """Test a frontend page returns 200"""
+    url = f"{BASE_URL}{path}"
+    
+    try:
+        print(f"\n🌐 Testing Frontend Page: {path}")
+        print(f"   Description: {description}")
+        print(f"   URL: {url}")
         
-        return True  # This is more of an informational test
+        response = requests.get(url, timeout=30)
+        print(f"   Status: {response.status_code}")
+        
+        if response.status_code != 200:
+            print(f"❌ Expected status 200, got {response.status_code}")
+            return False
+            
+        # Check if it's HTML content
+        content_type = response.headers.get('content-type', '')
+        if 'text/html' in content_type:
+            print(f"   ✅ Valid HTML page")
+        else:
+            print(f"   ⚠️  Content-Type: {content_type}")
+            
+        print(f"   ✅ Page accessible")
+        return True
+        
+    except requests.exceptions.RequestException as e:
+        print(f"❌ Request failed: {str(e)}")
+        return False
+    except Exception as e:
+        print(f"❌ Unexpected error: {str(e)}")
+        return False
+
+def main():
+    """Run all backend API tests"""
+    print("=" * 80)
+    print("🚀 ShowClawMart Backend API Test Suite")
+    print("   Testing after major frontend redesign")
+    print(f"   Base URL: {BASE_URL}")
+    print(f"   API Base: {API_BASE}")
+    print(f"   Test Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("=" * 80)
     
-    # Run all tests
-    run_test("Enhanced GitHub Ingestion", test_ingest_enhanced_data)
-    run_test("50 Skills Across 6 Categories", test_stats_50_skills)
-    run_test("Popular Repos (AutoGPT, LangChain, etc.)", test_popular_repos)
-    run_test("AI-Agent Category Filtering", test_ai_agent_category)
-    run_test("Skill Quality Improvements", test_skill_quality)
-    run_test("New Categories (ai-agent, ai-tool)", test_new_categories)
-    run_test("Rating Reflects Popularity", test_rating_popularity)
+    # Track test results
+    backend_tests = []
+    frontend_tests = []
     
-    # Summary
-    print("\n" + "=" * 60)
-    print("🏁 TEST SUMMARY")
-    print("=" * 60)
-    print(f"Total Tests: {results['total_tests']}")
-    print(f"Passed: {results['passed']} ✅")
-    print(f"Failed: {results['failed']} ❌")
-    print(f"Success Rate: {(results['passed']/results['total_tests']*100):.1f}%")
+    # Backend API Tests
+    print("\n" + "=" * 50)
+    print("🔧 BACKEND API TESTS")
+    print("=" * 50)
     
-    if results['issues']:
-        print(f"\n🚨 Issues Found:")
-        for issue in results['issues']:
-            print(f"   - {issue}")
+    # 1. Root endpoint
+    backend_tests.append(test_api_endpoint(
+        "GET", "/", 
+        description="Should return welcome message"
+    ))
     
-    return results['failed'] == 0
+    # 2. Stats endpoint
+    backend_tests.append(test_api_endpoint(
+        "GET", "/stats", 
+        description="Should return marketplace stats with totalSkills count"
+    ))
+    
+    # 3. Skills list
+    backend_tests.append(test_api_endpoint(
+        "GET", "/skills", 
+        description="Should return list of skills"
+    ))
+    
+    # 4. Skills category filter
+    backend_tests.append(test_api_endpoint(
+        "GET", "/skills?category=ai-agent", 
+        description="Category filter for ai-agent"
+    ))
+    
+    # 5. Skills search filter
+    backend_tests.append(test_api_endpoint(
+        "GET", "/skills?search=AutoGPT", 
+        description="Search filter for AutoGPT"
+    ))
+    
+    # 6. Personas endpoint
+    backend_tests.append(test_api_endpoint(
+        "GET", "/personas", 
+        description="Should return personas list"
+    ))
+    
+    # 7. Packs endpoint
+    backend_tests.append(test_api_endpoint(
+        "GET", "/packs", 
+        description="Should return packs list"
+    ))
+    
+    # 8. Playbooks endpoint
+    backend_tests.append(test_api_endpoint(
+        "GET", "/playbooks", 
+        description="Should return playbooks list"
+    ))
+    
+    # 9. Trending endpoint
+    backend_tests.append(test_api_endpoint(
+        "GET", "/trending", 
+        description="Should return trending skills"
+    ))
+    
+    # 10. Create agent template (POST)
+    agent_data = {
+        "goal": "test agent for marketplace verification",
+        "selectedSkillIds": [],
+        "isPublic": False
+    }
+    backend_tests.append(test_api_endpoint(
+        "POST", "/agent-templates", 
+        data=agent_data,
+        description="Create agent template"
+    ))
+    
+    # Frontend Page Tests (as requested)
+    print("\n" + "=" * 50)
+    print("🌐 FRONTEND PAGE TESTS")
+    print("=" * 50)
+    
+    frontend_pages = [
+        ("/learn/how-it-works", "How It Works page"),
+        ("/learn/skills", "Skills learning page"),
+        ("/learn/agents", "Agents learning page"),
+        ("/learn/mcp", "MCP learning page"),
+        ("/learn/creators", "Creators learning page"),
+        ("/learn/security", "Security learning page"),
+        ("/about", "About page"),
+        ("/enterprise", "Enterprise page"),
+        ("/docs", "Documentation page"),
+        ("/terms", "Terms of Service page"),
+        ("/privacy", "Privacy Policy page")
+    ]
+    
+    for path, description in frontend_pages:
+        frontend_tests.append(test_frontend_page(path, description))
+    
+    # Results Summary
+    print("\n" + "=" * 80)
+    print("📊 TEST RESULTS SUMMARY")
+    print("=" * 80)
+    
+    backend_passed = sum(backend_tests)
+    backend_total = len(backend_tests)
+    frontend_passed = sum(frontend_tests)
+    frontend_total = len(frontend_tests)
+    
+    print(f"\n🔧 Backend API Tests: {backend_passed}/{backend_total} passed")
+    if backend_passed == backend_total:
+        print("   ✅ All backend APIs working correctly!")
+    else:
+        print(f"   ❌ {backend_total - backend_passed} backend tests failed")
+    
+    print(f"\n🌐 Frontend Page Tests: {frontend_passed}/{frontend_total} passed")
+    if frontend_passed == frontend_total:
+        print("   ✅ All frontend pages accessible!")
+    else:
+        print(f"   ❌ {frontend_total - frontend_passed} frontend pages failed")
+    
+    total_passed = backend_passed + frontend_passed
+    total_tests = backend_total + frontend_total
+    
+    print(f"\n🎯 Overall: {total_passed}/{total_tests} tests passed ({(total_passed/total_tests)*100:.1f}%)")
+    
+    if total_passed == total_tests:
+        print("\n🎉 ALL TESTS PASSED! ShowClawMart is working correctly after the redesign.")
+        return True
+    else:
+        print(f"\n⚠️  {total_tests - total_passed} tests failed. Please check the issues above.")
+        return False
 
 if __name__ == "__main__":
-    test_enhanced_showclawmart_backend()
+    success = main()
+    sys.exit(0 if success else 1)

@@ -44,27 +44,27 @@ export default function PackDetailPage() {
 
   const getCategoryColor = (cat) => {
     const colors = {
-      'claude-skill': 'bg-purple-500/10 text-purple-500',
+      'claude-skill': 'bg-teal-500/10 text-teal-500',
       'gemini-extension': 'bg-blue-500/10 text-blue-500',
       'mcp-server': 'bg-green-500/10 text-green-500',
       'prompt': 'bg-orange-500/10 text-orange-500',
       'ai-agent': 'bg-cyan-500/10 text-cyan-500',
       'ai-tool': 'bg-indigo-500/10 text-indigo-500'
     }
-    return colors[cat] || 'bg-gray-500/10 text-gray-500'
+    return colors[cat] || 'bg-gray-500/10 text-slate-500'
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
-        <div className="inline-block w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-gradient-to-br neptune flex items-center justify-center">
+        <div className="inline-block w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     )
   }
 
   if (!pack) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br neptune flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl text-white mb-4">Pack not found</h2>
           <Link href="/packs">
@@ -76,12 +76,12 @@ export default function PackDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br neptune">
       {/* Header */}
-      <header className="border-b border-white/10 bg-black/20 backdrop-blur-xl">
+      <header className="border-b border-slate-700/50 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/packs">
-            <Button variant="ghost" className="text-white hover:bg-white/10">
+            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Packs
             </Button>
@@ -95,23 +95,23 @@ export default function PackDetailPage() {
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-4">
-                <Badge className="bg-purple-500/10 text-purple-500 border-purple-500/20 border">
+                <Badge className="bg-teal-500/10 text-teal-500 border-teal-500/20 border">
                   <Users className="w-3 h-3 mr-1" />
                   {pack.audience}
                 </Badge>
-                <Badge variant="outline" className="border-white/20 text-gray-300">
+                <Badge variant="outline" className="border-white/20 text-slate-300">
                   <Target className="w-3 h-3 mr-1" />
                   {pack.useCase}
                 </Badge>
               </div>
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">{pack.name}</h1>
-              <p className="text-xl text-gray-300">{pack.description}</p>
+              <p className="text-xl text-slate-300">{pack.description}</p>
             </div>
           </div>
 
           <Button
             onClick={handleOpenInBuilder}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+            className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-purple-600 hover:to-pink-600"
             size="lg"
           >
             <Zap className="w-4 h-4 mr-2" />
@@ -126,20 +126,20 @@ export default function PackDetailPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {skills.map((skill) => (
-              <Card key={skill.id} className="bg-black/40 border-white/10 backdrop-blur-xl hover:border-purple-500/50 transition-all">
+              <Card key={skill.id} className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl hover:border-teal-500/40 transition-all">
                 <CardHeader>
                   <div className="flex items-start justify-between mb-2">
-                    <Badge className={`${getCategoryColor(skill.category)} border border-white/10`}>
+                    <Badge className={`${getCategoryColor(skill.category)} border border-slate-700/50`}>
                       {skill.category}
                     </Badge>
                   </div>
                   <CardTitle className="text-white">{skill.title_human || skill.name}</CardTitle>
-                  <CardDescription className="text-gray-400">
+                  <CardDescription className="text-slate-400">
                     {skill.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center gap-4 text-sm text-gray-400 mb-3">
+                  <div className="flex items-center gap-4 text-sm text-slate-400 mb-3">
                     {skill.rating > 0 && (
                       <span className="flex items-center gap-1">
                         <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
@@ -154,7 +154,7 @@ export default function PackDetailPage() {
                     )}
                   </div>
                   <Link href={`/skills/${skill.id}`}>
-                    <Button variant="outline" className="w-full border-white/20 text-white hover:bg-white/10">
+                    <Button variant="outline" className="w-full border-white/20 text-slate-300 hover:text-white hover:bg-white/5">
                       View Details
                     </Button>
                   </Link>
