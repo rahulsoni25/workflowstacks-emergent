@@ -1,3 +1,4 @@
+<!-- deploy trigger -->
 # WorkflowStacks 🎯
 
 > **Discover AI Skills from GitHub** - A marketplace for Claude Skills, Gemini Extensions, and MCP Servers automatically sourced from the best GitHub repositories.
