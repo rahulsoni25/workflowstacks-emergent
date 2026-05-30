@@ -35,7 +35,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup'];
 
 // Build GitHub API headers (token optional — works on free unauthenticated tier)
 function ghHeaders(accept = 'application/vnd.github+json') {
@@ -488,6 +488,34 @@ export async function GET(request) {
         }
       }
       return Response.json({ success: true, total: all.length, recategorized: changed });
+    }
+
+    // Remove fake sample skills + test data (admin only)
+    if (path === '/cleanup') {
+      // Fake AgentPowers placeholder skills (not real GitHub repos)
+      const fakes = await database.collection('skills').deleteMany({
+        $or: [
+          { creator: 'AgentPowers' },
+          { github_url: { $regex: 'agentpowers', $options: 'i' } }
+        ]
+      });
+      // Test uploads created during QA
+      const tests = await database.collection('skills').deleteMany({
+        source: 'user',
+        name: { $regex: '^Test Upload', $options: 'i' }
+      });
+      // Test subscriber
+      const subs = await database.collection('subscribers').deleteMany({
+        email: 'founder@example.com'
+      });
+      const remaining = await database.collection('skills').countDocuments();
+      return Response.json({
+        success: true,
+        removedFakeSamples: fakes.deletedCount,
+        removedTestUploads: tests.deletedCount,
+        removedTestSubscribers: subs.deletedCount,
+        skillsRemaining: remaining
+      });
     }
 
     // De-duplicate skills: remove repeats by github_url and by normalized name,
