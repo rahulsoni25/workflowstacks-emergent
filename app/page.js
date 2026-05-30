@@ -568,8 +568,8 @@ const HomePage = () => {
                 />
               </div>
             </div>
-            <Tabs value={category} onValueChange={setCategory} className="w-full">
-              <TabsList className="bg-slate-800/50 border border-slate-700/50">
+            <Tabs value={category} onValueChange={setCategory} className="w-full max-w-full overflow-x-auto">
+              <TabsList className="bg-slate-800/50 border border-slate-700/50 flex-nowrap w-max max-w-none">
                 <TabsTrigger value="all" className="data-[state=active]:bg-teal-500 data-[state=active]:text-white">All</TabsTrigger>
                 <TabsTrigger value="ai-agent" className="data-[state=active]:bg-cyan-500 data-[state=active]:text-white">AI Agents</TabsTrigger>
                 <TabsTrigger value="mcp-server" className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white">MCP</TabsTrigger>

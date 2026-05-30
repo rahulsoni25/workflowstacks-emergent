@@ -4,6 +4,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent decorative blobs / wide rows from causing horizontal scroll on mobile */
+html,
+body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
 @layer base {
   :root {
     --background: 222 47% 4%;
