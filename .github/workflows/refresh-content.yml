@@ -1,0 +1,55 @@
+name: Refresh marketplace content
+
+# Pulls newest GitHub repos, rewrites + quality-gates them, and dedupes —
+# by calling the deployed API (logic stays server-side; only the admin secret
+# lives here). Runs daily and can be triggered manually from the Actions tab.
+on:
+  schedule:
+    - cron: '0 6 * * *' # 06:00 UTC daily
+  workflow_dispatch: {} # manual "Run workflow" button
+
+env:
+  BASE_URL: https://workflowstacks-emergent.vercel.app
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Discover — pull newest GitHub repos
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/ingest?sort=updated&days=120" | tee /tmp/ingest.json
+          echo
+
+      - name: Normalize — fix categories
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/reclassify" | tee /tmp/reclassify.json
+          echo
+
+      - name: Rewrite + gate — publish only listings scoring >= 8
+        run: |
+          for i in $(seq 1 40); do
+            R=$(curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/agent-rewrite?pending=true&limit=6") || break
+            U=$(echo "$R" | jq -r '.updated // 0')
+            P=$(echo "$R" | jq -r '.published // 0')
+            echo "batch $i: updated=$U published=$P"
+            [ "$U" = "0" ] && break
+            sleep 1
+          done
+
+      - name: De-duplicate
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/dedupe" | tee /tmp/dedupe.json
+          echo
+
+      - name: Summary
+        run: |
+          echo "### Content refresh complete" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/ingest.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+          echo '' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/dedupe.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+          echo '```' >> $GITHUB_STEP_SUMMARY

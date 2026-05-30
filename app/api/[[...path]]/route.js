@@ -8,67 +8,105 @@ async function connectDB() {
   if (!db) {
     await client.connect();
     db = client.db(process.env.DB_NAME || 'workflowstacks');
+    // Enforce uniqueness at the DB level so duplicate repos are impossible
+    try {
+      await db.collection('skills').createIndex(
+        { github_url: 1 },
+        { unique: true, sparse: true }
+      );
+    } catch (e) {
+      console.log('Index note:', e.message);
+    }
   }
   return db;
 }
 
-// Enhanced GitHub scraper function - Latest & Most Popular (March 2026+)
-async function scrapeGitHub(topicQueries, limit = 15) {
+// Admin guard for mutating/expensive endpoints. Accepts the secret via the
+// x-admin-secret header or ?secret=. Fail-open only if ADMIN_SECRET is unset.
+function requireAdmin(request) {
+  const secret = process.env.ADMIN_SECRET;
+  if (!secret) return null;
+  const provided =
+    request.headers.get('x-admin-secret') ||
+    new URL(request.url).searchParams.get('secret');
+  if (provided !== secret) {
+    return Response.json({ error: 'Unauthorized — admin secret required' }, { status: 401 });
+  }
+  return null;
+}
+
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs'];
+
+// Build GitHub API headers (token optional — works on free unauthenticated tier)
+function ghHeaders(accept = 'application/vnd.github+json') {
+  const headers = {
+    'Accept': accept,
+    'User-Agent': 'WorkflowStacks'
+  };
+  if (process.env.GITHUB_TOKEN) {
+    headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+  }
+  return headers;
+}
+
+// Enhanced GitHub scraper - trending, maintained, founder-relevant repos
+// opts: { limit, sort ('updated'|'stars'), sinceDays } — defaults pull the NEWEST content.
+async function scrapeGitHub(topicQueries, opts = {}) {
+  const { limit = 8, sort = 'updated', sinceDays = 120 } = typeof opts === 'number' ? { limit: opts } : opts;
   const skills = [];
   const seenRepos = new Set(); // Avoid duplicates
-  
+  const hasToken = !!process.env.GITHUB_TOKEN;
+  // Only fetch READMEs when authenticated — keeps us under the 60 req/hr free limit
+  const fetchReadmes = hasToken;
+
+  // Dynamic recency window relative to NOW so it never goes stale
+  const cutoff = new Date(Date.now() - sinceDays * 86400000).toISOString().slice(0, 10);
+  const ghSort = sort === 'stars' ? 'stars' : 'updated'; // 'updated' = freshest first
+
   for (const queryConfig of topicQueries) {
     try {
       const { query, category, minStars = 50 } = queryConfig;
-      
-      // Build query with filters for quality, recency, and March 2026+
-      const dateFilter = 'created:>=2026-03-01'; // Fresh skills from March 2026
+
+      // "pushed" within a rolling window = recently active/trending repos
+      const dateFilter = `pushed:>=${cutoff}`;
       const searchQuery = `${query} ${dateFilter} stars:>${minStars}`;
-      
+
       const response = await fetch(
-        `https://api.github.com/search/repositories?q=${encodeURIComponent(searchQuery)}&sort=stars&order=desc&per_page=${limit}`,
-        {
-          headers: {
-            'Accept': 'application/vnd.github+json',
-            'User-Agent': 'WorkflowStacks',
-            'Authorization': process.env.GITHUB_TOKEN ? `token ${process.env.GITHUB_TOKEN}` : undefined
-          }
-        }
+        `https://api.github.com/search/repositories?q=${encodeURIComponent(searchQuery)}&sort=${ghSort}&order=desc&per_page=${limit}`,
+        { headers: ghHeaders() }
       );
-      
+
       if (!response.ok) {
         console.log(`GitHub API error for ${query}: ${response.status}`);
+        // Back off harder on rate-limit so remaining queries can still succeed
+        if (response.status === 403) await new Promise(r => setTimeout(r, 2000));
         continue;
       }
-      
+
       const data = await response.json();
-      
+
       for (const repo of data.items || []) {
         // Skip duplicates and archived repos
         if (seenRepos.has(repo.full_name) || repo.archived) continue;
         seenRepos.add(repo.full_name);
-        
-        // Fetch README
-        let readmePreview = '';
-        try {
-          const readmeResponse = await fetch(
-            `https://api.github.com/repos/${repo.full_name}/readme`,
-            {
-              headers: {
-                'Accept': 'application/vnd.github.raw+json',
-                'User-Agent': 'WorkflowStacks',
-                'Authorization': process.env.GITHUB_TOKEN ? `token ${process.env.GITHUB_TOKEN}` : undefined
-              }
+
+        // Fetch README only when we have a token; otherwise fall back to description
+        let readmePreview = repo.description || '';
+        if (fetchReadmes) {
+          try {
+            const readmeResponse = await fetch(
+              `https://api.github.com/repos/${repo.full_name}/readme`,
+              { headers: ghHeaders('application/vnd.github.raw+json') }
+            );
+            if (readmeResponse.ok) {
+              const readmeText = await readmeResponse.text();
+              readmePreview = readmeText.substring(0, 600);
             }
-          );
-          if (readmeResponse.ok) {
-            const readmeText = await readmeResponse.text();
-            readmePreview = readmeText.substring(0, 600);
+          } catch (e) {
+            console.log('Error fetching README:', e.message);
           }
-        } catch (e) {
-          console.log('Error fetching README:', e.message);
         }
-        
+
         // Calculate popularity score (0-100)
         const daysSinceUpdate = (Date.now() - new Date(repo.updated_at)) / (1000 * 60 * 60 * 24);
         const recencyBonus = daysSinceUpdate < 7 ? 20 : daysSinceUpdate < 30 ? 10 : 0;
@@ -100,20 +138,21 @@ async function scrapeGitHub(topicQueries, limit = 15) {
           language: repo.language,
           last_updated: new Date(repo.updated_at),
           created_at: new Date(repo.created_at),
-          updated_at: new Date(repo.updated_at)
+          updated_at: new Date(repo.updated_at),
+          added_at: new Date() // when this skill entered the marketplace (powers "New")
         };
-        
+
         skills.push(skill);
       }
       
-      // Small delay to avoid rate limits
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
+      // Delay between queries to respect the search rate limit (10/min unauthenticated)
+      await new Promise(resolve => setTimeout(resolve, process.env.GITHUB_TOKEN ? 300 : 1500));
+
     } catch (error) {
       console.error(`Error scraping query ${queryConfig.query}:`, error.message);
     }
   }
-  
+
   return skills;
 }
 
@@ -220,10 +259,16 @@ const agentPowersSkills = [
 export async function GET(request) {
   const { pathname } = new URL(request.url);
   const path = pathname.replace('/api', '') || '/';
-  
+
   try {
+    // Gate admin/expensive endpoints
+    if (ADMIN_PATHS.includes(path)) {
+      const denied = requireAdmin(request);
+      if (denied) return denied;
+    }
+
     const database = await connectDB();
-    
+
     // Root endpoint
     if (path === '/' || path === '') {
       return Response.json({ message: 'WorkflowStacks API v1.0' });
@@ -235,7 +280,8 @@ export async function GET(request) {
       const category = searchParams.get('category');
       const search = searchParams.get('search');
       
-      let query = {};
+      // Quality gate: only show published listings (unless ?all=true)
+      let query = searchParams.get('all') === 'true' ? {} : { published: { $ne: false } };
       if (category && category !== 'all') {
         query.category = category;
       }
@@ -245,12 +291,12 @@ export async function GET(request) {
           { description: { $regex: search, $options: 'i' } }
         ];
       }
-      
+
       const skills = await database.collection('skills')
         .find(query)
-        .sort({ rating: -1, installs: -1 })
+        .sort({ github_stars: -1 })
         .toArray();
-      
+
       return Response.json({ skills });
     }
     
@@ -268,89 +314,219 @@ export async function GET(request) {
     
     // Ingest from GitHub - Latest & Most Popular
     if (path === '/ingest') {
-      // Enhanced topic queries with better targeting
+      // Founder-focused queries spanning every niche — trending & maintained repos
       const topicQueries = [
-        // Claude Skills & MCP Servers (most popular)
-        { query: 'topic:mcp-server OR topic:model-context-protocol', category: 'mcp-server', minStars: 10 },
-        { query: 'topic:claude-skill OR anthropic claude tool', category: 'claude-skill', minStars: 20 },
-        
-        // AI Agents & Automation (trending)
-        { query: 'ai-agent OR autonomous-agent llm', category: 'ai-agent', minStars: 100 },
-        { query: 'langchain OR langgraph agent', category: 'ai-agent', minStars: 50 },
-        
-        // Gemini & Google AI
-        { query: 'gemini-extension OR google-gemini', category: 'gemini-extension', minStars: 10 },
-        
-        // AI Prompts & Templates
-        { query: 'prompt-engineering OR awesome-prompts', category: 'prompt', minStars: 100 },
-        
-        // ChatGPT Plugins & Tools
-        { query: 'chatgpt-plugin OR gpt-plugin', category: 'ai-tool', minStars: 50 }
+        // --- AI agents, MCP & Claude skills (core marketplace) ---
+        { query: 'topic:mcp-server OR model-context-protocol', category: 'mcp-server', minStars: 30 },
+        { query: 'topic:claude-skill OR claude anthropic tool', category: 'claude-skill', minStars: 20 },
+        { query: 'ai-agent OR autonomous-agent llm', category: 'ai-agent', minStars: 200 },
+        { query: 'topic:rag retrieval-augmented-generation', category: 'ai-agent', minStars: 150 },
+
+        // --- Marketing & growth ---
+        { query: 'ai copywriting OR content-generation marketing', category: 'marketing', minStars: 80 },
+        { query: 'seo tools OR topic:seo', category: 'marketing', minStars: 150 },
+        { query: 'social-media automation', category: 'marketing', minStars: 100 },
+
+        // --- Sales & outreach ---
+        { query: 'cold-email OR lead-generation OR outreach automation', category: 'sales', minStars: 50 },
+        { query: 'open-source crm', category: 'sales', minStars: 200 },
+
+        // --- Build / ship product (SaaS founders) ---
+        { query: 'saas boilerplate nextjs OR saas-starter', category: 'saas-starter', minStars: 200 },
+        { query: 'stripe subscription billing saas', category: 'saas-starter', minStars: 80 },
+
+        // --- Automation / no-code ---
+        { query: 'workflow-automation OR n8n OR no-code', category: 'automation', minStars: 300 },
+
+        // --- Analytics, support, design ---
+        { query: 'open-source product-analytics', category: 'analytics', minStars: 250 },
+        { query: 'ai customer-support chatbot', category: 'support', minStars: 150 },
+        { query: 'ai design OR ui-generator OR figma', category: 'design', minStars: 100 },
+
+        // --- Prompts & founder resources ---
+        { query: 'prompt-engineering OR awesome-prompts OR system-prompts', category: 'prompt', minStars: 300 },
+        { query: 'awesome startup OR indie-hackers OR founder resources', category: 'founder-resource', minStars: 200 }
       ];
-      
-      const scrapedSkills = await scrapeGitHub(topicQueries, 10);
-      const allSkills = [...agentPowersSkills, ...scrapedSkills];
-      
-      // Clear existing and insert new
-      await database.collection('skills').deleteMany({});
-      
-      if (allSkills.length > 0) {
-        await database.collection('skills').insertMany(allSkills);
+
+      // Read options: /ingest?sort=updated&days=120  (defaults pull NEWEST content)
+      const { searchParams } = new URL(request.url);
+      const sort = searchParams.get('sort') || 'updated';
+      const sinceDays = parseInt(searchParams.get('days') || '120', 10);
+
+      const scrapedSkills = await scrapeGitHub(topicQueries, { limit: 8, sort, sinceDays });
+
+      // SAFE UPSERT — refresh metadata for known repos, add new ones, and NEVER
+      // overwrite curated fields (title_human/description_human/category) or wipe data.
+      let inserted = 0;
+      let refreshed = 0;
+      for (const s of scrapedSkills) {
+        const res = await database.collection('skills').updateOne(
+          { github_url: s.github_url },
+          {
+            // Always refresh live GitHub metadata
+            $set: {
+              name: s.name,
+              description: s.description,
+              github_stars: s.github_stars,
+              github_forks: s.github_forks,
+              github_topics: s.github_topics,
+              language: s.language,
+              popularity_score: s.popularity_score,
+              last_updated: s.last_updated,
+              updated_at: s.updated_at
+            },
+            // Only set on first insert — preserves rewrites & reclassified category
+            $setOnInsert: {
+              id: s.id,
+              category: s.category,
+              creator: s.creator,
+              creator_avatar: s.creator_avatar,
+              price: 0,
+              is_premium: false,
+              source_url: s.source_url,
+              readme_preview: s.readme_preview,
+              created_at: s.created_at,
+              added_at: new Date(),
+              // Quality gate: new repos stay hidden until rewritten + judged
+              published: false,
+              rewrite_status: 'pending'
+            }
+          },
+          { upsert: true }
+        );
+        if (res.upsertedCount > 0) inserted++;
+        else refreshed++;
       }
-      
-      return Response.json({ 
-        message: 'Ingestion complete - Latest & most popular skills loaded!', 
-        count: allSkills.length,
-        breakdown: {
-          agentPowers: agentPowersSkills.length,
-          github: scrapedSkills.length
-        },
-        note: 'Skills filtered for quality (min stars) and recency (updated since 2023)'
+
+      return Response.json({
+        message: 'Ingestion complete — newest GitHub content pulled (safe upsert, rewrites preserved).',
+        scraped: scrapedSkills.length,
+        newlyAdded: inserted,
+        refreshed,
+        sort,
+        sinceDays,
+        note: inserted > 0 ? `Run /api/agent-rewrite?pending=true to rewrite the ${inserted} new skill(s).` : 'No new repos this run.'
       });
     }
     
     // Get trending skills (high popularity score, recently updated)
     if (path === '/trending') {
       const skills = await database.collection('skills')
-        .find({ popularity_score: { $exists: true } })
+        .find({ popularity_score: { $exists: true }, published: { $ne: false } })
         .sort({ popularity_score: -1, last_updated: -1 })
         .limit(12)
         .toArray();
-      
+
       return Response.json({ skills });
     }
-    
+
     // Get hot skills (most stars, updated in last 30 days)
     if (path === '/hot') {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
+
       const skills = await database.collection('skills')
-        .find({ 
+        .find({
           last_updated: { $gte: thirtyDaysAgo },
-          github_stars: { $exists: true }
+          github_stars: { $exists: true },
+          published: { $ne: false }
         })
         .sort({ github_stars: -1 })
         .limit(12)
         .toArray();
-      
+
       return Response.json({ skills });
     }
-    
-    // Get new skills (added this week)
+
+    // Get new skills (most recently added to the marketplace)
     if (path === '/new') {
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      
-      const skills = await database.collection('skills')
-        .find({ created_at: { $gte: sevenDaysAgo } })
-        .sort({ created_at: -1 })
+      // Prefer added_at (when it entered the marketplace); fall back to recency
+      // of repo activity so the section is never empty for older data.
+      let skills = await database.collection('skills')
+        .find({ added_at: { $exists: true }, published: { $ne: false } })
+        .sort({ added_at: -1 })
         .limit(12)
         .toArray();
-      
+
+      if (skills.length === 0) {
+        skills = await database.collection('skills')
+          .find({ published: { $ne: false } })
+          .sort({ last_updated: -1, created_at: -1 })
+          .limit(12)
+          .toArray();
+      }
+
       return Response.json({ skills });
     }
     
+    // Re-classify skills into correct categories by keyword (fixes mis-tags)
+    if (path === '/reclassify') {
+      const classify = (s) => {
+        const t = `${s.name} ${s.description || ''} ${(s.github_topics || []).join(' ')}`.toLowerCase();
+        const has = (...kw) => kw.some((k) => t.includes(k));
+        if (has('mcp', 'model-context-protocol')) return 'mcp-server';
+        if (has('claude-skill', 'anthropic')) return 'claude-skill';
+        if (has('prompt', 'awesome-prompts', 'system-prompt')) return 'prompt';
+        if (has('puppeteer', 'playwright', 'selenium', 'scraper', 'scraping', 'browser-automation', 'testing', 'e2e', 'ansible', 'kubernetes', 'docker', 'devops', 'home-assistant')) return 'devtools';
+        if (has('crm', 'lead', 'outreach', 'cold-email', 'cold email', 'sales', 'prospect', 'erp')) return 'sales';
+        if (has('seo', 'marketing', 'copywriting', 'content-generation', 'social-media', 'social media', 'newsletter', 'ads')) return 'marketing';
+        if (has('saas', 'boilerplate', 'starter', 'stripe', 'billing', 'subscription', 'template')) return 'saas-starter';
+        if (has('n8n', 'workflow', 'automation', 'zapier', 'no-code', 'low-code')) return 'automation';
+        if (has('analytics', 'dashboard', 'metrics', 'tracking', 'telemetry')) return 'analytics';
+        if (has('support', 'chatbot', 'helpdesk', 'customer', 'ticketing')) return 'support';
+        if (has('design', 'figma', 'ui-', 'icon', 'css', 'tailwind', 'component')) return 'design';
+        if (has('rag', 'retrieval', 'agent', 'autonomous', 'llm', 'transformer', 'ollama', 'langchain')) return 'ai-agent';
+        return s.category || 'ai-tool';
+      };
+      const all = await database.collection('skills').find({}).toArray();
+      let changed = 0;
+      for (const s of all) {
+        const cat = classify(s);
+        if (cat !== s.category) {
+          await database.collection('skills').updateOne({ id: s.id }, { $set: { category: cat } });
+          changed++;
+        }
+      }
+      return Response.json({ success: true, total: all.length, recategorized: changed });
+    }
+
+    // De-duplicate skills: remove repeats by github_url and by normalized name,
+    // keeping the highest-starred copy (tie-break: prefer an AI-rewritten one).
+    if (path === '/dedupe') {
+      const all = await database.collection('skills').find({}).toArray();
+      const keyUrl = (s) => (s.github_url || '').trim().toLowerCase().replace(/\/+$/, '');
+      const keyName = (s) => (s.name_original || s.name || '').trim().toLowerCase();
+      const score = (s) =>
+        (s.github_stars || 0) + (String(s.rewritten_by || '').match(/openrouter|anthropic|claude/) ? 1e9 : 0);
+
+      const removeIds = new Set();
+      for (const keyFn of [keyUrl, keyName]) {
+        const groups = {};
+        for (const s of all) {
+          if (removeIds.has(s.id)) continue;
+          const k = keyFn(s);
+          if (!k) continue;
+          (groups[k] = groups[k] || []).push(s);
+        }
+        for (const k in groups) {
+          const grp = groups[k];
+          if (grp.length < 2) continue;
+          grp.sort((a, b) => score(b) - score(a)); // best first
+          grp.slice(1).forEach((s) => removeIds.add(s.id)); // remove the rest
+        }
+      }
+
+      const removed = [];
+      for (const s of all) {
+        if (removeIds.has(s.id)) removed.push({ name: s.name_original || s.name, url: s.github_url });
+      }
+      if (removeIds.size > 0) {
+        await database.collection('skills').deleteMany({ id: { $in: [...removeIds] } });
+      }
+      const remaining = await database.collection('skills').countDocuments();
+      return Response.json({ success: true, removedCount: removeIds.size, removed, remaining });
+    }
+
     // Stats endpoint
     if (path === '/stats') {
       const totalSkills = await database.collection('skills').countDocuments();
@@ -448,6 +624,20 @@ export async function GET(request) {
       return Response.json({ playbook, skills });
     }
     
+    // Get the current device's saved agents (lightweight account)
+    if (path === '/my-agents') {
+      const { searchParams } = new URL(request.url);
+      const userId = searchParams.get('userId');
+      if (!userId) return Response.json({ agents: [] });
+
+      const agents = await database.collection('agent_templates')
+        .find({ userId })
+        .sort({ created_at: -1 })
+        .toArray();
+
+      return Response.json({ agents });
+    }
+
     // Get public agent templates
     if (path === '/agents') {
       const agents = await database.collection('agent_templates')
@@ -494,15 +684,30 @@ export async function GET(request) {
 export async function POST(request) {
   const { pathname } = new URL(request.url);
   const path = pathname.replace('/api', '') || '/';
-  
+
   try {
+    // Gate admin/expensive endpoints
+    if (ADMIN_PATHS.includes(path)) {
+      const denied = requireAdmin(request);
+      if (denied) return denied;
+    }
+
     const database = await connectDB();
-    
+
     // Seed packs and playbooks
     if (path === '/seed-packs') {
-      // Get some skill IDs for seeding
-      const allSkills = await database.collection('skills').find({}).limit(20).toArray();
-      
+      // Get all skills, then pick coherent bundles by category
+      const allSkills = await database.collection('skills').find({}).toArray();
+      const pick = (cats, n) => {
+        const ids = [];
+        for (const c of cats) {
+          for (const s of allSkills) if (s.category === c) ids.push(s.id);
+        }
+        // Fallback to any skills if a category bucket is empty
+        if (ids.length === 0) allSkills.slice(0, n).forEach((s) => ids.push(s.id));
+        return [...new Set(ids)].slice(0, n);
+      };
+
       const packs = [
         {
           id: uuidv4(),
@@ -510,34 +715,34 @@ export async function POST(request) {
           description: 'Everything you need to validate and launch your startup idea quickly',
           audience: 'Founder',
           useCase: 'Product Launch',
-          skillIds: allSkills.slice(0, 4).map(s => s.id),
+          skillIds: pick(['saas-starter', 'ai-agent', 'automation'], 5),
           created_at: new Date()
         },
         {
           id: uuidv4(),
-          name: 'Cold Email Pack',
-          description: 'Master outbound sales with AI-powered email campaigns',
+          name: 'Outbound Sales Pack',
+          description: 'Master outbound sales with AI-powered research, outreach, and CRM',
           audience: 'Agency',
-          useCase: 'Email Marketing',
-          skillIds: allSkills.slice(4, 7).map(s => s.id),
+          useCase: 'Sales',
+          skillIds: pick(['sales'], 4),
           created_at: new Date()
         },
         {
           id: uuidv4(),
-          name: 'Content Creator Pack',
+          name: 'Content & Marketing Pack',
           description: 'Create, optimize, and distribute content at scale',
           audience: 'Creator',
           useCase: 'Content Creation',
-          skillIds: allSkills.slice(7, 11).map(s => s.id),
+          skillIds: pick(['marketing'], 4),
           created_at: new Date()
         },
         {
           id: uuidv4(),
           name: 'Developer Productivity Pack',
-          description: 'Supercharge your coding workflow with AI assistance',
+          description: 'Supercharge your coding and shipping workflow with AI',
           audience: 'Developer',
           useCase: 'Development',
-          skillIds: allSkills.slice(11, 15).map(s => s.id),
+          skillIds: pick(['devtools', 'saas-starter', 'mcp-server'], 4),
           created_at: new Date()
         }
       ];
@@ -550,7 +755,7 @@ export async function POST(request) {
           audience: 'Founder',
           useCase: 'Validation',
           problem: 'You have a business idea but don\'t know if people will pay for it',
-          skillIds: allSkills.slice(0, 3).map(s => s.id),
+          skillIds: pick(['ai-agent', 'analytics', 'marketing'], 3),
           created_at: new Date()
         },
         {
@@ -560,7 +765,7 @@ export async function POST(request) {
           audience: 'Founder',
           useCase: 'Market Research',
           problem: 'Need to validate your idea with real market data before building anything',
-          skillIds: allSkills.slice(0, 4).map(s => s.id),
+          skillIds: pick(['analytics', 'ai-agent', 'marketing'], 4),
           created_at: new Date()
         },
         {
@@ -570,66 +775,134 @@ export async function POST(request) {
           audience: 'Agency',
           useCase: 'Lead Generation',
           problem: 'Cold outreach is getting ignored, you need warmer approaches',
-          skillIds: allSkills.slice(3, 6).map(s => s.id),
+          skillIds: pick(['sales'], 3),
           created_at: new Date()
         },
         {
           id: uuidv4(),
-          title: 'Turn Meetings into Action Items',
-          description: 'Capture, organize, and execute on meeting outcomes efficiently',
-          audience: 'Marketer',
-          useCase: 'Operations',
-          problem: 'Meeting notes get lost and action items fall through the cracks',
-          skillIds: allSkills.slice(6, 9).map(s => s.id),
+          title: 'Ship Your MVP in a Weekend',
+          description: 'Use SaaS starters and automation to go from idea to live product fast',
+          audience: 'Developer',
+          useCase: 'Development',
+          problem: 'You keep starting projects but never ship them to real users',
+          skillIds: pick(['saas-starter', 'devtools', 'automation'], 3),
           created_at: new Date()
         }
       ];
       
+      // Founder personas — curated bundles of skills for a role/goal
+      const personas = [
+        {
+          id: uuidv4(),
+          name: 'Solo Founder',
+          description: 'Wear every hat: validate, build, market, and sell — with an AI stack that replaces a small team.',
+          audience: 'Founder',
+          skillIds: pick(['saas-starter', 'marketing', 'ai-agent'], 5),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          name: 'Growth Marketer',
+          description: 'Scale organic + paid: SEO content, social automation, and high-converting copy on autopilot.',
+          audience: 'Marketer',
+          skillIds: pick(['marketing'], 5),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          name: 'Sales Closer',
+          description: 'Fill the pipeline: lead research, personalized outreach, and follow-ups that book meetings.',
+          audience: 'Sales',
+          skillIds: pick(['sales'], 4),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          name: 'Indie Hacker',
+          description: 'Ship fast: SaaS starters, automation, and AI agents to launch a product in a weekend.',
+          audience: 'Developer',
+          skillIds: pick(['saas-starter', 'devtools', 'automation'], 5),
+          created_at: new Date()
+        }
+      ];
+
       // Clear and insert
       await database.collection('skill_packs').deleteMany({});
       await database.collection('playbooks').deleteMany({});
-      
+      await database.collection('personas').deleteMany({});
+
       await database.collection('skill_packs').insertMany(packs);
       await database.collection('playbooks').insertMany(playbooks);
-      
-      return Response.json({ 
+      await database.collection('personas').insertMany(personas);
+
+      return Response.json({
         success: true,
         packs: packs.length,
-        playbooks: playbooks.length
+        playbooks: playbooks.length,
+        personas: personas.length
       });
     }
     
+    // Email subscribe — stores waitlist emails (deduped)
+    if (path === '/subscribe') {
+      const body = await request.json();
+      const email = (body.email || '').trim().toLowerCase();
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        return Response.json({ success: false, error: 'Invalid email' }, { status: 400 });
+      }
+      await database.collection('subscribers').updateOne(
+        { email },
+        { $setOnInsert: { email, created_at: new Date() } },
+        { upsert: true }
+      );
+      return Response.json({ success: true });
+    }
+
     // Upload skill
     if (path === '/upload') {
       const body = await request.json();
-      
+
+      // Basic validation
+      if (!body.name || !body.description) {
+        return Response.json({ success: false, error: 'Name and description are required' }, { status: 400 });
+      }
+
       const skill = {
         id: uuidv4(),
-        name: body.name,
-        description: body.description,
-        category: body.category,
+        name: String(body.name).slice(0, 120),
+        description: String(body.description).slice(0, 500),
+        category: body.category || 'ai-tool',
         price: parseFloat(body.price) || 0,
-        rating: 0,
-        installs: 0,
         source_url: body.source_url || '',
-        github_url: body.github_url || '',
         github_stars: 0,
         creator: body.creator || 'Anonymous',
         is_premium: body.price > 0,
         readme_preview: '',
-        created_at: new Date()
+        created_at: new Date(),
+        added_at: new Date(),
+        source: 'user',
+        // Quality gate: user submissions are hidden until reviewed/rewritten
+        published: false,
+        rewrite_status: 'pending'
       };
-      
+      // Only set github_url when provided — avoids empty-string collisions on the
+      // unique sparse index (which would reject a 2nd URL-less submission).
+      if (body.github_url) skill.github_url = body.github_url;
+
       await database.collection('skills').insertOne(skill);
-      
-      return Response.json({ success: true, skill });
+
+      return Response.json({
+        success: true,
+        skill,
+        message: 'Submitted! Your skill is in review and will appear once approved.'
+      });
     }
     
     // Create Agent Template
     if (path === '/agent-templates') {
       const body = await request.json();
-      const { goal, selectedSkillIds, isPublic } = body;
-      
+      const { goal, selectedSkillIds, isPublic, userId } = body;
+
       if (!goal || !selectedSkillIds || selectedSkillIds.length === 0) {
         return Response.json({ 
           success: false, 
@@ -688,6 +961,7 @@ export async function POST(request) {
         skills: selectedSkills.map(s => ({ id: s.id, name: s.name, category: s.category })),
         agentBlueprint: agentBlueprint,
         isPublic: isPublic || false,
+        userId: userId || null,
         copyCount: 0,
         created_at: new Date()
       };

@@ -208,41 +208,16 @@ function formatStars(stars) {
 }
 
 export async function GET(request) {
-  try {
-    const database = await connectDB();
-    
-    // Get all skills
-    const skills = await database.collection('skills').find({}).toArray();
-    
-    let updated = 0;
-    for (const skill of skills) {
-      // Generate unique benefit-focused title AND description
-      const result = generateUniqueTitle(skill);
-      
-      // Store original name and add human title + description
-      await database.collection('skills').updateOne(
-        { id: skill.id },
-        { 
-          $set: { 
-            title_human: result.title,
-            description_human: result.description,
-            name_original: skill.name_original || skill.name,
-            description_original: skill.description_original || skill.description
-          } 
-        }
-      );
-      
-      updated++;
-    }
-    
-    return Response.json({ 
-      success: true,
-      updated,
-      message: `Updated ${updated} skills with unique titles and descriptions`
-    });
-    
-  } catch (error) {
-    console.error('Error:', error);
-    return Response.json({ error: error.message }, { status: 500 });
-  }
+  // DISABLED: this template-based generator produced highly repetitive titles
+  // (many repos collapsed to the same "AI Code Assistant..." string) and would
+  // overwrite the high-quality AI rewrites from /api/agent-rewrite.
+  // Use /api/agent-rewrite (LLM-powered, unique per skill) instead.
+  return Response.json(
+    {
+      success: false,
+      disabled: true,
+      message: 'rewrite-titles is disabled — it produced duplicate copy. Use /api/agent-rewrite instead.'
+    },
+    { status: 410 }
+  );
 }

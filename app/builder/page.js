@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import { getUserId } from '@/lib/identity'
 
 export default function BuilderPage() {
   const [step, setStep] = useState(1)
@@ -28,7 +29,24 @@ export default function BuilderPage() {
     try {
       const res = await fetch('/api/skills?limit=30')
       const data = await res.json()
-      setSkills(data.skills || [])
+      let list = data.skills || []
+
+      // Carry intent from a skill detail page: /builder?skill=<id>
+      const skillId = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search).get('skill')
+        : null
+      if (skillId) {
+        if (!list.find((s) => s.id === skillId)) {
+          try {
+            const r = await fetch(`/api/skills/${skillId}`)
+            const d = await r.json()
+            if (d.skill) list = [d.skill, ...list]
+          } catch (e) { /* ignore */ }
+        }
+        setSelectedSkillIds([skillId])
+        setStep(2)
+      }
+      setSkills(list)
     } catch (e) {
       console.error('Error loading skills:', e)
     }
@@ -52,7 +70,7 @@ export default function BuilderPage() {
       const res = await fetch('/api/agent-templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goal: goal.trim(), selectedSkillIds })
+        body: JSON.stringify({ goal: goal.trim(), selectedSkillIds, userId: getUserId() })
       })
       const data = await res.json()
       if (data.success) {
@@ -267,6 +285,10 @@ export default function BuilderPage() {
                     </div>
                   </div>
                 </div>
+                <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 flex items-center gap-2 text-sm text-slate-300">
+                  <CheckCircle2 className="w-4 h-4 text-teal-400" />
+                  Saved to <Link href="/my-agents" className="text-teal-300 underline hover:text-teal-200">My Agents</Link> — come back anytime, no login needed.
+                </div>
                 <div className="flex gap-3">
                   <Button
                     onClick={() => { setStep(1); setGoal(''); setSelectedSkillIds([]); setAgentBlueprint(null) }}
@@ -275,9 +297,9 @@ export default function BuilderPage() {
                   >
                     Build Another Agent
                   </Button>
-                  <Link href="/" className="flex-1">
+                  <Link href="/my-agents" className="flex-1">
                     <Button className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white">
-                      Browse More Skills
+                      View My Agents
                     </Button>
                   </Link>
                 </div>

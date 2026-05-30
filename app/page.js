@@ -44,7 +44,7 @@ const HomePage = () => {
         { '@type': 'Question', name: 'Do I need coding skills to use it?', acceptedAnswer: { '@type': 'Answer', text: 'No! WorkflowStacks is designed for non-technical users. You simply browse skills, pick the ones you want, and our Agent Builder creates a ready-to-paste prompt blueprint for you.' } },
         { '@type': 'Question', name: 'What AI tools does it work with?', acceptedAnswer: { '@type': 'Answer', text: 'WorkflowStacks works with any AI chat tool including ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), and any tool that accepts system prompts or custom instructions.' } },
         { '@type': 'Question', name: 'How are skills sourced?', acceptedAnswer: { '@type': 'Answer', text: 'Skills are automatically ingested from GitHub using our proprietary scraper that finds the highest-quality, most-starred AI repositories. We also curate premium skills from verified creators.' } },
-        { '@type': 'Question', name: 'Is it free to use?', acceptedAnswer: { '@type': 'Answer', text: 'Yes! You can browse all skills and build up to 3 agents per month for free. Pro and Enterprise plans unlock unlimited builds, premium packs, and team features.' } },
+        { '@type': 'Question', name: 'Is it free to use?', acceptedAnswer: { '@type': 'Answer', text: 'Yes — browsing skills and building agent blueprints is completely free. You copy the blueprint into Claude, ChatGPT, or Gemini and run it there. Paid plans add premium packs and team features.' } },
       ]
     }
     const script = document.createElement('script')
@@ -104,11 +104,23 @@ const HomePage = () => {
     setIngesting(false)
   }
 
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault()
-    if (email.trim()) {
-      setEmailSubmitted(true)
-      setEmail('')
+    if (!email.trim()) return
+    try {
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() })
+      })
+      if (res.ok) {
+        setEmailSubmitted(true)
+        setEmail('')
+      } else {
+        alert('Please enter a valid email address.')
+      }
+    } catch (err) {
+      alert('Something went wrong — please try again.')
     }
   }
 
@@ -170,6 +182,11 @@ const HomePage = () => {
               <Link href="/help">
                 <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
                   How It Works
+                </Button>
+              </Link>
+              <Link href="/my-agents">
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
+                  My Agents
                 </Button>
               </Link>
               <div className="w-px h-6 bg-slate-700 mx-2"></div>
@@ -471,7 +488,7 @@ const HomePage = () => {
             {[
               {
                 name: 'Free', price: '$0', period: '/forever', desc: 'For individuals exploring AI tools',
-                features: ['Browse all skills', 'Build 3 agents/month', 'Access playbooks', 'Community support'],
+                features: ['Browse all skills', 'Build unlimited agents', 'Access playbooks', 'Community support'],
                 cta: 'Get Started Free', primary: false, badge: null,
               },
               {
@@ -607,19 +624,20 @@ const HomePage = () => {
                     </CardHeader>
                     <CardContent className="pb-2">
                       <div className="flex items-center gap-4 text-sm text-slate-400">
-                        <span className="flex items-center gap-1">
-                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                          {skill.rating?.toFixed(1) || '0.0'}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Download className="w-3.5 h-3.5" />
-                          {skill.installs?.toLocaleString() || '0'}
-                        </span>
                         {skill.github_stars > 0 && (
                           <span className="flex items-center gap-1">
-                            <Github className="w-3.5 h-3.5" />
-                            {skill.github_stars}
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            {skill.github_stars.toLocaleString()}
                           </span>
+                        )}
+                        {skill.github_forks > 0 && (
+                          <span className="flex items-center gap-1">
+                            <Github className="w-3.5 h-3.5" />
+                            {skill.github_forks.toLocaleString()} forks
+                          </span>
+                        )}
+                        {skill.language && (
+                          <span className="text-slate-500">{skill.language}</span>
                         )}
                       </div>
                     </CardContent>
@@ -651,7 +669,7 @@ const HomePage = () => {
               { q: 'Do I need coding skills to use it?', a: 'No! WorkflowStacks is designed for non-technical users. You simply browse skills, pick the ones you want, and our Agent Builder creates a ready-to-paste prompt blueprint for you.' },
               { q: 'What AI tools does it work with?', a: 'WorkflowStacks works with any AI chat tool including ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), and any tool that accepts system prompts or custom instructions.' },
               { q: 'How are skills sourced?', a: 'Skills are automatically ingested from GitHub using our proprietary scraper that finds the highest-quality, most-starred AI repositories. We also curate premium skills from verified creators.' },
-              { q: 'Is it free to use?', a: 'Yes! You can browse all skills and build up to 3 agents per month for free. Pro and Enterprise plans unlock unlimited builds, premium packs, and team features.' },
+              { q: 'Is it free to use?', a: 'Yes — browsing skills and building agent blueprints is completely free. You copy the blueprint into Claude, ChatGPT, or Gemini and run it there. Paid plans add premium packs and team features.' },
               { q: 'What are Playbooks and Personas?', a: 'Playbooks are step-by-step guides that combine AI skills to solve specific problems (like "Validate a Business Idea in 48 Hours"). Personas are pre-configured AI agent roles designed for specific audiences (Founders, Agencies, Ecommerce).' },
             ].map((faq, i) => (
               <motion.div

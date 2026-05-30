@@ -86,13 +86,13 @@ export default function SkillDetailPage() {
                   )}
                 </div>
                 <CardTitle className="text-4xl text-white mb-2">{skill.title_human || skill.name}</CardTitle>
-                <CardDescription className="text-xl text-slate-300">{skill.description}</CardDescription>
+                <CardDescription className="text-xl text-slate-300">{skill.description_human || skill.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center gap-6 text-slate-300">
-                  <span className="flex items-center gap-2"><Star className="w-5 h-5 fill-amber-400 text-amber-400" />{skill.rating?.toFixed(1)}</span>
-                  <span className="flex items-center gap-2"><Download className="w-5 h-5" />{skill.installs?.toLocaleString()} installs</span>
-                  {skill.github_stars > 0 && <span className="flex items-center gap-2"><Github className="w-5 h-5" />{skill.github_stars} stars</span>}
+                  {skill.github_stars > 0 && <span className="flex items-center gap-2"><Star className="w-5 h-5 fill-amber-400 text-amber-400" />{skill.github_stars.toLocaleString()} stars</span>}
+                  {skill.github_forks > 0 && <span className="flex items-center gap-2"><Github className="w-5 h-5" />{skill.github_forks.toLocaleString()} forks</span>}
+                  {skill.language && <span className="flex items-center gap-2"><Code2 className="w-5 h-5" />{skill.language}</span>}
                 </div>
                 <Separator className="bg-slate-700/50" />
                 <div>
@@ -127,10 +127,10 @@ export default function SkillDetailPage() {
                   <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white" size="lg">Purchase for ${skill.price}</Button>
                 ) : (
                   <Button onClick={() => skill.github_url && window.open(skill.github_url, '_blank')} className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
-                    <Download className="w-4 h-4 mr-2" />Download Free
+                    <Github className="w-4 h-4 mr-2" />Get it Free on GitHub
                   </Button>
                 )}
-                <Link href="/builder" className="block">
+                <Link href={`/builder?skill=${skill.id}`} className="block">
                   <Button variant="outline" className="w-full border-teal-500/30 text-teal-300 hover:bg-teal-500/10">
                     <Zap className="w-4 h-4 mr-2" />Use in Agent Builder
                   </Button>
