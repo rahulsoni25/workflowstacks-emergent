@@ -463,19 +463,27 @@ export async function GET(request) {
     if (path === '/reclassify') {
       const classify = (s) => {
         const t = `${s.name} ${s.description || ''} ${(s.github_topics || []).join(' ')}`.toLowerCase();
+        const name = (s.name || '').toLowerCase();
+        const topics = (s.github_topics || []).map((x) => String(x).toLowerCase());
         const has = (...kw) => kw.some((k) => t.includes(k));
-        if (has('mcp', 'model-context-protocol')) return 'mcp-server';
-        if (has('claude-skill', 'anthropic')) return 'claude-skill';
-        if (has('prompt', 'awesome-prompts', 'system-prompt')) return 'prompt';
-        if (has('puppeteer', 'playwright', 'selenium', 'scraper', 'scraping', 'browser-automation', 'testing', 'e2e', 'ansible', 'kubernetes', 'docker', 'devops', 'home-assistant')) return 'devtools';
-        if (has('crm', 'lead', 'outreach', 'cold-email', 'cold email', 'sales', 'prospect', 'erp')) return 'sales';
-        if (has('seo', 'marketing', 'copywriting', 'content-generation', 'social-media', 'social media', 'newsletter', 'ads')) return 'marketing';
-        if (has('saas', 'boilerplate', 'starter', 'stripe', 'billing', 'subscription', 'template')) return 'saas-starter';
+        const hasTopic = (...kw) => kw.some((k) => topics.includes(k));
+        const isName = (...kw) => kw.some((k) => name === k);
+
+        // Strong product-name signals win first (avoids generic-keyword bleed)
+        if (isName('n8n') || has('workflow-automation', 'zapier alternative')) return 'automation';
+        // MCP must be an explicit signal, not a stray "mcp" substring (e.g. n8n mentions MCP support)
+        if (hasTopic('mcp', 'mcp-server', 'model-context-protocol') || has('model-context-protocol', 'mcp-server', 'mcp server')) return 'mcp-server';
+        if (hasTopic('claude', 'anthropic', 'claude-skill') || has('claude skill', 'anthropic claude')) return 'claude-skill';
+        if (has('prompt engineering', 'awesome-prompts', 'system-prompt', 'prompt library')) return 'prompt';
+        if (has('puppeteer', 'playwright', 'selenium', 'scraper', 'scraping', 'browser-automation', 'testing', 'e2e', 'ansible', 'kubernetes', 'devops', 'home-assistant')) return 'devtools';
+        if (has('crm', 'cold-email', 'cold email', 'lead-generation', 'lead generation', 'outreach', 'prospect', 'sales pipeline', 'erpnext')) return 'sales';
+        if (has('seo', 'copywriting', 'content-generation', 'social-media', 'social media', 'newsletter', 'marketing')) return 'marketing';
+        if (has('saas boilerplate', 'saas-starter', 'boilerplate', 'stripe', 'subscription billing', 'starter kit')) return 'saas-starter';
         if (has('n8n', 'workflow', 'automation', 'zapier', 'no-code', 'low-code')) return 'automation';
         if (has('analytics', 'dashboard', 'metrics', 'tracking', 'telemetry')) return 'analytics';
-        if (has('support', 'chatbot', 'helpdesk', 'customer', 'ticketing')) return 'support';
-        if (has('design', 'figma', 'ui-', 'icon', 'css', 'tailwind', 'component')) return 'design';
-        if (has('rag', 'retrieval', 'agent', 'autonomous', 'llm', 'transformer', 'ollama', 'langchain')) return 'ai-agent';
+        if (has('helpdesk', 'customer-support', 'customer support', 'ticketing', 'chatbot')) return 'support';
+        if (has('figma', 'ui-generator', 'icon', 'design system', 'tailwind')) return 'design';
+        if (has('rag', 'retrieval', 'ai-agent', 'autonomous-agent', 'autonomous agent', 'llm', 'transformer', 'ollama', 'langchain', 'agent framework')) return 'ai-agent';
         return s.category || 'ai-tool';
       };
       const all = await database.collection('skills').find({}).toArray();

@@ -100,11 +100,14 @@ async function rewriteWithLLM(skill, modelOverride) {
     'GitHub star count provided. Lead with the concrete value/outcome for a founder. ' +
     'Respond with ONLY a JSON object, no prose, no code fences.';
 
+  // README (when a GitHub token is configured) gives far richer context
+  const readme = (skill.readme_preview || '').slice(0, 500);
   const user =
     `Rewrite this listing.\n\n` +
     `Name: ${skill.name}\n` +
     `Category: ${skill.category}\n` +
     `Current description: ${skill.description_original || skill.description || 'n/a'}\n` +
+    (readme ? `README excerpt: ${readme}\n` : '') +
     `GitHub stars: ${stars}\n` +
     `Language: ${skill.language || 'n/a'}\n` +
     `Topics: ${topics || 'n/a'}\n\n` +
