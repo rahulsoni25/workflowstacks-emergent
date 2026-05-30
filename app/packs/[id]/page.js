@@ -111,12 +111,13 @@ export default function PackDetailPage() {
 
           <Button
             onClick={handleOpenInBuilder}
-            className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-purple-600 hover:to-pink-600"
+            className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20"
             size="lg"
           >
             <Zap className="w-4 h-4 mr-2" />
-            Open in Agent Builder
+            Build an Agent from this Pack
           </Button>
+          <p className="text-sm text-slate-500 mt-2">Loads all {skills.length} skills into the builder and generates a paste-ready blueprint.</p>
         </div>
 
         {/* Skills in Pack */}
@@ -134,24 +135,19 @@ export default function PackDetailPage() {
                     </Badge>
                   </div>
                   <CardTitle className="text-white">{skill.title_human || skill.name}</CardTitle>
-                  <CardDescription className="text-slate-400">
-                    {skill.description}
+                  <CardDescription className="text-slate-400 line-clamp-2">
+                    {skill.description_human || skill.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center gap-4 text-sm text-slate-400 mb-3">
-                    {skill.rating > 0 && (
+                    {skill.github_stars > 0 && (
                       <span className="flex items-center gap-1">
-                        <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                        {skill.rating.toFixed(1)}
+                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                        {skill.github_stars.toLocaleString()}
                       </span>
                     )}
-                    {skill.installs > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Download className="w-4 h-4" />
-                        {skill.installs.toLocaleString()}
-                      </span>
-                    )}
+                    {skill.language && <span className="text-slate-500">{skill.language}</span>}
                   </div>
                   <Link href={`/skills/${skill.id}`}>
                     <Button variant="outline" className="w-full border-white/20 text-slate-300 hover:text-white hover:bg-white/5">

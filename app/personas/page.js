@@ -31,18 +31,19 @@ export default function PersonasPage() {
   }
 
   const handleUsePersona = (persona) => {
-    const skillIds = persona.skillIds.join(',')
-    const goal = `Act as a ${persona.name} for ${persona.targetAudience}`
-    router.push(`/builder?personaId=${persona.id}&skillIds=${skillIds}&goal=${encodeURIComponent(goal)}`)
+    const skillIds = (persona.skillIds || []).join(',')
+    const goal = persona.description || `Act as my ${persona.name}`
+    router.push(`/builder?skillIds=${skillIds}&goal=${encodeURIComponent(goal)}`)
   }
 
-  const getDomainColor = (domain) => {
+  const getAudienceColor = (audience) => {
     const colors = {
-      'commerce': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-      'marketing': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-      'founder_ops': 'bg-violet-500/10 text-violet-400 border-violet-500/20'
+      Founder: 'bg-teal-500/10 text-teal-400 border-teal-500/20',
+      Marketer: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
+      Sales: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      Developer: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     }
-    return colors[domain] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+    return colors[audience] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
   }
 
   return (
@@ -69,7 +70,8 @@ export default function PersonasPage() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">AI Agent Personas</h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Pre-configured AI agents for specific roles — start with proven skill combinations
+            A <span className="text-teal-300 font-semibold">Persona</span> is a role in a box — the exact skills a
+            Founder, Marketer, or Sales rep needs, pre-selected. One click turns it into a working agent.
           </p>
         </motion.div>
 
@@ -94,9 +96,9 @@ export default function PersonasPage() {
                 <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl hover:border-teal-500/40 transition-all duration-300">
                   <CardHeader>
                     <div className="flex items-start justify-between mb-3">
-                      <Badge className={`${getDomainColor(persona.primaryDomain)} border`}>
+                      <Badge className={`${getAudienceColor(persona.audience)} border`}>
                         <Briefcase className="w-3 h-3 mr-1" />
-                        {persona.primaryDomain}
+                        {persona.audience}
                       </Badge>
                       <Badge variant="outline" className="border-slate-600 text-slate-300">
                         {persona.skillIds?.length || 0} skills
@@ -110,7 +112,7 @@ export default function PersonasPage() {
                   <CardContent className="space-y-4">
                     <div className="flex items-center gap-2 text-sm text-slate-400">
                       <Target className="w-4 h-4" />
-                      <span>For: {persona.targetAudience}</span>
+                      <span>Best for: {persona.audience}s</span>
                     </div>
                     <Button
                       onClick={() => handleUsePersona(persona)}

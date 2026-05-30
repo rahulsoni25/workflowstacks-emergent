@@ -83,7 +83,7 @@ export default function PlaybookDetailPage() {
               <Card key={skill.id} className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
                 <CardHeader>
                   <CardTitle className="text-white">{skill.title_human || skill.name}</CardTitle>
-                  <CardDescription className="text-slate-400">{skill.description}</CardDescription>
+                  <CardDescription className="text-slate-400 line-clamp-2">{skill.description_human || skill.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Link href={`/skills/${skill.id}`}>

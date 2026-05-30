@@ -60,7 +60,8 @@ export default function PacksPage() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Starter Packs</h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Curated bundles of AI skills for common use cases. Pick a pack and start building instantly!
+            A <span className="text-teal-300 font-semibold">Pack</span> is a ready-made bundle of skills for one job.
+            Open it in the Builder and get a paste-ready AI agent in one click.
           </p>
         </motion.div>
 

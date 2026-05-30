@@ -27,24 +27,39 @@ export default function BuilderPage() {
 
   const loadSkills = async () => {
     try {
-      const res = await fetch('/api/skills?limit=30')
+      const res = await fetch('/api/skills?limit=60')
       const data = await res.json()
       let list = data.skills || []
 
-      // Carry intent from a skill detail page: /builder?skill=<id>
-      const skillId = typeof window !== 'undefined'
-        ? new URLSearchParams(window.location.search).get('skill')
-        : null
-      if (skillId) {
-        if (!list.find((s) => s.id === skillId)) {
+      // Carry intent from a skill detail (?skill=id) OR a bundle
+      // (?skillIds=a,b,c&goal=...) — packs, playbooks, and personas.
+      const sp = typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search)
+        : new URLSearchParams()
+      const multi = sp.get('skillIds')
+      const single = sp.get('skill')
+      const goalParam = sp.get('goal')
+      const preselect = multi
+        ? multi.split(',').map((s) => s.trim()).filter(Boolean)
+        : single
+          ? [single]
+          : []
+
+      // Make sure every pre-selected skill is in the list (fetch any missing)
+      for (const id of preselect) {
+        if (!list.find((s) => s.id === id)) {
           try {
-            const r = await fetch(`/api/skills/${skillId}`)
+            const r = await fetch(`/api/skills/${id}`)
             const d = await r.json()
             if (d.skill) list = [d.skill, ...list]
           } catch (e) { /* ignore */ }
         }
-        setSelectedSkillIds([skillId])
-        setStep(2)
+      }
+
+      if (goalParam) setGoal(goalParam)
+      if (preselect.length) {
+        setSelectedSkillIds(preselect)
+        setStep(2) // jump straight to skill selection with the bundle loaded
       }
       setSkills(list)
     } catch (e) {

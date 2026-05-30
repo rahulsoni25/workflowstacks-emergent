@@ -59,7 +59,8 @@ export default function PlaybooksPage() {
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Playbooks</h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Step-by-step guides combining AI skills to solve real problems
+            A <span className="text-teal-300 font-semibold">Playbook</span> solves one specific problem with a
+            proven set of skills. Open it in the Builder to get the agent that runs it.
           </p>
         </motion.div>
 
