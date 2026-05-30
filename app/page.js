@@ -196,15 +196,6 @@ const HomePage = () => {
                   Build Agent
                 </Button>
               </Link>
-              <Button
-                onClick={handleIngest}
-                disabled={ingesting}
-                size="sm"
-                variant="outline"
-                className="border-teal-500/30 text-teal-400 hover:bg-teal-500/10 ml-1"
-              >
-                {ingesting ? '⏳' : '🔄'} Sync
-              </Button>
             </nav>
           </div>
         </div>
@@ -587,10 +578,10 @@ const HomePage = () => {
             </div>
           ) : skills.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-slate-400 text-xl mb-4">No skills found. Click "Sync" to ingest skills from GitHub!</p>
-              <Button onClick={handleIngest} disabled={ingesting} className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
-                {ingesting ? 'Syncing...' : '🔄 Sync GitHub Skills'}
-              </Button>
+              <p className="text-slate-400 text-xl mb-4">No skills match this filter yet — check back soon.</p>
+              <Link href="/skills">
+                <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">Browse all skills</Button>
+              </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
