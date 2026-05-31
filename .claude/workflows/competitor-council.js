@@ -1,69 +1,82 @@
 export const meta = {
   name: 'competitor-council',
-  description: 'Agents research competitors, identify what each does best, an adversary critiques feasibility, and they synthesize a prioritized deploy plan',
-  phases: [
-    { title: 'Research', detail: 'one agent per competitor' },
-    { title: 'Synthesize', detail: 'lead strategist finds top opportunities' },
-    { title: 'Critique', detail: 'adversary checks feasibility & differentiation' },
-    { title: 'Plan', detail: 'prioritized deploy plan' },
-  ],
+  description: 'Token-lean: ONE Haiku agent turns cached competitor intel into a prioritized deploy plan — zero web fetching by default',
+  phases: [{ title: 'Plan', detail: 'single Haiku agent synthesizes from cached intel' }],
 }
 
-const COMPETITORS = [
-  { name: 'Claw Mart', url: 'https://www.shopclawmart.com', note: 'DIRECT OpenClaw rival — sells personas/skills/playbooks with deep, itemized listings; 90% creator share' },
-  { name: 'Agensi', url: 'https://www.agensi.io', note: 'security-reviewed skills + MCP marketplace; 8-point scan; 80/20' },
-  { name: 'Smithery', url: 'https://smithery.ai', note: 'largest MCP server hub; 1-click install/config; hosting' },
-  { name: 'PromptBase', url: 'https://promptbase.com', note: 'prompts + agent-skill marketplace; direct-sell 0% fee' },
-]
+// --- Token economy ---------------------------------------------------------
+// The expensive version ran 7 agents that each web-scraped a competitor (~250k
+// tokens). This lean version bakes the research in as CACHED INTEL and uses 1
+// Haiku agent to synthesize the plan with NO web calls (~10-20k tokens).
+// Pass args.refresh=true to do a live web re-research (heavier) when intel is stale.
+const REFRESH = !!(args && args.refresh)
 
-const FIND_SCHEMA = {
+// Cached competitor intel (gathered 2026-05-31). Refresh occasionally with ?refresh=true.
+const INTEL = `
+CLAW MART (shopclawmart.com) — DIRECT OpenClaw rival, PAID ($5-99/item, 90% creator share, instant publish):
+  - Deep itemized "what you get" spec sheets: exact file count + total line count + every named sub-component
+    (e.g. "The Content Engine" = 15 files / 3,400+ lines / 12 named agents) + quantified outputs.
+  - Version history with dated changelogs (signals maintenance). Stacked social proof: ratings, "1,383 sold".
+  - Aggregate proof ($100k+ paid to creators, 2,000+ listings). "Operator-tested, not theoretical."
+  - WEAKNESS: pay-to-inspect — you must BUY ($9-49) to see what's inside the black box.
+AGENSI (agensi.io) — curated SKILL.md + MCP, 80/20 split:
+  - 8-point automated security scan + human review = trust moat (hammered everywhere). 1-command <60s install.
+  - SKILL.md open standard evangelism. 80+ SEO "learn" articles ranking for competitor comparisons.
+  - WEAKNESS: scan is a black box (no public report); browse grid has no trust signals (gated behind a click).
+SMITHERY (smithery.ai) — largest MCP catalog, 1-click install/config, hosting.
+PROMPTBASE — 270k+ prompts + agent skills, direct-sell at 0% fee, $2-10/item.
+
+WORKFLOWSTACKS ADVANTAGES (unfair, hard to copy): 100% FREE (real OSS), verifiable live GitHub trust signals,
+the Agent Builder (custom blueprint vs static config), auto-refresh pipeline, quality/published gate.
+
+TOP OPPORTUNITIES IDENTIFIED:
+  1. Read-the-source spec sheet: render the FULL skill source (file tree, named components, line counts,
+     example IO) inline and FREE — inverts rivals' pay-to-inspect into our top-of-funnel.
+  2. GitHub-native trust strip on every card (live stars/forks/maintainer/recency).
+  3. "The listing IS the installer": one-click copy install command per target tool.
+  4. Transparent, reproducible security-scan strip (honest checklist + linked raw output, not a bare badge).
+`
+
+const SCHEMA = {
   type: 'object',
   properties: {
-    competitor: { type: 'string' },
-    bestThings: { type: 'array', items: { type: 'string' }, description: 'what they do best' },
-    listingDepth: { type: 'string', description: 'how deep/structured their listings are' },
-    trustModel: { type: 'string' },
-    monetization: { type: 'string' },
-    oneThingToSteal: { type: 'string', description: 'single highest-impact thing WorkflowStacks should copy or beat' },
+    plan: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          rank: { type: 'number' },
+          item: { type: 'string' },
+          build: { type: 'string', description: 'what to build, concretely' },
+          where: { type: 'string', description: 'which Next.js files/pages (app/ dir)' },
+          impact: { type: 'string' },
+        },
+        required: ['rank', 'item', 'build'],
+      },
+    },
   },
-  required: ['competitor', 'bestThings', 'oneThingToSteal'],
+  required: ['plan'],
 }
 
-phase('Research')
-const findings = (await parallel(COMPETITORS.map((c) => () =>
-  agent(
-    `Research the AI-marketplace competitor "${c.name}" (${c.url} — ${c.note}). ` +
-    `Use WebSearch and WebFetch on their site. Identify what they do BEST: listing depth/structure, ` +
-    `trust signals, how they present and sell, pricing/monetization, and the SINGLE highest-impact thing ` +
-    `WorkflowStacks (a FREE marketplace of real open-source AI skills with an agent builder) should copy or beat. Be specific and concrete.`,
-    { schema: FIND_SCHEMA, label: `research:${c.name}`, phase: 'Research' }
-  )
-))).filter(Boolean)
-
-phase('Synthesize')
-const synthesis = await agent(
-  `You are the lead strategist. Competitor findings: ${JSON.stringify(findings)}.\n` +
-  `WorkflowStacks is a FREE marketplace of real, trending open-source AI skills, with an agent builder, ` +
-  `a quality/published gate, real GitHub trust signals, and an auto-refresh pipeline. ` +
-  `Identify the TOP 5 opportunities to make WorkflowStacks MORE valuable than these competitors. ` +
-  `Each opportunity: the competitor insight it's based on, and how our free + builder model BEATS them (not me-too).`,
-  { schema: { type: 'object', properties: { opportunities: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, basedOn: { type: 'string' }, howWeBeatThem: { type: 'string' }, impact: { type: 'string' } }, required: ['title', 'howWeBeatThem'] } } }, required: ['opportunities'] }, phase: 'Synthesize' }
-)
-
-phase('Critique')
-const critique = await agent(
-  `Adversarially critique these opportunities for WorkflowStacks: ${JSON.stringify(synthesis.opportunities)}.\n` +
-  `For each: is it feasible WITHOUT paid infra or huge effort? Is it genuinely differentiated (not me-too)? What's the risk? ` +
-  `Flag weak ones. Then give the recommended implementation order (by impact/effort).`,
-  { schema: { type: 'object', properties: { verdicts: { type: 'array', items: { type: 'object', properties: { title: { type: 'string' }, feasible: { type: 'boolean' }, differentiated: { type: 'boolean' }, note: { type: 'string' } } } }, recommendedOrder: { type: 'array', items: { type: 'string' } } }, required: ['verdicts', 'recommendedOrder'] }, phase: 'Critique' }
-)
-
 phase('Plan')
-const plan = await agent(
-  `Produce a prioritized, concrete deploy plan for WorkflowStacks from the opportunities ${JSON.stringify(synthesis.opportunities)} ` +
-  `and the critique ${JSON.stringify(critique)}. Only include feasible, differentiated items. ` +
-  `For each: what to build, which pages/files (the app is Next.js — app/ dir, MongoDB API at app/api/[[...path]]/route.js), and expected ranking impact. Order by impact/effort.`,
-  { schema: { type: 'object', properties: { plan: { type: 'array', items: { type: 'object', properties: { rank: { type: 'number' }, item: { type: 'string' }, build: { type: 'string' }, where: { type: 'string' }, impact: { type: 'string' } }, required: ['rank', 'item', 'build'] } } }, required: ['plan'] }, phase: 'Plan' }
+
+let intel = INTEL
+if (REFRESH) {
+  // Optional heavier path: one agent does a quick web refresh of the two key rivals.
+  intel = await agent(
+    `Quickly refresh competitor intel for Claw Mart (shopclawmart.com) and Agensi (agensi.io) using WebSearch/WebFetch — ` +
+    `what they do best (listing depth, trust model, pricing) in <=12 concise bullets. Be brief to save tokens.`,
+    { model: 'haiku', label: 'refresh-intel' }
+  )
+}
+
+const result = await agent(
+  `You are a lean competitive strategist for WorkflowStacks — a FREE open-source AI-skills marketplace with an agent builder.\n` +
+  `Using ONLY this intel (do NOT browse the web — save tokens):\n${intel}\n\n` +
+  `Output the TOP 5 prioritized, feasible, differentiated moves to make WorkflowStacks more valuable than these rivals. ` +
+  `Each: what to build, which Next.js files/pages (app/ dir; the API is app/api/[[...path]]/route.js), and expected impact. ` +
+  `Favor moves that exploit our FREE + Builder advantage. Order by impact/effort.`,
+  { schema: SCHEMA, model: 'haiku', label: 'plan' }
 )
 
-return { findings, opportunities: synthesis.opportunities, critique, plan: plan.plan }
+return { mode: REFRESH ? 'refreshed (web)' : 'cached intel (lean)', plan: result.plan }
