@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { Search, Star, Github, ArrowLeft, ChevronRight } from 'lucide-react'
+import { Search, Star, Github, ArrowLeft, ChevronRight, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -118,6 +118,11 @@ export default function SkillsCatalogClient({ skills = [] }) {
                       </span>
                     )}
                     {skill.language && <span className="text-slate-500">{skill.language}</span>}
+                    {typeof skill.rewrite_score === 'number' && (
+                      <span className="ml-auto flex items-center gap-1 text-teal-300">
+                        <Check className="w-3.5 h-3.5" />{skill.rewrite_score}/10
+                      </span>
+                    )}
                   </div>
                 </CardContent>
                 <CardFooter>

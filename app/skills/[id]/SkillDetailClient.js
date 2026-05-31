@@ -57,7 +57,7 @@ export default function SkillDetailClient({ skill }) {
                     <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 border-0 text-white text-lg px-4 py-1">${skill.price}</Badge>
                   )}
                 </div>
-                <CardTitle className="text-4xl text-white mb-2">{skill.title_human || skill.name}</CardTitle>
+                <h1 className="text-4xl text-white mb-2 font-semibold leading-tight tracking-tight">{skill.title_human || skill.name}</h1>
                 <CardDescription className="text-xl text-slate-300">{skill.description_human || skill.description}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">

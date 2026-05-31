@@ -280,9 +280,8 @@ async function pool(items, size, worker) {
 // Admin guard — this endpoint spends real money (LLM calls), so it must be locked.
 function requireAdmin(request) {
   const secret = process.env.ADMIN_SECRET;
-  const provided =
-    request.headers.get('x-admin-secret') ||
-    new URL(request.url).searchParams.get('secret');
+  // Header-only — query params leak into access logs / browser history / Referer.
+  const provided = request.headers.get('x-admin-secret');
   // Fail CLOSED: LLM-spend endpoints must never be public, even if the env is missing.
   if (!secret || provided !== secret) {
     return Response.json({ error: 'Unauthorized — admin secret required' }, { status: 401 });

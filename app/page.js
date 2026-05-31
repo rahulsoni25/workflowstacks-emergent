@@ -225,7 +225,7 @@ const HomePage = () => {
               className="inline-flex items-center gap-2 bg-teal-500/10 border border-teal-500/20 rounded-full px-4 py-1.5 mb-6"
             >
               <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></span>
-              <span className="text-teal-300 text-sm font-medium">Live marketplace — {stats?.totalSkills || '500'}+ AI skills indexed</span>
+              <span className="text-teal-300 text-sm font-medium">Live marketplace — {stats?.totalSkills || '100'}+ AI skills indexed</span>
             </motion.div>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
@@ -266,7 +266,7 @@ const HomePage = () => {
               className="flex flex-wrap justify-center gap-8 md:gap-12"
             >
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-white">{stats?.totalSkills || '500'}+</div>
+                <div className="text-3xl md:text-4xl font-bold text-white">{stats?.totalSkills || '100'}+</div>
                 <div className="text-sm text-slate-400 mt-1">AI Skills Indexed</div>
               </div>
               <div className="text-center">

@@ -15,7 +15,7 @@ async function connectDB() {
 // Fail-CLOSED admin guard — destructive seeding must never be public.
 function requireAdmin(request) {
   const secret = process.env.ADMIN_SECRET;
-  const provided = request.headers.get('x-admin-secret') || new URL(request.url).searchParams.get('secret');
+  const provided = request.headers.get('x-admin-secret');
   if (!secret || provided !== secret) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
