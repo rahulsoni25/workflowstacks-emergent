@@ -1,6 +1,5 @@
 import { ImageResponse } from 'next/og'
 
-export const runtime = 'edge'
 export const alt = 'WorkflowStacks — AI Skills & Agent Marketplace'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
@@ -16,34 +15,30 @@ export default function OgImage() {
           flexDirection: 'column',
           justifyContent: 'center',
           padding: '80px',
-          background: 'linear-gradient(135deg, #04141f 0%, #06283d 100%)',
-          fontFamily: 'sans-serif',
+          background: '#04141f',
+          backgroundImage: 'linear-gradient(135deg, #04141f 0%, #06283d 100%)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 40 }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 40 }}>
           <div
             style={{
-              width: 72,
-              height: 72,
-              borderRadius: 18,
-              background: 'linear-gradient(135deg, #2dd4bf, #06b6d4)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 44,
+              width: 64,
+              height: 64,
+              borderRadius: 16,
+              background: '#2dd4bf',
+              marginRight: 20,
             }}
-          >
-            ✦
-          </div>
-          <div style={{ fontSize: 40, fontWeight: 800, color: 'white' }}>
-            Workflow<span style={{ color: '#2dd4bf' }}>Stacks</span>
+          />
+          <div style={{ fontSize: 40, fontWeight: 700, color: '#ffffff', display: 'flex' }}>
+            <span>Workflow</span>
+            <span style={{ color: '#2dd4bf' }}>Stacks</span>
           </div>
         </div>
-        <div style={{ fontSize: 64, fontWeight: 800, color: 'white', lineHeight: 1.1, maxWidth: 900 }}>
+        <div style={{ fontSize: 68, fontWeight: 800, color: '#ffffff', lineHeight: 1.1, maxWidth: 1000 }}>
           AI Skills & Agent Marketplace
         </div>
-        <div style={{ fontSize: 32, color: '#94a3b8', marginTop: 24, maxWidth: 850 }}>
-          100+ free, trending GitHub AI skills, MCP servers & agent tools — for founders, no code required.
+        <div style={{ fontSize: 30, color: '#94a3b8', marginTop: 28, maxWidth: 900 }}>
+          100+ free, trending open-source AI skills, playbooks & agents — for founders, no code.
         </div>
       </div>
     ),

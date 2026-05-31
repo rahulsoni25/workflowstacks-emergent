@@ -83,10 +83,12 @@ export default function SkillDetailClient({ skill }) {
                       <CheckCircle2 className="w-4 h-4" />Quality {score}/10
                     </span>
                   )}
-                  <span className="flex items-center gap-1.5 text-sm bg-emerald-500/10 border border-emerald-500/30 rounded-full px-3 py-1 text-emerald-300">
-                    <CheckCircle2 className="w-4 h-4" />Verified working
-                  </span>
-                  <span className="flex items-center gap-1.5 text-sm text-slate-500">100% free · open source</span>
+                  {skill.last_updated && (
+                    <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-300">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />Updated {new Date(skill.last_updated).toLocaleDateString()}
+                    </span>
+                  )}
+                  <span className="flex items-center gap-1.5 text-sm text-emerald-300">100% free · open source</span>
                 </div>
 
                 <Separator className="bg-slate-700/50" />

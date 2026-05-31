@@ -25,11 +25,11 @@ async function connectDB() {
 // x-admin-secret header or ?secret=. Fail-open only if ADMIN_SECRET is unset.
 function requireAdmin(request) {
   const secret = process.env.ADMIN_SECRET;
-  if (!secret) return null;
   const provided =
     request.headers.get('x-admin-secret') ||
     new URL(request.url).searchParams.get('secret');
-  if (provided !== secret) {
+  // Fail CLOSED: if the secret isn't configured, deny (don't expose expensive ops).
+  if (!secret || provided !== secret) {
     return Response.json({ error: 'Unauthorized — admin secret required' }, { status: 401 });
   }
   return null;

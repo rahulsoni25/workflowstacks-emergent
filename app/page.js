@@ -415,48 +415,26 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Social Proof / Testimonials */}
+      {/* Honest, verifiable trust — no fake reviews */}
       <section className="py-20 px-4 border-t border-teal-500/10">
-        <div className="container mx-auto max-w-6xl">
-          <motion.h2
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="text-3xl md:text-4xl font-bold text-white text-center mb-14"
-          >
-            Trusted by <span className="text-gradient-neptune">Teams Who Ship</span>
-          </motion.h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {testimonials.map((t, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl h-full">
-                  <CardContent className="pt-6">
-                    <div className="flex items-center gap-1 mb-4">
-                      {[...Array(5)].map((_, j) => (
-                        <Star key={j} className="w-4 h-4 fill-teal-400 text-teal-400" />
-                      ))}
-                    </div>
-                    <p className="text-slate-300 text-base mb-6 leading-relaxed italic">
-                      "{t.quote}"
-                    </p>
-                    <div className="flex items-center gap-3 border-t border-slate-700/50 pt-4">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center text-lg">
-                        {t.avatar}
-                      </div>
-                      <div>
-                        <div className="text-white font-semibold text-sm">{t.name}</div>
-                        <div className="text-slate-400 text-xs">{t.role}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
+        <div className="container mx-auto max-w-5xl text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+            Real tools. <span className="text-gradient-neptune">Real numbers.</span> No fluff.
+          </h2>
+          <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-12">
+            Every listing is a genuine, trending open-source project — with live GitHub stats, an AI-written usage guide, and a quality score. We don't run fake reviews or inflated metrics.
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { v: `${stats?.totalSkills || '100'}+`, l: 'Real OSS tools indexed' },
+              { v: 'Live', l: 'GitHub stars & forks' },
+              { v: '≥8/10', l: 'Quality-gated listings' },
+              { v: '100%', l: 'Free — no paywall' },
+            ].map((s, i) => (
+              <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-6">
+                <div className="text-3xl font-bold text-gradient-neptune mb-1">{s.v}</div>
+                <div className="text-slate-400 text-sm">{s.l}</div>
+              </div>
             ))}
           </div>
         </div>
@@ -490,12 +468,12 @@ const HomePage = () => {
               {
                 name: 'Pro', price: '$29', period: '/month', desc: 'For power users and small teams',
                 features: ['Unlimited agent builds', 'Premium skill packs', 'Priority GitHub sync', 'Export blueprints', 'Email support'],
-                cta: 'Start Pro Trial', primary: true, badge: 'Most Popular',
+                cta: 'Coming soon', primary: true, badge: 'Planned', disabled: true,
               },
               {
                 name: 'Enterprise', price: 'Custom', period: '', desc: 'For agencies and large teams',
                 features: ['Everything in Pro', 'Custom skill ingestion', 'White-label agents', 'API access', 'Dedicated support', 'SSO & team management'],
-                cta: 'Contact Sales', primary: false, badge: null,
+                cta: 'Coming soon', primary: false, badge: null, disabled: true,
               },
             ].map((plan, i) => (
               <motion.div
@@ -530,9 +508,17 @@ const HomePage = () => {
                         </li>
                       ))}
                     </ul>
-                    <Button className={`w-full mt-6 ${plan.primary ? 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-slate-600'}`} size="lg">
-                      {plan.cta}
-                    </Button>
+                    {plan.disabled ? (
+                      <Button disabled className="w-full mt-6 bg-slate-800/60 text-slate-500 border border-slate-700 cursor-not-allowed" size="lg">
+                        {plan.cta}
+                      </Button>
+                    ) : (
+                      <Link href="/builder" className="block mt-6">
+                        <Button className={`w-full ${plan.primary ? 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-slate-600'}`} size="lg">
+                          {plan.cta}
+                        </Button>
+                      </Link>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -707,7 +693,7 @@ const HomePage = () => {
                   Get New Skills Every Week
                 </h3>
                 <p className="text-slate-300 mb-6 max-w-lg mx-auto">
-                  Join 2,000+ founders and agencies who get weekly curated AI skills, agent blueprints, and automation playbooks.
+                  Get weekly curated AI skills, agent blueprints, and automation playbooks — straight to your inbox.
                 </p>
                 {emailSubmitted ? (
                   <div className="flex items-center justify-center gap-2 text-teal-400 font-semibold">
@@ -741,24 +727,24 @@ const HomePage = () => {
         <div className="container mx-auto max-w-4xl">
           <div className="flex flex-wrap items-center justify-center gap-8 text-slate-500">
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5" />
-              <span className="text-sm">SOC 2 Compliant</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              <span className="text-sm">99.9% Uptime</span>
-            </div>
-            <div className="flex items-center gap-2">
               <Github className="w-5 h-5" />
-              <span className="text-sm">Open Source Skills</span>
+              <span className="text-sm">100% open-source tools</span>
             </div>
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              <span className="text-sm">2,000+ Users</span>
+              <Star className="w-5 h-5" />
+              <span className="text-sm">Live GitHub stars & forks</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              <span className="text-sm">Quality-gated (≥8/10)</span>
             </div>
             <div className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5" />
-              <span className="text-sm">Daily GitHub Sync</span>
+              <span className="text-sm">Refreshed daily</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              <span className="text-sm">No fake reviews or metrics</span>
             </div>
           </div>
         </div>
