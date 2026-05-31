@@ -3,8 +3,9 @@ export const meta = {
   description: 'Council scores the live site across dimensions, compares to baseline, and turns any regression into concrete fixes',
   phases: [
     { title: 'Score', detail: 'parallel judges score each dimension against a 10/10 bar' },
+    { title: 'Verify', detail: 'adversarial fact-check every flagged issue against ground truth' },
     { title: 'Verdict', detail: 'compare to baseline, flag regressions' },
-    { title: 'Remediate', detail: 'propose concrete fixes for any regression' },
+    { title: 'Remediate', detail: 'propose concrete fixes for CONFIRMED issues only' },
   ],
 }
 
@@ -47,6 +48,47 @@ const results = (await parallel(DIMENSIONS.map((d) => () =>
 
 const overall = results.length ? Number((results.reduce((s, r) => s + r.score, 0) / results.length).toFixed(2)) : 0
 
+// Adversarial verification — the council MUST NOT cry wolf. Every flagged issue is
+// fact-checked against ground truth before it can drive remediation.
+phase('Verify')
+const VERIFY_SCHEMA = {
+  type: 'object',
+  properties: {
+    checks: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          issue: { type: 'string' },
+          confirmed: { type: 'boolean', description: 'true ONLY if verified real against ground truth' },
+          evidence: { type: 'string', description: 'what you checked and found' },
+        },
+        required: ['issue', 'confirmed', 'evidence'],
+      },
+    },
+  },
+  required: ['checks'],
+}
+const verified = (await parallel(results.map((r) => () =>
+  agent(
+    `You are an adversarial fact-checker on the rating council. A reviewer flagged these issues for "${r.title}" on the live site:\n${JSON.stringify(r.topIssues)}\n\n` +
+    `VERIFY each against GROUND TRUTH before it is treated as real — reviewers hallucinate. Specifically:\n` +
+    `- Data claims ("X stars are fabricated/inflated", "metric is fake"): fetch the REAL value from the GitHub API (https://api.github.com/repos/OWNER/REPO — get the repo from ${BASE}/api/skills?cb=${CACHE_BUST}) and compare. If the site's number matches reality, mark confirmed:false.\n` +
+    `- "Endpoint is unauthenticated/insecure": actually curl/WebFetch it and check the real HTTP status.\n` +
+    `- "Content X present/missing", "says 500+", "fabricated testimonials": WebFetch the page WITH ?cb=${CACHE_BUST} and check the actual current HTML.\n` +
+    `- "Duplicate listing": check whether they are genuinely the same product or legitimately different repos.\n` +
+    `Mark confirmed:true ONLY if ground truth proves the issue is real right now. Otherwise confirmed:false with evidence.`,
+    { schema: VERIFY_SCHEMA, label: `verify:${r.key}`, phase: 'Verify' }
+  ).then((v) => ({ key: r.key, title: r.title, checks: (v && v.checks) || [] }))
+))).filter(Boolean)
+
+const confirmedByDim = {}
+const falsePositives = []
+for (const v of verified) {
+  confirmedByDim[v.key] = v.checks.filter((c) => c.confirmed).map((c) => c.issue)
+  falsePositives.push(...v.checks.filter((c) => !c.confirmed).map((c) => ({ dimension: v.title, issue: c.issue, evidence: c.evidence })))
+}
+
 phase('Verdict')
 const compared = results.map((r) => {
   const prev = typeof BASELINE[r.key] === 'number' ? BASELINE[r.key] : null
@@ -59,23 +101,26 @@ const prevOverall = baseVals.length ? Number((baseVals.reduce((a, b) => a + b, 0
 log(`Overall ${overall}${prevOverall !== null ? ` (was ${prevOverall} — ${overall >= prevOverall ? 'IMPROVED' : 'REGRESSED'})` : ' (baseline set)'}; ${regressions.length} dimension(s) regressed`)
 
 phase('Remediate')
-let remediation = []
-if (regressions.length) {
-  remediation = (await parallel(regressions.map((r) => () =>
-    agent(
-      `On the WorkflowStacks rating council, dimension "${r.title}" REGRESSED (now ${r.score}, was ${r.baseline}).\n` +
-      `Issues flagged: ${JSON.stringify(r.topIssues)}.\n` +
-      `Propose the specific, minimal code/content changes (files + actions) to restore and improve this dimension. Be concrete and prioritized.`,
-      { schema: { type: 'object', properties: { fixes: { type: 'array', items: { type: 'string' } } }, required: ['fixes'] }, label: `fix:${r.key}`, phase: 'Remediate' }
-    ).then((f) => ({ dimension: r.title, ...f }))
-  ))).filter(Boolean)
-}
+// Remediate dimensions that have CONFIRMED issues (verified real), prioritizing regressions.
+const toFix = compared.filter((r) => (confirmedByDim[r.key] || []).length > 0)
+const remediation = (await parallel(toFix.map((r) => () =>
+  agent(
+    `On the WorkflowStacks rating council, dimension "${r.title}" (score ${r.score}${r.baseline !== null ? `, was ${r.baseline}` : ''}) has these VERIFIED-REAL issues:\n` +
+    `${JSON.stringify(confirmedByDim[r.key])}.\n` +
+    `Propose the specific, minimal code/content changes (files + actions) to fix them. Concrete and prioritized.`,
+    { schema: { type: 'object', properties: { fixes: { type: 'array', items: { type: 'string' } } }, required: ['fixes'] }, label: `fix:${r.key}`, phase: 'Remediate' }
+  ).then((f) => ({ dimension: r.title, ...f }))
+))).filter(Boolean)
+
+const confirmedCount = Object.values(confirmedByDim).reduce((n, arr) => n + arr.length, 0)
+log(`Confirmed ${confirmedCount} real issue(s); rejected ${falsePositives.length} false positive(s) via fact-check`)
 
 return {
   overall,
   previousOverall: prevOverall,
   verdict: prevOverall === null ? 'BASELINE-SET' : overall >= prevOverall ? 'IMPROVED-OR-HELD' : 'REGRESSED — see remediation',
-  scorecard: compared.map((r) => ({ dimension: r.title, score: r.score, baseline: r.baseline, delta: r.delta, topIssues: r.topIssues })),
+  scorecard: compared.map((r) => ({ dimension: r.title, score: r.score, baseline: r.baseline, delta: r.delta, confirmedIssues: confirmedByDim[r.key] || [] })),
+  falsePositivesRejected: falsePositives,
   regressions: regressions.map((r) => r.title),
   remediation,
 }

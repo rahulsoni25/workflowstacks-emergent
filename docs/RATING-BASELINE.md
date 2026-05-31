@@ -28,6 +28,14 @@ _Run `rating-council` to populate. The first run sets the baseline._
 | tech_security | 6.0 → fixing | 2026-05-31 (run 1) |
 | **Overall** | **5.7** | 2026-05-31 (run 1) |
 
+### Score trajectory (council-driven remediation)
+| Run | Overall | Notes |
+|-----|---------|-------|
+| 1 | 5.7 | baseline; exposed unauth seed-ecommerce, fail-open auth, fabricated trust, 0-byte OG |
+| 2 | 6.8 | after security+trust fixes (Trust 3→7) — but read partly-stale (WebFetch cache) |
+| 3 | 7.2 | cache-busted honest read; Security→9; caught "500+" hero inflation, cron fail-open |
+| 4 | running | after cycle-3 fixes (kill 500+ lie, quality score on cards, h1, og:image, cron fail-closed, header-only auth) |
+
 ### Run 1 findings (remediated)
 - Security: `/api/seed-ecommerce` unauthenticated (FIXED — guarded), fail-open auth (FIXED — fail-closed)
 - Trust: fabricated testimonials/SOC2/uptime/user-count, misleading paid tiers, broken OG image (ALL FIXED)
