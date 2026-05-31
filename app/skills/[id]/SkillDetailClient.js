@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle } from 'lucide-react'
+import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -20,7 +20,7 @@ function getCategoryColor(cat) {
   return colors[cat] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
 }
 
-export default function SkillDetailClient({ skill }) {
+export default function SkillDetailClient({ skill, sourceSpec }) {
   const [copied, setCopied] = useState(false)
   const guide = skill.use_guide || null
   const score = typeof skill.rewrite_score === 'number' ? skill.rewrite_score : null
@@ -163,6 +163,70 @@ export default function SkillDetailClient({ skill }) {
                 )}
               </CardContent>
             </Card>
+
+            {/* Read-the-source spec sheet — fully inspectable & free (vs rivals' pay-to-inspect) */}
+            {sourceSpec && (
+              <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
+                <CardHeader>
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <CardTitle className="text-white flex items-center gap-2"><Eye className="w-5 h-5 text-teal-400" />What's inside — free to inspect</CardTitle>
+                    <Badge className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 border text-xs">No purchase needed</Badge>
+                  </div>
+                  <p className="text-slate-400 text-sm mt-1">Read the entire source before you build — unlike paid marketplaces that hide it behind a buy button.</p>
+                </CardHeader>
+                <CardContent className="space-y-5">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50">
+                      <div className="text-2xl font-bold text-white">{sourceSpec.fileCount}</div>
+                      <div className="text-xs text-slate-400">top-level files</div>
+                    </div>
+                    <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50">
+                      <div className="text-2xl font-bold text-white">{sourceSpec.dirCount}</div>
+                      <div className="text-xs text-slate-400">folders</div>
+                    </div>
+                    <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50">
+                      <div className="text-2xl font-bold text-white">{sourceSpec.sizeKB >= 1024 ? (sourceSpec.sizeKB / 1024).toFixed(1) + 'M' : sourceSpec.sizeKB + 'K'}</div>
+                      <div className="text-xs text-slate-400">repo size</div>
+                    </div>
+                    <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50">
+                      <div className="text-2xl font-bold text-white truncate">{sourceSpec.license || '—'}</div>
+                      <div className="text-xs text-slate-400">license</div>
+                    </div>
+                  </div>
+
+                  {sourceSpec.notable?.length > 0 && (
+                    <div>
+                      <div className="text-sm text-slate-400 mb-2">Key files</div>
+                      <div className="flex flex-wrap gap-2">
+                        {sourceSpec.notable.map((f, i) => (
+                          <Badge key={i} className="bg-teal-500/10 text-teal-300 border-teal-500/20 border text-xs"><FileText className="w-3 h-3 mr-1" />{f}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div>
+                    <div className="text-sm text-slate-400 mb-2 flex items-center gap-1.5"><FolderTree className="w-4 h-4" />File tree</div>
+                    <div className="bg-slate-950/60 rounded-lg p-3 border border-slate-800 max-h-64 overflow-auto font-mono text-sm">
+                      {sourceSpec.tree.map((t, i) => (
+                        <div key={i} className="flex items-center gap-2 text-slate-300 py-0.5">
+                          {t.type === 'dir'
+                            ? <Folder className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                            : <FileText className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />}
+                          <span className={t.type === 'dir' ? 'text-amber-300' : ''}>{t.name}{t.type === 'dir' ? '/' : ''}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <a href={`${sourceSpec.htmlUrl}`} target="_blank" rel="noopener noreferrer" className="block">
+                    <Button variant="outline" className="w-full border-slate-600 text-slate-200 hover:bg-white/5">
+                      <Github className="w-4 h-4 mr-2" />Read the full source on GitHub
+                    </Button>
+                  </a>
+                </CardContent>
+              </Card>
+            )}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-6">

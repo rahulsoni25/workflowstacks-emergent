@@ -47,6 +47,15 @@ _Run `rating-council` to populate. The first run sets the baseline._
 3. **Listing IS the installer** — one-click copy install command
 4. **Transparent security-scan strip** — honest checklist + linked raw output
 
-## How to run
-- Rating council: `Workflow({ scriptPath: ".claude/workflows/rating-council.js", args: { baseUrl, baseline } })`
-- Competitor council: `Workflow({ scriptPath: ".claude/workflows/competitor-council.js" })`
+## How to run (token-lean by default — built for a $20 plan)
+- Rating council (1 Haiku agent, <=3 fetches, ~15-30k tokens):
+  `Workflow({ scriptPath: ".claude/workflows/rating-council.js", args: { baseline } })`
+  - Heavier 2-agent pass: add `args.thorough = true`
+- Competitor council (1 Haiku agent over cached intel, ~10-20k tokens, no web calls):
+  `Workflow({ scriptPath: ".claude/workflows/competitor-council.js" })`
+  - Live web re-research: add `args.refresh = true`
+
+### Token economy
+Both councils were rebuilt to minimize cost: single Haiku agent, minimal/zero fetches,
+self-verification folded into one pass. Prior fan-out design cost ~200-250k tokens/run;
+the lean design targets ~15-30k. Use `thorough`/`refresh` only when you need the deep pass.
