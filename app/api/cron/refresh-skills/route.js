@@ -107,16 +107,21 @@ async function scrapeGitHub(topicQueries, opts = {}) {
 }
 
 export async function GET(request) {
-  // Simple auth check for production
+  // Fail-CLOSED auth. Accepts Vercel Cron's `Authorization: Bearer <CRON_SECRET>`,
+  // or x-cron-secret / x-admin-secret. Denies if no secret is configured.
   const cronSecret = process.env.CRON_SECRET;
-  const authHeader = request.headers.get('x-cron-secret');
-  
-  if (process.env.NODE_ENV === 'production' && cronSecret) {
-    if (!authHeader || authHeader !== cronSecret) {
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const adminSecret = process.env.ADMIN_SECRET;
+  const auth = request.headers.get('authorization') || '';
+  const bearer = auth.startsWith('Bearer ') ? auth.slice(7) : '';
+  const provided = request.headers.get('x-cron-secret') || request.headers.get('x-admin-secret') || bearer;
+
+  const ok =
+    (cronSecret && provided === cronSecret) ||
+    (adminSecret && provided === adminSecret);
+  if (!ok) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
-  
+
   try {
     const database = await connectDB();
     

@@ -10,6 +10,8 @@ export const meta = {
 
 const BASE = (args && args.baseUrl) || 'https://workflowstacks-emergent.vercel.app'
 const BASELINE = (args && args.baseline) || {}
+// Cache-buster so the council never scores stale WebFetch-cached HTML.
+const CACHE_BUST = (args && args.cacheBust) || 'r' + (args && args.run || '1')
 
 const DIMENSIONS = [
   { key: 'ux_clarity', title: 'UX & Clarity', focus: 'Is it obvious what each page is and what to do next? Are inner pages (skills, packs, playbooks, personas, builder) self-explanatory? Concept clarity: skills vs packs vs playbooks vs personas vs agents.' },
@@ -34,7 +36,8 @@ const results = (await parallel(DIMENSIONS.map((d) => () =>
   agent(
     `You are a strict product reviewer on the rating council for WorkflowStacks, a marketplace of free open-source AI skills with an agent builder.\n` +
     `Evaluate ONLY this dimension: ${d.title}.\nCovers: ${d.focus}\n\n` +
-    `Inspect the LIVE site at ${BASE} using WebFetch on these pages: /, /skills, one /skills/<id> detail page (get an id from ${BASE}/api/skills), /packs, /playbooks, /personas, /builder. ` +
+    `Inspect the LIVE site using WebFetch on these pages, and CRITICAL: append "?cb=${CACHE_BUST}" to EVERY url to bypass stale cache: ` +
+    `${BASE}/?cb=${CACHE_BUST}, ${BASE}/skills?cb=${CACHE_BUST}, one ${BASE}/skills/<id>?cb=${CACHE_BUST} detail page (get an id from ${BASE}/api/skills?cb=${CACHE_BUST}), ${BASE}/packs?cb=${CACHE_BUST}, ${BASE}/playbooks?cb=${CACHE_BUST}, ${BASE}/personas?cb=${CACHE_BUST}, ${BASE}/builder?cb=${CACHE_BUST}. ` +
     `You may also Read/Grep the repo (app/ directory) to verify implementation.\n` +
     `Score 0-10 HONESTLY against a best-in-class bar (Claw Mart, Smithery, Agensi). Do not inflate. ` +
     `Return the score, a one-paragraph rationale, and the most important concrete issues.`,

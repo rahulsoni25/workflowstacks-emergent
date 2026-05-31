@@ -21,12 +21,23 @@ _Run `rating-council` to populate. The first run sets the baseline._
 
 | Dimension | Score | Last updated |
 |-----------|-------|--------------|
-| ux_clarity | TBD | — |
-| content_depth | TBD | — |
-| seo_perf | TBD | — |
-| trust_conversion | TBD | — |
-| tech_security | TBD | — |
-| **Overall** | **TBD** | — |
+| ux_clarity | 7.0 | 2026-05-31 (run 1) |
+| content_depth | 5.0 | 2026-05-31 (run 1) |
+| seo_perf | 7.5 | 2026-05-31 (run 1) |
+| trust_conversion | 3.0 → fixing | 2026-05-31 (run 1) |
+| tech_security | 6.0 → fixing | 2026-05-31 (run 1) |
+| **Overall** | **5.7** | 2026-05-31 (run 1) |
+
+### Run 1 findings (remediated)
+- Security: `/api/seed-ecommerce` unauthenticated (FIXED — guarded), fail-open auth (FIXED — fail-closed)
+- Trust: fabricated testimonials/SOC2/uptime/user-count, misleading paid tiers, broken OG image (ALL FIXED)
+- Remaining: content depth (quickStart boilerplate, playbook/persona paste-ready configs), inflated stars on some repos, per-page OG on section pages
+
+### Competitor Council deploy plan (run 1) — next opportunities
+1. **Read-the-source spec sheet** — render full skill source (file tree, named components, line counts) inline & free, before install (inverts rivals' pay-to-inspect)
+2. **GitHub-native trust strip** on every card (live stars/forks/maintainer/recency)
+3. **Listing IS the installer** — one-click copy install command
+4. **Transparent security-scan strip** — honest checklist + linked raw output
 
 ## How to run
 - Rating council: `Workflow({ scriptPath: ".claude/workflows/rating-council.js", args: { baseUrl, baseline } })`
