@@ -44,9 +44,10 @@ const SCHEMA = {
 const PROMPT =
   `You are a token-efficient one-person rating council for WorkflowStacks — a FREE open-source AI-skills ` +
   `marketplace with an agent builder — at ${BASE}.\n\n` +
-  `BE ECONOMICAL. Fetch at most these URLs (append ?cb=${CB} to bust cache):\n` +
-  `1) ${BASE}/?cb=${CB}  2) ${BASE}/skills?cb=${CB}  3) ONE ${BASE}/skills/<id>?cb=${CB} detail page (get an id from ${BASE}/api/skills?cb=${CB}).\n` +
-  `Do NOT fetch more pages or read code unless a finding truly requires it.\n\n` +
+  `BE EXTREMELY TOKEN-FRUGAL — make AT MOST 6 tool calls total (incl. any GitHub-API verification). Prefer the COMPACT JSON APIs over heavy HTML pages:\n` +
+  `1) ${BASE}/api/stats  2) ${BASE}/api/skills?limit=12  (these are small JSON — use them to judge data/catalog, NOT the 770KB /skills HTML).\n` +
+  `3) ${BASE}/?cb=${CB} (homepage HTML, for UX/trust copy)  4) ONE ${BASE}/skills/<id>?cb=${CB} detail page.\n` +
+  `Do NOT fetch the /skills, /packs, /playbooks, /personas HTML pages (large) or read repo code — judge from the above.\n\n` +
   `Score 0-10 each (vs best-in-class Claw Mart/Smithery): ${DIMS.join(', ')}.\n\n` +
   `CRITICAL — do not cry wolf. Before reporting ANY issue, VERIFY it:\n` +
   `- Data claims ("stars fabricated/inflated"): check the real value via https://api.github.com/repos/OWNER/REPO and compare. If the site matches reality, it is NOT an issue.\n` +
