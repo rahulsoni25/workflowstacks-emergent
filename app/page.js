@@ -253,6 +253,11 @@ const HomePage = () => {
               </Link>
             </div>
 
+            <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto mb-12">
+              Everything's <strong className="text-teal-300">100% free</strong> — real, trending open-source tools, AI-packaged into ready-to-use skills, playbooks, and agents.
+              Others charge $5–49 per config. Don't <em>buy</em> a static setup — <strong className="text-white">build exactly the agent you need</strong>, in one click.
+            </p>
+
             {/* Trust Stats */}
             <motion.div
               initial={{ opacity: 0 }}

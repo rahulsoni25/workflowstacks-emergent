@@ -114,14 +114,15 @@ export default function PersonasPage() {
                       <Target className="w-4 h-4" />
                       <span>Best for: {persona.audience}s</span>
                     </div>
-                    <Button
-                      onClick={() => handleUsePersona(persona)}
-                      className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20"
-                      size="lg"
-                    >
-                      <Zap className="w-4 h-4 mr-2" />
-                      Use This Persona in Builder
-                    </Button>
+                    <Link href={`/personas/${persona.id}`} className="block">
+                      <Button
+                        className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20"
+                        size="lg"
+                      >
+                        <Zap className="w-4 h-4 mr-2" />
+                        See What This Agent Does
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               </motion.div>

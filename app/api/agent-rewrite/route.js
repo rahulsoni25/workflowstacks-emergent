@@ -40,7 +40,7 @@ function formatStars(stars) {
 
 // Call the chosen LLM provider with a system + user prompt, return raw text.
 // modelOverride lets the compare mode test a specific model via OpenRouter.
-async function callLLM(system, user, modelOverride) {
+async function callLLM(system, user, modelOverride, maxTokens = 300) {
   if (PROVIDER.name === 'openrouter' || (modelOverride && process.env.OPENROUTER_API_KEY)) {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -51,7 +51,7 @@ async function callLLM(system, user, modelOverride) {
       },
       body: JSON.stringify({
         model: modelOverride || PROVIDER.model,
-        max_tokens: 300,
+        max_tokens: maxTokens,
         messages: [
           { role: 'system', content: system },
           { role: 'user', content: user }
@@ -75,7 +75,7 @@ async function callLLM(system, user, modelOverride) {
     },
     body: JSON.stringify({
       model: PROVIDER.model,
-      max_tokens: 300,
+      max_tokens: maxTokens,
       system,
       messages: [{ role: 'user', content: user }]
     })
@@ -154,6 +154,83 @@ async function judgeCopy(skill, result, judgeModel) {
   return { score: Math.max(0, Math.min(10, score)), reason: parsed.reason || '' };
 }
 
+// ---- Enrichment: generate the actual on-page deliverable ----------------
+// A practical "how to use this" guide so a skill page completes the user's goal.
+async function enrichSkillGuide(skill) {
+  const system =
+    'You write concise, practical "how to use this" guides for AI tools and skills, ' +
+    'aimed at non-technical startup founders. Be specific, concrete, and actionable — ' +
+    'no fluff, no invented claims. Respond with ONLY a JSON object.';
+  const readme = (skill.readme_preview || '').slice(0, 600);
+  const user =
+    `Tool: ${skill.name}\n` +
+    `What it is: ${skill.description_human || skill.description || 'n/a'}\n` +
+    `Category: ${skill.category}\nLanguage: ${skill.language || 'n/a'}\n` +
+    (readme ? `README: ${readme}\n` : '') +
+    `${skill.github_url ? 'GitHub: ' + skill.github_url + '\n' : ''}\n` +
+    `Return JSON: {\n` +
+    `  "whatItDoes": "one clear sentence a founder understands",\n` +
+    `  "whenToUse": ["3 short bullet situations where this is the right tool"],\n` +
+    `  "quickStart": ["3-4 concrete steps to get value from it"],\n` +
+    `  "examplePrompt": "one ready-to-paste prompt or command showing real usage"\n` +
+    `}`;
+  const parsed = parseJsonObject(await callLLM(system, user, undefined, 700));
+  return {
+    whatItDoes: String(parsed.whatItDoes || '').trim(),
+    whenToUse: Array.isArray(parsed.whenToUse) ? parsed.whenToUse.slice(0, 4) : [],
+    quickStart: Array.isArray(parsed.quickStart) ? parsed.quickStart.slice(0, 5) : [],
+    examplePrompt: String(parsed.examplePrompt || '').trim(),
+  };
+}
+
+// Turn a playbook (goal + skills) into the actual executable, numbered plan.
+async function enrichPlaybook(playbook, skills) {
+  const skillList = skills.map((s) => s.title_human || s.name).join(', ');
+  const system =
+    'You turn a founder goal into a concrete, numbered playbook they can execute today. ' +
+    'Each step is specific and references which skill/tool to use. No fluff. ONLY JSON.';
+  const user =
+    `Playbook: ${playbook.title}\n` +
+    `Problem it solves: ${playbook.problem || 'n/a'}\n` +
+    `Goal: ${playbook.description || 'n/a'}\n` +
+    `Available skills: ${skillList || 'general AI tools'}\n\n` +
+    `Return JSON: {\n` +
+    `  "timeEstimate": "e.g. 48 hours / 1 week",\n` +
+    `  "outcome": "one sentence on what the founder will have at the end",\n` +
+    `  "steps": [{ "title": "short step title", "detail": "what to do, concretely", "skill": "which skill/tool" }]\n` +
+    `}  // 4-7 steps`;
+  const parsed = parseJsonObject(await callLLM(system, user, undefined, 1500));
+  return {
+    timeEstimate: String(parsed.timeEstimate || '').trim(),
+    outcome: String(parsed.outcome || '').trim(),
+    steps: Array.isArray(parsed.steps) ? parsed.steps.slice(0, 8) : [],
+  };
+}
+
+// Turn a persona (role + skills) into a real "AI employee" spec.
+async function enrichPersona(persona, skills) {
+  const skillList = skills.map((s) => s.title_human || s.name).join(', ');
+  const system =
+    'You define an "AI employee" persona for a founder — what it does, what it handles, ' +
+    'and a short operating brief. Concrete and practical. ONLY JSON.';
+  const user =
+    `Persona: ${persona.name}\n` +
+    `Best for: ${persona.audience || 'founders'}\n` +
+    `Summary: ${persona.description || 'n/a'}\n` +
+    `Skills it has: ${skillList || 'general AI tools'}\n\n` +
+    `Return JSON: {\n` +
+    `  "whatItDoes": "1-2 sentences: what this AI employee handles for you",\n` +
+    `  "handles": ["4-6 concrete tasks/responsibilities it takes off your plate"],\n` +
+    `  "brief": "a 2-3 sentence operating brief written as the agent's role/personality"\n` +
+    `}`;
+  const parsed = parseJsonObject(await callLLM(system, user, undefined, 900));
+  return {
+    whatItDoes: String(parsed.whatItDoes || '').trim(),
+    handles: Array.isArray(parsed.handles) ? parsed.handles.slice(0, 6) : [],
+    brief: String(parsed.brief || '').trim(),
+  };
+}
+
 // ---- Free heuristic fallback (no API key needed) ------------------------
 function rewriteHeuristic(skill) {
   const name = skill.name
@@ -222,6 +299,74 @@ async function handle(request) {
   const limit = parseInt(searchParams.get('limit') || '0', 10);
 
   const database = await connectDB();
+
+  // Enrichment: generate the actual deliverable content for pages.
+  // ?mode=enrich-skills (batched via skip/limit) | ?mode=enrich-playbooks
+  const mode = searchParams.get('mode');
+  if (mode === 'enrich-skills') {
+    if (PROVIDER.name === 'heuristic') {
+      return Response.json({ error: 'Enrichment needs an LLM key (OpenRouter/Anthropic)' }, { status: 400 });
+    }
+    const skip = parseInt(searchParams.get('skip') || '0', 10);
+    const onlyMissing = searchParams.get('pending') === 'true';
+    const q = onlyMissing ? { use_guide: { $exists: false } } : {};
+    let cur = database.collection('skills').find(q).sort({ _id: 1 });
+    if (skip > 0) cur = cur.skip(skip);
+    if (limit > 0) cur = cur.limit(limit);
+    const skills = await cur.toArray();
+    let done = 0;
+    const errs = [];
+    await pool(skills, 4, async (skill) => {
+      try {
+        const guide = await enrichSkillGuide(skill);
+        await database.collection('skills').updateOne({ id: skill.id }, { $set: { use_guide: guide } });
+        done++;
+      } catch (e) {
+        if (errs.length < 5) errs.push(`${skill.name}: ${e.message}`);
+      }
+    });
+    return Response.json({ mode, processed: skills.length, enriched: done, sampleErrors: errs });
+  }
+
+  if (mode === 'enrich-playbooks') {
+    if (PROVIDER.name === 'heuristic') {
+      return Response.json({ error: 'Enrichment needs an LLM key' }, { status: 400 });
+    }
+    const playbooks = await database.collection('playbooks').find({}).toArray();
+    let done = 0;
+    const errs = [];
+    for (const pb of playbooks) {
+      try {
+        const skills = await database.collection('skills').find({ id: { $in: pb.skillIds || [] } }).toArray();
+        const enriched = await enrichPlaybook(pb, skills);
+        await database.collection('playbooks').updateOne({ id: pb.id }, { $set: enriched });
+        done++;
+      } catch (e) {
+        if (errs.length < 5) errs.push(`${pb.title}: ${e.message}`);
+      }
+    }
+    return Response.json({ mode, processed: playbooks.length, enriched: done, sampleErrors: errs });
+  }
+
+  if (mode === 'enrich-personas') {
+    if (PROVIDER.name === 'heuristic') {
+      return Response.json({ error: 'Enrichment needs an LLM key' }, { status: 400 });
+    }
+    const personas = await database.collection('personas').find({}).toArray();
+    let done = 0;
+    const errs = [];
+    for (const pa of personas) {
+      try {
+        const skills = await database.collection('skills').find({ id: { $in: pa.skillIds || [] } }).toArray();
+        const enriched = await enrichPersona(pa, skills);
+        await database.collection('personas').updateOne({ id: pa.id }, { $set: enriched });
+        done++;
+      } catch (e) {
+        if (errs.length < 5) errs.push(`${pa.name}: ${e.message}`);
+      }
+    }
+    return Response.json({ mode, processed: personas.length, enriched: done, sampleErrors: errs });
+  }
 
   // Compare mode: run the same skills through 2+ models, return both, write nothing.
   // e.g. /api/agent-rewrite?compare=anthropic/claude-3.5-haiku,google/gemini-2.0-flash-exp:free&limit=3
