@@ -84,6 +84,11 @@ export default function BuilderPage() {
   const handleGenerateAgent = async () => {
     if (!goal.trim()) { alert('Please enter your agent goal'); return }
     if (selectedSkillIds.length === 0) { alert('Please select at least one skill'); return }
+    // Paid agents must be complete, tuned systems — not a single free tool with a price slapped on.
+    if (publish && parseFloat(price) > 0 && selectedSkillIds.length < 3) {
+      alert('Paid agents must be a complete system — combine at least 3 skills (buyers can get any single tool free on GitHub). Add more skills, or set the price to $0.')
+      return
+    }
     setLoading(true)
     try {
       const res = await fetch('/api/agent-templates', {
@@ -272,7 +277,7 @@ export default function BuilderPage() {
                           inputMode="decimal"
                           className="w-24 bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-sm text-white focus:border-teal-500/50 outline-none"
                         />
-                        <span className="text-slate-500 text-xs">{price && parseFloat(price) > 0 ? `paid · you keep 85% ($${(parseFloat(price) * 0.85).toFixed(2)})` : 'leave 0 for free'}</span>
+                        <span className="text-slate-500 text-xs">{price && parseFloat(price) > 0 ? `you keep 85% ($${(parseFloat(price) * 0.85).toFixed(2)}) · 3+ skills required` : 'free — or charge for a complete, tuned system'}</span>
                       </div>
                     </div>
                   )}

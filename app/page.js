@@ -476,29 +476,30 @@ const HomePage = () => {
             className="text-center mb-14"
           >
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Simple, Transparent <span className="text-gradient-neptune">Pricing</span>
+              The tools are free. You pay for <span className="text-gradient-neptune">time, trust & savings</span>
             </motion.h2>
-            <motion.p variants={fadeInUp} className="text-slate-400 text-lg">
-              Start free. Upgrade when you need more power.
+            <motion.p variants={fadeInUp} className="text-slate-400 text-lg max-w-2xl mx-auto">
+              The open-source skills are <strong className="text-teal-300">always free</strong> — you can read every line.
+              We earn from group-buy savings, done-for-you setups, and creator tools. Never from the free catalog.
             </motion.p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
               {
-                name: 'Free', price: '$0', period: '/forever', desc: 'For individuals exploring AI tools',
-                features: ['Browse all skills', 'Build unlimited agents', 'Access playbooks', 'Community support'],
+                name: 'Free', price: '$0', period: '/forever', desc: 'Everything you need to ship',
+                features: ['Browse 160+ real skills — read the source', 'Build & remix unlimited agents', 'Post problems, join the network', 'Sell your agents — keep 85%'],
                 cta: 'Get Started Free', primary: false, badge: null,
               },
               {
-                name: 'Pro', price: '$29', period: '/month', desc: 'For power users and small teams',
-                features: ['Unlimited agent builds', 'Premium skill packs', 'Priority GitHub sync', 'Export blueprints', 'Email support'],
-                cta: 'Coming soon', primary: true, badge: 'Planned', disabled: true,
+                name: 'Pro', price: '$19', period: '/month', desc: 'For serious creators & power users',
+                features: ['0% selling fees (keep 100%)', 'Private & unlisted agents', 'Sales analytics + custom branding', 'Early access to group-buy deals', 'API access'],
+                cta: 'Join the waitlist', primary: true, badge: 'Planned', waitlist: true,
               },
               {
-                name: 'Enterprise', price: 'Custom', period: '', desc: 'For agencies and large teams',
-                features: ['Everything in Pro', 'Custom skill ingestion', 'White-label agents', 'API access', 'Dedicated support', 'SSO & team management'],
-                cta: 'Coming soon', primary: false, badge: null, disabled: true,
+                name: 'Enterprise', price: 'Custom', period: '', desc: 'For agencies & teams',
+                features: ['White-label agents', 'Team seats & SSO', 'Done-for-you agent setup', 'Custom skill ingestion', 'Dedicated support'],
+                cta: 'Talk to us', primary: false, badge: null, waitlist: true,
               },
             ].map((plan, i) => (
               <motion.div
@@ -533,10 +534,12 @@ const HomePage = () => {
                         </li>
                       ))}
                     </ul>
-                    {plan.disabled ? (
-                      <Button disabled className="w-full mt-6 bg-slate-800/60 text-slate-500 border border-slate-700 cursor-not-allowed" size="lg">
-                        {plan.cta}
-                      </Button>
+                    {plan.waitlist ? (
+                      <a href="#newsletter" className="block mt-6">
+                        <Button className={`w-full ${plan.primary ? 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-slate-600'}`} size="lg">
+                          {plan.cta}
+                        </Button>
+                      </a>
                     ) : (
                       <Link href="/builder" className="block mt-6">
                         <Button className={`w-full ${plan.primary ? 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-slate-600'}`} size="lg">
@@ -702,7 +705,7 @@ const HomePage = () => {
       </section>
 
       {/* Email Capture / Newsletter */}
-      <section className="py-20 px-4">
+      <section id="newsletter" className="py-20 px-4 scroll-mt-20">
         <div className="container mx-auto max-w-3xl">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
