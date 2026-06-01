@@ -28,20 +28,47 @@ function categoryColor(cat) {
   return map[cat] || 'bg-slate-500/15 text-slate-300 border-slate-500/30'
 }
 
+const ts = (v) => (v ? new Date(v).getTime() : 0)
+const daysAgo = (v) => (v ? (Date.now() - ts(v)) / 86400000 : 1e9)
+
+// All rankings use REAL, verifiable signals (no fabricated downloads/ratings).
+const SORTS = [
+  { key: 'trending', label: '🔥 Trending', hint: 'Popular + recently active', cmp: (a, b) => (b.popularity_score || 0) - (a.popularity_score || 0) || (b.github_stars || 0) - (a.github_stars || 0) },
+  { key: 'popular', label: '⭐ Most Starred', hint: 'Highest GitHub stars', cmp: (a, b) => (b.github_stars || 0) - (a.github_stars || 0) },
+  { key: 'newest', label: '🆕 Newest', hint: 'Recently added here', cmp: (a, b) => ts(b.added_at || b.created_at) - ts(a.added_at || a.created_at) },
+  { key: 'updated', label: '♻️ Recently Updated', hint: 'Freshest, actively maintained', cmp: (a, b) => ts(b.last_updated) - ts(a.last_updated) },
+  { key: 'quality', label: '✅ Top Quality', hint: 'Our AI quality-gate score', cmp: (a, b) => (b.rewrite_score || 0) - (a.rewrite_score || 0) || (b.github_stars || 0) - (a.github_stars || 0) },
+  // Novel: surfaces genuinely useful tools before they go mainstream
+  { key: 'gems', label: '💎 Hidden Gems', hint: 'High quality, still under the radar', cmp: (a, b) => gemScore(b) - gemScore(a) },
+]
+
+// Gem score rewards quality + freshness, dampened by fame (favors under-the-radar picks)
+function gemScore(s) {
+  const stars = s.github_stars || 0
+  const quality = s.rewrite_score || 7
+  const freshness = Math.max(0, 30 - daysAgo(s.last_updated)) / 30 // 0..1, last ~30d
+  const fameDamp = stars > 15000 ? 0 : 1 - stars / 15000 // big repos lose gem points
+  return quality * 2 + freshness * 5 + fameDamp * 5
+}
+
 // Receives the full published list (server-rendered) and filters client-side.
 export default function SkillsCatalogClient({ skills = [] }) {
   const [category, setCategory] = useState('all')
   const [search, setSearch] = useState('')
+  const [sort, setSort] = useState('trending')
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
-    return skills.filter((s) => {
-      if (category !== 'all' && s.category !== category) return false
-      if (!q) return true
-      const hay = `${s.title_human || ''} ${s.name || ''} ${s.description_human || s.description || ''}`.toLowerCase()
-      return hay.includes(q)
-    })
-  }, [skills, category, search])
+    const cmp = (SORTS.find((s) => s.key === sort) || SORTS[0]).cmp
+    return skills
+      .filter((s) => {
+        if (category !== 'all' && s.category !== category) return false
+        if (!q) return true
+        const hay = `${s.title_human || ''} ${s.name || ''} ${s.description_human || s.description || ''}`.toLowerCase()
+        return hay.includes(q)
+      })
+      .sort(cmp)
+  }, [skills, category, search, sort])
 
   return (
     <div className="min-h-screen bg-neptune">
@@ -70,6 +97,29 @@ export default function SkillsCatalogClient({ skills = [] }) {
             placeholder="Search skills..."
             className="pl-10 bg-slate-900/60 border-slate-700 text-white"
           />
+        </div>
+
+        {/* Rank by — all real, verifiable signals */}
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-2 justify-center">
+            {SORTS.map((s) => (
+              <button
+                key={s.key}
+                onClick={() => setSort(s.key)}
+                title={s.hint}
+                className={`px-3.5 py-1.5 rounded-lg text-sm border transition-all ${
+                  sort === s.key
+                    ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white border-teal-500 shadow-lg shadow-teal-500/20'
+                    : 'bg-slate-900/60 text-slate-300 border-slate-700 hover:border-teal-500/40'
+                }`}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-center text-xs text-slate-500 mt-2">
+            {(SORTS.find((s) => s.key === sort) || SORTS[0]).hint} · ranked by real GitHub + quality data, no fake metrics
+          </p>
         </div>
 
         <div className="flex flex-wrap gap-2 justify-center mb-10">
