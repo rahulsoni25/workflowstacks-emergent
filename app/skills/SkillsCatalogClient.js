@@ -55,7 +55,11 @@ function gemScore(s) {
 export default function SkillsCatalogClient({ skills = [] }) {
   const [category, setCategory] = useState('all')
   const [search, setSearch] = useState('')
-  const [sort, setSort] = useState('trending')
+  const [sort, setSort] = useState(() => {
+    if (typeof window === 'undefined') return 'trending'
+    const p = new URLSearchParams(window.location.search).get('sort')
+    return SORTS.some((s) => s.key === p) ? p : 'trending'
+  })
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()

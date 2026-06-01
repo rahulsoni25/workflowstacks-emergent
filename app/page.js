@@ -164,6 +164,11 @@ const HomePage = () => {
               <span className="text-xl font-bold text-white tracking-tight">Workflow<span className="text-teal-400">Stacks</span></span>
             </Link>
             <nav className="hidden md:flex items-center gap-1">
+              <Link href="/discover">
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
+                  Discover
+                </Button>
+              </Link>
               <Link href="/personas">
                 <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
                   Personas
