@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals'];
 
 // Build GitHub API headers (token optional — works on free unauthenticated tier)
 function ghHeaders(accept = 'application/vnd.github+json') {
@@ -701,6 +701,29 @@ export async function GET(request) {
       return Response.json({ agents });
     }
 
+    // Problems board — founders post workflow bottlenecks (the demand side)
+    if (path === '/problems') {
+      const { searchParams } = new URL(request.url);
+      const cat = searchParams.get('category');
+      const q = {};
+      if (cat && cat !== 'all') q.category = cat;
+      const problems = await database.collection('problems')
+        .find(q)
+        .sort({ upvotes: -1, created_at: -1 })
+        .limit(120)
+        .toArray();
+      return Response.json({ problems });
+    }
+
+    // Group-buy tool deals
+    if (path === '/deals') {
+      const deals = await database.collection('deals')
+        .find({})
+        .sort({ featured: -1, created_at: -1 })
+        .toArray();
+      return Response.json({ deals });
+    }
+
     // Featured members directory (LinkedIn-based community)
     if (path === '/members') {
       const { searchParams } = new URL(request.url);
@@ -929,6 +952,60 @@ export async function POST(request) {
       });
     }
     
+    // Post a workflow problem (demand side)
+    if (path === '/problems') {
+      const body = await request.json();
+      const title = (body.title || '').toString().trim().slice(0, 140);
+      if (!title) return Response.json({ success: false, error: 'A problem title is required' }, { status: 400 });
+      const problem = {
+        id: uuidv4(),
+        title,
+        description: (body.description || '').toString().slice(0, 600),
+        category: (body.category || 'Ops').toString().slice(0, 30),
+        author: (body.author || 'anonymous').toString().replace(/^@/, '').slice(0, 30) || 'anonymous',
+        upvotes: 1,
+        created_at: new Date(),
+      };
+      await database.collection('problems').insertOne(problem);
+      return Response.json({ success: true, problem });
+    }
+
+    if (path === '/problems/upvote') {
+      const body = await request.json();
+      if (!body.problemId) return Response.json({ success: false }, { status: 400 });
+      await database.collection('problems').updateOne({ id: body.problemId }, { $inc: { upvotes: 1 } });
+      return Response.json({ success: true });
+    }
+
+    // Express interest in a group-buy deal (staged — no payment yet)
+    if (path === '/deals/join') {
+      const body = await request.json();
+      const email = (body.email || '').toString().trim().toLowerCase();
+      if (!body.dealId || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        return Response.json({ success: false, error: 'Valid email + deal required' }, { status: 400 });
+      }
+      await database.collection('deal_interest').updateOne(
+        { dealId: body.dealId, email },
+        { $setOnInsert: { dealId: body.dealId, email, created_at: new Date() } },
+        { upsert: true }
+      );
+      await database.collection('deals').updateOne({ id: body.dealId }, { $inc: { slotsTaken: 1 } });
+      return Response.json({ success: true, message: "You're on the list — we'll email you when the deal unlocks." });
+    }
+
+    // Seed example group-buy deals (admin)
+    if (path === '/seed-deals') {
+      const deals = [
+        { id: uuidv4(), tool: 'Perplexity Pro', category: 'Research', retailPrice: 240, groupPrice: 96, savingsPct: 60, slotsTotal: 50, slotsTaken: 0, status: 'open', featured: true, blurb: 'AI research & answers — annual seats at wholesale.', created_at: new Date() },
+        { id: uuidv4(), tool: 'n8n Cloud (Pro)', category: 'Automation', retailPrice: 600, groupPrice: 300, savingsPct: 50, slotsTotal: 40, slotsTaken: 0, status: 'open', featured: true, blurb: 'Self-host-grade automation, hosted — group rate.', created_at: new Date() },
+        { id: uuidv4(), tool: 'Apollo.io', category: 'Sales', retailPrice: 588, groupPrice: 235, savingsPct: 60, slotsTotal: 30, slotsTaken: 0, status: 'open', featured: false, blurb: 'B2B lead data + outreach — collective seats.', created_at: new Date() },
+        { id: uuidv4(), tool: 'Framer Pro', category: 'Design', retailPrice: 360, groupPrice: 180, savingsPct: 50, slotsTotal: 25, slotsTaken: 0, status: 'open', featured: false, blurb: 'Ship landing pages fast — bundled annual.', created_at: new Date() },
+      ];
+      await database.collection('deals').deleteMany({});
+      await database.collection('deals').insertMany(deals);
+      return Response.json({ success: true, deals: deals.length });
+    }
+
     // Become a featured member (LinkedIn-based, auto-listed, deduped)
     if (path === '/members/apply') {
       const body = await request.json();

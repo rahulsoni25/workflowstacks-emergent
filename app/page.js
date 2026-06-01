@@ -169,6 +169,16 @@ const HomePage = () => {
                   Discover
                 </Button>
               </Link>
+              <Link href="/problems">
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
+                  Problems
+                </Button>
+              </Link>
+              <Link href="/deals">
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
+                  Deals
+                </Button>
+              </Link>
               <Link href="/members">
                 <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
                   Members
