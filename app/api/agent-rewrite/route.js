@@ -48,8 +48,9 @@ function formatStars(stars) {
 // Call the chosen LLM provider with a system + user prompt, return raw text.
 // modelOverride lets the compare mode test a specific model via OpenRouter.
 async function callLLM(system, user, modelOverride, maxTokens = 300) {
-  // Groq — free, fast, OpenAI-compatible
-  if (PROVIDER.name === 'groq' && !(modelOverride && process.env.OPENROUTER_API_KEY)) {
+  // Groq — free, fast, OpenAI-compatible. Only defer to OpenRouter for an explicit
+  // OpenRouter slug (compare mode, "provider/model"); judge calls stay on Groq.
+  if (PROVIDER.name === 'groq' && !(modelOverride && modelOverride.includes('/'))) {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -521,7 +522,9 @@ async function handle(request) {
   // pending=true selects only skills not yet rewritten by the current LLM provider,
   // so production runs can batch through all rows within the 60s function limit.
   let query;
-  if (searchParams.get('pending') === 'true') {
+  if (searchParams.get('unpublished') === 'true') {
+    query = { published: false };
+  } else if (searchParams.get('pending') === 'true') {
     query = { rewritten_by: { $ne: PROVIDER.name } };
   } else {
     query = onlyNew ? { title_human: { $exists: false } } : {};
