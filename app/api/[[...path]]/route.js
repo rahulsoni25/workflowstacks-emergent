@@ -701,6 +701,36 @@ export async function GET(request) {
       return Response.json({ agents });
     }
 
+    // Match a problem (or any query) to the most relevant published skills
+    if (path === '/match') {
+      const { searchParams } = new URL(request.url);
+      const q = (searchParams.get('q') || '').toLowerCase();
+      const category = searchParams.get('category') || '';
+      const catMap = {
+        Sales: ['sales'], Marketing: ['marketing'], Support: ['support'],
+        Ops: ['automation', 'devtools', 'mcp-server'], Finance: ['analytics'],
+        Product: ['ai-agent', 'saas-starter', 'multi-agent'],
+      };
+      const cats = catMap[category] || [];
+      const words = q.split(/[^a-z0-9]+/).filter((w) => w.length > 3);
+      const skills = await database.collection('skills').find({ published: { $ne: false } }).toArray();
+      const scored = skills
+        .map((s) => {
+          const hay = `${s.title_human || ''} ${s.name || ''} ${s.description_human || s.description || ''} ${(s.github_topics || []).join(' ')}`.toLowerCase();
+          let score = 0;
+          if (cats.includes(s.category)) score += 5;
+          for (const w of words) if (hay.includes(w)) score += 2;
+          score += Math.min(2, (s.github_stars || 0) / 50000);
+          return { s, score };
+        })
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5);
+      return Response.json({
+        matches: scored.map((x) => ({ id: x.s.id, title: x.s.title_human || x.s.name, category: x.s.category, stars: x.s.github_stars || 0 })),
+      });
+    }
+
     // Problems board — founders post workflow bottlenecks (the demand side)
     if (path === '/problems') {
       const { searchParams } = new URL(request.url);

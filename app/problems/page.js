@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, ArrowBigUp, Zap, Plus, MessageSquarePlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,6 +27,21 @@ export default function ProblemsPage() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({ title: '', description: '', category: 'Ops' })
   const [submitting, setSubmitting] = useState(false)
+  const [building, setBuilding] = useState(null)
+  const router = useRouter()
+
+  // Match the problem to the right skills, then open the Builder pre-loaded
+  const buildAgent = async (p) => {
+    setBuilding(p.id)
+    let skillIds = []
+    try {
+      const r = await fetch(`/api/match?q=${encodeURIComponent(`${p.title} ${p.description || ''}`)}&category=${encodeURIComponent(p.category)}`)
+      const d = await r.json()
+      skillIds = (d.matches || []).map((m) => m.id)
+    } catch { /* fall back to goal-only */ }
+    const qs = skillIds.length ? `skillIds=${skillIds.join(',')}&goal=${encodeURIComponent(p.title)}` : `goal=${encodeURIComponent(p.title)}`
+    router.push(`/builder?${qs}`)
+  }
 
   const load = () => {
     fetch('/api/problems')
@@ -120,9 +136,9 @@ export default function ProblemsPage() {
                     <h3 className="text-white font-semibold">{p.title}</h3>
                     {p.description && <p className="text-slate-400 text-sm mt-1 line-clamp-2">{p.description}</p>}
                   </div>
-                  <Link href={`/builder?goal=${encodeURIComponent(p.title)}`} className="shrink-0">
-                    <Button size="sm" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white"><Zap className="w-4 h-4 mr-1.5" />Build the agent</Button>
-                  </Link>
+                  <Button onClick={() => buildAgent(p)} disabled={building === p.id} size="sm" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white shrink-0">
+                    <Zap className="w-4 h-4 mr-1.5" />{building === p.id ? 'Matching skills…' : 'Build the agent'}
+                  </Button>
                 </CardContent>
               </Card>
             ))}
