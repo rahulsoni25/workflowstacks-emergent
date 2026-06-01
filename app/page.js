@@ -169,6 +169,11 @@ const HomePage = () => {
                   Discover
                 </Button>
               </Link>
+              <Link href="/community">
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
+                  Community
+                </Button>
+              </Link>
               <Link href="/personas">
                 <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
                   Personas

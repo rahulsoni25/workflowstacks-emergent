@@ -690,20 +690,35 @@ export async function GET(request) {
 
     // Get public agent templates
     if (path === '/agents') {
+      const { searchParams } = new URL(request.url);
+      const sort = searchParams.get('sort');
+      const sortSpec = sort === 'new' ? { created_at: -1 } : { copyCount: -1, remixCount: -1, created_at: -1 };
       const agents = await database.collection('agent_templates')
         .find({ isPublic: true })
-        .sort({ copyCount: -1, created_at: -1 })
+        .sort(sortSpec)
+        .limit(60)
         .toArray();
-      
-      // For each agent, get dominant audience from skills
-      for (let agent of agents) {
-        const skills = await database.collection('skills')
-          .find({ id: { $in: agent.skillIds } })
-          .toArray();
-        agent.skills = skills;
-      }
-      
       return Response.json({ agents });
+    }
+
+    // Creators leaderboard — aggregate public agents by handle
+    if (path === '/creators') {
+      const rows = await database.collection('agent_templates').aggregate([
+        { $match: { isPublic: true } },
+        {
+          $group: {
+            _id: { $ifNull: ['$creatorName', 'anonymous'] },
+            agents: { $sum: 1 },
+            copies: { $sum: { $ifNull: ['$copyCount', 0] } },
+            remixes: { $sum: { $ifNull: ['$remixCount', 0] } },
+          },
+        },
+        { $sort: { copies: -1, remixes: -1, agents: -1 } },
+        { $limit: 20 },
+      ]).toArray();
+      return Response.json({
+        creators: rows.map((r) => ({ handle: r._id, agents: r.agents, copies: r.copies, remixes: r.remixes })),
+      });
     }
     
     // Get agent template by ID
@@ -951,7 +966,7 @@ export async function POST(request) {
     // Create Agent Template
     if (path === '/agent-templates') {
       const body = await request.json();
-      const { goal, selectedSkillIds, isPublic, userId } = body;
+      const { goal, selectedSkillIds, isPublic, userId, creatorName } = body;
 
       if (!goal || !selectedSkillIds || selectedSkillIds.length === 0) {
         return Response.json({ 
@@ -1012,7 +1027,9 @@ export async function POST(request) {
         agentBlueprint: agentBlueprint,
         isPublic: isPublic || false,
         userId: userId || null,
+        creatorName: (creatorName || '').toString().replace(/^@/, '').slice(0, 30) || 'anonymous',
         copyCount: 0,
+        remixCount: 0,
         created_at: new Date()
       };
       

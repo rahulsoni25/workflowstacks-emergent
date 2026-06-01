@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import { getUserId } from '@/lib/identity'
+import { getUserId, getHandle, setHandle as saveHandle } from '@/lib/identity'
 
 export default function BuilderPage() {
   const [step, setStep] = useState(1)
@@ -20,8 +20,11 @@ export default function BuilderPage() {
   const [loading, setLoading] = useState(false)
   const [agentBlueprint, setAgentBlueprint] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [publish, setPublish] = useState(false)
+  const [handle, setHandle] = useState('')
 
   useEffect(() => {
+    try { setHandle(getHandle()) } catch (e) {}
     loadSkills()
   }, [])
 
@@ -85,7 +88,13 @@ export default function BuilderPage() {
       const res = await fetch('/api/agent-templates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goal: goal.trim(), selectedSkillIds, userId: getUserId() })
+        body: JSON.stringify({
+          goal: goal.trim(),
+          selectedSkillIds,
+          userId: getUserId(),
+          isPublic: publish,
+          creatorName: publish ? (saveHandle(handle) || 'anonymous') : undefined,
+        })
       })
       const data = await res.json()
       if (data.success) {
@@ -232,6 +241,28 @@ export default function BuilderPage() {
                     </div>
                   ))}
                 </div>
+
+                {/* Publish to community — the viral loop */}
+                <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 mb-4">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" checked={publish} onChange={(e) => setPublish(e.target.checked)} className="w-4 h-4 accent-teal-500" />
+                    <span className="text-white text-sm font-medium">🌍 Publish to the community</span>
+                    <span className="text-slate-500 text-xs">— get a shareable page others can remix</span>
+                  </label>
+                  {publish && (
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-slate-400 text-sm">@</span>
+                      <input
+                        value={handle}
+                        onChange={(e) => setHandle(e.target.value.replace(/^@/, '').slice(0, 30))}
+                        placeholder="your-handle"
+                        className="flex-1 bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-sm text-white focus:border-teal-500/50 outline-none"
+                      />
+                      <span className="text-slate-500 text-xs">shown as the creator</span>
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex gap-3">
                   <Button onClick={() => setStep(1)} variant="outline" className="flex-1 border-slate-600 text-slate-200 hover:bg-white/5">
                     Back
@@ -242,7 +273,7 @@ export default function BuilderPage() {
                     className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20"
                     size="lg"
                   >
-                    {loading ? 'Generating...' : 'Generate Agent Blueprint'}
+                    {loading ? 'Generating...' : publish ? 'Generate & Publish' : 'Generate Agent Blueprint'}
                   </Button>
                 </div>
               </CardContent>
@@ -300,10 +331,28 @@ export default function BuilderPage() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 flex items-center gap-2 text-sm text-slate-300">
-                  <CheckCircle2 className="w-4 h-4 text-teal-400" />
-                  Saved to <Link href="/my-agents" className="text-teal-300 underline hover:text-teal-200">My Agents</Link> — come back anytime, no login needed.
-                </div>
+                {agentBlueprint?.isPublic ? (
+                  <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-teal-300 font-semibold mb-2">🎉 Live in the community!</div>
+                    <p className="text-slate-300 text-sm mb-3">Anyone can now view and remix your agent. Share the link:</p>
+                    <div className="flex flex-wrap gap-2">
+                      <Link href={`/a/${agentBlueprint.id}`}>
+                        <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white" size="sm">View public page →</Button>
+                      </Link>
+                      <Button
+                        onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/a/${agentBlueprint.id}`); setCopied(true); setTimeout(() => setCopied(false), 2000) }}
+                        variant="outline" size="sm" className="border-teal-500/30 text-teal-300 hover:bg-teal-500/10"
+                      >
+                        {copied ? 'Link copied!' : 'Copy share link'}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 flex items-center gap-2 text-sm text-slate-300">
+                    <CheckCircle2 className="w-4 h-4 text-teal-400" />
+                    Saved to <Link href="/my-agents" className="text-teal-300 underline hover:text-teal-200">My Agents</Link> — come back anytime, no login needed.
+                  </div>
+                )}
                 <div className="flex gap-3">
                   <Button
                     onClick={() => { setStep(1); setGoal(''); setSelectedSkillIds([]); setAgentBlueprint(null) }}
