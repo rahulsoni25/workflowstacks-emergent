@@ -52,7 +52,9 @@ const PROMPT =
   `CRITICAL — do not cry wolf. Before reporting ANY issue, VERIFY it:\n` +
   `- Data claims ("stars fabricated/inflated"): check the real value via https://api.github.com/repos/OWNER/REPO and compare. If the site matches reality, it is NOT an issue.\n` +
   `- "Content X present/missing / says 500+ / fake testimonials": trust ONLY the cache-busted HTML you actually fetched.\n` +
-  `Report ONLY verified-real issues, each with concrete evidence and a one-line fix. Quality over quantity — a few real issues beat many guesses.`
+  `Report ONLY verified-real issues, each with concrete evidence and a one-line fix. Quality over quantity — a few real issues beat many guesses.\n\n` +
+  `ABORT RULE: if your fetches FAIL and you cannot actually load the live site, DO NOT estimate or guess scores. ` +
+  `Instead set EVERY score to 0 and return exactly one issue titled "AUDIT FAILED — no web access". Never score a site you could not inspect.`
 
 phase('Audit')
 
@@ -75,6 +77,13 @@ function sum(o) {
 
 const scores = result.scores
 const overall = Number((sum(scores) / DIMS.length).toFixed(2))
+
+// Guard: if the agent couldn't actually inspect the site, the run is invalid — never trust a blind score.
+const auditFailed = overall === 0 || (result.confirmedIssues || []).some((c) => /audit failed|no web access|cannot verify|web access blocked/i.test(c.issue || ''))
+if (auditFailed) {
+  log('AUDIT FAILED — agent could not reach the live site. Scores discarded. Re-run when web access is available.')
+  return { valid: false, verdict: 'INVALID — re-run (no web access)', overall: null, scores: null, confirmedIssues: result.confirmedIssues || [] }
+}
 const baseVals = Object.values(BASELINE).filter((v) => typeof v === 'number')
 const prev = baseVals.length ? Number((baseVals.reduce((a, b) => a + b, 0) / baseVals.length).toFixed(2)) : null
 const deltas = Object.fromEntries(
