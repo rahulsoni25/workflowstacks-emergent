@@ -14,6 +14,13 @@ async function connectDB() {
 // Provider resolution: OpenRouter preferred (one key, many models, free tiers),
 // then native Anthropic, else free heuristic.
 function resolveProvider() {
+  // Groq first — free tier is fast + generous (great for bulk enrichment).
+  if (process.env.GROQ_API_KEY) {
+    return {
+      name: 'groq',
+      model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+    };
+  }
   if (process.env.OPENROUTER_API_KEY) {
     return {
       name: 'openrouter',
@@ -41,6 +48,30 @@ function formatStars(stars) {
 // Call the chosen LLM provider with a system + user prompt, return raw text.
 // modelOverride lets the compare mode test a specific model via OpenRouter.
 async function callLLM(system, user, modelOverride, maxTokens = 300) {
+  // Groq — free, fast, OpenAI-compatible
+  if (PROVIDER.name === 'groq' && !(modelOverride && process.env.OPENROUTER_API_KEY)) {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: PROVIDER.model,
+        max_tokens: maxTokens,
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: user },
+        ],
+      }),
+    });
+    if (!res.ok) {
+      throw new Error(`Groq ${res.status}: ${(await res.text()).substring(0, 200)}`);
+    }
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content || '';
+  }
+
   if (PROVIDER.name === 'openrouter' || (modelOverride && process.env.OPENROUTER_API_KEY)) {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
