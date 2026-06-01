@@ -701,6 +701,27 @@ export async function GET(request) {
       return Response.json({ agents });
     }
 
+    // Featured members directory (LinkedIn-based community)
+    if (path === '/members') {
+      const { searchParams } = new URL(request.url);
+      const cat = searchParams.get('category');
+      const q = { approved: { $ne: false } };
+      if (cat && cat !== 'all') q.category = cat;
+      const members = await database.collection('members')
+        .find(q)
+        .sort({ featured: -1, created_at: -1 })
+        .limit(300)
+        .toArray();
+      // Don't leak internal moderation fields beyond what's needed
+      return Response.json({
+        members: members.map((m) => ({
+          id: m.id, name: m.name, category: m.category, headline: m.headline,
+          country: m.country, linkedinUrl: m.linkedinUrl, builds: m.builds,
+          featured: !!m.featured, created_at: m.created_at,
+        })),
+      });
+    }
+
     // Creators leaderboard — aggregate public agents by handle
     if (path === '/creators') {
       const rows = await database.collection('agent_templates').aggregate([
@@ -908,6 +929,44 @@ export async function POST(request) {
       });
     }
     
+    // Become a featured member (LinkedIn-based, auto-listed, deduped)
+    if (path === '/members/apply') {
+      const body = await request.json();
+      const name = (body.name || '').toString().trim().slice(0, 80);
+      const linkedinUrl = (body.linkedinUrl || '').toString().trim();
+      if (!name || !linkedinUrl) {
+        return Response.json({ success: false, error: 'Name and LinkedIn URL are required' }, { status: 400 });
+      }
+      if (!/^https?:\/\/(www\.)?linkedin\.com\//i.test(linkedinUrl)) {
+        return Response.json({ success: false, error: 'Please enter a valid LinkedIn profile URL' }, { status: 400 });
+      }
+      const member = {
+        id: uuidv4(),
+        name,
+        linkedinUrl,
+        category: (body.category || 'Developer').toString().slice(0, 40),
+        headline: (body.headline || '').toString().slice(0, 140),
+        country: (body.country || '').toString().slice(0, 60),
+        builds: (body.builds || '').toString().slice(0, 220),
+        ref: (body.ref || '').toString().slice(0, 40) || null,
+        approved: true, // auto-listed for virality; admin can feature/remove
+        featured: false,
+        created_at: new Date(),
+      };
+      // Dedupe by LinkedIn URL
+      const res = await database.collection('members').updateOne(
+        { linkedinUrl },
+        { $setOnInsert: member },
+        { upsert: true }
+      );
+      return Response.json({
+        success: true,
+        alreadyListed: res.upsertedCount === 0,
+        id: member.id,
+        message: res.upsertedCount === 0 ? "You're already in the directory!" : "You're in! Welcome to the network.",
+      });
+    }
+
     // Email subscribe — stores waitlist emails (deduped)
     if (path === '/subscribe') {
       const body = await request.json();
