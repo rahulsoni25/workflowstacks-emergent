@@ -13,6 +13,23 @@ export default function AgentClient({ agent, skills }) {
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState(false)
   const [copies, setCopies] = useState(agent.copyCount || 0)
+  const [buying, setBuying] = useState(false)
+  const purchased = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('purchased') === '1'
+  const locked = agent.isPaid && agent.price > 0 && !purchased
+
+  const buy = async () => {
+    setBuying(true)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agentId: agent.id }),
+      })
+      const d = await res.json()
+      if (d.url) window.location.href = d.url
+      else { alert(d.error || 'Checkout unavailable'); setBuying(false) }
+    } catch { setBuying(false) }
+  }
 
   const bump = () => {
     fetch('/api/agent-templates/copy', {
@@ -71,11 +88,17 @@ export default function AgentClient({ agent, skills }) {
         {agent.goal && <p className="text-xl text-slate-300 mb-6">{agent.goal}</p>}
 
         <div className="flex flex-wrap gap-3 mb-8">
-          <Button onClick={remix} className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
-            <Zap className="w-4 h-4 mr-2" />Remix this agent — free
-          </Button>
-          <Button onClick={copyBlueprint} variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5" size="lg">
-            {copied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-teal-400" />Copied</> : <><Copy className="w-4 h-4 mr-2" />Copy blueprint</>}
+          {locked ? (
+            <Button onClick={buy} disabled={buying} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20" size="lg">
+              {buying ? 'Opening checkout…' : `Buy for $${agent.price} — unlock blueprint`}
+            </Button>
+          ) : (
+            <Button onClick={copyBlueprint} variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5" size="lg">
+              {copied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-teal-400" />Copied</> : <><Copy className="w-4 h-4 mr-2" />Copy blueprint</>}
+            </Button>
+          )}
+          <Button onClick={remix} variant={locked ? 'outline' : 'default'} className={locked ? 'border-teal-500/40 text-teal-300 hover:bg-teal-500/10' : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20'} size="lg">
+            <Zap className="w-4 h-4 mr-2" />Remix the skills — free
           </Button>
         </div>
 
@@ -100,12 +123,27 @@ export default function AgentClient({ agent, skills }) {
 
         {agent.agentBlueprint && (
           <Card className="bg-slate-900/60 border-slate-700/50">
-            <CardHeader><CardTitle className="text-white">The agent blueprint</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-white">The agent blueprint{agent.isPaid && agent.price > 0 ? ` · $${agent.price}` : ''}</CardTitle></CardHeader>
             <CardContent>
-              <div className="bg-slate-950/60 rounded-lg p-4 border border-slate-800 max-h-96 overflow-auto">
-                <pre className="text-slate-300 whitespace-pre-wrap font-mono text-xs">{agent.agentBlueprint}</pre>
-              </div>
-              <p className="text-slate-500 text-sm mt-3">Paste into Claude, ChatGPT, or Gemini — or hit Remix to customize it in the Builder.</p>
+              {locked ? (
+                <div className="relative">
+                  <div className="bg-slate-950/60 rounded-lg p-4 border border-slate-800 max-h-48 overflow-hidden">
+                    <pre className="text-slate-400 whitespace-pre-wrap font-mono text-xs blur-sm select-none">{(agent.agentBlueprint || '').slice(0, 600)}</pre>
+                  </div>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent rounded-lg">
+                    <p className="text-white font-semibold mb-3">🔒 Buy to unlock the full blueprint</p>
+                    <Button onClick={buy} disabled={buying} className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">{buying ? 'Opening…' : `Buy for $${agent.price}`}</Button>
+                    <p className="text-slate-500 text-xs mt-2">or remix the skills for free</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="bg-slate-950/60 rounded-lg p-4 border border-slate-800 max-h-96 overflow-auto">
+                    <pre className="text-slate-300 whitespace-pre-wrap font-mono text-xs">{agent.agentBlueprint}</pre>
+                  </div>
+                  <p className="text-slate-500 text-sm mt-3">{purchased ? '✅ Purchased — ' : ''}Paste into Claude, ChatGPT, or Gemini — or hit Remix to customize it in the Builder.</p>
+                </>
+              )}
             </CardContent>
           </Card>
         )}

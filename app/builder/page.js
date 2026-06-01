@@ -22,6 +22,7 @@ export default function BuilderPage() {
   const [copied, setCopied] = useState(false)
   const [publish, setPublish] = useState(false)
   const [handle, setHandle] = useState('')
+  const [price, setPrice] = useState('')
 
   useEffect(() => {
     try { setHandle(getHandle()) } catch (e) {}
@@ -94,6 +95,7 @@ export default function BuilderPage() {
           userId: getUserId(),
           isPublic: publish,
           creatorName: publish ? (saveHandle(handle) || 'anonymous') : undefined,
+          price: publish ? (parseFloat(price) || 0) : 0,
         })
       })
       const data = await res.json()
@@ -250,15 +252,28 @@ export default function BuilderPage() {
                     <span className="text-slate-500 text-xs">— get a shareable page others can remix</span>
                   </label>
                   {publish && (
-                    <div className="mt-3 flex items-center gap-2">
-                      <span className="text-slate-400 text-sm">@</span>
-                      <input
-                        value={handle}
-                        onChange={(e) => setHandle(e.target.value.replace(/^@/, '').slice(0, 30))}
-                        placeholder="your-handle"
-                        className="flex-1 bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-sm text-white focus:border-teal-500/50 outline-none"
-                      />
-                      <span className="text-slate-500 text-xs">shown as the creator</span>
+                    <div className="mt-3 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400 text-sm">@</span>
+                        <input
+                          value={handle}
+                          onChange={(e) => setHandle(e.target.value.replace(/^@/, '').slice(0, 30))}
+                          placeholder="your-handle"
+                          className="flex-1 bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-sm text-white focus:border-teal-500/50 outline-none"
+                        />
+                        <span className="text-slate-500 text-xs">creator</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-slate-400 text-sm">$</span>
+                        <input
+                          value={price}
+                          onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ''))}
+                          placeholder="0"
+                          inputMode="decimal"
+                          className="w-24 bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-sm text-white focus:border-teal-500/50 outline-none"
+                        />
+                        <span className="text-slate-500 text-xs">{price && parseFloat(price) > 0 ? `paid · you keep 85% ($${(parseFloat(price) * 0.85).toFixed(2)})` : 'leave 0 for free'}</span>
+                      </div>
                     </div>
                   )}
                 </div>

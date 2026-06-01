@@ -775,6 +775,24 @@ export async function GET(request) {
       });
     }
 
+    // A single creator's payout status + earnings (for the /earnings page)
+    if (path === '/creator') {
+      const { searchParams } = new URL(request.url);
+      const handle = (searchParams.get('handle') || '').replace(/^@/, '');
+      if (!handle) return Response.json({ connected: false, earnings: 0, salesCount: 0 });
+      const c = await database.collection('creators').findOne({ key: handle });
+      const paidAgents = await database.collection('agent_templates')
+        .find({ creatorName: handle, isPaid: true })
+        .project({ id: 1, name: 1, price: 1, sales: 1, revenue: 1 })
+        .toArray();
+      return Response.json({
+        connected: !!c?.stripeAccountId,
+        earnings: c?.earnings || 0,
+        salesCount: c?.salesCount || 0,
+        paidAgents,
+      });
+    }
+
     // Creators leaderboard — aggregate public agents by handle
     if (path === '/creators') {
       const rows = await database.collection('agent_templates').aggregate([
@@ -1132,7 +1150,8 @@ export async function POST(request) {
     // Create Agent Template
     if (path === '/agent-templates') {
       const body = await request.json();
-      const { goal, selectedSkillIds, isPublic, userId, creatorName } = body;
+      const { goal, selectedSkillIds, isPublic, userId, creatorName, price } = body;
+      const agentPrice = Math.max(0, Math.min(999, parseFloat(price) || 0));
 
       if (!goal || !selectedSkillIds || selectedSkillIds.length === 0) {
         return Response.json({ 
@@ -1194,6 +1213,10 @@ export async function POST(request) {
         isPublic: isPublic || false,
         userId: userId || null,
         creatorName: (creatorName || '').toString().replace(/^@/, '').slice(0, 30) || 'anonymous',
+        price: agentPrice,
+        isPaid: agentPrice > 0,
+        sales: 0,
+        revenue: 0,
         copyCount: 0,
         remixCount: 0,
         created_at: new Date()
