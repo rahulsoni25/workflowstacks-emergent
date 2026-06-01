@@ -10,7 +10,9 @@ import { Badge } from '@/components/ui/badge'
 
 const CATEGORIES = [
   'all', 'ai-agent', 'marketing', 'sales', 'saas-starter', 'automation',
-  'devtools', 'mcp-server', 'claude-skill', 'prompt', 'analytics', 'support', 'design'
+  'devtools', 'mcp-server', 'claude-skill', 'prompt', 'analytics', 'support', 'design',
+  // Emerging 2026/2027
+  'computer-use', 'voice-ai', 'agent-memory', 'ai-evals', 'local-ai', 'multi-agent'
 ]
 
 function categoryColor(cat) {
@@ -24,6 +26,12 @@ function categoryColor(cat) {
     'mcp-server': 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
     'claude-skill': 'bg-violet-500/15 text-violet-300 border-violet-500/30',
     prompt: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+    'computer-use': 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+    'voice-ai': 'bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30',
+    'agent-memory': 'bg-purple-500/15 text-purple-300 border-purple-500/30',
+    'ai-evals': 'bg-lime-500/15 text-lime-300 border-lime-500/30',
+    'local-ai': 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+    'multi-agent': 'bg-teal-500/15 text-teal-300 border-teal-500/30',
   }
   return map[cat] || 'bg-slate-500/15 text-slate-300 border-slate-500/30'
 }

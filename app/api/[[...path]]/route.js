@@ -344,7 +344,15 @@ export async function GET(request) {
 
         // --- Prompts & founder resources ---
         { query: 'prompt-engineering OR awesome-prompts OR system-prompts', category: 'prompt', minStars: 300 },
-        { query: 'awesome startup OR indie-hackers OR founder resources', category: 'founder-resource', minStars: 200 }
+        { query: 'awesome startup OR indie-hackers OR founder resources', category: 'founder-resource', minStars: 200 },
+
+        // --- Emerging 2026/2027 categories (forward-looking) ---
+        { query: 'computer-use OR browser-use OR topic:computer-use-agent', category: 'computer-use', minStars: 80 },
+        { query: 'voice-agent OR realtime-voice OR text-to-speech agent', category: 'voice-ai', minStars: 100 },
+        { query: 'agent-memory OR long-term-memory llm OR topic:memory', category: 'agent-memory', minStars: 80 },
+        { query: 'llm-evaluation OR llm-observability OR ai-guardrails', category: 'ai-evals', minStars: 100 },
+        { query: 'on-device llm OR local-llm OR edge-ai', category: 'local-ai', minStars: 150 },
+        { query: 'multi-agent OR agent-orchestration OR autonomous agents', category: 'multi-agent', minStars: 200 }
       ];
 
       // Read options: /ingest?sort=updated&days=120  (defaults pull NEWEST content)
@@ -482,6 +490,13 @@ export async function GET(request) {
         if (has('analytics', 'dashboard', 'metrics', 'tracking', 'telemetry')) return 'analytics';
         if (has('helpdesk', 'customer-support', 'customer support', 'ticketing', 'chatbot')) return 'support';
         if (has('figma', 'ui-generator', 'icon', 'design system', 'tailwind')) return 'design';
+        // --- Emerging 2026/2027 categories (checked before the broad ai-agent rule) ---
+        if (has('computer-use', 'computer use', 'browser-use', 'browser agent', 'gui agent', 'desktop agent', 'web automation agent', 'operator agent')) return 'computer-use';
+        if (has('voice agent', 'text-to-speech', 'speech-to-text', 'realtime voice', 'voice assistant', 'speech synthesis', 'voice ai', 'whisper')) return 'voice-ai';
+        if (has('agent memory', 'long-term memory', 'persistent memory', 'memory layer', 'mem0', 'vector memory')) return 'agent-memory';
+        if (has('llm eval', 'evaluation framework', 'llm observability', 'llm tracing', 'guardrail', 'red-team', 'ai governance', 'prompt injection', 'llm-as-judge')) return 'ai-evals';
+        if (has('on-device', 'local llm', 'local-first', 'edge inference', 'llama.cpp', 'offline ai', 'gguf')) return 'local-ai';
+        if (has('multi-agent', 'multi agent', 'agent swarm', 'agent orchestration', 'crewai', 'agent team')) return 'multi-agent';
         if (has('rag', 'retrieval', 'ai-agent', 'autonomous-agent', 'autonomous agent', 'llm', 'transformer', 'ollama', 'langchain', 'agent framework')) return 'ai-agent';
         return s.category || 'ai-tool';
       };
