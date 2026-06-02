@@ -760,6 +760,35 @@ export async function GET(request) {
       });
     }
 
+    // Top tool-deal requests (founders vote for deals they want — your demand radar)
+    if (path === '/deals/requests') {
+      const requests = await database.collection('deal_requests')
+        .find({})
+        .sort({ votes: -1, created_at: -1 })
+        .limit(30)
+        .toArray();
+      return Response.json({ requests: requests.map((r) => ({ id: r.id, tool: r.tool, votes: r.votes || 1 })) });
+    }
+
+    // Admin demand dashboard — reservations per deal + top requests + emails to pitch vendors
+    if (path === '/demand') {
+      const denied = requireAdmin(request);
+      if (denied) return denied;
+      const deals = await database.collection('deals').find({}).toArray();
+      const interest = await database.collection('deal_interest').find({}).toArray();
+      const byDeal = {};
+      for (const i of interest) (byDeal[i.dealId] = byDeal[i.dealId] || []).push(i.email);
+      const requests = await database.collection('deal_requests').find({}).sort({ votes: -1 }).limit(30).toArray();
+      return Response.json({
+        deals: deals.map((d) => ({
+          id: d.id, tool: d.tool, status: d.status || (d.approved === false ? 'pending' : 'open'),
+          slotsTaken: d.slotsTaken || 0, slotsTotal: d.slotsTotal,
+          reservations: (byDeal[d.id] || []).length, reservationEmails: byDeal[d.id] || [],
+        })).sort((a, b) => b.reservations - a.reservations),
+        topRequests: requests.map((r) => ({ tool: r.tool, votes: r.votes || 1 })),
+      });
+    }
+
     // Group-buy / affiliate tool deals (only approved ones show publicly)
     if (path === '/deals') {
       const deals = await database.collection('deals')
@@ -1022,6 +1051,21 @@ export async function POST(request) {
       });
     }
     
+    // A founder requests a tool deal (demand radar — deduped, upvoted)
+    if (path === '/deals/request') {
+      const body = await request.json();
+      const tool = (body.tool || '').toString().trim().slice(0, 60);
+      if (!tool) return Response.json({ success: false, error: 'Tool name required' }, { status: 400 });
+      const norm = tool.toLowerCase();
+      const existing = await database.collection('deal_requests').findOne({ norm });
+      if (existing) {
+        await database.collection('deal_requests').updateOne({ norm }, { $inc: { votes: 1 } });
+      } else {
+        await database.collection('deal_requests').insertOne({ id: uuidv4(), tool, norm, votes: 1, created_at: new Date() });
+      }
+      return Response.json({ success: true });
+    }
+
     // Company submits a deal (self-serve supply side) — moderated before going live
     if (path === '/deals/submit') {
       const body = await request.json();

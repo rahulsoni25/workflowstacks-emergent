@@ -14,6 +14,21 @@ export default function DealsPage() {
   const [email, setEmail] = useState('')
   const [joined, setJoined] = useState({})
   const [locking, setLocking] = useState(null)
+  const [requests, setRequests] = useState([])
+  const [reqTool, setReqTool] = useState('')
+  const [reqVoted, setReqVoted] = useState({})
+
+  const loadRequests = () => fetch('/api/deals/requests').then((r) => r.json()).then((d) => setRequests(d.requests || [])).catch(() => {})
+  useEffect(() => { loadRequests() }, [])
+
+  const requestTool = async (tool) => {
+    const t = (tool || '').trim()
+    if (!t) return
+    setReqVoted((v) => ({ ...v, [t.toLowerCase()]: true }))
+    await fetch('/api/deals/request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tool: t }) }).catch(() => {})
+    setReqTool('')
+    loadRequests()
+  }
 
   const lockSeat = async (dealId) => {
     setLocking(dealId)
@@ -122,6 +137,27 @@ export default function DealsPage() {
           </div>
         )}
         <p className="text-center text-xs text-slate-500 mt-8">Lock a seat to secure the group rate — <strong className="text-slate-400">fully refunded</strong> if the deal doesn't reach its target. Or reserve free and pay only when it unlocks.</p>
+
+        {/* Demand radar — founders request the tools they want deals on */}
+        <div className="mt-16 border-t border-slate-700/50 pt-12">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-white mb-2">Want a deal on a tool we don't have?</h2>
+            <p className="text-slate-400 text-sm">Request it. The most-wanted tools are the ones we go negotiate next.</p>
+          </div>
+          <div className="max-w-md mx-auto flex gap-2 mb-6">
+            <Input value={reqTool} onChange={(e) => setReqTool(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && requestTool(reqTool)} placeholder="e.g. Claude, Perplexity, Higgsfield…" className="bg-slate-800/50 border-slate-700 text-white" />
+            <Button onClick={() => requestTool(reqTool)} className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white shrink-0">Request</Button>
+          </div>
+          {requests.length > 0 && (
+            <div className="max-w-2xl mx-auto flex flex-wrap gap-2 justify-center">
+              {requests.map((r) => (
+                <button key={r.id} onClick={() => requestTool(r.tool)} disabled={reqVoted[r.tool.toLowerCase()]} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition-all ${reqVoted[r.tool.toLowerCase()] ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-slate-900/60 border-slate-700 text-slate-300 hover:border-teal-500/40'}`}>
+                  {r.tool} <span className="text-xs bg-slate-800 rounded-full px-1.5">{r.votes}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
