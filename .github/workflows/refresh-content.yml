@@ -45,6 +45,12 @@ jobs:
             "$BASE_URL/api/dedupe" | tee /tmp/dedupe.json
           echo
 
+      - name: Refresh live GitHub star/fork counts (rotates through catalog)
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/refresh-stars?max=80" | tee /tmp/stars.json
+          echo
+
       - name: Summary
         run: |
           echo "### Content refresh complete" >> $GITHUB_STEP_SUMMARY
@@ -52,4 +58,6 @@ jobs:
           cat /tmp/ingest.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
           echo '' >> $GITHUB_STEP_SUMMARY
           cat /tmp/dedupe.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+          echo '' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/stars.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
           echo '```' >> $GITHUB_STEP_SUMMARY

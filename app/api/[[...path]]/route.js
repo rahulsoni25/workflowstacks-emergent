@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars'];
 
 // Build GitHub API headers (token optional — works on free unauthenticated tier)
 function ghHeaders(accept = 'application/vnd.github+json') {
@@ -537,6 +537,50 @@ export async function GET(request) {
         removedTestUploads: tests.deletedCount,
         removedTestSubscribers: subs.deletedCount,
         skillsRemaining: remaining
+      });
+    }
+
+    // Refresh live GitHub star/fork counts so displayed numbers don't drift stale.
+    // Processes the least-recently-refreshed skills first (capped per run), so the
+    // daily cron rotates through the whole catalog over a few runs. Honest by design:
+    // we only ever store the real number GitHub returns.
+    if (path === '/refresh-stars') {
+      const { searchParams } = new URL(request.url);
+      const max = Math.min(120, parseInt(searchParams.get('max') || '60', 10));
+      const skills = await database.collection('skills')
+        .find({ github_url: { $exists: true, $ne: null } })
+        .sort({ stars_refreshed_at: 1 }) // missing field sorts first → never-refreshed go first
+        .limit(max)
+        .toArray();
+
+      let refreshed = 0, skipped = 0, changed = 0;
+      for (const s of skills) {
+        const m = (s.github_url || '').match(/github\.com\/([^/]+)\/([^/#?]+)/i);
+        if (!m) { skipped++; continue; }
+        const owner = m[1];
+        const repo = m[2].replace(/\.git$/, '');
+        try {
+          const r = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: ghHeaders() });
+          if (!r.ok) { skipped++; continue; }
+          const data = await r.json();
+          if (typeof data.stargazers_count !== 'number') { skipped++; continue; }
+          const set = {
+            github_stars: data.stargazers_count,
+            github_forks: data.forks_count ?? s.github_forks ?? 0,
+            stars_refreshed_at: new Date(),
+          };
+          if (data.pushed_at) set.last_updated = data.pushed_at;
+          if (data.stargazers_count !== s.github_stars) changed++;
+          await database.collection('skills').updateOne({ id: s.id }, { $set: set });
+          refreshed++;
+        } catch { skipped++; }
+        await new Promise((res) => setTimeout(res, process.env.GITHUB_TOKEN ? 120 : 800));
+      }
+
+      return Response.json({
+        success: true,
+        message: `Refreshed live GitHub metrics for ${refreshed} skill(s); ${changed} had changed counts.`,
+        refreshed, changed, skipped, considered: skills.length,
       });
     }
 
