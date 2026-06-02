@@ -553,7 +553,7 @@ export async function GET(request) {
         .limit(max)
         .toArray();
 
-      let refreshed = 0, skipped = 0, changed = 0;
+      let refreshed = 0, skipped = 0, changed = 0, hidden = 0;
       for (const s of skills) {
         const m = (s.github_url || '').match(/github\.com\/([^/]+)\/([^/#?]+)/i);
         if (!m) { skipped++; continue; }
@@ -561,6 +561,14 @@ export async function GET(request) {
         const repo = m[2].replace(/\.git$/, '');
         try {
           const r = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: ghHeaders() });
+          // Repo deleted/renamed → hide from the catalog (reversible) so we never show a dead link.
+          if (r.status === 404) {
+            await database.collection('skills').updateOne(
+              { id: s.id },
+              { $set: { published: false, dead_repo: true, stars_refreshed_at: new Date() } }
+            );
+            hidden++; continue;
+          }
           if (!r.ok) { skipped++; continue; }
           const data = await r.json();
           if (typeof data.stargazers_count !== 'number') { skipped++; continue; }
@@ -568,6 +576,7 @@ export async function GET(request) {
             github_stars: data.stargazers_count,
             github_forks: data.forks_count ?? s.github_forks ?? 0,
             stars_refreshed_at: new Date(),
+            dead_repo: false,
           };
           if (data.pushed_at) set.last_updated = data.pushed_at;
           if (data.stargazers_count !== s.github_stars) changed++;
@@ -579,8 +588,8 @@ export async function GET(request) {
 
       return Response.json({
         success: true,
-        message: `Refreshed live GitHub metrics for ${refreshed} skill(s); ${changed} had changed counts.`,
-        refreshed, changed, skipped, considered: skills.length,
+        message: `Refreshed ${refreshed} skill(s); ${changed} changed; hid ${hidden} dead repo(s).`,
+        refreshed, changed, hidden, skipped, considered: skills.length,
       });
     }
 
