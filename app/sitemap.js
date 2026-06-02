@@ -2,7 +2,7 @@ const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergen
 
 // Static, indexable routes
 const STATIC_ROUTES = [
-  '', '/skills', '/discover', '/problems', '/deals', '/members', '/join', '/community', '/packs', '/playbooks', '/personas', '/builder', '/upload',
+  '', '/skills', '/discover', '/problems', '/deals', '/partner', '/members', '/join', '/community', '/packs', '/playbooks', '/personas', '/builder', '/upload',
   '/learn', '/learn/how-it-works', '/learn/agents', '/learn/skills',
   '/learn/mcp', '/learn/creators', '/learn/security',
   '/about', '/docs', '/help', '/enterprise', '/founder-launch',

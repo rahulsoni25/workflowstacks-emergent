@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals'];
 
 // Build GitHub API headers (token optional — works on free unauthenticated tier)
 function ghHeaders(accept = 'application/vnd.github+json') {
@@ -745,13 +745,35 @@ export async function GET(request) {
       return Response.json({ problems });
     }
 
-    // Group-buy tool deals
+    // Admin: review submitted deals + approve them (id=all approves every pending)
+    if (path === '/approve-deals') {
+      const { searchParams } = new URL(request.url);
+      const id = searchParams.get('id');
+      if (id && id !== 'all') {
+        await database.collection('deals').updateOne({ id }, { $set: { approved: true } });
+      } else if (id === 'all') {
+        await database.collection('deals').updateMany({ approved: false }, { $set: { approved: true } });
+      }
+      const pending = await database.collection('deals').find({ approved: false }).sort({ created_at: -1 }).toArray();
+      return Response.json({
+        pending: pending.map((d) => ({ id: d.id, tool: d.tool, company: d.company, dealType: d.dealType, savingsPct: d.savingsPct, contactEmail: d.contactEmail, link: d.link })),
+      });
+    }
+
+    // Group-buy / affiliate tool deals (only approved ones show publicly)
     if (path === '/deals') {
       const deals = await database.collection('deals')
-        .find({})
+        .find({ approved: { $ne: false } })
         .sort({ featured: -1, created_at: -1 })
         .toArray();
-      return Response.json({ deals });
+      return Response.json({
+        deals: deals.map((d) => ({
+          id: d.id, tool: d.tool, category: d.category, blurb: d.blurb,
+          retailPrice: d.retailPrice, groupPrice: d.groupPrice, savingsPct: d.savingsPct,
+          slotsTotal: d.slotsTotal, slotsTaken: d.slotsTaken, featured: !!d.featured,
+          dealType: d.dealType || 'groupbuy', link: d.link || null, code: d.code || null,
+        })),
+      });
     }
 
     // Featured members directory (LinkedIn-based community)
@@ -1000,6 +1022,40 @@ export async function POST(request) {
       });
     }
     
+    // Company submits a deal (self-serve supply side) — moderated before going live
+    if (path === '/deals/submit') {
+      const body = await request.json();
+      const tool = (body.tool || '').toString().trim().slice(0, 80);
+      const contactEmail = (body.contactEmail || '').toString().trim().toLowerCase();
+      if (!tool || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contactEmail)) {
+        return Response.json({ success: false, error: 'Tool name and a valid contact email are required' }, { status: 400 });
+      }
+      const retailPrice = parseFloat(body.retailPrice) || 0;
+      const groupPrice = parseFloat(body.groupPrice) || 0;
+      const savingsPct = retailPrice > 0 && groupPrice > 0
+        ? Math.round((1 - groupPrice / retailPrice) * 100)
+        : parseInt(body.savingsPct) || 0;
+      const deal = {
+        id: uuidv4(),
+        tool,
+        company: (body.company || '').toString().slice(0, 80),
+        category: (body.category || 'Other').toString().slice(0, 40),
+        blurb: (body.blurb || '').toString().slice(0, 220),
+        dealType: body.dealType === 'affiliate' ? 'affiliate' : 'groupbuy',
+        link: (body.link || '').toString().slice(0, 500) || null,
+        code: (body.code || '').toString().slice(0, 40) || null,
+        retailPrice, groupPrice, savingsPct,
+        slotsTotal: Math.max(1, parseInt(body.slotsTotal) || 50),
+        slotsTaken: 0,
+        contactEmail,
+        approved: false, // we review before it goes live
+        submitted: true,
+        created_at: new Date(),
+      };
+      await database.collection('deals').insertOne(deal);
+      return Response.json({ success: true, message: 'Submitted! We review every deal before it goes live (usually within 48h).' });
+    }
+
     // Post a workflow problem (demand side)
     if (path === '/problems') {
       const body = await request.json();

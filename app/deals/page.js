@@ -53,10 +53,11 @@ export default function DealsPage() {
             <Percent className="w-4 h-4 text-emerald-400" />
             <span className="text-emerald-300 text-sm font-medium">Founders save 40–70% by buying together</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Group-Buy Tool Deals</h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-            Pool with other founders to unlock <strong className="text-teal-300">wholesale rates</strong> on the AI tools you already use. Join a deal — it unlocks when enough builders are in.
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Tool Deals for Founders</h1>
+          <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-5">
+            Pool with other founders for <strong className="text-teal-300">wholesale rates</strong> — or grab an exclusive discount on the AI tools you already use.
           </p>
+          <Link href="/partner"><Button variant="outline" className="border-teal-500/30 text-teal-300 hover:bg-teal-500/10">Are you a tool? List your deal →</Button></Link>
         </div>
 
         {deals.length === 0 ? (
@@ -76,6 +77,16 @@ export default function DealsPage() {
                     <p className="text-slate-400 text-sm">{d.blurb}</p>
                   </CardHeader>
                   <CardContent>
+                    {d.dealType === 'affiliate' ? (
+                      <>
+                        {d.savingsPct > 0 && <div className="text-2xl font-bold text-white mb-3">{d.savingsPct}% off</div>}
+                        <a href={d.link || '#'} target="_blank" rel="noopener noreferrer" className="block">
+                          <Button className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white">Get this deal →</Button>
+                        </a>
+                        {d.code && <p className="text-center text-sm text-slate-400 mt-2">Use code <span className="text-teal-300 font-mono bg-slate-800/60 px-2 py-0.5 rounded">{d.code}</span></p>}
+                      </>
+                    ) : (
+                    <>
                     <div className="flex items-baseline gap-2 mb-3">
                       <span className="text-2xl font-bold text-white">${d.groupPrice}</span>
                       <span className="text-slate-500 line-through text-sm">${d.retailPrice}/yr</span>
@@ -101,6 +112,8 @@ export default function DealsPage() {
                         </Button>
                         <button onClick={() => setOpenId(d.id)} className="w-full text-center text-slate-400 text-xs hover:text-slate-300">or reserve free (pay later)</button>
                       </div>
+                    )}
+                    </>
                     )}
                   </CardContent>
                 </Card>
