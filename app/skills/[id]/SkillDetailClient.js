@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye } from 'lucide-react'
+import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye, Terminal, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -102,6 +102,14 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                         <p className="text-slate-200">{guide.whatItDoes}</p>
                       </div>
                     )}
+                    {guide.install && (
+                      <div>
+                        <div className="flex items-center gap-2 text-white font-semibold mb-2"><Terminal className="w-4 h-4 text-teal-400" />Install / run</div>
+                        <div className="bg-slate-950/60 rounded-lg p-3 border border-slate-800">
+                          <code className="text-teal-300 font-mono text-sm break-all">{guide.install}</code>
+                        </div>
+                      </div>
+                    )}
                     {guide.whenToUse?.length > 0 && (
                       <div>
                         <div className="flex items-center gap-2 text-white font-semibold mb-2"><ListChecks className="w-4 h-4 text-teal-400" />When to use it</div>
@@ -136,6 +144,12 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                         <div className="bg-slate-950/60 rounded-lg p-4 border border-slate-800">
                           <pre className="text-slate-300 whitespace-pre-wrap font-mono text-sm">{guide.examplePrompt}</pre>
                         </div>
+                      </div>
+                    )}
+                    {guide.gotcha && (
+                      <div className="flex items-start gap-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg p-4">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                        <div><span className="text-amber-300 font-semibold">Heads up: </span><span className="text-slate-300">{guide.gotcha}</span></div>
                       </div>
                     )}
                   </div>

@@ -102,7 +102,11 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
           {[
             { icon: Tag, v: stats.count, l: 'live deals' },
             { icon: TrendingDown, v: `${stats.avg}%`, l: 'avg savings' },
-            { icon: Users, v: stats.joinedCount, l: 'founders joined' },
+            // Show real momentum only once it exists; pre-launch we surface max
+            // savings instead of an honest-but-deflating "0 founders joined".
+            stats.joinedCount > 0
+              ? { icon: Users, v: stats.joinedCount, l: 'founders joined' }
+              : { icon: Percent, v: `${stats.maxOff || 0}%`, l: 'max savings' },
             { icon: ShieldCheck, v: '100%', l: 'refundable group-buys' },
           ].map((s, i) => {
             const Icon = s.icon
@@ -202,8 +206,8 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
                           {savePerYr > 0 && <span className="text-emerald-400 text-sm ml-auto">save ${savePerYr}/yr</span>}
                         </div>
                         <div className="mb-1 flex items-center justify-between text-xs text-slate-400 mt-3">
-                          <span className="flex items-center gap-1"><Users className="w-3 h-3" />{d.slotsTaken || 0}/{d.slotsTotal} joined</span>
-                          <span className={pct >= 80 ? 'text-amber-400' : ''}>{pct >= 80 ? <><Clock className="w-3 h-3 inline mr-0.5" />almost there!</> : `${pct}%`}</span>
+                          <span className="flex items-center gap-1"><Users className="w-3 h-3" />{(d.slotsTaken || 0) === 0 ? `Be the first — ${d.slotsTotal} seats` : `${d.slotsTaken}/${d.slotsTotal} joined`}</span>
+                          <span className={pct >= 80 ? 'text-amber-400' : ''}>{pct >= 80 ? <><Clock className="w-3 h-3 inline mr-0.5" />almost there!</> : (pct > 0 ? `${pct}%` : 'open')}</span>
                         </div>
                         <div className="h-2 bg-slate-800 rounded-full overflow-hidden mb-4">
                           <div className="h-full bg-gradient-to-r from-teal-500 to-cyan-500" style={{ width: `${pct}%` }} />

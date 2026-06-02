@@ -125,9 +125,11 @@ export default function ProblemsClient({ initialProblems = [] }) {
             {filtered.map((p) => (
               <Card key={p.id} className="bg-slate-900/60 border-slate-700/50 hover:border-teal-500/40 transition-all">
                 <CardContent className="py-4 flex items-start gap-4">
-                  <button onClick={() => upvote(p.id)} className={`flex flex-col items-center rounded-lg px-2.5 py-1.5 border transition-all ${voted[p.id] ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:border-teal-500/40'}`}>
+                  <button onClick={() => upvote(p.id)} title="Upvote" className={`flex flex-col items-center rounded-lg px-2.5 py-1.5 border transition-all ${voted[p.id] ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:border-teal-500/40'}`}>
                     <ArrowBigUp className="w-5 h-5" />
-                    <span className="text-sm font-bold">{p.upvotes || 0}</span>
+                    {/* Only show a count once there's genuine traction (>1) so seeded
+                        starters don't display uniform placeholder-looking numbers. */}
+                    <span className="text-[11px] font-bold leading-tight mt-0.5">{(p.upvotes || 0) > 1 ? p.upvotes : 'Vote'}</span>
                   </button>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">

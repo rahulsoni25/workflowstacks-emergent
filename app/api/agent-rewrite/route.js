@@ -200,18 +200,24 @@ async function enrichSkillGuide(skill) {
     `Category: ${skill.category}\nLanguage: ${skill.language || 'n/a'}\n` +
     (readme ? `README: ${readme}\n` : '') +
     `${skill.github_url ? 'GitHub: ' + skill.github_url + '\n' : ''}\n` +
+    `Write a guide that is SPECIFIC to THIS tool — not generic boilerplate. Use real, concrete\n` +
+    `commands/config from the README when present; never write filler like "install dependencies".\n` +
     `Return JSON: {\n` +
     `  "whatItDoes": "one clear sentence a founder understands",\n` +
     `  "whenToUse": ["3 short bullet situations where this is the right tool"],\n` +
-    `  "quickStart": ["3-4 concrete steps to get value from it"],\n` +
-    `  "examplePrompt": "one ready-to-paste prompt or command showing real usage"\n` +
+    `  "install": "the exact first command to install/run it (real, tool-specific, e.g. 'npx n8n start' or 'pip install crewai') — or the first concrete setup step if there is no install command",\n` +
+    `  "quickStart": ["4-5 concrete, tool-specific steps — reference actual commands, files, or config from the README, not generic verbs"],\n` +
+    `  "examplePrompt": "one ready-to-paste prompt or command showing a real, non-trivial use of THIS tool",\n` +
+    `  "gotcha": "one specific, real pitfall or prerequisite a first-time user hits (API key, runtime version, paid dependency, etc.)"\n` +
     `}`;
-  const parsed = parseJsonObject(await callLLM(system, user, undefined, 700));
+  const parsed = parseJsonObject(await callLLM(system, user, undefined, 900));
   return {
     whatItDoes: String(parsed.whatItDoes || '').trim(),
     whenToUse: Array.isArray(parsed.whenToUse) ? parsed.whenToUse.slice(0, 4) : [],
-    quickStart: Array.isArray(parsed.quickStart) ? parsed.quickStart.slice(0, 5) : [],
+    install: String(parsed.install || '').trim(),
+    quickStart: Array.isArray(parsed.quickStart) ? parsed.quickStart.slice(0, 6) : [],
     examplePrompt: String(parsed.examplePrompt || '').trim(),
+    gotcha: String(parsed.gotcha || '').trim(),
   };
 }
 
@@ -341,7 +347,9 @@ async function handle(request) {
     const skip = parseInt(searchParams.get('skip') || '0', 10);
     const onlyMissing = searchParams.get('pending') === 'true';
     const q = onlyMissing ? { use_guide: { $exists: false } } : {};
-    let cur = database.collection('skills').find(q).sort({ _id: 1 });
+    // ?top=true re-enriches the highest-star (most-viewed) skills first.
+    const sort = searchParams.get('top') === 'true' ? { github_stars: -1 } : { _id: 1 };
+    let cur = database.collection('skills').find(q).sort(sort);
     if (skip > 0) cur = cur.skip(skip);
     if (limit > 0) cur = cur.limit(limit);
     const skills = await cur.toArray();
