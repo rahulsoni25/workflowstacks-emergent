@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Zap, Copy, CheckCircle2, Share2, User, Repeat, Star } from 'lucide-react'
+import { ArrowLeft, Zap, Copy, CheckCircle2, Share2, User, Repeat, Star, Sparkles, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -55,6 +55,18 @@ export default function AgentClient({ agent, skills }) {
     }
   }
 
+  // Open the blueprint straight in Claude with the prompt prefilled (clipboard fallback for long prompts).
+  const openInClaude = async () => {
+    const text = agent.agentBlueprint
+    if (!text) return
+    try { await navigator.clipboard.writeText(text) } catch {}
+    bump()
+    const q = encodeURIComponent(text)
+    const url = q.length <= 6000 ? `https://claude.ai/new?q=${q}` : 'https://claude.ai/new'
+    if (q.length > 6000) { setCopied(true); setTimeout(() => setCopied(false), 2500) }
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
   const share = async () => {
     const url = typeof window !== 'undefined' ? window.location.href : ''
     try {
@@ -93,9 +105,14 @@ export default function AgentClient({ agent, skills }) {
               {buying ? 'Opening checkout…' : `Buy for $${agent.price} — unlock blueprint`}
             </Button>
           ) : (
-            <Button onClick={copyBlueprint} variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5" size="lg">
-              {copied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-teal-400" />Copied</> : <><Copy className="w-4 h-4 mr-2" />Copy blueprint</>}
-            </Button>
+            <>
+              <Button onClick={openInClaude} className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
+                <Sparkles className="w-4 h-4 mr-2" />Open in Claude<ExternalLink className="w-3.5 h-3.5 ml-2 opacity-80" />
+              </Button>
+              <Button onClick={copyBlueprint} variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5" size="lg">
+                {copied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-teal-400" />Copied</> : <><Copy className="w-4 h-4 mr-2" />Copy blueprint</>}
+              </Button>
+            </>
           )}
           <Button onClick={remix} variant={locked ? 'outline' : 'default'} className={locked ? 'border-teal-500/40 text-teal-300 hover:bg-teal-500/10' : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20'} size="lg">
             <Zap className="w-4 h-4 mr-2" />Remix the skills — free

@@ -118,3 +118,9 @@ credentials.json
 *.key
 .credentials
 .env*.local
+
+# local debug/curl artifacts
+*_raw.html
+ws_home.html
+Usershabib*.html
+_pb.html

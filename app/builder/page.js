@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Zap, CheckCircle2, Copy, Sparkles } from 'lucide-react'
+import { ArrowLeft, Zap, CheckCircle2, Copy, Sparkles, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -123,6 +123,24 @@ export default function BuilderPage() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }
+  }
+
+  // Launch the finished blueprint straight into an AI chat with the prompt prefilled.
+  // Always copy to clipboard first so that if the prompt is too long for a URL
+  // (browsers cap query strings), the user can paste it with one keystroke.
+  const launchIn = async (tool) => {
+    const text = agentBlueprint?.agentBlueprint
+    if (!text) return
+    try { await navigator.clipboard.writeText(text) } catch {}
+    const q = encodeURIComponent(text)
+    const fits = q.length <= 6000
+    const urls = {
+      claude: fits ? `https://claude.ai/new?q=${q}` : 'https://claude.ai/new',
+      chatgpt: fits ? `https://chatgpt.com/?q=${q}` : 'https://chatgpt.com/',
+      gemini: 'https://gemini.google.com/app',
+    }
+    if (!fits) { setCopied(true); setTimeout(() => setCopied(false), 2500) }
+    window.open(urls[tool] || urls.claude, '_blank', 'noopener,noreferrer')
   }
 
   const getCategoryColor = (cat) => {
@@ -338,14 +356,32 @@ export default function BuilderPage() {
                     <pre className="text-slate-300 whitespace-pre-wrap font-mono text-sm">{agentBlueprint.agentBlueprint}</pre>
                   </div>
                 </div>
+
+                {/* One-click launch — opens the chat with the prompt prefilled (clipboard fallback) */}
+                <div>
+                  <Label className="text-white font-semibold">Run it now — one click</Label>
+                  <div className="flex flex-col sm:flex-row gap-2 mt-2">
+                    <Button onClick={() => launchIn('claude')} className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20">
+                      <Sparkles className="w-4 h-4 mr-2" />Open in Claude<ExternalLink className="w-3.5 h-3.5 ml-2 opacity-80" />
+                    </Button>
+                    <Button onClick={() => launchIn('chatgpt')} variant="outline" className="flex-1 border-slate-600 text-slate-200 hover:bg-white/5">
+                      Open in ChatGPT<ExternalLink className="w-3.5 h-3.5 ml-2 opacity-70" />
+                    </Button>
+                    <Button onClick={() => launchIn('gemini')} variant="outline" className="flex-1 border-slate-600 text-slate-200 hover:bg-white/5">
+                      Open in Gemini<ExternalLink className="w-3.5 h-3.5 ml-2 opacity-70" />
+                    </Button>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">Opens a new chat with your prompt prefilled. We also copy it to your clipboard, so for longer agents just paste (Ctrl/⌘+V).</p>
+                </div>
+
                 <div className="bg-teal-500/10 border border-teal-500/20 rounded-lg p-4">
                   <div className="flex items-start gap-3">
                     <Sparkles className="w-5 h-5 text-teal-400 mt-0.5" />
                     <div>
                       <h4 className="text-teal-300 font-semibold mb-1">How to Use</h4>
                       <p className="text-slate-300 text-sm">
-                        1. Copy the agent prompt above<br />
-                        2. Paste it into Claude, ChatGPT, Gemini, or create a Custom GPT<br />
+                        1. Click <strong className="text-white">Open in Claude</strong> above (or Copy the prompt)<br />
+                        2. Your prompt is prefilled in a new chat — or paste it if it didn't fit<br />
                         3. Start chatting with your custom AI agent!
                       </p>
                     </div>
