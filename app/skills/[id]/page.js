@@ -87,13 +87,16 @@ async function getSourceSpec(githubUrl) {
   }
 }
 
-// Trim to a clean snippet length without cutting a word in half (append … if shortened).
+// Trim to a clean snippet. Prefer ending on a complete sentence; otherwise cut on
+// a word boundary and append … — never mid-word or on a dangling preposition.
 function clip(text, max = 160) {
   const t = (text || '').trim()
   if (t.length <= max) return t
   const cut = t.slice(0, max - 1)
+  const sentenceEnd = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '))
+  if (sentenceEnd > max * 0.55) return cut.slice(0, sentenceEnd + 1)
   const lastSpace = cut.lastIndexOf(' ')
-  return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\-]+$/, '') + '…'
+  return (lastSpace > max * 0.55 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\-]+$/, '') + '…'
 }
 
 // Per-skill SEO: unique title, description, canonical, and OG/Twitter tags
