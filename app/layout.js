@@ -15,6 +15,7 @@ export const metadata = {
     type: 'website',
     locale: 'en_US',
     siteName: 'WorkflowStacks',
+    url: '/',
   },
   twitter: {
     card: 'summary_large_image',

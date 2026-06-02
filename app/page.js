@@ -55,10 +55,15 @@ export default async function HomePage() {
   const playbookCount = (playbooksData?.playbooks || []).length || 4
   const stats = { ...(statsData || {}), totalSkills, personaCount, playbookCount }
 
+  // Server-render a featured grid (not all 182) to keep the landing HTML light /
+  // fast; the full catalog stays fully crawlable at /skills + in the sitemap. The
+  // client re-fetches the matching set when the visitor searches or filters.
+  const featured = skills.slice(0, 24)
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <HomeClient initialSkills={skills} initialStats={stats} />
+      <HomeClient initialSkills={featured} initialStats={stats} />
     </>
   )
 }

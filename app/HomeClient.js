@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Search, Star, Download, Github, Sparkles, Zap, Code2, Brain, ArrowRight, Shield, Clock, TrendingUp, Users, ChevronRight, Check, Mail, Play, Target, Layers, Bot } from 'lucide-react'
+import { Search, Star, Download, Github, Sparkles, Zap, Code2, Brain, ArrowRight, Shield, Clock, TrendingUp, Users, ChevronRight, ChevronDown, Check, Mail, Play, Target, Layers, Bot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -119,56 +119,42 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
               <span className="text-xl font-bold text-white tracking-tight">Workflow<span className="text-teal-400">Stacks</span></span>
             </Link>
             <nav className="hidden md:flex items-center gap-1">
+              {/* Primary destinations only — secondary links live under "More" so the
+                  bar stays focused on the core Build-an-Agent action. */}
               <Link href="/discover">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  Discover
-                </Button>
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">Discover</Button>
               </Link>
               <Link href="/problems">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  Problems
-                </Button>
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">Problems</Button>
               </Link>
               <Link href="/deals">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  Deals
-                </Button>
+                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">Deals</Button>
               </Link>
-              <Link href="/members">
+
+              {/* More ▾ — hover/focus dropdown for secondary destinations */}
+              <div className="relative group">
                 <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  Members
+                  More <ChevronDown className="w-3.5 h-3.5 ml-1 group-hover:rotate-180 transition-transform" />
                 </Button>
-              </Link>
-              <Link href="/community">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  Agents
-                </Button>
-              </Link>
-              <Link href="/personas">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  Personas
-                </Button>
-              </Link>
-              <Link href="/packs">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  Starter Packs
-                </Button>
-              </Link>
-              <Link href="/playbooks">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  Playbooks
-                </Button>
-              </Link>
-              <Link href="/help">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  How It Works
-                </Button>
-              </Link>
-              <Link href="/my-agents">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  My Agents
-                </Button>
-              </Link>
+                <div className="absolute right-0 top-full pt-2 hidden group-hover:block z-50">
+                  <div className="min-w-[190px] rounded-xl border border-slate-700/70 bg-slate-900/95 backdrop-blur-xl p-1.5 shadow-2xl shadow-black/40">
+                    {[
+                      { href: '/members', label: 'Members' },
+                      { href: '/community', label: 'Agents' },
+                      { href: '/personas', label: 'Personas' },
+                      { href: '/packs', label: 'Starter Packs' },
+                      { href: '/playbooks', label: 'Playbooks' },
+                      { href: '/help', label: 'How It Works' },
+                      { href: '/my-agents', label: 'My Agents' },
+                    ].map((l) => (
+                      <Link key={l.href} href={l.href} className="block rounded-lg px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">
+                        {l.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
               <div className="w-px h-6 bg-slate-700 mx-2"></div>
               <Link href="/builder">
                 <Button size="sm" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20">
@@ -611,6 +597,18 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
                   </Card>
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* The grid is a featured subset — the full catalog lives at /skills */}
+          {skills.length > 0 && (stats?.totalSkills || 0) > skills.length && (
+            <div className="text-center mt-10">
+              <Link href="/skills">
+                <Button size="lg" variant="outline" className="border-teal-500/30 text-teal-200 hover:bg-teal-500/10">
+                  Browse all {stats.totalSkills} skills
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
             </div>
           )}
         </div>

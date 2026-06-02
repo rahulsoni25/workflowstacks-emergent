@@ -124,3 +124,7 @@ credentials.json
 ws_home.html
 Usershabib*.html
 _pb.html
+*.br
+*.gz
+*.hdr
+*.brhdr

@@ -1,6 +1,11 @@
 import { notFound } from 'next/navigation'
 import SkillDetailClient from './SkillDetailClient'
 
+// Render per-request so notFound() returns a real HTTP 404 (not a soft-404/200).
+// Data fetches below keep their own `next: { revalidate }` caching, so this does
+// not add API/GitHub load for valid pages.
+export const dynamic = 'force-dynamic'
+
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 
 // Sibling skills in the same category, for the "Related skills" cross-link module.
