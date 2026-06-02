@@ -31,10 +31,26 @@ export default async function HomePage() {
   const [skillsData, statsData, personasData, playbooksData] = await Promise.all([
     getJson('/api/skills'), getJson('/api/stats'), getJson('/api/personas'), getJson('/api/playbooks'),
   ])
-  const skills = skillsData?.skills || []
+  const allSkills = skillsData?.skills || []
+  // Trim each card to only the fields the home grid renders, so we don't inline
+  // heavy unused fields (readme_preview, use_guide, *_original) ×182 into the SSR
+  // payload twice. Keeps all cards (content/SEO) while cutting parse/hydration cost.
+  const skills = allSkills.map((s) => ({
+    id: s.id,
+    name: s.name,
+    title_human: s.title_human,
+    description: s.description,
+    description_human: s.description_human,
+    category: s.category,
+    github_stars: s.github_stars,
+    github_forks: s.github_forks,
+    language: s.language,
+    is_premium: s.is_premium,
+    price: s.price,
+  }))
   // Single source of truth: every headline count is the real number of published,
   // browsable items — never rounded up past what a visitor can actually see.
-  const totalSkills = skills.length || statsData?.totalSkills || 0
+  const totalSkills = allSkills.length || statsData?.totalSkills || 0
   const personaCount = (personasData?.personas || []).length || 4
   const playbookCount = (playbooksData?.playbooks || []).length || 4
   const stats = { ...(statsData || {}), totalSkills, personaCount, playbookCount }

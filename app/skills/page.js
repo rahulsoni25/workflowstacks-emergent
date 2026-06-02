@@ -27,8 +27,17 @@ async function getSkills() {
   }
 }
 
+// Heavy fields the catalog grid never renders — strip them from the SSR payload.
+const HEAVY = ['readme_preview', 'use_guide', 'description_original', 'name_original', 'rewritten_at']
+function trim(s) {
+  const out = {}
+  for (const k in s) if (!HEAVY.includes(k)) out[k] = s[k]
+  return out
+}
+
 export default async function SkillsPage() {
-  const skills = await getSkills()
+  const raw = await getSkills()
+  const skills = raw.map(trim)
   const itemList = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
