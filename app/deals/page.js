@@ -13,6 +13,17 @@ export default function DealsPage() {
   const [openId, setOpenId] = useState(null)
   const [email, setEmail] = useState('')
   const [joined, setJoined] = useState({})
+  const [locking, setLocking] = useState(null)
+
+  const lockSeat = async (dealId) => {
+    setLocking(dealId)
+    try {
+      const res = await fetch('/api/stripe/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dealId }) })
+      const d = await res.json()
+      if (d.url) window.location.href = d.url
+      else { alert(d.error || 'Checkout unavailable'); setLocking(null) }
+    } catch { setLocking(null) }
+  }
 
   useEffect(() => {
     fetch('/api/deals').then((r) => r.json()).then((d) => setDeals(d.deals || [])).catch(() => {})
@@ -77,14 +88,19 @@ export default function DealsPage() {
                       <div className="h-full bg-gradient-to-r from-teal-500 to-cyan-500" style={{ width: `${pct}%` }} />
                     </div>
                     {joined[d.id] ? (
-                      <div className="flex items-center gap-2 text-teal-300 text-sm"><CheckCircle2 className="w-4 h-4" />You're on the list — we'll email you when it unlocks.</div>
+                      <div className="flex items-center gap-2 text-teal-300 text-sm"><CheckCircle2 className="w-4 h-4" />Reserved — we'll email you when it unlocks.</div>
                     ) : openId === d.id ? (
                       <div className="flex gap-2">
                         <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" className="bg-slate-800/50 border-slate-700 text-white" />
                         <Button onClick={() => join(d.id)} className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white shrink-0">Confirm</Button>
                       </div>
                     ) : (
-                      <Button onClick={() => setOpenId(d.id)} className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white">Join this deal — free to reserve</Button>
+                      <div className="space-y-2">
+                        <Button onClick={() => lockSeat(d.id)} disabled={locking === d.id} className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white">
+                          {locking === d.id ? 'Opening checkout…' : `Lock your seat — $${d.groupPrice}`}
+                        </Button>
+                        <button onClick={() => setOpenId(d.id)} className="w-full text-center text-slate-400 text-xs hover:text-slate-300">or reserve free (pay later)</button>
+                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -92,7 +108,7 @@ export default function DealsPage() {
             })}
           </div>
         )}
-        <p className="text-center text-xs text-slate-500 mt-8">Reserving is free and non-binding. You only pay if the deal unlocks and you opt in.</p>
+        <p className="text-center text-xs text-slate-500 mt-8">Lock a seat to secure the group rate — <strong className="text-slate-400">fully refunded</strong> if the deal doesn't reach its target. Or reserve free and pay only when it unlocks.</p>
       </div>
     </div>
   )

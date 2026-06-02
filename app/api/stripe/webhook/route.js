@@ -20,6 +20,18 @@ export async function POST(request) {
   if (event.type === 'checkout.session.completed') {
     const s = event.data.object
     const db = await getDb()
+
+    // Group-buy deal seat purchased
+    if (s.metadata?.type === 'deal' && s.metadata?.dealId) {
+      await db.collection('purchases').updateOne(
+        { sessionId: s.id },
+        { $setOnInsert: { sessionId: s.id, dealId: s.metadata.dealId, type: 'deal', tool: s.metadata.tool || null, amount: s.amount_total || 0, buyerEmail: s.customer_details?.email || null, created_at: new Date() } },
+        { upsert: true }
+      )
+      await db.collection('deals').updateOne({ id: s.metadata.dealId }, { $inc: { slotsTaken: 1, paidSeats: 1 } })
+      return Response.json({ received: true })
+    }
+
     const agentId = s.metadata?.agentId
     const amount = s.amount_total || 0
     const platformFee = Math.round(amount * PLATFORM_FEE_PCT)
