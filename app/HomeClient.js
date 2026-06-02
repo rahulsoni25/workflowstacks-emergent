@@ -200,7 +200,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
               <span className="text-gradient-neptune">for Claude, ChatGPT & Gemini</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Built for startup founders and marketing agencies who want to install OpenClaw‑style skills, agents, and personas that handle SEO, outreach, and ecommerce ops — <strong className="text-white">without writing code.</strong>
+              Built for startup founders and marketing agencies who want to install open-source AI skills, agents, and personas that handle SEO, outreach, and ecommerce ops — <strong className="text-white">without writing code.</strong>
             </p>
 
             {/* CTA Buttons */}

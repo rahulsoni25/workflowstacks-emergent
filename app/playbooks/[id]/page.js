@@ -1,60 +1,65 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
-import { ArrowLeft, BookOpen, Zap, Star, Download } from 'lucide-react'
+import { notFound } from 'next/navigation'
+import { ArrowLeft, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 
-export default function PlaybookDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const [playbook, setPlaybook] = useState(null)
-  const [skills, setSkills] = useState([])
-  const [loading, setLoading] = useState(true)
+const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+export const revalidate = 600
 
-  useEffect(() => {
-    if (params.id) loadPlaybook()
-  }, [params.id])
-
-  const loadPlaybook = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/playbooks/${params.id}`)
-      const data = await res.json()
-      if (data.playbook) {
-        setPlaybook(data.playbook)
-        setSkills(data.skills || [])
-      }
-    } catch (e) {
-      console.error('Error:', e)
-    }
-    setLoading(false)
+async function getPlaybook(id) {
+  try {
+    const res = await fetch(`${BASE}/api/playbooks/${id}`, { next: { revalidate: 600 } })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.playbook ? { playbook: data.playbook, skills: data.skills || [] } : null
+  } catch {
+    return null
   }
+}
 
-  const handleCreateAgent = () => {
-    const skillIds = playbook.skillIds.join(',')
-    router.push(`/builder?skillIds=${skillIds}&goal=${encodeURIComponent(playbook.title)}`)
+export async function generateMetadata({ params }) {
+  const data = await getPlaybook(params.id)
+  if (!data) return { title: 'Playbook not found | WorkflowStacks', robots: { index: false, follow: false } }
+  const p = data.playbook
+  const title = `${p.title} | WorkflowStacks Playbook`
+  const description = (p.description || p.outcome || '').slice(0, 160)
+  const url = `/playbooks/${p.id}`
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title, description, type: 'article', url },
   }
+}
 
-  if (loading || !playbook) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br neptune flex items-center justify-center">
-        <div className="inline-block w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    )
+export default async function PlaybookDetailPage({ params }) {
+  const data = await getPlaybook(params.id)
+  if (!data) notFound()
+  const { playbook, skills } = data
+  const builderHref = `/builder?skillIds=${(playbook.skillIds || []).join(',')}&goal=${encodeURIComponent(playbook.title)}`
+
+  // HowTo structured data — strong AEO signal for a step-by-step guide
+  const howTo = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: playbook.title,
+    description: playbook.description || playbook.outcome || undefined,
+    ...(playbook.timeEstimate ? { totalTime: playbook.timeEstimate } : {}),
+    ...(Array.isArray(playbook.steps) && playbook.steps.length
+      ? { step: playbook.steps.map((s, i) => ({ '@type': 'HowToStep', position: i + 1, name: s.title, text: s.detail })) }
+      : {}),
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br neptune">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(howTo) }} />
       <header className="border-b border-slate-700/50 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/playbooks">
             <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Playbooks
+              <ArrowLeft className="w-4 h-4 mr-2" />Back to Playbooks
             </Button>
           </Link>
         </div>
@@ -85,13 +90,13 @@ export default function PlaybookDetailPage() {
               <p className="text-slate-300">{playbook.problem}</p>
             </div>
           )}
-          <Button onClick={handleCreateAgent} className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
-            <Zap className="w-4 h-4 mr-2" />
-            Build the Agent that Runs this Playbook
-          </Button>
+          <Link href={builderHref}>
+            <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
+              <Zap className="w-4 h-4 mr-2" />Build the Agent that Runs this Playbook
+            </Button>
+          </Link>
         </div>
 
-        {/* The actual playbook — numbered, executable steps */}
         {playbook.steps?.length > 0 && (
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-white mb-6">The Playbook — step by step</h2>
@@ -112,24 +117,26 @@ export default function PlaybookDetailPage() {
           </div>
         )}
 
-        <div>
-          <h2 className="text-2xl font-bold text-white mb-6">Skills Used ({skills.length})</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {skills.map((skill) => (
-              <Card key={skill.id} className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
-                <CardHeader>
-                  <CardTitle className="text-white">{skill.title_human || skill.name}</CardTitle>
-                  <CardDescription className="text-slate-400 line-clamp-2">{skill.description_human || skill.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Link href={`/skills/${skill.id}`}>
-                    <Button variant="outline" className="w-full border-white/20 text-white">View Details</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+        {skills.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-bold text-white mb-6">Skills Used ({skills.length})</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {skills.map((skill) => (
+                <Card key={skill.id} className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
+                  <CardHeader>
+                    <CardTitle className="text-white">{skill.title_human || skill.name}</CardTitle>
+                    <CardDescription className="text-slate-400 line-clamp-2">{skill.description_human || skill.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Link href={`/skills/${skill.id}`}>
+                      <Button variant="outline" className="w-full border-white/20 text-white">View Details</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

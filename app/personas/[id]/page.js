@@ -1,63 +1,40 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { ArrowLeft, Briefcase, Zap, CheckCircle2, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 
-export default function PersonaDetailPage() {
-  const params = useParams()
-  const router = useRouter()
-  const [persona, setPersona] = useState(null)
-  const [skills, setSkills] = useState([])
-  const [loading, setLoading] = useState(true)
+const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+export const revalidate = 600
 
-  useEffect(() => {
-    if (params.id) load()
-  }, [params.id])
-
-  const load = async () => {
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/personas/${params.id}`)
-      const data = await res.json()
-      if (data.persona) {
-        setPersona(data.persona)
-        setSkills(data.skills || [])
-      }
-    } catch (e) {
-      console.error('Error:', e)
-    }
-    setLoading(false)
+async function getPersona(id) {
+  try {
+    const res = await fetch(`${BASE}/api/personas/${id}`, { next: { revalidate: 600 } })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.persona ? { persona: data.persona, skills: data.skills || [] } : null
+  } catch {
+    return null
   }
+}
 
-  const useInBuilder = () => {
-    const ids = (persona.skillIds || []).join(',')
-    const goal = persona.description || `Act as my ${persona.name}`
-    router.push(`/builder?skillIds=${ids}&goal=${encodeURIComponent(goal)}`)
-  }
+export async function generateMetadata({ params }) {
+  const data = await getPersona(params.id)
+  if (!data) return { title: 'Persona not found | WorkflowStacks', robots: { index: false, follow: false } }
+  const p = data.persona
+  const title = `${p.name} — AI Agent Persona | WorkflowStacks`
+  const description = (p.whatItDoes || p.description || '').slice(0, 160)
+  const url = `/personas/${p.id}`
+  return { title, description, alternates: { canonical: url }, openGraph: { title, description, type: 'article', url } }
+}
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-neptune flex items-center justify-center">
-        <div className="inline-block w-14 h-14 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
-  if (!persona) {
-    return (
-      <div className="min-h-screen bg-neptune flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl text-white mb-4">Persona not found</h2>
-          <Link href="/personas"><Button>Browse Personas</Button></Link>
-        </div>
-      </div>
-    )
-  }
+export default async function PersonaDetailPage({ params }) {
+  const data = await getPersona(params.id)
+  if (!data) notFound()
+  const { persona, skills } = data
+  const goal = persona.description || `Act as my ${persona.name}`
+  const builderHref = `/builder?skillIds=${(persona.skillIds || []).join(',')}&goal=${encodeURIComponent(goal)}`
 
   return (
     <div className="min-h-screen bg-neptune">
@@ -82,9 +59,11 @@ export default function PersonaDetailPage() {
             <span className="text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-200">🧩 {persona.skillIds?.length || 0} skills</span>
             <span className="text-sm bg-emerald-500/10 border border-emerald-500/30 rounded-full px-3 py-1 text-emerald-300">100% free</span>
           </div>
-          <Button onClick={useInBuilder} className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
-            <Zap className="w-4 h-4 mr-2" />Build this AI Employee
-          </Button>
+          <Link href={builderHref}>
+            <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
+              <Zap className="w-4 h-4 mr-2" />Build this AI Employee
+            </Button>
+          </Link>
           <p className="text-sm text-slate-500 mt-2">Loads its {persona.skillIds?.length || 0} skills into the builder and generates a paste-ready agent.</p>
         </div>
 
@@ -112,30 +91,34 @@ export default function PersonaDetailPage() {
           </Card>
         )}
 
-        <h2 className="text-2xl font-bold text-white mb-6">Skills in this persona ({skills.length})</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {skills.map((skill) => (
-            <Card key={skill.id} className="bg-slate-900/60 border-slate-700/50 hover:border-teal-500/40 transition-all">
-              <CardHeader>
-                <Badge className="bg-slate-800 text-slate-300 border-slate-700 w-fit mb-2 text-xs">{skill.category}</Badge>
-                <CardTitle className="text-white text-lg">{skill.title_human || skill.name}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-slate-400 text-sm line-clamp-2 mb-3">{skill.description_human || skill.description}</p>
-                <div className="flex items-center justify-between">
-                  {skill.github_stars > 0 && (
-                    <span className="flex items-center gap-1 text-sm text-slate-400">
-                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />{skill.github_stars.toLocaleString()}
-                    </span>
-                  )}
-                  <Link href={`/skills/${skill.id}`}>
-                    <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:text-teal-300">View</Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {skills.length > 0 && (
+          <>
+            <h2 className="text-2xl font-bold text-white mb-6">Skills in this persona ({skills.length})</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {skills.map((skill) => (
+                <Card key={skill.id} className="bg-slate-900/60 border-slate-700/50 hover:border-teal-500/40 transition-all">
+                  <CardHeader>
+                    <Badge className="bg-slate-800 text-slate-300 border-slate-700 w-fit mb-2 text-xs">{skill.category}</Badge>
+                    <CardTitle className="text-white text-lg">{skill.title_human || skill.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-slate-400 text-sm line-clamp-2 mb-3">{skill.description_human || skill.description}</p>
+                    <div className="flex items-center justify-between">
+                      {skill.github_stars > 0 && (
+                        <span className="flex items-center gap-1 text-sm text-slate-400">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />{skill.github_stars.toLocaleString()}
+                        </span>
+                      )}
+                      <Link href={`/skills/${skill.id}`}>
+                        <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:text-teal-300">View</Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
