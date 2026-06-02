@@ -6,7 +6,7 @@ export default function robots() {
       userAgent: '*',
       allow: '/',
       // Don't waste crawl budget on API or per-user pages
-      disallow: ['/api/', '/my-agents'],
+      disallow: ['/api/', '/my-agents', '/admin', '/earnings'],
     },
     sitemap: `${BASE}/sitemap.xml`,
   }
