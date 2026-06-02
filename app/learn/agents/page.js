@@ -41,13 +41,13 @@ export default function LearnAgentsPage() {
               <h2 className="text-2xl font-bold text-white mb-3">Agent Examples</h2>
               <ul className="space-y-3">
                 {[
-                  'SEO Content Agent — Writes, optimizes, and publishes blog posts for AI Overview rankings',
-                  'Founder Launch Agent — Validates ideas, creates landing pages, writes launch emails',
-                  'Ecommerce Ops Agent — Responds to reviews, syncs inventory, generates product descriptions',
-                  'Lead Gen Agent — Qualifies leads, personalizes outreach, tracks follow-ups',
+                  'SEO Content Agent â€” Writes, optimizes, and publishes blog posts for AI Overview rankings',
+                  'Founder Launch Agent â€” Validates ideas, creates landing pages, writes launch emails',
+                  'Ecommerce Ops Agent â€” Responds to reviews, syncs inventory, generates product descriptions',
+                  'Lead Gen Agent â€” Qualifies leads, personalizes outreach, tracks follow-ups',
                 ].map((ex, i) => (
                   <li key={i} className="flex items-start gap-3 text-slate-300">
-                    <span className="text-teal-400">\u2022</span>{ex}
+                    <span className="text-teal-400">•</span>{ex}
                   </li>
                 ))}
               </ul>

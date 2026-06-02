@@ -25,19 +25,19 @@ export default function PrivacyPage() {
             <h2 className="text-2xl font-bold text-white mb-3">1. Information We Collect</h2>
             <p className="text-slate-300 leading-relaxed">We collect minimal data necessary to provide the Service:</p>
             <ul className="space-y-2 text-slate-300 mt-2">
-              <li>\u2022 <strong className="text-white">Usage Data:</strong> Pages visited, features used, search queries</li>
-              <li>\u2022 <strong className="text-white">Email:</strong> Only if you subscribe to our newsletter</li>
-              <li>\u2022 <strong className="text-white">Agent Data:</strong> Goals and skill selections when building agents</li>
+              <li>• <strong className="text-white">Usage Data:</strong> Pages visited, features used, search queries</li>
+              <li>• <strong className="text-white">Email:</strong> Only if you subscribe to our newsletter</li>
+              <li>• <strong className="text-white">Agent Data:</strong> Goals and skill selections when building agents</li>
             </ul>
           </section>
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">2. How We Use Your Information</h2>
             <ul className="space-y-2 text-slate-300">
-              <li>\u2022 To provide and improve the Service</li>
-              <li>\u2022 To send newsletter updates (with consent)</li>
-              <li>\u2022 To analyze usage patterns and improve skill recommendations</li>
-              <li>\u2022 We do NOT sell your data to third parties</li>
+              <li>• To provide and improve the Service</li>
+              <li>• To send newsletter updates (with consent)</li>
+              <li>• To analyze usage patterns and improve skill recommendations</li>
+              <li>• We do NOT sell your data to third parties</li>
             </ul>
           </section>
 

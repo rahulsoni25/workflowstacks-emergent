@@ -34,10 +34,10 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">3. User Responsibilities</h2>
             <ul className="space-y-2 text-slate-300">
-              <li>\u2022 You are responsible for how you use generated agent blueprints</li>
-              <li>\u2022 You must comply with the terms of service of third-party AI tools (ChatGPT, Claude, Gemini)</li>
-              <li>\u2022 You may not use the Service for illegal, harmful, or abusive purposes</li>
-              <li>\u2022 You may not redistribute premium skills without authorization</li>
+              <li>• You are responsible for how you use generated agent blueprints</li>
+              <li>• You must comply with the terms of service of third-party AI tools (ChatGPT, Claude, Gemini)</li>
+              <li>• You may not use the Service for illegal, harmful, or abusive purposes</li>
+              <li>• You may not redistribute premium skills without authorization</li>
             </ul>
           </section>
 

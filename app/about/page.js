@@ -58,13 +58,13 @@ export default function AboutPage() {
               <h2 className="text-2xl font-bold text-white mb-3">Our Values</h2>
               <ul className="space-y-3">
                 {[
-                  'Accessibility — AI should be usable by everyone, not just developers',
-                  'Quality — Every skill is verified for quality and usefulness',
-                  'Transparency — Open-source skills, clear pricing, no hidden fees',
-                  'Community — Built by creators, for creators',
+                  'Accessibility â€” AI should be usable by everyone, not just developers',
+                  'Quality â€” Every skill is verified for quality and usefulness',
+                  'Transparency â€” Open-source skills, clear pricing, no hidden fees',
+                  'Community â€” Built by creators, for creators',
                 ].map((v, i) => (
                   <li key={i} className="flex items-start gap-2 text-slate-300">
-                    <span className="text-teal-400">\u2022</span>{v}
+                    <span className="text-teal-400">•</span>{v}
                   </li>
                 ))}
               </ul>
