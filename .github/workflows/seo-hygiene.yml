@@ -1,0 +1,47 @@
+name: Weekly SEO/AEO/GEO hygiene
+
+# Runs every Monday 09:00 UTC. Checks the live site's SEO/AEO/GEO health and
+# opens a GitHub issue if anything high-severity regresses.
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch: {}
+
+env:
+  BASE_URL: https://workflowstacks-emergent.vercel.app
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/checkout@v4
+      - name: Run SEO/AEO/GEO hygiene check
+        id: check
+        run: node scripts/seo-check.mjs
+        continue-on-error: true
+      - name: Open an issue if it regressed
+        if: steps.check.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const body = fs.existsSync(process.env.GITHUB_STEP_SUMMARY)
+              ? fs.readFileSync(process.env.GITHUB_STEP_SUMMARY, 'utf8')
+              : 'SEO hygiene check failed — see the Action logs.'
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `SEO/AEO/GEO hygiene regressed — ${new Date().toISOString().slice(0,10)}`,
+              body,
+              labels: ['seo'],
+            })
+      - name: Fail the run if regressed
+        if: steps.check.outcome == 'failure'
+        run: exit 1
