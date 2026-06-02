@@ -29,5 +29,23 @@ async function getSkills() {
 
 export default async function SkillsPage() {
   const skills = await getSkills()
-  return <SkillsCatalogClient skills={skills} />
+  const itemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'AI Skills & Tools catalog',
+    description: 'Free, trending open-source AI skills, MCP servers, and agent tools for founders.',
+    numberOfItems: skills.length,
+    itemListElement: skills.slice(0, 100).map((s, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${BASE}/skills/${s.id}`,
+      name: s.title_human || s.name,
+    })),
+  }
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
+      <SkillsCatalogClient skills={skills} />
+    </>
+  )
 }

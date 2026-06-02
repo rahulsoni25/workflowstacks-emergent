@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen, Users, AlertCircle } from 'lucide-react'
+import { ArrowLeft, BookOpen, Users, AlertCircle, Clock, ListChecks, Target } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -30,8 +30,24 @@ async function getPlaybooks() {
 
 export default async function PlaybooksPage() {
   const playbooks = await getPlaybooks()
+
+  const itemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'AI Playbooks for Founders',
+    description: 'Step-by-step AI playbooks that combine skills to solve one specific problem.',
+    numberOfItems: playbooks.length,
+    itemListElement: playbooks.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${BASE}/playbooks/${p.id}`,
+      name: p.title,
+    })),
+  }
+
   return (
     <div className="min-h-screen bg-neptune">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Back to Home</Button></Link>
@@ -53,28 +69,46 @@ export default async function PlaybooksPage() {
           <div className="text-center py-20"><p className="text-slate-400 text-xl">No playbooks available yet.</p></div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {playbooks.map((playbook) => (
-              <Card key={playbook.id} className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl hover:border-amber-500/40 transition-all duration-300 h-full flex flex-col">
-                <CardHeader className="flex-1">
-                  <div className="flex items-start justify-between mb-3">
-                    <Badge className={`${audienceColor(playbook.audience)} border`}><Users className="w-3 h-3 mr-1" />{playbook.audience}</Badge>
-                    <Badge variant="outline" className="border-slate-600 text-slate-300">{playbook.skillIds?.length || 0} skills</Badge>
-                  </div>
-                  <CardTitle className="text-white text-xl">{playbook.title}</CardTitle>
-                  <CardDescription className="text-slate-400">{playbook.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {playbook.problem && (
-                    <div className="flex items-start gap-2 text-sm text-slate-400 bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
-                      <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-400" /><span>{playbook.problem}</span>
+            {playbooks.map((playbook) => {
+              const stepCount = playbook.steps?.length || 0
+              return (
+                <Card key={playbook.id} className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl hover:border-amber-500/40 transition-all duration-300 h-full flex flex-col">
+                  <CardHeader className="flex-1">
+                    <div className="flex items-start justify-between mb-3">
+                      <Badge className={`${audienceColor(playbook.audience)} border`}><Users className="w-3 h-3 mr-1" />{playbook.audience}</Badge>
+                      <Badge variant="outline" className="border-slate-600 text-slate-300">{playbook.skillIds?.length || 0} skills</Badge>
                     </div>
-                  )}
-                  <Link href={`/playbooks/${playbook.id}`} className="block">
-                    <Button className="w-full bg-gradient-to-r from-amber-500 to-teal-500 hover:from-amber-600 hover:to-teal-600 text-white shadow-lg shadow-amber-500/20">View Playbook</Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+                    <CardTitle className="text-white text-xl">{playbook.title}</CardTitle>
+                    <CardDescription className="text-slate-400">{playbook.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    {/* At-a-glance signals so the value is legible before click-through */}
+                    <div className="flex flex-wrap items-center gap-2 text-xs">
+                      {playbook.timeEstimate && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-teal-500/20 bg-teal-500/10 px-2.5 py-1 text-teal-300"><Clock className="w-3 h-3" />{playbook.timeEstimate}</span>
+                      )}
+                      {stepCount > 0 && (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-600 bg-slate-800/50 px-2.5 py-1 text-slate-300"><ListChecks className="w-3 h-3" />{stepCount} steps</span>
+                      )}
+                    </div>
+                    {playbook.outcome && (
+                      <div className="flex items-start gap-2 text-sm text-slate-300 bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/15">
+                        <Target className="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-400" />
+                        <span><span className="text-emerald-300 font-medium">Outcome:</span> {playbook.outcome}</span>
+                      </div>
+                    )}
+                    {playbook.problem && (
+                      <div className="flex items-start gap-2 text-sm text-slate-400 bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+                        <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-400" /><span>{playbook.problem}</span>
+                      </div>
+                    )}
+                    <Link href={`/playbooks/${playbook.id}`} className="block">
+                      <Button className="w-full bg-gradient-to-r from-amber-500 to-teal-500 hover:from-amber-600 hover:to-teal-600 text-white shadow-lg shadow-amber-500/20">View Playbook</Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              )
+            })}
           </div>
         )}
       </div>

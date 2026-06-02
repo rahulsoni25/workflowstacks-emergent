@@ -20,7 +20,7 @@ function getCategoryColor(cat) {
   return colors[cat] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
 }
 
-export default function SkillDetailClient({ skill, sourceSpec }) {
+export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
   const [copied, setCopied] = useState(false)
   const guide = skill.use_guide || null
   const score = typeof skill.rewrite_score === 'number' ? skill.rewrite_score : null
@@ -264,6 +264,27 @@ export default function SkillDetailClient({ skill, sourceSpec }) {
             </Card>
           </motion.div>
         </div>
+
+        {related.length > 0 && (
+          <div className="mt-12 border-t border-slate-700/50 pt-10">
+            <h2 className="text-2xl font-bold text-white mb-1">Related skills</h2>
+            <p className="text-slate-400 text-sm mb-6">More {skill.category} tools founders pair with this one.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {related.map((r) => (
+                <Link key={r.id} href={`/skills/${r.id}`} className="block group">
+                  <div className="h-full rounded-xl border border-slate-700/50 bg-slate-900/60 p-4 hover:border-teal-500/40 transition-all">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs text-slate-500">{r.category}</span>
+                      {r.github_stars > 0 && <span className="text-xs text-amber-400">★ {r.github_stars.toLocaleString()}</span>}
+                    </div>
+                    <div className="text-white font-semibold group-hover:text-teal-300 transition-colors line-clamp-1">{r.title_human || r.name}</div>
+                    <div className="text-slate-400 text-sm mt-1 line-clamp-2">{r.description_human || r.description}</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

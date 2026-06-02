@@ -133,6 +133,14 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
           </div>
         </div>
 
+        {/* Honest disclosure: how deals work + affiliate transparency */}
+        <div className="flex items-start gap-2 text-xs text-slate-500 bg-slate-900/40 border border-slate-700/40 rounded-lg p-3 mb-6">
+          <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0 text-slate-400" />
+          <p>
+            <span className="text-slate-400 font-medium">How these deals work:</span> Group-buy seats pool founders together for wholesale rates and are 100% refundable if a deal doesn&apos;t reach its target. Some discount links are partner/affiliate links — we may earn a commission at no extra cost to you. We never inflate prices or run fake scarcity.
+          </p>
+        </div>
+
         {/* Controls */}
         <div className="flex flex-col md:flex-row gap-3 mb-6">
           <div className="relative flex-1">

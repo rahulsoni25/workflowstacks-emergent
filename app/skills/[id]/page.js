@@ -3,6 +3,26 @@ import SkillDetailClient from './SkillDetailClient'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 
+// Render dynamically so an unknown id produces a real 404 status (not a soft-404
+// 200). Underlying data (getSkill, getSourceSpec, related) stays fetch-cached via
+// `next: { revalidate }`, so this only re-runs a cheap render per request.
+export const dynamic = 'force-dynamic'
+
+// Sibling skills in the same category, for the "Related skills" cross-link module.
+async function getRelated(skill) {
+  try {
+    const res = await fetch(`${BASE}/api/skills?category=${encodeURIComponent(skill.category)}`, { next: { revalidate: 3600 } })
+    if (!res.ok) return []
+    const data = await res.json()
+    return (data.skills || [])
+      .filter((s) => s.id !== skill.id)
+      .sort((a, b) => (b.github_stars || 0) - (a.github_stars || 0))
+      .slice(0, 6)
+  } catch {
+    return []
+  }
+}
+
 async function getSkill(id) {
   try {
     const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 3600 } })
@@ -95,7 +115,7 @@ export async function generateMetadata({ params }) {
 export default async function SkillDetailPage({ params }) {
   const skill = await getSkill(params.id)
   if (!skill) notFound()
-  const sourceSpec = await getSourceSpec(skill.github_url)
+  const [sourceSpec, related] = await Promise.all([getSourceSpec(skill.github_url), getRelated(skill)])
 
   // Structured data for rich results
   const jsonLd = {
@@ -130,7 +150,7 @@ export default async function SkillDetailPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
-      <SkillDetailClient skill={skill} sourceSpec={sourceSpec} />
+      <SkillDetailClient skill={skill} sourceSpec={sourceSpec} related={related} />
     </>
   )
 }

@@ -209,9 +209,9 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
             </motion.div>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-              AI Skills & Agent Marketplace
+              AI Skills & No-Code Agents
               <br />
-              <span className="text-gradient-neptune">for OpenClaw, Claude & Gemini</span>
+              <span className="text-gradient-neptune">for Claude, ChatGPT & Gemini</span>
             </h1>
             <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed">
               Built for startup founders and marketing agencies who want to install OpenClaw‑style skills, agents, and personas that handle SEO, outreach, and ecommerce ops — <strong className="text-white">without writing code.</strong>

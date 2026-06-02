@@ -2,7 +2,7 @@ import './globals.css'
 import Footer from '@/components/Footer'
 
 export const metadata = {
-  title: 'WorkflowStacks — AI Skills & Agent Marketplace for OpenClaw, Claude & Gemini',
+  title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, Gemini & OpenClaw',
   description: 'Install OpenClaw-style AI skills, agent personas, and ready-to-use playbooks for Claude, Gemini, and MCP. Build custom AI agents for SEO, outreach, and ecommerce ops — without writing code.',
   keywords: 'WorkflowStacks, AI skills marketplace, OpenClaw skills, Claude skills, Gemini extensions, MCP servers, AI agents, prompt engineering, AI automation, no-code AI, AI for founders, AI for marketers, SEO automation, ecommerce AI',
   authors: [{ name: 'WorkflowStacks' }],
@@ -10,7 +10,7 @@ export const metadata = {
   publisher: 'WorkflowStacks',
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'),
   openGraph: {
-    title: 'WorkflowStacks — AI Skills & Agent Marketplace for OpenClaw, Claude & Gemini',
+    title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, Gemini & OpenClaw',
     description: 'Install OpenClaw-style AI skills and build custom AI agents for SEO, outreach, and ecommerce — without coding.',
     type: 'website',
     locale: 'en_US',
@@ -18,7 +18,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'WorkflowStacks — AI Skills & Agent Marketplace for OpenClaw, Claude & Gemini',
+    title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, Gemini & OpenClaw',
     description: 'Install OpenClaw-style AI skills and build custom AI agents for SEO, outreach, and ecommerce — without coding.',
   },
   robots: {

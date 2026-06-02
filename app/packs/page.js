@@ -30,8 +30,22 @@ async function getPacks() {
 
 export default async function PacksPage() {
   const packs = await getPacks()
+  const itemList = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'AI Starter Packs',
+    description: 'Ready-made bundles of AI skills for one job — open in the Builder for a paste-ready agent.',
+    numberOfItems: packs.length,
+    itemListElement: packs.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      url: `${BASE}/packs/${p.id}`,
+      name: p.name,
+    })),
+  }
   return (
     <div className="min-h-screen bg-neptune">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Back to Home</Button></Link>
