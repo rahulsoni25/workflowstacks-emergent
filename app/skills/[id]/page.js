@@ -3,11 +3,6 @@ import SkillDetailClient from './SkillDetailClient'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 
-// Render dynamically so an unknown id produces a real 404 status (not a soft-404
-// 200). Underlying data (getSkill, getSourceSpec, related) stays fetch-cached via
-// `next: { revalidate }`, so this only re-runs a cheap render per request.
-export const dynamic = 'force-dynamic'
-
 // Sibling skills in the same category, for the "Related skills" cross-link module.
 async function getRelated(skill) {
   try {
@@ -98,7 +93,9 @@ function clip(text, max = 160) {
 // Per-skill SEO: unique title, description, canonical, and OG/Twitter tags
 export async function generateMetadata({ params }) {
   const skill = await getSkill(params.id)
-  if (!skill) return { title: 'Skill not found | WorkflowStacks', robots: { index: false, follow: false } }
+  // Throw the not-found here too (not just in the page) so Next emits a real 404
+  // status for unknown skill ids instead of a soft-404 200 (Next 14.2 quirk).
+  if (!skill) notFound()
   const name = skill.title_human || skill.name
   const title = `${name} | WorkflowStacks`
   const description = clip(skill.description_human || skill.description || '')
