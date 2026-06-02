@@ -1,0 +1,24 @@
+# WorkflowStacks
+
+> WorkflowStacks is a free marketplace of real, trending open-source AI skills, with a no-code agent builder, group-buy deals on AI tools, a founder problems board, and a global community of AI builders. The open-source catalog is 100% free — there is no paywall on the tools, and every skill's full source is viewable before use.
+
+## What it is
+- A curated catalog of 160+ free, open-source AI skills (MCP servers, AI agents, automation, marketing, sales, dev tools, and more), each with an AI-written "how to use it" guide and live GitHub stats.
+- An Agent Builder that combines skills into a ready-to-paste blueprint for Claude, ChatGPT, or Gemini — no code.
+- A monetization model that never charges for the free catalog: group-buy/affiliate deals on paid AI tools, optional premium "complete system" agents, and creator tools.
+
+## Key pages
+- [Skills catalog](/skills): Browse 160+ free open-source AI skills, filter by category, sort by trending / newest / top quality / hidden gems.
+- [Discover](/discover): Skills bifurcated into ranked sections (Trending, Newest, Recently Updated, Top Quality, Most Starred, Hidden Gems).
+- [Agent Builder](/builder): Pick skills, set a goal, get a paste-ready AI agent blueprint — free.
+- [Tool Deals](/deals): Group-buy and affiliate discounts (40–70% off) on AI tools founders use.
+- [Problems](/problems): Founders post workflow bottlenecks; one click turns any problem into a matched agent.
+- [Community](/community): Public AI agents to remix in one click.
+- [Members](/members): A global, LinkedIn-based network of AI micro-SaaS founders, developers, and influencers.
+- [Playbooks](/playbooks) · [Personas](/personas) · [Packs](/packs): Curated, outcome-oriented bundles of skills.
+
+## Positioning
+Unlike paid AI-skill marketplaces that hide their source behind a buy button, WorkflowStacks shows the full, real source of every free open-source tool. It earns from time, trust, and savings (deals, services, creator tools) — never from the free catalog.
+
+## Contact
+List a deal: /partner · Join the network: /join

@@ -101,11 +101,25 @@ export default async function SkillDetailPage({ params }) {
     ...(skill.creator ? { author: { '@type': 'Person', name: skill.creator } } : {}),
   }
 
+  const breadcrumb = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
+      { '@type': 'ListItem', position: 2, name: 'Skills', item: `${BASE}/skills` },
+      { '@type': 'ListItem', position: 3, name: skill.title_human || skill.name, item: `${BASE}/skills/${skill.id}` },
+    ],
+  }
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
       <SkillDetailClient skill={skill} sourceSpec={sourceSpec} />
     </>
