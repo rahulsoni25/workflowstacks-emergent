@@ -66,13 +66,22 @@ async function getSourceSpec(githubUrl) {
   }
 }
 
+// Trim to a clean snippet length without cutting a word in half (append … if shortened).
+function clip(text, max = 160) {
+  const t = (text || '').trim()
+  if (t.length <= max) return t
+  const cut = t.slice(0, max - 1)
+  const lastSpace = cut.lastIndexOf(' ')
+  return (lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\-]+$/, '') + '…'
+}
+
 // Per-skill SEO: unique title, description, canonical, and OG/Twitter tags
 export async function generateMetadata({ params }) {
   const skill = await getSkill(params.id)
-  if (!skill) return { title: 'Skill not found | WorkflowStacks' }
+  if (!skill) return { title: 'Skill not found | WorkflowStacks', robots: { index: false, follow: false } }
   const name = skill.title_human || skill.name
   const title = `${name} | WorkflowStacks`
-  const description = (skill.description_human || skill.description || '').slice(0, 160)
+  const description = clip(skill.description_human || skill.description || '')
   const url = `/skills/${skill.id}`
   return {
     title,

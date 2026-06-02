@@ -102,6 +102,10 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
     return <Zap className="w-4 h-4" />
   }
 
+  // Honest floor for "X+" claims: round DOWN to the nearest 10 so the "+" is always
+  // true (we always have at least this many), never rounding up past the real count.
+  const skillsFloor = Math.floor((Number(stats?.totalSkills) || 100) / 10) * 10
+
   return (
     <div className="min-h-screen bg-neptune">
       {/* Sticky Header */}
@@ -201,7 +205,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
               className="inline-flex items-center gap-2 bg-teal-500/10 border border-teal-500/20 rounded-full px-4 py-1.5 mb-6"
             >
               <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></span>
-              <span className="text-teal-300 text-sm font-medium">Live marketplace — {stats?.totalSkills || '100'}+ AI skills indexed</span>
+              <span className="text-teal-300 text-sm font-medium">Live marketplace — {skillsFloor}+ AI skills indexed</span>
             </motion.div>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
@@ -242,15 +246,15 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
               className="flex flex-wrap justify-center gap-8 md:gap-12"
             >
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-white">{stats?.totalSkills || '100'}+</div>
+                <div className="text-3xl md:text-4xl font-bold text-white">{skillsFloor}+</div>
                 <div className="text-sm text-slate-400 mt-1">AI Skills Indexed</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-teal-400">4</div>
+                <div className="text-3xl md:text-4xl font-bold text-teal-400">{stats?.personaCount || 4}</div>
                 <div className="text-sm text-slate-400 mt-1">Agent Personas</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-cyan-400">8</div>
+                <div className="text-3xl md:text-4xl font-bold text-cyan-400">{stats?.playbookCount || 4}</div>
                 <div className="text-sm text-slate-400 mt-1">Ready Playbooks</div>
               </div>
               <div className="text-center">
@@ -402,7 +406,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { v: `${stats?.totalSkills || '100'}+`, l: 'Real OSS tools indexed' },
+              { v: `${skillsFloor}+`, l: 'Real OSS tools indexed' },
               { v: 'Live', l: 'GitHub stars & forks' },
               { v: '≥8/10', l: 'Quality-gated listings' },
               { v: '100%', l: 'Free — no paywall' },
@@ -439,7 +443,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
             {[
               {
                 name: 'Free', price: '$0', period: '/forever', desc: 'Everything you need to ship',
-                features: ['Browse 160+ real skills — read the source', 'Build & remix unlimited agents', 'Post problems, join the network', 'Sell your agents — keep 85%'],
+                features: [`Browse ${skillsFloor}+ real skills — read the source`, 'Build & remix unlimited agents', 'Post problems, join the network', 'Sell your agents — keep 85%'],
                 cta: 'Get Started Free', primary: false, badge: null,
               },
               {

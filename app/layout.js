@@ -64,18 +64,8 @@ export default function RootLayout({ children }) {
     sameAs: ['https://github.com/rahulsoni25/workflowstacks-emergent'],
   }
 
-  // FAQPage schema for AEO / AI answer engines (server-rendered so it's always crawlable)
-  const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: [
-      { '@type': 'Question', name: 'What is WorkflowStacks?', acceptedAnswer: { '@type': 'Answer', text: 'WorkflowStacks is a free marketplace of real, trending open-source AI skills, with a no-code agent builder, group-buy deals on AI tools, and a community of AI founders. The open-source catalog is 100% free.' } },
-      { '@type': 'Question', name: 'Is WorkflowStacks free?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. Browsing 160+ open-source AI skills, reading their full source, and building agents is completely free. WorkflowStacks earns from group-buy tool deals, services, and creator tools — never from the free catalog.' } },
-      { '@type': 'Question', name: 'How is it different from paid AI-skill marketplaces?', acceptedAnswer: { '@type': 'Answer', text: 'Unlike paid marketplaces that hide a skill behind a buy button, WorkflowStacks shows the full real source of every free open-source tool before you use it, and lets you build a custom agent from them for free.' } },
-      { '@type': 'Question', name: 'What can I build with the Agent Builder?', acceptedAnswer: { '@type': 'Answer', text: 'Pick any skills, set a goal, and the builder generates a ready-to-paste agent blueprint for Claude, ChatGPT, or Gemini — no code required.' } },
-      { '@type': 'Question', name: 'What are group-buy tool deals?', acceptedAnswer: { '@type': 'Answer', text: 'Founders pool together to unlock wholesale rates (typically 40–70% off) on paid AI tools like Perplexity and n8n. You reserve a seat for free and the deal unlocks when enough founders join.' } },
-    ],
-  }
+  // Note: FAQPage schema is intentionally NOT global — it lives on the homepage
+  // (app/page.js) so each route can carry its own page-specific structured data.
 
   return (
     <html lang="en" className="dark">
@@ -87,10 +77,6 @@ export default function RootLayout({ children }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
         />
       </head>
       <body className="flex min-h-screen flex-col bg-neptune">
