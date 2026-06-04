@@ -139,16 +139,17 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
                 <div className="absolute right-0 top-full pt-2 hidden group-hover:block z-50">
                   <div className="min-w-[190px] rounded-xl border border-slate-700/70 bg-slate-900/95 backdrop-blur-xl p-1.5 shadow-2xl shadow-black/40">
                     {[
-                      { href: '/members', label: 'Members' },
-                      { href: '/community', label: 'Agents' },
-                      { href: '/personas', label: 'Personas' },
-                      { href: '/packs', label: 'Starter Packs' },
-                      { href: '/playbooks', label: 'Playbooks' },
-                      { href: '/help', label: 'How It Works' },
-                      { href: '/my-agents', label: 'My Agents' },
+                      { href: '/playbooks', label: 'Playbooks', note: 'Solve one problem' },
+                      { href: '/personas', label: 'Personas', note: 'Role-in-a-box' },
+                      { href: '/packs', label: 'Starter Packs', note: 'Skill bundles' },
+                      { href: '/community', label: 'Community gallery', note: 'Agents others built' },
+                      { href: '/members', label: 'Members', note: 'The network' },
+                      { href: '/my-agents', label: 'My Agents', note: 'Your saved builds' },
+                      { href: '/help', label: 'How it works' },
                     ].map((l) => (
-                      <Link key={l.href} href={l.href} className="block rounded-lg px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">
-                        {l.label}
+                      <Link key={l.href} href={l.href} className="block rounded-lg px-3 py-2 hover:bg-white/5 transition-colors">
+                        <span className="block text-sm text-slate-200">{l.label}</span>
+                        {l.note && <span className="block text-[11px] text-slate-500">{l.note}</span>}
                       </Link>
                     ))}
                   </div>
@@ -233,22 +234,61 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
             >
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-white">{skillsFloor}+</div>
-                <div className="text-sm text-slate-400 mt-1">AI Skills Indexed</div>
+                <div className="text-sm text-slate-400 mt-1">real AI skills indexed</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-teal-400">{stats?.personaCount || 4}</div>
-                <div className="text-sm text-slate-400 mt-1">Agent Personas</div>
+                <div className="text-3xl md:text-4xl font-bold text-teal-400">Live</div>
+                <div className="text-sm text-slate-400 mt-1">GitHub stars &amp; forks</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-cyan-400">{stats?.playbookCount || 4}</div>
-                <div className="text-sm text-slate-400 mt-1">Ready Playbooks</div>
+                <div className="text-3xl md:text-4xl font-bold text-cyan-400">Daily</div>
+                <div className="text-sm text-slate-400 mt-1">refreshed from GitHub</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-emerald-400">2 min</div>
-                <div className="text-sm text-slate-400 mt-1">Avg. Agent Build</div>
+                <div className="text-3xl md:text-4xl font-bold text-emerald-400">Free</div>
+                <div className="text-sm text-slate-400 mt-1">no paywall, ever</div>
               </div>
             </motion.div>
           </motion.div>
+        </div>
+      </section>
+
+      {/* The wedge — answer "isn't this just GitHub with extra steps?" out loud */}
+      <section className="py-20 px-4 border-t border-teal-500/10">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              "Isn't this just GitHub with <span className="text-gradient-neptune">extra steps?</span>"
+            </h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              The opposite — we <strong className="text-white">remove</strong> the steps. The tools are free and open-source on GitHub. The hours of digging, judging, and prompt-wiring are what we delete.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { icon: Star, t: 'We read & score 180+ repos', d: 'Only trending, high-star tools that clear an 8/10 quality gate surface — with live GitHub stats. You skip hours of wading through dead repos.' },
+              { icon: Code2, t: 'Every tool gets a usage guide', d: 'An AI-written install command, quick-start steps, and the one real gotcha — so you\'re productive in minutes, not after reading a README.' },
+              { icon: Zap, t: 'One click = a working agent', d: 'The Builder merges the skills you pick into a single paste-ready blueprint for Claude, ChatGPT, or Gemini. That\'s the thing GitHub can\'t do for you.' },
+            ].map((c, i) => {
+              const Icon = c.icon
+              return (
+                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-2xl p-6">
+                  <div className="w-11 h-11 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-teal-400" />
+                  </div>
+                  <h3 className="text-white font-semibold text-lg mb-2">{c.t}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">{c.d}</p>
+                </div>
+              )
+            })}
+          </div>
+          <div className="text-center mt-8">
+            <Link href="/builder">
+              <Button size="lg" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20">
+                <Zap className="w-4 h-4 mr-2" />Build an agent from real tools — free
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -325,19 +365,19 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
             {[
               {
                 emoji: '🚀', title: 'Founders', subtitle: 'Launch & Validate Faster',
-                desc: 'Validate offers, automate research, write launch copy, and get your first 100 users — all with AI agents.',
+                desc: 'Stop duct-taping prompts. Build the exact AI agent that validates your offer and gets your first users — free, no code.',
                 cta: 'See Founder Agents', href: '/personas', gradient: 'from-teal-500/20 to-cyan-500/20', border: 'border-teal-500/30', hoverBorder: 'hover:border-teal-400',
                 benefits: ['Idea validation in 48 hours', 'Auto-generate landing pages', 'AI-powered outreach']
               },
               {
                 emoji: '📈', title: 'Agencies', subtitle: 'Scale Client Results 10x',
-                desc: 'Rank in AI Overviews, dominate SEO/AEO/GEO, automate reporting, and scale without hiring.',
+                desc: 'Spin up client-ready AI agents for SEO/AEO/GEO and reporting without hiring. One blueprint, paste into any model, bill the outcome.',
                 cta: 'See Agency Agents', href: '/personas', gradient: 'from-cyan-500/20 to-blue-500/20', border: 'border-cyan-500/30', hoverBorder: 'hover:border-cyan-400',
                 benefits: ['AI Overview optimization', 'Automated client reports', 'GEO-targeted content']
               },
               {
                 emoji: '🛍️', title: 'Ecommerce', subtitle: 'Automate Store Operations',
-                desc: 'Respond to reviews, sync inventory, write product descriptions, and manage Shopify ops on autopilot.',
+                desc: 'Put store ops on autopilot — reviews, product copy, inventory — with agents built from proven open-source tools, not random prompts.',
                 cta: 'See Ecommerce Agents', href: '/personas', gradient: 'from-emerald-500/20 to-teal-500/20', border: 'border-emerald-500/30', hoverBorder: 'hover:border-emerald-400',
                 benefits: ['Auto-respond to reviews', 'Smart inventory sync', 'AI product descriptions']
               },
@@ -622,12 +662,12 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
           </h2>
           <div className="space-y-4">
             {[
-              { q: 'What is WorkflowStacks?', a: 'WorkflowStacks is an AI skills marketplace where you can discover, combine, and deploy AI agent blueprints for Claude, ChatGPT, Gemini, and MCP tools — without writing any code.' },
-              { q: 'Do I need coding skills to use it?', a: 'No! WorkflowStacks is designed for non-technical users. You simply browse skills, pick the ones you want, and our Agent Builder creates a ready-to-paste prompt blueprint for you.' },
-              { q: 'What AI tools does it work with?', a: 'WorkflowStacks works with any AI chat tool including ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), and any tool that accepts system prompts or custom instructions.' },
-              { q: 'How are skills sourced?', a: 'Skills are automatically ingested from GitHub using our proprietary scraper that finds the highest-quality, most-starred AI repositories. We also curate premium skills from verified creators.' },
-              { q: 'Is it free to use?', a: 'Yes — browsing skills and building agent blueprints is completely free. You copy the blueprint into Claude, ChatGPT, or Gemini and run it there. Paid plans add premium packs and team features.' },
-              { q: 'What are Playbooks and Personas?', a: 'Playbooks are step-by-step guides that combine AI skills to solve specific problems (like "Validate a Business Idea in 48 Hours"). Personas are pre-configured AI agent roles designed for specific audiences (Founders, Agencies, Ecommerce).' },
+              { q: 'Isn\'t this just GitHub with extra steps?', a: 'The opposite — we remove the steps. We read 180+ repos, score them at 8/10+, write each tool\'s usage guide (install command, quick-start, real gotcha), and let you merge the ones you pick into one paste-ready agent. You skip hours of evaluating repos and wiring prompts. The tools stay free and open-source; we delete the work around them.' },
+              { q: 'If it\'s free, what\'s the catch?', a: 'No catch. The catalog is free forever and every skill\'s source is readable line-by-line before you use it. We earn from group-buy savings on paid AI tools, done-for-you agent setups, and creator tools — never by locking the free catalog behind a paywall.' },
+              { q: 'Will it actually work in my AI tool?', a: 'Yes. The Builder outputs a system prompt / custom instruction that runs as-is in ChatGPT, Claude, or Gemini — paste it in and go. No API keys, no install, no code.' },
+              { q: 'Do I need to know how to code?', a: 'No. WorkflowStacks is built for non-technical founders and marketers. You browse by outcome, pick the skills you want, and the Agent Builder generates a ready-to-paste blueprint for you.' },
+              { q: 'How are skills chosen?', a: 'They\'re ingested from GitHub by trending and star count, then quality-gated — only listings that score 8/10 or higher are published. Every card shows live GitHub stars and forks, refreshed daily, so you judge real third-party signal, not invented benchmarks.' },
+              { q: 'What are Playbooks and Personas?', a: 'Playbooks are step-by-step guides that combine AI skills to solve one specific problem (like "Validate a New Offer in 48 Hours"). Personas are pre-configured AI agent roles for specific audiences (Founders, Agencies, Ecommerce). Both open in the Builder in one click.' },
             ].map((faq, i) => (
               <details key={i} className="group bg-slate-900/60 border border-slate-700/50 rounded-xl overflow-hidden">
                 <summary className="flex items-center justify-between p-5 cursor-pointer text-white font-semibold hover:bg-white/5 transition-colors">
