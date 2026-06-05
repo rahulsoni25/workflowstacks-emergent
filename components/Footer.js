@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Sparkles } from 'lucide-react'
+import WsMark from '@/components/WsMark'
 
 const footerLinks = {
   marketplace: {
@@ -67,12 +68,10 @@ export default function Footer() {
         {/* Brand */}
         <div className="max-w-sm">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg shadow-teal-500/20">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#C6F24E' }}>
+              <WsMark className="w-6 h-6" style={{ color: '#0A0C0D' }} />
             </div>
-            <span className="text-xl font-bold text-white tracking-tight">
-              Workflow<span className="text-teal-400">Stacks</span>
-            </span>
+            <span className="wm text-xl text-white">workflow<span className="s" style={{ color: '#C6F24E' }}>stacks</span></span>
           </Link>
           <p className="mt-4 text-sm text-slate-400 leading-relaxed">
             The marketplace for AI skills that launch offers, rank in AI search, and automate operations. No coding required.

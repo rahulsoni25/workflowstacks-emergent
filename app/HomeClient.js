@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import WsMark from '@/components/WsMark'
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -129,10 +130,10 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg shadow-teal-500/20">
-                <Sparkles className="w-5 h-5 text-white" />
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#C6F24E' }}>
+                <WsMark className="w-6 h-6" style={{ color: '#0A0C0D' }} />
               </div>
-              <span className="text-xl font-bold text-white tracking-tight">Workflow<span className="text-teal-400">Stacks</span></span>
+              <span className="wm text-xl text-slate-100">workflow<span className="s" style={{ color: '#C6F24E' }}>stacks</span></span>
             </Link>
             <nav className="hidden md:flex items-center gap-1">
               {/* Primary destinations only — secondary links live under "More" so the
@@ -211,11 +212,12 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               <span className="text-teal-300 text-sm font-medium">Live marketplace — {skillsFloor}+ AI skills indexed</span>
             </motion.div>
 
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-6 leading-tight tracking-tight">
-              AI Skills & No-Code Agents
-              <br />
-              <span className="text-gradient-neptune">for Claude, ChatGPT & Gemini</span>
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-white mb-4 leading-[0.92] tracking-tight">
+              <span className="wm">workflow<span className="s" style={{ color: '#C6F24E' }}>stacks</span></span>
             </h1>
+            <p className="text-2xl md:text-3xl font-semibold text-white mb-6 tracking-tight">
+              Stack the skills.{' '}<span style={{ color: '#C6F24E' }}>Ship the agent.</span>
+            </p>
             <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed">
               Built for startup founders and marketing agencies who want to install open-source AI skills, agents, and personas that handle SEO, outreach, and ecommerce ops — <strong className="text-white">without writing code.</strong>
             </p>

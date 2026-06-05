@@ -110,3 +110,23 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #14b8a6;
 }
+
+/* ============ Brand Direction 02 ============ */
+:root{
+  --brand-ink: #0A0C0D;
+  --brand-ink-2: #101314;
+  --brand-ink-3: #171B1C;
+  --brand-line: #262B2D;
+  --brand-line-2: #323A3C;
+  --brand-lime: #C6F24E;
+  --brand-lime-deep: #A6D62E;
+  --brand-off: #ECEFEA;
+  --brand-muted: #8B928D;
+  --brand-faint: #5A615D;
+  --brand-cream: #F3F3EC;
+  --brand-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --brand-sans: 'Space Grotesk', system-ui, sans-serif;
+}
+.wm{font-weight:600;letter-spacing:-.025em;line-height:1;white-space:nowrap;text-transform:lowercase}
+.wm .s{color:var(--brand-lime)}
+.font-mono-brand{font-family:var(--brand-mono)}

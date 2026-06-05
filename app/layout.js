@@ -1,5 +1,9 @@
 import './globals.css'
 import Footer from '@/components/Footer'
+import { Space_Grotesk, JetBrains_Mono } from 'next/font/google'
+
+const grotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400','500','600','700'], variable: '--font-grotesk', display: 'swap' })
+const mono = JetBrains_Mono({ subsets: ['latin'], weight: ['400','500','600','700'], variable: '--font-mono-jb', display: 'swap' })
 
 export const metadata = {
   title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, ChatGPT & Gemini',
@@ -69,7 +73,7 @@ export default function RootLayout({ children }) {
   // (app/page.js) so each route can carry its own page-specific structured data.
 
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`dark ${grotesk.variable} ${mono.variable}`}>
       <head>
         <script
           type="application/ld+json"
