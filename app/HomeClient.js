@@ -126,7 +126,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
   return (
     <div className="min-h-screen bg-neptune">
       {/* Sticky Header */}
-      <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50">
+      <header className="border-b border-[#262B2D] bg-[#0A0C0D]/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2.5">
@@ -154,7 +154,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                   More <ChevronDown className="w-3.5 h-3.5 ml-1 group-hover:rotate-180 transition-transform" />
                 </Button>
                 <div className="absolute right-0 top-full pt-2 hidden group-hover:block z-50">
-                  <div className="min-w-[190px] rounded-xl border border-slate-700/70 bg-slate-900/95 backdrop-blur-xl p-1.5 shadow-2xl shadow-black/40">
+                  <div className="min-w-[190px] rounded-xl border border-[#262B2D] bg-[#101314] backdrop-blur-xl p-1.5 shadow-2xl shadow-black/40">
                     {[
                       { href: '/playbooks', label: 'Playbooks', note: 'Solve one problem' },
                       { href: '/personas', label: 'Personas', note: 'Role-in-a-box' },
@@ -175,7 +175,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
 
               <div className="w-px h-6 bg-slate-700 mx-2"></div>
               <Link href="/builder">
-                <Button size="sm" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20">
+                <Button size="sm" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20">
                   <Zap className="w-3.5 h-3.5 mr-1.5" />
                   Build Agent
                 </Button>
@@ -189,9 +189,9 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
       <section className="relative overflow-hidden py-20 md:py-28 px-4">
         {/* Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-teal-500/5 rounded-full blur-3xl"></div>
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#C6F24E]/5 rounded-full blur-3xl animate-pulse-slow"></div>
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#C6F24E]/5 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[#C6F24E]/5 rounded-full blur-3xl"></div>
         </div>
 
         <div className="container mx-auto relative z-10">
@@ -206,10 +206,10 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-teal-500/10 border border-teal-500/20 rounded-full px-4 py-1.5 mb-6"
+              className="inline-flex items-center gap-2 bg-[#101314] border border-[#262B2D] rounded-full px-4 py-1.5 mb-6"
             >
-              <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></span>
-              <span className="text-teal-300 text-sm font-medium">Live marketplace — {skillsFloor}+ AI skills indexed</span>
+              <span className="w-2 h-2 rounded-full animate-pulse" style={{background:'#C6F24E', boxShadow:'0 0 0 4px rgba(198,242,78,0.18)'}}></span>
+              <span className="text-slate-200 font-mono text-xs tracking-wider uppercase">Live marketplace — {skillsFloor}+ AI skills indexed</span>
             </motion.div>
 
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-white mb-4 leading-[0.92] tracking-tight">
@@ -225,13 +225,13 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
               <Link href="/builder">
-                <Button size="lg" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white px-8 py-6 text-lg shadow-2xl shadow-teal-500/25 rounded-xl">
+                <Button size="lg" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] px-8 py-6 text-lg shadow-2xl shadow-lime-500/20 rounded-xl font-semibold">
                   <Zap className="w-5 h-5 mr-2" />
                   Build Your AI Agent — Free
                 </Button>
               </Link>
               <Link href="/playbooks">
-                <Button size="lg" variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5 px-8 py-6 text-lg rounded-xl">
+                <Button size="lg" variant="outline" className="border-[#323A3C] text-[#ECEFEA] hover:bg-white/5 px-8 py-6 text-lg rounded-xl">
                   <Play className="w-5 h-5 mr-2" />
                   Browse Playbooks
                 </Button>
@@ -239,7 +239,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             </div>
 
             <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto mb-12">
-              Everything's <strong className="text-teal-300">100% free</strong> — real, trending open-source tools, AI-packaged into ready-to-use skills, playbooks, and agents.
+              Everything's <strong className="text-[#C6F24E]">100% free</strong> — real, trending open-source tools, AI-packaged into ready-to-use skills, playbooks, and agents.
               Others charge $5–49 per config. Don't <em>buy</em> a static setup — <strong className="text-white">build exactly the agent you need</strong>, in one click.
             </p>
 
@@ -256,19 +256,19 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               </div>
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-white">{skillsFloor}+</div>
-                <div className="text-sm text-slate-400 mt-1">real AI skills indexed</div>
+                <div className="text-[#8B928D] font-mono text-xs tracking-wider uppercase mt-1">real AI skills indexed</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-teal-400">Live</div>
-                <div className="text-sm text-slate-400 mt-1">GitHub stars &amp; forks</div>
+                <div className="text-3xl md:text-4xl font-bold text-[#C6F24E]">Live</div>
+                <div className="text-[#8B928D] font-mono text-xs tracking-wider uppercase mt-1">GitHub stars &amp; forks</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-cyan-400">Daily</div>
-                <div className="text-sm text-slate-400 mt-1">refreshed from GitHub</div>
+                <div className="text-3xl md:text-4xl font-bold text-[#C6F24E]">Daily</div>
+                <div className="text-[#8B928D] font-mono text-xs tracking-wider uppercase mt-1">refreshed from GitHub</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-emerald-400">Free</div>
-                <div className="text-sm text-slate-400 mt-1">no paywall, ever</div>
+                <div className="text-3xl md:text-4xl font-bold text-[#C6F24E]">Free</div>
+                <div className="text-[#8B928D] font-mono text-xs tracking-wider uppercase mt-1">no paywall, ever</div>
               </div>
             </motion.div>
           </motion.div>
@@ -276,9 +276,10 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
       </section>
 
       {/* The wedge — answer "isn't this just GitHub with extra steps?" out loud */}
-      <section className="py-20 px-4 border-t border-teal-500/10">
+      <section className="py-20 px-4 border-t border-[#262B2D]">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
+            <p className="eyebrow mb-4 justify-center">// THE WEDGE</p>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
               "Isn't this just GitHub with <span className="text-gradient-neptune">extra steps?</span>"
             </h2>
@@ -294,9 +295,9 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             ].map((c, i) => {
               const Icon = c.icon
               return (
-                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-2xl p-6">
-                  <div className="w-11 h-11 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5 text-teal-400" />
+                <div key={i} className="bg-[#101314] border border-[#262B2D] rounded-2xl p-6">
+                  <div className="w-11 h-11 rounded-xl bg-[#0A0C0D] border border-[#C6F24E]/30 flex items-center justify-center mb-4">
+                    <Icon className="w-5 h-5 text-[#C6F24E]" />
                   </div>
                   <h3 className="text-white font-semibold text-lg mb-2">{c.t}</h3>
                   <p className="text-slate-400 text-sm leading-relaxed">{c.d}</p>
@@ -306,7 +307,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
           </div>
           <div className="text-center mt-8">
             <Link href="/builder">
-              <Button size="lg" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20">
+              <Button size="lg" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20">
                 <Zap className="w-4 h-4 mr-2" />Build an agent from real tools — free
               </Button>
             </Link>
@@ -315,7 +316,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
       </section>
 
       {/* 3-Step How It Works */}
-      <section className="py-20 px-4 border-t border-teal-500/10">
+      <section className="py-20 px-4 border-t border-[#262B2D]">
         <div className="container mx-auto max-w-6xl">
           <motion.div
             initial="initial"
@@ -324,6 +325,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             variants={staggerContainer}
             className="text-center mb-14"
           >
+            <motion.p variants={fadeInUp} className="eyebrow mb-4 justify-center">// HOW IT WORKS</motion.p>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
               From Idea to AI Agent in <span className="text-gradient-neptune">3 Simple Steps</span>
             </motion.h2>
@@ -345,7 +347,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.15 }}
               >
-                <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl hover:border-teal-500/30 transition-all duration-300 h-full group">
+                <Card className="bg-[#101314] border border-[#262B2D] hover:border-[#C6F24E]/30 transition-all duration-300 h-full group">
                   <CardHeader>
                     <div className="flex items-center gap-4 mb-3">
                       <div className={`w-12 h-12 rounded-xl bg-${item.color}-500/10 border border-${item.color}-500/20 flex items-center justify-center group-hover:bg-${item.color}-500/20 transition-colors`}>
@@ -375,6 +377,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             variants={staggerContainer}
             className="text-center mb-14"
           >
+            <motion.p variants={fadeInUp} className="eyebrow mb-4 justify-center">// BUILT FOR</motion.p>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
               Built for <span className="text-gradient-neptune">Your Role</span>
             </motion.h2>
@@ -412,11 +415,11 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                 transition={{ delay: i * 0.12 }}
               >
                 <Link href={card.href}>
-                  <Card className={`bg-gradient-to-br ${card.gradient} ${card.border} backdrop-blur-xl ${card.hoverBorder} transition-all duration-300 cursor-pointer group h-full`}>
+                  <Card className="bg-[#101314] border border-[#262B2D] hover:border-[#C6F24E]/40 transition-all duration-300 cursor-pointer group h-full">
                     <CardHeader>
                       <div className="text-4xl mb-2">{card.emoji}</div>
                       <CardTitle className="text-white text-2xl">{card.title}</CardTitle>
-                      <p className="text-teal-300 text-sm font-medium">{card.subtitle}</p>
+                      <p className="text-[#C6F24E] text-sm font-medium">{card.subtitle}</p>
                       <CardDescription className="text-slate-300 text-base mt-2">
                         {card.desc}
                       </CardDescription>
@@ -425,12 +428,12 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                       <ul className="space-y-2">
                         {card.benefits.map((b, j) => (
                           <li key={j} className="flex items-center gap-2 text-sm text-slate-300">
-                            <Check className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                            <Check className="w-4 h-4 text-[#C6F24E] flex-shrink-0" />
                             {b}
                           </li>
                         ))}
                       </ul>
-                      <Button className="w-full bg-white/10 hover:bg-white/20 text-white border border-white/10 mt-4 group-hover:border-teal-500/50">
+                      <Button className="w-full bg-white/5 hover:bg-white/10 text-white border border-[#323A3C] group-hover:border-[#C6F24E]/50 mt-4">
                         {card.cta}
                         <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                       </Button>
@@ -445,7 +448,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
 
       {/* New This Week strip */}
       {initialNewSkills.length > 0 && (
-        <section className="py-16 px-4 border-t border-teal-500/10">
+        <section className="py-16 px-4 border-t border-[#262B2D]">
           <div className="container mx-auto max-w-6xl">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -455,13 +458,13 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                   Updated daily from GitHub
                 </span>
               </div>
-              <Link href="/skills" className="text-sm text-teal-300 hover:text-teal-200 transition-colors whitespace-nowrap">
+              <Link href="/skills" className="text-sm text-[#C6F24E] hover:text-[#A6D62E] transition-colors whitespace-nowrap">
                 Browse all 182+ skills →
               </Link>
             </div>
             <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-slate-700">
               {initialNewSkills.slice(0, 8).map((skill) => (
-                <Link key={skill.id} href={`/skills/${skill.id}`} className="flex-shrink-0 w-64 bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 hover:border-teal-500/40 transition-all duration-200 group">
+                <Link key={skill.id} href={`/skills/${skill.id}`} className="flex-shrink-0 w-64 bg-[#101314] border border-[#262B2D] rounded-xl p-4 hover:border-[#C6F24E]/40 transition-all duration-200 group">
                   <div className="flex items-center justify-between mb-2">
                     <Badge className={`${getCategoryColor(skill.category)} border text-xs`}>
                       {skill.category}
@@ -473,10 +476,10 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                       </span>
                     )}
                   </div>
-                  <p className="text-white text-sm font-semibold leading-snug mb-3 line-clamp-2 group-hover:text-teal-300 transition-colors">
+                  <p className="text-white text-sm font-semibold leading-snug mb-3 line-clamp-2 group-hover:text-[#C6F24E] transition-colors">
                     {skill.title_human || skill.name}
                   </p>
-                  <span className="text-xs text-teal-400">View →</span>
+                  <span className="text-xs text-[#C6F24E]">View →</span>
                 </Link>
               ))}
             </div>
@@ -485,7 +488,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
       )}
 
       {/* Honest, verifiable trust — no fake reviews */}
-      <section className="py-20 px-4 border-t border-teal-500/10">
+      <section className="py-20 px-4 border-t border-[#262B2D]">
         <div className="container mx-auto max-w-5xl text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Real tools. <span className="text-gradient-neptune">Real numbers.</span> No fluff.
@@ -500,7 +503,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               { v: '≥8/10', l: 'Quality-gated listings' },
               { v: '100%', l: 'Free — no paywall' },
             ].map((s, i) => (
-              <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-6">
+              <div key={i} className="bg-[#101314] border border-[#262B2D] rounded-xl p-6">
                 <div className="text-3xl font-bold text-gradient-neptune mb-1">{s.v}</div>
                 <div className="text-slate-400 text-sm">{s.l}</div>
               </div>
@@ -519,11 +522,12 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             variants={staggerContainer}
             className="text-center mb-14"
           >
+            <motion.p variants={fadeInUp} className="eyebrow mb-4 justify-center">// PRICING</motion.p>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
               The tools are free. You pay for <span className="text-gradient-neptune">time, trust & savings</span>
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-slate-400 text-lg max-w-2xl mx-auto">
-              The open-source skills are <strong className="text-teal-300">always free</strong> — you can read every line.
+              The open-source skills are <strong className="text-[#C6F24E]">always free</strong> — you can read every line.
               We earn from group-buy savings, done-for-you setups, and creator tools. Never from the free catalog.
             </motion.p>
           </motion.div>
@@ -553,10 +557,10 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.12 }}
               >
-                <Card className={`relative h-full ${plan.primary ? 'bg-gradient-to-b from-teal-500/10 to-cyan-500/10 border-teal-500/40 glow-teal' : 'bg-slate-900/60 border-slate-700/50'} backdrop-blur-xl`}>
+                <Card className={`relative h-full ${plan.primary ? 'bg-[#0A0C0D] border border-[#C6F24E]/40 glow-teal' : 'bg-[#101314] border border-[#262B2D]'} backdrop-blur-xl`}>
                   {plan.badge && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white border-0 px-4 py-1 shadow-lg shadow-teal-500/20">
+                      <Badge className="bg-[#C6F24E] text-[#0A0C0D] border-0 px-4 py-1 shadow-lg shadow-lime-500/20">
                         {plan.badge}
                       </Badge>
                     </div>
@@ -573,20 +577,20 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                     <ul className="space-y-3">
                       {plan.features.map((f, j) => (
                         <li key={j} className="flex items-center gap-2.5 text-sm text-slate-300">
-                          <Check className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                          <Check className="w-4 h-4 text-[#C6F24E] flex-shrink-0" />
                           {f}
                         </li>
                       ))}
                     </ul>
                     {plan.waitlist ? (
                       <a href="#newsletter" className="block mt-6">
-                        <Button className={`w-full ${plan.primary ? 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-slate-600'}`} size="lg">
+                        <Button className={`w-full ${plan.primary ? 'bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-[#323A3C]'}`} size="lg">
                           {plan.cta}
                         </Button>
                       </a>
                     ) : (
                       <Link href="/builder" className="block mt-6">
-                        <Button className={`w-full ${plan.primary ? 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-slate-600'}`} size="lg">
+                        <Button className={`w-full ${plan.primary ? 'bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-[#323A3C]'}`} size="lg">
                           {plan.cta}
                         </Button>
                       </Link>
@@ -600,7 +604,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
       </section>
 
       {/* Browse Skills Section */}
-      <section className="py-20 px-4 border-t border-teal-500/10">
+      <section className="py-20 px-4 border-t border-[#262B2D]">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
@@ -610,7 +614,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
           </div>
 
           {/* Search and Filter */}
-          <div className="bg-slate-900/60 backdrop-blur-xl rounded-2xl p-5 border border-slate-700/50 mb-8">
+          <div className="bg-[#101314] border border-[#262B2D] rounded-2xl p-5 mb-8">
             <div className="flex flex-col md:flex-row gap-4 mb-5">
               <div className="flex-1 relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
@@ -618,22 +622,22 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                   placeholder="Search: 'automate reviews', 'rank in AI search', 'qualify leads'..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-500 focus:border-teal-500/50 focus:ring-teal-500/20"
+                  className="pl-10 bg-[#0A0C0D] border-[#262B2D] text-white placeholder:text-slate-500 focus:border-[#C6F24E]/50 focus:ring-[#C6F24E]/20"
                 />
               </div>
               {favs.length > 0 && (
-                <span className="text-xs text-teal-300 bg-teal-500/10 border border-teal-500/20 rounded-full px-2 py-0.5 self-center">
+                <span className="text-xs text-[#C6F24E] bg-[#C6F24E]/10 border border-[#C6F24E]/30 rounded-full px-2 py-0.5 self-center">
                   {favs.length} saved
                 </span>
               )}
             </div>
             <Tabs value={category} onValueChange={setCategory} className="w-full max-w-full overflow-x-auto">
               <TabsList className="bg-slate-800/50 border border-slate-700/50 flex-nowrap w-max max-w-none">
-                <TabsTrigger value="all" className="data-[state=active]:bg-teal-500 data-[state=active]:text-white">All</TabsTrigger>
-                <TabsTrigger value="ai-agent" className="data-[state=active]:bg-cyan-500 data-[state=active]:text-white">AI Agents</TabsTrigger>
-                <TabsTrigger value="mcp-server" className="data-[state=active]:bg-emerald-500 data-[state=active]:text-white">MCP</TabsTrigger>
-                <TabsTrigger value="claude-skill" className="data-[state=active]:bg-violet-500 data-[state=active]:text-white">Claude</TabsTrigger>
-                <TabsTrigger value="prompt" className="data-[state=active]:bg-amber-500 data-[state=active]:text-white">Prompts</TabsTrigger>
+                <TabsTrigger value="all" className="data-[state=active]:bg-[#C6F24E] data-[state=active]:text-[#0A0C0D]">All</TabsTrigger>
+                <TabsTrigger value="ai-agent" className="data-[state=active]:bg-[#C6F24E] data-[state=active]:text-[#0A0C0D]">AI Agents</TabsTrigger>
+                <TabsTrigger value="mcp-server" className="data-[state=active]:bg-[#C6F24E] data-[state=active]:text-[#0A0C0D]">MCP</TabsTrigger>
+                <TabsTrigger value="claude-skill" className="data-[state=active]:bg-[#C6F24E] data-[state=active]:text-[#0A0C0D]">Claude</TabsTrigger>
+                <TabsTrigger value="prompt" className="data-[state=active]:bg-[#C6F24E] data-[state=active]:text-[#0A0C0D]">Prompts</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
@@ -641,21 +645,21 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
           {/* Skills Grid */}
           {loading ? (
             <div className="text-center py-20">
-              <div className="inline-block w-14 h-14 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+              <div className="inline-block w-14 h-14 border-4 border-[#C6F24E] border-t-transparent rounded-full animate-spin"></div>
               <p className="text-slate-400 mt-4">Loading skills...</p>
             </div>
           ) : skills.length === 0 ? (
             <div className="text-center py-20">
               <p className="text-slate-400 text-xl mb-4">No skills match this filter yet — check back soon.</p>
               <Link href="/skills">
-                <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white">Browse all skills</Button>
+                <Button className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold">Browse all skills</Button>
               </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {skills.map((skill) => (
                 <div key={skill.id}>
-                  <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl hover:border-teal-500/40 transition-all duration-300 group h-full flex flex-col">
+                  <Card className="bg-[#101314] border border-[#262B2D] hover:border-[#C6F24E]/40 transition-all duration-300 group h-full flex flex-col">
                     <CardHeader className="flex-1">
                       <div className="flex items-start justify-between mb-2">
                         <Badge className={`${getCategoryColor(skill.category)} border text-xs`}>
@@ -675,7 +679,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                           </button>
                         </div>
                       </div>
-                      <CardTitle className="text-white text-lg group-hover:text-teal-300 transition-colors">{skill.title_human || skill.name}</CardTitle>
+                      <CardTitle className="text-white text-lg group-hover:text-[#C6F24E] transition-colors">{skill.title_human || skill.name}</CardTitle>
                       <CardDescription className="text-slate-400 line-clamp-2">
                         {skill.description_human || skill.description}
                       </CardDescription>
@@ -701,7 +705,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                     </CardContent>
                     <CardFooter>
                       <Link href={`/skills/${skill.id}`} className="w-full">
-                        <Button className="w-full bg-slate-800 hover:bg-teal-500/20 text-slate-200 hover:text-teal-300 border border-slate-700 hover:border-teal-500/40 transition-all" variant="outline">
+                        <Button className="w-full bg-[#0A0C0D] hover:bg-[#C6F24E]/10 text-[#ECEFEA] hover:text-[#C6F24E] border border-[#262B2D] hover:border-[#C6F24E]/40 transition-all" variant="outline">
                           View Details
                           <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
                         </Button>
@@ -717,7 +721,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
           {skills.length > 0 && (stats?.totalSkills || 0) > skills.length && (
             <div className="text-center mt-10">
               <Link href="/skills">
-                <Button size="lg" variant="outline" className="border-teal-500/30 text-teal-200 hover:bg-teal-500/10">
+                <Button size="lg" variant="outline" className="border-[#C6F24E]/40 text-[#C6F24E] hover:bg-[#C6F24E]/10">
                   Browse all {stats.totalSkills} skills
                   <ChevronRight className="w-4 h-4 ml-1" />
                 </Button>
@@ -728,11 +732,14 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
       </section>
 
       {/* FAQ Section — AEO Rich Snippets */}
-      <section className="py-20 px-4 border-t border-teal-500/10">
+      <section className="py-20 px-4 border-t border-[#262B2D]">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="text-3xl md:text-4xl font-bold text-white text-center mb-14">
-            Frequently Asked <span className="text-gradient-neptune">Questions</span>
-          </h2>
+          <div className="text-center mb-14">
+            <p className="eyebrow mb-4 justify-center">// QUESTIONS</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white">
+              Frequently Asked <span className="text-gradient-neptune">Questions</span>
+            </h2>
+          </div>
           <div className="space-y-4">
             {[
               { q: 'Isn\'t this just GitHub with extra steps?', a: 'The opposite — we remove the steps. We read 180+ repos, score them at 8/10+, write each tool\'s usage guide (install command, quick-start, real gotcha), and let you merge the ones you pick into one paste-ready agent. You skip hours of evaluating repos and wiring prompts. The tools stay free and open-source; we delete the work around them.' },
@@ -742,7 +749,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               { q: 'How are skills chosen?', a: 'They\'re ingested from GitHub by trending and star count, then quality-gated — only listings that score 8/10 or higher are published. Every card shows live GitHub stars and forks, refreshed daily, so you judge real third-party signal, not invented benchmarks.' },
               { q: 'What are Playbooks and Personas?', a: 'Playbooks are step-by-step guides that combine AI skills to solve one specific problem (like "Validate a New Offer in 48 Hours"). Personas are pre-configured AI agent roles for specific audiences (Founders, Agencies, Ecommerce). Both open in the Builder in one click.' },
             ].map((faq, i) => (
-              <details key={i} className="group bg-slate-900/60 border border-slate-700/50 rounded-xl overflow-hidden">
+              <details key={i} className="group bg-[#101314] border border-[#262B2D] rounded-xl overflow-hidden">
                 <summary className="flex items-center justify-between p-5 cursor-pointer text-white font-semibold hover:bg-white/5 transition-colors">
                   {faq.q}
                   <ChevronRight className="w-5 h-5 text-slate-400 group-open:rotate-90 transition-transform" />
@@ -764,10 +771,11 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Card className="bg-gradient-to-br from-teal-500/10 to-cyan-500/10 border-teal-500/30 backdrop-blur-xl">
+            <Card className="bg-[#101314] border border-[#C6F24E]/30 backdrop-blur-xl">
               <CardContent className="py-10 px-8 text-center">
-                <div className="w-14 h-14 mx-auto mb-5 bg-teal-500/20 rounded-2xl flex items-center justify-center">
-                  <Mail className="w-7 h-7 text-teal-400" />
+                <p className="eyebrow mb-4 justify-center">// DAILY</p>
+                <div className="w-14 h-14 mx-auto mb-5 bg-[#C6F24E]/15 rounded-2xl flex items-center justify-center">
+                  <Mail className="w-7 h-7 text-[#C6F24E]" />
                 </div>
                 <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
                   Get New Skills Every Week
@@ -776,7 +784,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                   Get weekly curated AI skills, agent blueprints, and automation playbooks — straight to your inbox.
                 </p>
                 {emailSubmitted ? (
-                  <div className="flex items-center justify-center gap-2 text-teal-400 font-semibold">
+                  <div className="flex items-center justify-center gap-2 text-[#C6F24E] font-semibold">
                     <Check className="w-5 h-5" />
                     You're in! Check your inbox for a welcome email.
                   </div>
@@ -788,9 +796,9 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-500 focus:border-teal-500/50"
+                      className="bg-[#0A0C0D] border-[#262B2D] text-white placeholder:text-slate-500 focus:border-[#C6F24E]/50"
                     />
-                    <Button type="submit" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white whitespace-nowrap px-6 shadow-lg shadow-teal-500/20">
+                    <Button type="submit" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold whitespace-nowrap px-6 shadow-lg shadow-lime-500/20">
                       Subscribe Free
                     </Button>
                   </form>
@@ -803,28 +811,28 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
       </section>
 
       {/* Trust Badges */}
-      <section className="py-12 px-4 border-t border-teal-500/10">
+      <section className="py-12 px-4 border-t border-[#262B2D]">
         <div className="container mx-auto max-w-4xl">
-          <div className="flex flex-wrap items-center justify-center gap-8 text-slate-500">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-8 text-[#5A615D]">
+            <div className="flex items-center gap-2 text-[#ECEFEA]">
               <Github className="w-5 h-5" />
-              <span className="text-sm">100% open-source tools</span>
+              <span className="font-mono text-xs tracking-wider uppercase">100% open-source tools</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-[#ECEFEA]">
               <Star className="w-5 h-5" />
-              <span className="text-sm">Live GitHub stars & forks</span>
+              <span className="font-mono text-xs tracking-wider uppercase">Live GitHub stars & forks</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-[#ECEFEA]">
               <Check className="w-5 h-5" />
-              <span className="text-sm">Quality-gated (≥8/10)</span>
+              <span className="font-mono text-xs tracking-wider uppercase">Quality-gated (≥8/10)</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-[#ECEFEA]">
               <TrendingUp className="w-5 h-5" />
-              <span className="text-sm">Refreshed daily</span>
+              <span className="font-mono text-xs tracking-wider uppercase">Refreshed daily</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 text-[#ECEFEA]">
               <Check className="w-5 h-5" />
-              <span className="text-sm">No fake reviews or metrics</span>
+              <span className="font-mono text-xs tracking-wider uppercase">No fake reviews or metrics</span>
             </div>
           </div>
         </div>

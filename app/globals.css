@@ -13,39 +13,39 @@ body {
 
 @layer base {
   :root {
-    --background: 222 47% 4%;
-    --foreground: 210 40% 98%;
-    --card: 222 47% 6%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222 47% 6%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 172 66% 50%;
-    --primary-foreground: 222 47% 4%;
-    --secondary: 217 33% 12%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 12%;
-    --muted-foreground: 215 20% 55%;
-    --accent: 172 66% 50%;
-    --accent-foreground: 222 47% 4%;
+    --background: 200 7% 4%;        /* #0A0C0D ink */
+    --foreground: 80 16% 92%;       /* #ECEFEA off-white */
+    --card: 200 9% 7%;              /* #101314 ink-2 */
+    --card-foreground: 80 16% 92%;
+    --popover: 200 9% 9%;           /* #171B1C ink-3 */
+    --popover-foreground: 80 16% 92%;
+    --primary: 73 84% 63%;          /* #C6F24E lime */
+    --primary-foreground: 200 7% 4%; /* ink */
+    --secondary: 200 6% 11%;        /* ink-3 */
+    --secondary-foreground: 80 16% 92%;
+    --muted: 200 6% 11%;
+    --muted-foreground: 130 4% 55%; /* muted gray */
+    --accent: 73 84% 63%;            /* lime */
+    --accent-foreground: 200 7% 4%;
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 15%;
-    --input: 217 33% 15%;
-    --ring: 172 66% 50%;
-    --chart-1: 172 66% 50%;
-    --chart-2: 186 72% 48%;
-    --chart-3: 160 60% 45%;
-    --chart-4: 199 89% 48%;
-    --chart-5: 142 71% 45%;
+    --destructive-foreground: 80 16% 92%;
+    --border: 200 7% 16%;           /* #262B2D hairline */
+    --input: 200 7% 16%;
+    --ring: 73 84% 63%;              /* lime */
+    --chart-1: 73 84% 63%;
+    --chart-2: 80 16% 92%;
+    --chart-3: 130 4% 55%;
+    --chart-4: 73 75% 51%;          /* lime-deep */
+    --chart-5: 200 7% 16%;
     --radius: 0.75rem;
-    --sidebar-background: 222 47% 5%;
-    --sidebar-foreground: 210 40% 90%;
-    --sidebar-primary: 172 66% 50%;
-    --sidebar-primary-foreground: 222 47% 4%;
-    --sidebar-accent: 217 33% 12%;
-    --sidebar-accent-foreground: 210 40% 90%;
-    --sidebar-border: 217 33% 15%;
-    --sidebar-ring: 172 66% 50%;
+    --sidebar-background: 200 9% 7%;
+    --sidebar-foreground: 80 16% 92%;
+    --sidebar-primary: 73 84% 63%;
+    --sidebar-primary-foreground: 200 7% 4%;
+    --sidebar-accent: 200 6% 11%;
+    --sidebar-accent-foreground: 80 16% 92%;
+    --sidebar-border: 200 7% 16%;
+    --sidebar-ring: 73 84% 63%;
   }
 }
 
@@ -55,7 +55,7 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-family: var(--font-grotesk), 'Space Grotesk', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -63,19 +63,19 @@ body {
 
 @layer utilities {
   .text-gradient-neptune {
-    @apply bg-gradient-to-r from-teal-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent;
+    color: #C6F24E;
   }
   .text-gradient-warm {
-    @apply bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent;
+    color: #C6F24E;
   }
   .bg-neptune {
-    background: linear-gradient(135deg, #020617 0%, #0a1628 25%, #0d2137 50%, #0a1628 75%, #020617 100%);
+    background: #0A0C0D;
   }
   .bg-neptune-card {
     @apply bg-slate-900/60 backdrop-blur-xl;
   }
   .glow-teal {
-    box-shadow: 0 0 30px rgba(20, 184, 166, 0.15), 0 0 60px rgba(20, 184, 166, 0.05);
+    box-shadow: 0 0 30px rgba(198, 242, 78, 0.15), 0 0 60px rgba(198, 242, 78, 0.05);
   }
   .glow-cyan {
     box-shadow: 0 0 30px rgba(6, 182, 212, 0.15), 0 0 60px rgba(6, 182, 212, 0.05);
@@ -130,3 +130,35 @@ body {
 .wm{font-weight:600;letter-spacing:-.025em;line-height:1;white-space:nowrap;text-transform:lowercase}
 .wm .s{color:var(--brand-lime)}
 .font-mono-brand{font-family:var(--brand-mono)}
+
+@layer components {
+  .eyebrow {
+    font-family: var(--font-mono-jb), 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #C6F24E;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 26px;
+    height: 1px;
+    background: #C6F24E;
+    display: inline-block;
+  }
+  .ink-card {
+    background: #101314;
+    border: 1px solid #262B2D;
+    border-radius: var(--radius);
+  }
+  .btn-lime {
+    background: #C6F24E;
+    color: #0A0C0D;
+    font-weight: 600;
+  }
+  .btn-lime:hover { background: #A6D62E; }
+}
