@@ -279,12 +279,13 @@ export async function GET(request) {
       const category = searchParams.get('category');
       const search = searchParams.get('search');
 
-      // ?new=true — return skills added in the last 7 days, newest first
+      // ?new=true — return the 8 most recently updated skills (freshest GitHub
+      // pushes). Falls back to sort by last_updated since most skills share the
+      // same added_at batch timestamp. "New" here means "active on GitHub recently."
       if (searchParams.get('new') === 'true') {
-        const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
         const newSkills = await database.collection('skills')
-          .find({ added_at: { $gte: since }, published: { $ne: false } })
-          .sort({ added_at: -1 })
+          .find({ published: { $ne: false }, last_updated: { $exists: true } })
+          .sort({ last_updated: -1, github_stars: -1 })
           .limit(8)
           .toArray();
         return Response.json({ skills: newSkills });
