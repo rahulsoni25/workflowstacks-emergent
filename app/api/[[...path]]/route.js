@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/publish-category'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/publish-category', '/add-skill'];
 
 // Build GitHub API headers (token optional — works on free unauthenticated tier)
 function ghHeaders(accept = 'application/vnd.github+json') {
@@ -597,6 +597,61 @@ export async function GET(request) {
         removedTestSubscribers: subs.deletedCount,
         skillsRemaining: remaining
       });
+    }
+
+    // Add a specific GitHub repo to the catalog by URL — for canonical tools the
+    // generic scraper queries miss. ?url=https://github.com/owner/repo&category=...
+    // Honest content only: pulls real metadata from the GitHub API.
+    if (path === '/add-skill') {
+      const { searchParams } = new URL(request.url);
+      const ghUrl = searchParams.get('url');
+      const category = searchParams.get('category') || 'ai-agent';
+      if (!ghUrl) return Response.json({ error: 'url param required' }, { status: 400 });
+      const m = ghUrl.match(/github\.com\/([^/]+)\/([^/#?]+)/i);
+      if (!m) return Response.json({ error: 'invalid github url' }, { status: 400 });
+      const owner = m[1];
+      const repo = m[2].replace(/\.git$/, '');
+      try {
+        const r = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: ghHeaders() });
+        if (!r.ok) return Response.json({ error: `GitHub returned ${r.status}` }, { status: 400 });
+        const data = await r.json();
+        const id = uuidv4();
+        const doc = {
+          id,
+          name: data.name,
+          description: data.description || '',
+          category,
+          price: 0,
+          rating: Math.min(5, (data.stargazers_count / 1000) + 3.5),
+          installs: Math.floor(data.stargazers_count * 2.5),
+          source_url: ghUrl,
+          github_url: data.html_url,
+          github_stars: data.stargazers_count,
+          github_forks: data.forks_count,
+          github_topics: data.topics || [],
+          popularity_score: data.stargazers_count + data.forks_count * 5,
+          creator: owner,
+          creator_avatar: `https://github.com/${owner}.png`,
+          is_premium: false,
+          readme_preview: data.description || '',
+          language: data.language,
+          last_updated: data.pushed_at,
+          created_at: data.created_at,
+          updated_at: new Date(),
+          added_at: new Date(),
+          published: true, // manually added = trust the curator
+          rewrite_status: 'pending',
+          stars_refreshed_at: new Date(),
+        };
+        await database.collection('skills').updateOne(
+          { github_url: data.html_url },
+          { $set: doc },
+          { upsert: true }
+        );
+        return Response.json({ success: true, id, name: data.name, stars: data.stargazers_count, category });
+      } catch (e) {
+        return Response.json({ error: String(e.message || e) }, { status: 500 });
+      }
     }
 
     // Bulk-publish all real skills in a category — for fresh content areas where
