@@ -349,6 +349,15 @@ export async function GET(request) {
         { query: 'ad-creative-ai OR ad-copy-ai OR generative-ads', category: 'performance-marketing', minStars: 10 },
         { query: 'paid-social-automation OR campaign-optimization OR ppc-automation', category: 'performance-marketing', minStars: 10 },
 
+        // --- Google ecosystem: Looker, Flow (Veo), Opal/Opus, Gemini tools ---
+        { query: 'looker-open-source OR looker-sdk OR looker-mcp', category: 'analytics', minStars: 1 },
+        { query: 'looker-studio OR lookml OR looker-dashboard', category: 'analytics', minStars: 5 },
+        { query: 'google-flow OR veo-3 OR veo3 OR gemini-flow', category: 'ai-agent', minStars: 5 },
+        { query: 'veo-mcp OR flow-mcp OR ai-video-generation google', category: 'ai-agent', minStars: 1 },
+        { query: 'google-opal OR opal-app-builder OR google-stitch', category: 'ai-agent', minStars: 1 },
+        { query: 'opus-codec OR opus-mcp OR opus-tools', category: 'ai-agent', minStars: 5 },
+        { query: 'gemini-cli OR gemini-mcp OR vertex-ai-mcp', category: 'ai-agent', minStars: 5 },
+
         // --- Marketing analytics, attribution & BI dashboards ---
         { query: 'open-source bi OR business-intelligence dashboard', category: 'analytics', minStars: 800 },
         { query: 'marketing-attribution OR multi-touch-attribution', category: 'analytics', minStars: 30 },
