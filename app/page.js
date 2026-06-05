@@ -29,8 +29,9 @@ const faqJsonLd = {
 }
 
 export default async function HomePage() {
-  const [skillsData, statsData, personasData, playbooksData] = await Promise.all([
+  const [skillsData, statsData, personasData, playbooksData, newSkillsData] = await Promise.all([
     getJson('/api/skills'), getJson('/api/stats'), getJson('/api/personas'), getJson('/api/playbooks'),
+    getJson('/api/skills?new=true'),
   ])
   const allSkills = skillsData?.skills || []
   // Trim each card to only the fields the home grid renders, so we don't inline
@@ -49,6 +50,16 @@ export default async function HomePage() {
     is_premium: s.is_premium,
     price: s.price,
   }))
+  const newSkills = (newSkillsData?.skills || []).map((s) => ({
+    id: s.id,
+    name: s.name,
+    title_human: s.title_human,
+    description_human: s.description_human,
+    category: s.category,
+    github_stars: s.github_stars,
+    language: s.language,
+  }))
+
   // Single source of truth: every headline count is the real number of published,
   // browsable items — never rounded up past what a visitor can actually see.
   const totalSkills = allSkills.length || statsData?.totalSkills || 0
@@ -64,7 +75,7 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <HomeClient initialSkills={featured} initialStats={stats} />
+      <HomeClient initialSkills={featured} initialStats={stats} initialNewSkills={newSkills} />
     </>
   )
 }

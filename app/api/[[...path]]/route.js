@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators'];
 
 // Build GitHub API headers (token optional — works on free unauthenticated tier)
 function ghHeaders(accept = 'application/vnd.github+json') {
@@ -278,7 +278,18 @@ export async function GET(request) {
       const { searchParams } = new URL(request.url);
       const category = searchParams.get('category');
       const search = searchParams.get('search');
-      
+
+      // ?new=true — return skills added in the last 7 days, newest first
+      if (searchParams.get('new') === 'true') {
+        const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+        const newSkills = await database.collection('skills')
+          .find({ added_at: { $gte: since }, published: { $ne: false } })
+          .sort({ added_at: -1 })
+          .limit(8)
+          .toArray();
+        return Response.json({ skills: newSkills });
+      }
+
       // Quality gate: only show published listings (unless ?all=true)
       let query = searchParams.get('all') === 'true' ? {} : { published: { $ne: false } };
       if (category && category !== 'all') {
@@ -636,13 +647,23 @@ export async function GET(request) {
       const categories = await database.collection('skills').aggregate([
         { $group: { _id: '$category', count: { $sum: 1 } } }
       ]).toArray();
-      
-      return Response.json({ 
+
+      const [agentsBuilt, subscriberCount, memberCount, publishedSkills] = await Promise.all([
+        database.collection('agent_templates').countDocuments(),
+        database.collection('subscribers').countDocuments(),
+        database.collection('members').countDocuments(),
+        database.collection('skills').countDocuments({ published: { $ne: false } }),
+      ]);
+
+      return Response.json({
         totalSkills,
         categories: categories.reduce((acc, cat) => {
           acc[cat._id] = cat.count;
           return acc;
-        }, {})
+        }, {}),
+        agentsBuilt,
+        communitySize: subscriberCount + memberCount,
+        publishedSkills,
       });
     }
     
@@ -921,19 +942,183 @@ export async function GET(request) {
     if (path.startsWith('/agents/')) {
       const id = path.split('/')[2];
       const agent = await database.collection('agent_templates').findOne({ id, isPublic: true });
-      
+
       if (!agent) {
         return Response.json({ error: 'Agent not found' }, { status: 404 });
       }
-      
+
       // Fetch the skills
       const skills = await database.collection('skills')
         .find({ id: { $in: agent.skillIds } })
         .toArray();
-      
+
       return Response.json({ agent, skills });
     }
-    
+
+    // Admin: list all creator applications (sorted newest first)
+    if (path === '/creator-applications') {
+      const applications = await database.collection('creator_applications')
+        .find({})
+        .sort({ created_at: -1 })
+        .toArray();
+      return Response.json({ applications });
+    }
+
+    // Admin: send skill-of-the-day newsletter via Resend
+    if (path === '/newsletter/send') {
+      const subscribers = await database.collection('subscribers').find({}).toArray();
+      if (subscribers.length === 0) {
+        return Response.json({ ok: false, message: 'No subscribers yet.' });
+      }
+
+      // Pick a skill not sent in last 7 days, prefer highest stars
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const recentSends = await database.collection('newsletter_sends')
+        .find({ sent_at: { $gte: sevenDaysAgo } })
+        .toArray();
+      const recentSkillIds = recentSends.map((s) => s.skill_id);
+
+      let skill = await database.collection('skills').findOne(
+        { published: { $ne: false }, id: { $nin: recentSkillIds } },
+        { sort: { github_stars: -1 } }
+      );
+      // Fallback: all have been sent recently — pick the most-starred overall
+      if (!skill) {
+        skill = await database.collection('skills').findOne(
+          { published: { $ne: false } },
+          { sort: { github_stars: -1 } }
+        );
+      }
+      if (!skill) {
+        return Response.json({ ok: false, message: 'No published skills found.' });
+      }
+
+      const skillName = skill.title_human || skill.name;
+      const whatItDoes = (skill.use_guide && skill.use_guide.whatItDoes) || skill.description_human || skill.description || '';
+      const installCmd = (skill.use_guide && skill.use_guide.install) ? skill.use_guide.install : null;
+      const stars = skill.github_stars || 0;
+      const ctaUrl = `https://claude.ai/new?q=${encodeURIComponent('Act as ' + skillName + '. ' + whatItDoes)}`;
+      const guideUrl = `https://workflowstacks.com/skills/${skill.id}`;
+
+      let sentCount = 0;
+      for (const sub of subscribers) {
+        const unsubUrl = `https://workflowstacks.com/unsubscribe?email=${encodeURIComponent(sub.email)}`;
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WorkflowStacks</title></head>
+<body style="margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e5e5e5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <tr><td style="text-align:center;padding-bottom:32px;">
+      <span style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.5px;">WorkflowStacks</span>
+    </td></tr>
+    <tr><td style="background:#1a1a1a;border-radius:12px;padding:32px;">
+      <p style="margin:0 0 8px;font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Today's top AI skill</p>
+      <h1 style="margin:0 0 16px;font-size:28px;font-weight:700;color:#fff;line-height:1.2;">${skillName}</h1>
+      <p style="margin:0 0 24px;font-size:16px;color:#ccc;line-height:1.6;">${whatItDoes}</p>
+      ${installCmd ? `<div style="background:#0f0f0f;border-radius:8px;padding:14px 16px;margin-bottom:24px;"><code style="font-family:monospace;font-size:13px;color:#6ee7b7;">${installCmd}</code></div>` : ''}
+      <p style="margin:0 0 24px;font-size:14px;color:#888;">⭐ ${stars.toLocaleString()} stars on GitHub</p>
+      <a href="${ctaUrl}" style="display:inline-block;background:#7c3aed;color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 28px;border-radius:8px;margin-bottom:12px;">Open in Claude →</a>
+      <br>
+      <a href="${guideUrl}" style="display:inline-block;margin-top:8px;font-size:14px;color:#888;text-decoration:underline;">View full guide</a>
+    </td></tr>
+    <tr><td style="text-align:center;padding-top:24px;font-size:12px;color:#555;line-height:1.6;">
+      You're receiving this because you subscribed to WorkflowStacks.<br>
+      <a href="${unsubUrl}" style="color:#555;">Unsubscribe</a>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            },
+            body: JSON.stringify({
+              from: 'WorkflowStacks <newsletter@workflowstacks.com>',
+              to: sub.email,
+              subject: `🔧 Skill of the Day: ${skillName}`,
+              html,
+            }),
+          });
+          sentCount++;
+        } catch (e) {
+          console.error('Resend error for', sub.email, e.message);
+        }
+      }
+
+      await database.collection('newsletter_sends').insertOne({
+        skill_id: skill.id,
+        sent_at: new Date(),
+        recipient_count: sentCount,
+      });
+
+      return Response.json({ ok: true, sent: sentCount, skill: skill.name });
+    }
+
+    // Admin: discover creator leads from skills with github_url + creator field
+    if (path === '/find-creators') {
+      const skills = await database.collection('skills')
+        .find({ github_url: { $exists: true, $ne: null }, creator: { $exists: true, $ne: null } })
+        .limit(50)
+        .toArray();
+
+      let discovered = 0;
+      let withEmail = 0;
+
+      for (const s of skills) {
+        const username = (s.creator || '').toString().trim();
+        if (!username) continue;
+
+        // Skip if already a creator or has applied
+        const [existingCreator, existingApp] = await Promise.all([
+          database.collection('creators').findOne({ id: username }),
+          database.collection('creator_applications').findOne({ github: username }),
+        ]);
+        if (existingCreator || existingApp) continue;
+
+        // Check GitHub for public email
+        let email = null;
+        try {
+          const r = await fetch(`https://api.github.com/users/${username}`, { headers: ghHeaders() });
+          if (r.ok) {
+            const ghUser = await r.json();
+            if (ghUser.email) email = ghUser.email;
+          }
+        } catch (e) {
+          console.error('GitHub user fetch error:', username, e.message);
+        }
+
+        // Upsert into creator_leads
+        await database.collection('creator_leads').updateOne(
+          { creator_username: username, skill_id: s.id },
+          {
+            $setOnInsert: {
+              creator_username: username,
+              email: email || null,
+              skill_name: s.name,
+              skill_id: s.id,
+              github_url: s.github_url,
+              stars: s.github_stars || 0,
+              status: 'discovered',
+              created_at: new Date(),
+            },
+          },
+          { upsert: true }
+        );
+
+        discovered++;
+        if (email) withEmail++;
+
+        // Respect GitHub rate limits
+        await new Promise((res) => setTimeout(res, process.env.GITHUB_TOKEN ? 200 : 1000));
+      }
+
+      return Response.json({ discovered, with_email: withEmail });
+    }
+
     return Response.json({ error: 'Not found' }, { status: 404 });
     
   } catch (error) {
@@ -1260,6 +1445,14 @@ export async function POST(request) {
       return Response.json({ success: true });
     }
 
+    // Email unsubscribe — removes the email from the subscribers collection
+    if (path === '/unsubscribe') {
+      const { email } = await request.json().catch(() => ({}))
+      if (!email) return Response.json({ error: 'Email required' }, { status: 400 })
+      await database.collection('subscribers').deleteOne({ email: email.toLowerCase().trim() })
+      return Response.json({ ok: true, message: 'Unsubscribed successfully.' })
+    }
+
     // Upload skill
     if (path === '/upload') {
       const body = await request.json();
@@ -1387,15 +1580,102 @@ export async function POST(request) {
     if (path === '/agent-templates/copy') {
       const body = await request.json();
       const { agentId } = body;
-      
+
       await database.collection('agent_templates').updateOne(
         { id: agentId },
         { $inc: { copyCount: 1 } }
       );
-      
+
       return Response.json({ success: true });
     }
-    
+
+    // React (thumbs-up) a skill — increments reactions_up, returns new count
+    if (path.startsWith('/skills/') && path.endsWith('/react')) {
+      const parts = path.split('/');
+      // path is /skills/{id}/react → parts = ['', 'skills', id, 'react']
+      const skillId = parts[2];
+      if (!skillId) return Response.json({ error: 'Skill id required' }, { status: 400 });
+
+      const result = await database.collection('skills').findOneAndUpdate(
+        { id: skillId },
+        { $inc: { reactions_up: 1 } },
+        { returnDocument: 'after' }
+      );
+      if (!result) return Response.json({ error: 'Skill not found' }, { status: 404 });
+
+      return Response.json({ ok: true, reactions_up: result.reactions_up || 1 });
+    }
+
+    // Creator application — anyone can apply to list their tools
+    if (path === '/creator-apply') {
+      const body = await request.json();
+      const email = (body.email || '').toString().trim().toLowerCase();
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        return Response.json({ ok: false, error: 'Valid email is required' }, { status: 400 });
+      }
+
+      // Check for duplicate application
+      const existing = await database.collection('creator_applications').findOne({ email });
+      if (existing) {
+        return Response.json({ ok: false, error: 'An application with this email already exists.' }, { status: 409 });
+      }
+
+      const application = {
+        id: uuidv4(),
+        name: (body.name || '').toString().trim().slice(0, 100),
+        email,
+        github: (body.github || '').toString().trim().slice(0, 60),
+        twitter: (body.twitter || '').toString().trim().slice(0, 60),
+        bio: (body.bio || '').toString().trim().slice(0, 500),
+        what_you_want_to_list: (body.what_you_want_to_list || '').toString().trim().slice(0, 500),
+        status: 'pending',
+        created_at: new Date(),
+      };
+
+      await database.collection('creator_applications').insertOne(application);
+      return Response.json({ ok: true, message: 'Application received! We review within 48 hours.' });
+    }
+
+    // Admin: approve a creator application, generate API key, upsert creator record
+    if (path === '/creator-applications/approve') {
+      const denied = requireAdmin(request);
+      if (denied) return denied;
+
+      const body = await request.json();
+      const { id, notes } = body;
+      if (!id) return Response.json({ error: 'Application id required' }, { status: 400 });
+
+      const application = await database.collection('creator_applications').findOne({ id });
+      if (!application) return Response.json({ error: 'Application not found' }, { status: 404 });
+
+      const apiKey = uuidv4();
+      const now = new Date();
+
+      await database.collection('creator_applications').updateOne(
+        { id },
+        { $set: { status: 'approved', approved_at: now, api_key: apiKey, notes: notes || '' } }
+      );
+
+      await database.collection('creators').updateOne(
+        { id },
+        {
+          $set: {
+            id,
+            name: application.name,
+            email: application.email,
+            github: application.github,
+            api_key: apiKey,
+            revenue_split: 0.85,
+            approved_at: now,
+            status: 'active',
+          },
+        },
+        { upsert: true }
+      );
+
+      return Response.json({ ok: true, api_key: apiKey });
+    }
+
     return Response.json({ error: 'Not found' }, { status: 404 });
     
   } catch (error) {

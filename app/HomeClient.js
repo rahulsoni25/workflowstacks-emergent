@@ -24,7 +24,22 @@ const staggerContainer = {
   }
 }
 
-const HomeClient = ({ initialSkills = [], initialStats = null }) => {
+function useFavorites() {
+  const [favs, setFavs] = useState([])
+  useEffect(() => {
+    try { setFavs(JSON.parse(localStorage.getItem('ws_favs') || '[]')) } catch {}
+  }, [])
+  const toggle = (id) => {
+    setFavs(prev => {
+      const next = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+      try { localStorage.setItem('ws_favs', JSON.stringify(next)) } catch {}
+      return next
+    })
+  }
+  return { favs, toggle }
+}
+
+const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills = [] }) => {
   const [skills, setSkills] = useState(initialSkills)
   const [loading, setLoading] = useState(false)
   const [category, setCategory] = useState('all')
@@ -33,6 +48,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
   const [email, setEmail] = useState('')
   const [emailSubmitted, setEmailSubmitted] = useState(false)
   const filtersReady = useRef(false)
+  const { favs, toggle } = useFavorites()
 
   // Re-fetch when filters change. Skip the very first run when the server already
   // seeded the grid (so crawlers + first paint get real content, no refetch flash).
@@ -233,6 +249,10 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
               className="flex flex-wrap justify-center gap-8 md:gap-12"
             >
               <div className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-rose-400">{stats?.agentsBuilt || 0}</div>
+                <div className="text-sm text-slate-400 mt-1">agents built</div>
+              </div>
+              <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-white">{skillsFloor}+</div>
                 <div className="text-sm text-slate-400 mt-1">real AI skills indexed</div>
               </div>
@@ -421,6 +441,47 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
         </div>
       </section>
 
+      {/* New This Week strip */}
+      {initialNewSkills.length > 0 && (
+        <section className="py-16 px-4 border-t border-teal-500/10">
+          <div className="container mx-auto max-w-6xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-white">New this week</h2>
+                <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                  <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                  Updated daily from GitHub
+                </span>
+              </div>
+              <Link href="/skills" className="text-sm text-teal-300 hover:text-teal-200 transition-colors whitespace-nowrap">
+                Browse all 182+ skills →
+              </Link>
+            </div>
+            <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-slate-700">
+              {initialNewSkills.slice(0, 8).map((skill) => (
+                <Link key={skill.id} href={`/skills/${skill.id}`} className="flex-shrink-0 w-64 bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 hover:border-teal-500/40 transition-all duration-200 group">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge className={`${getCategoryColor(skill.category)} border text-xs`}>
+                      {skill.category}
+                    </Badge>
+                    {skill.github_stars > 0 && (
+                      <span className="flex items-center gap-1 text-xs text-amber-400">
+                        <Star className="w-3 h-3 fill-amber-400" />
+                        {skill.github_stars.toLocaleString()}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-white text-sm font-semibold leading-snug mb-3 line-clamp-2 group-hover:text-teal-300 transition-colors">
+                    {skill.title_human || skill.name}
+                  </p>
+                  <span className="text-xs text-teal-400">View →</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Honest, verifiable trust — no fake reviews */}
       <section className="py-20 px-4 border-t border-teal-500/10">
         <div className="container mx-auto max-w-5xl text-center">
@@ -558,6 +619,11 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
                   className="pl-10 bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-500 focus:border-teal-500/50 focus:ring-teal-500/20"
                 />
               </div>
+              {favs.length > 0 && (
+                <span className="text-xs text-teal-300 bg-teal-500/10 border border-teal-500/20 rounded-full px-2 py-0.5 self-center">
+                  {favs.length} saved
+                </span>
+              )}
             </div>
             <Tabs value={category} onValueChange={setCategory} className="w-full max-w-full overflow-x-auto">
               <TabsList className="bg-slate-800/50 border border-slate-700/50 flex-nowrap w-max max-w-none">
@@ -596,11 +662,16 @@ const HomeClient = ({ initialSkills = [], initialStats = null }) => {
                             {skill.category}
                           </span>
                         </Badge>
-                        {skill.is_premium && (
-                          <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 border-0 text-white">
-                            ${skill.price}
-                          </Badge>
-                        )}
+                        <div className="flex items-center gap-1">
+                          {skill.is_premium && (
+                            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 border-0 text-white">
+                              ${skill.price}
+                            </Badge>
+                          )}
+                          <button onClick={() => toggle(skill.id)} className={`ml-auto flex-shrink-0 ${favs.includes(skill.id) ? 'text-rose-400' : 'text-slate-600 hover:text-slate-400'}`}>
+                            ♥
+                          </button>
+                        </div>
                       </div>
                       <CardTitle className="text-white text-lg group-hover:text-teal-300 transition-colors">{skill.title_human || skill.name}</CardTitle>
                       <CardDescription className="text-slate-400 line-clamp-2">

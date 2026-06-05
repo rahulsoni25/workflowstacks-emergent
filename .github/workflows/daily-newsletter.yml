@@ -1,0 +1,24 @@
+name: Daily newsletter
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+  workflow_dispatch: {}
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send skill of the day
+        run: |
+          RESULT=$(curl -sf \
+            -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/newsletter/send")
+          echo "Result: $RESULT"
+          echo "## Daily Newsletter" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$RESULT" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

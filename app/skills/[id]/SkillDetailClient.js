@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye, Terminal, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -22,8 +22,25 @@ function getCategoryColor(cat) {
 
 export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
   const [copied, setCopied] = useState(false)
+  const [reacted, setReacted] = useState(false)
+  const [reactionCount, setReactionCount] = useState(skill.reactions_up || 0)
   const guide = skill.use_guide || null
   const score = typeof skill.rewrite_score === 'number' ? skill.rewrite_score : null
+
+  useEffect(() => {
+    try {
+      const key = `ws_reacted_${skill.id}`
+      if (localStorage.getItem(key)) setReacted(true)
+    } catch {}
+  }, [skill.id])
+
+  const handleReact = async () => {
+    if (reacted) return
+    setReacted(true)
+    setReactionCount(c => c + 1)
+    try { localStorage.setItem(`ws_reacted_${skill.id}`, '1') } catch {}
+    fetch(`/api/skills/${skill.id}/react`, { method: 'POST' }).catch(() => {})
+  }
 
   const copyPrompt = async () => {
     if (guide?.examplePrompt) {
@@ -152,6 +169,18 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                         <div><span className="text-amber-300 font-semibold">Heads up: </span><span className="text-slate-300">{guide.gotcha}</span></div>
                       </div>
                     )}
+                    {/* Reactions — lightweight social signal, no auth required */}
+                    <div className="flex items-center gap-4 pt-2 border-t border-slate-700/50">
+                      <button
+                        onClick={handleReact}
+                        disabled={reacted}
+                        className={`flex items-center gap-1.5 text-sm transition-all ${reacted ? 'text-rose-400 cursor-default' : 'text-slate-400 hover:text-rose-400'}`}
+                      >
+                        <span className="text-base">{reacted ? '❤️' : '🤍'}</span>
+                        <span>{reactionCount > 0 ? reactionCount : ''} {reacted ? 'Liked' : 'Like this skill'}</span>
+                      </button>
+                      <span className="text-slate-600 text-xs">Saves to your device</span>
+                    </div>
                   </div>
                 ) : (
                   <div>
@@ -274,6 +303,9 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                 {skill.language && <div className="flex items-start gap-3"><Code2 className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Language</div><div className="text-white font-medium">{skill.language}</div></div></div>}
                 <div className="flex items-start gap-3"><Package className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Category</div><div className="text-white font-medium">{skill.category}</div></div></div>
                 {skill.created_at && <div className="flex items-start gap-3"><Calendar className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Published</div><div className="text-white font-medium">{new Date(skill.created_at).toLocaleDateString()}</div></div></div>}
+                <div className="mt-4 p-3 bg-teal-500/5 border border-teal-500/15 rounded-lg">
+                  <p className="text-slate-400 text-xs">Are you the creator of this tool? <Link href="/submit" className="text-teal-300 hover:text-teal-200">Claim your listing →</Link> and earn 85% of every sale.</p>
+                </div>
               </CardContent>
             </Card>
           </motion.div>

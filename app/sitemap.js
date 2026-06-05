@@ -7,6 +7,7 @@ const STATIC_ROUTES = [
   '/learn/mcp', '/learn/creators', '/learn/security',
   '/about', '/docs', '/help', '/enterprise', '/founder-launch',
   '/privacy', '/terms',
+  '/submit',
 ]
 
 export const revalidate = 86400 // refresh sitemap daily
@@ -16,7 +17,7 @@ export default async function sitemap() {
   const staticEntries = STATIC_ROUTES.map((path) => ({
     url: `${BASE}${path}`,
     lastModified: now,
-    changeFrequency: path === '' || path === '/skills' ? 'daily' : 'weekly',
+    changeFrequency: path === '' || path === '/skills' ? 'daily' : path === '/submit' ? 'monthly' : 'weekly',
     priority: path === '' ? 1 : path === '/skills' ? 0.9 : 0.6,
   }))
 

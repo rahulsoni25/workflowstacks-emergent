@@ -374,6 +374,25 @@ export default function BuilderPage() {
                   <p className="text-xs text-slate-500 mt-2">Opens a new chat with your prompt prefilled. We also copy it to your clipboard, so for longer agents just paste (Ctrl/⌘+V).</p>
                 </div>
 
+                {/* Done-for-You — immediate revenue path */}
+                <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5">
+                  <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                      <Sparkles className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="text-white font-semibold mb-1">Want us to set this up for you?</h4>
+                      <p className="text-slate-400 text-sm mb-3">We'll configure and test this exact agent for your specific workflow — you get a ready-to-use, fully customised setup. One-time, no subscription.</p>
+                      <a href="https://buy.stripe.com/PLACEHOLDER_LINK" target="_blank" rel="noopener noreferrer">
+                        <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20" size="sm">
+                          Done-for-You Setup — $49 <ExternalLink className="w-3.5 h-3.5 ml-2" />
+                        </Button>
+                      </a>
+                      <p className="text-xs text-slate-500 mt-2">You'll be redirected to a secure Stripe checkout. We'll follow up within 24 hours.</p>
+                    </div>
+                  </div>
+                </div>
+
                 <div className="bg-teal-500/10 border border-teal-500/20 rounded-lg p-4">
                   <div className="flex items-start gap-3">
                     <Sparkles className="w-5 h-5 text-teal-400 mt-0.5" />

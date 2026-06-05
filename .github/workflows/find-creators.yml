@@ -1,0 +1,24 @@
+name: Creator discovery
+
+on:
+  schedule:
+    - cron: '0 10 * * 1'  # Every Monday 10:00 UTC
+  workflow_dispatch: {}
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scan GitHub repos for unclaimed creator emails
+        run: |
+          RESULT=$(curl -sf \
+            -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/find-creators")
+          echo "Result: $RESULT"
+          echo "## Creator Discovery" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "$RESULT" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

@@ -31,12 +31,14 @@ const footerLinks = {
       { label: 'What Are Agents', href: '/learn/agents' },
       { label: 'What Is MCP', href: '/learn/mcp' },
       { label: 'For Creators', href: '/learn/creators' },
+      { label: 'Submit a Tool', href: '/submit' },
       { label: 'Security', href: '/learn/security' },
     ]
   },
   company: {
     title: 'Company',
     links: [
+      { label: 'Become a Creator', href: '/submit' },
       { label: 'About', href: '/about' },
       { label: 'Enterprise', href: '/enterprise' },
       { label: 'API Docs', href: '/docs' },
@@ -121,6 +123,9 @@ export default function Footer() {
               </div>
             ))}
             <span className="rounded-full border border-slate-700/50 px-3 py-1.5 text-xs text-slate-500">+50 more</span>
+            <Link href="/submit" className="rounded-full border border-teal-500/30 bg-teal-500/10 px-3 py-1.5 text-xs text-teal-400 hover:bg-teal-500/20 hover:border-teal-500/50 transition-all">
+              Creator program →
+            </Link>
           </div>
         </div>
       </div>
