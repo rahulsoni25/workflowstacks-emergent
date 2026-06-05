@@ -565,6 +565,12 @@ export async function GET(request) {
           { github_url: { $regex: 'agentpowers', $options: 'i' } }
         ]
       });
+      // Astronomy / cartography tools mis-tagged by "survey" keyword overlap.
+      // They are real repos, just not marketplace-relevant. Unpublish (reversible).
+      const sciency = await database.collection('skills').updateMany(
+        { name: { $in: ['lftools', 'rubin_sim'] } },
+        { $set: { published: false, hidden_reason: 'off-topic (sci/astronomy)' } }
+      );
       // Test uploads created during QA
       const tests = await database.collection('skills').deleteMany({
         source: 'user',
