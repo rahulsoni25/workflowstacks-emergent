@@ -339,10 +339,15 @@ export async function GET(request) {
         { query: 'social-media automation', category: 'marketing', minStars: 100 },
 
         // --- Performance marketing & paid ads (Meta / Google / TikTok) ---
-        { query: 'meta-ads OR facebook-ads-api OR topic:facebook-marketing-api', category: 'performance-marketing', minStars: 30 },
-        { query: 'google-ads-api OR google-ads-mcp OR adwords automation', category: 'performance-marketing', minStars: 30 },
-        { query: 'tiktok-ads OR linkedin-ads OR ads-automation', category: 'performance-marketing', minStars: 30 },
-        { query: 'ad-creative-generation OR ad-copy-ai OR creative-automation', category: 'performance-marketing', minStars: 50 },
+        // Lower thresholds + repo-name targeting — paid-ads SDKs are a niche slice
+        // of OSS, so a 200-star bar excludes the entire category.
+        { query: 'facebook-business-sdk OR facebook-python-business-sdk', category: 'performance-marketing', minStars: 5 },
+        { query: 'meta-ads-mcp OR facebook-ads-mcp OR meta-business-mcp', category: 'performance-marketing', minStars: 1 },
+        { query: 'google-ads-api OR google-ads-python OR google-ads-mcp', category: 'performance-marketing', minStars: 5 },
+        { query: 'tiktok-business OR tiktok-ads-api OR tiktok-marketing-api', category: 'performance-marketing', minStars: 5 },
+        { query: 'linkedin-ads-api OR linkedin-marketing OR linkedin-api', category: 'performance-marketing', minStars: 10 },
+        { query: 'ad-creative-ai OR ad-copy-ai OR generative-ads', category: 'performance-marketing', minStars: 10 },
+        { query: 'paid-social-automation OR campaign-optimization OR ppc-automation', category: 'performance-marketing', minStars: 10 },
 
         // --- Marketing analytics, attribution & BI dashboards ---
         { query: 'open-source bi OR business-intelligence dashboard', category: 'analytics', minStars: 800 },
@@ -516,10 +521,13 @@ export async function GET(request) {
         if (has('prompt engineering', 'awesome-prompts', 'system-prompt', 'prompt library')) return 'prompt';
         if (has('puppeteer', 'playwright', 'selenium', 'scraper', 'scraping', 'browser-automation', 'testing', 'e2e', 'ansible', 'kubernetes', 'devops', 'home-assistant')) return 'devtools';
         if (has('crm', 'cold-email', 'cold email', 'lead-generation', 'lead generation', 'outreach', 'prospect', 'sales pipeline', 'erpnext')) return 'sales';
-        // Performance marketing — Meta / Google / TikTok ads, ad-creative tooling
-        if (has('facebook ads', 'meta ads', 'meta-ads', 'facebook-ads', 'google ads', 'google-ads', 'adwords', 'tiktok ads', 'linkedin ads', 'ad-creative', 'ad creative', 'ads automation', 'ads-automation', 'paid-social', 'paid social', 'ppc')) return 'performance-marketing';
-        // Market research, competitor intel, web research agents
-        if (has('competitor analysis', 'competitor-analysis', 'market research', 'market-research', 'competitor intelligence', 'web research', 'web-research', 'deep research', 'survey analysis', 'voice of customer', 'social listening', 'reddit-scraper', 'youtube research')) return 'market-research';
+        // Performance marketing — Meta / Google / TikTok ads, ad-creative tooling.
+        // Use unique multi-word phrases (no bare "ads" — too generic, catches every
+        // ads-blocker / banner repo).
+        if (has('facebook ads', 'meta ads', 'meta-ads', 'facebook-ads', 'google ads', 'google-ads', 'adwords', 'tiktok ads', 'linkedin ads', 'meta-business', 'facebook-business', 'ads-api', 'ad creative', 'ad-creative', 'ads automation', 'ads-automation', 'paid social', 'paid-social', 'ppc automation', 'campaign optimization', 'ad copy ai', 'ad-copy')) return 'performance-marketing';
+        // Market research, competitor intel, web research agents. Avoid bare
+        // "research" / "survey" / "agents" which match scientific & generic tools.
+        if (has('competitor analysis', 'competitor-analysis', 'market research', 'market-research', 'competitor intelligence', 'competitor-intelligence', 'web research agent', 'web-research-agent', 'deep research agent', 'deep-research-agent', 'voice of customer', 'voice-of-customer', 'customer feedback', 'social listening', 'social-listening', 'reddit-scraper', 'reddit scraper', 'review-mining', 'product-research', 'product research')) return 'market-research';
         if (has('seo', 'copywriting', 'content-generation', 'social-media', 'social media', 'newsletter', 'marketing')) return 'marketing';
         if (has('saas boilerplate', 'saas-starter', 'boilerplate', 'stripe', 'subscription billing', 'starter kit')) return 'saas-starter';
         if (has('n8n', 'workflow', 'automation', 'zapier', 'no-code', 'low-code')) return 'automation';
