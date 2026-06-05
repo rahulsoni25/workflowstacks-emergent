@@ -219,7 +219,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               Stack the skills.{' '}<span style={{ color: '#C6F24E' }}>Ship the agent.</span>
             </p>
             <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed">
-              Built for startup founders and marketing agencies who want to install open-source AI skills, agents, and personas that handle SEO, outreach, and ecommerce ops — <strong className="text-white">without writing code.</strong>
+              Built for founders and marketing agencies who want to install open-source AI skills, agents, and personas that handle <strong className="text-white">paid ads, performance reporting, SEO, outreach, market research, and ecommerce ops</strong> — without writing code.
             </p>
 
             {/* CTA Buttons */}
@@ -289,7 +289,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { icon: Star, t: 'We read & score 180+ repos', d: 'Only trending, high-star tools that clear an 8/10 quality gate surface — with live GitHub stats. You skip hours of wading through dead repos.' },
+              { icon: Star, t: 'We read & score 180+ repos', d: 'Only trending, high-star tools — across ads, analytics, research, SEO, outreach, and ecommerce — that clear an 8/10 quality gate, with live GitHub stats. You skip hours of wading through dead repos.' },
               { icon: Code2, t: 'Every tool gets a usage guide', d: 'An AI-written install command, quick-start steps, and the one real gotcha — so you\'re productive in minutes, not after reading a README.' },
               { icon: Zap, t: 'One click = a working agent', d: 'The Builder merges the skills you pick into a single paste-ready blueprint for Claude, ChatGPT, or Gemini. That\'s the thing GitHub can\'t do for you.' },
             ].map((c, i) => {
@@ -392,13 +392,13 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                 emoji: '🚀', title: 'Founders', subtitle: 'Launch & Validate Faster',
                 desc: 'Stop duct-taping prompts. Build the exact AI agent that validates your offer and gets your first users — free, no code.',
                 cta: 'See Founder Agents', href: '/personas', gradient: 'from-teal-500/20 to-cyan-500/20', border: 'border-teal-500/30', hoverBorder: 'hover:border-teal-400',
-                benefits: ['Idea validation in 48 hours', 'Auto-generate landing pages', 'AI-powered outreach']
+                benefits: ['Idea validation + market research', 'Auto-generate landing pages', 'AI-powered outreach + ads']
               },
               {
                 emoji: '📈', title: 'Agencies', subtitle: 'Scale Client Results 10x',
-                desc: 'Spin up client-ready AI agents for SEO/AEO/GEO and reporting without hiring. One blueprint, paste into any model, bill the outcome.',
+                desc: 'Spin up client-ready agents for Meta + Google ads automation, performance reporting, SEO/AEO/GEO, and weekly client dashboards — without hiring. One blueprint, paste into any model, bill the outcome.',
                 cta: 'See Agency Agents', href: '/personas', gradient: 'from-cyan-500/20 to-blue-500/20', border: 'border-cyan-500/30', hoverBorder: 'hover:border-cyan-400',
-                benefits: ['AI Overview optimization', 'Automated client reports', 'GEO-targeted content']
+                benefits: ['Meta + Google ads automation', 'Performance dashboards + attribution', 'AI Overview + GEO content']
               },
               {
                 emoji: '🛍️', title: 'Ecommerce', subtitle: 'Automate Store Operations',

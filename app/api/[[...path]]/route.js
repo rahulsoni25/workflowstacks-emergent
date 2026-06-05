@@ -338,6 +338,26 @@ export async function GET(request) {
         { query: 'seo tools OR topic:seo', category: 'marketing', minStars: 150 },
         { query: 'social-media automation', category: 'marketing', minStars: 100 },
 
+        // --- Performance marketing & paid ads (Meta / Google / TikTok) ---
+        { query: 'meta-ads OR facebook-ads-api OR topic:facebook-marketing-api', category: 'performance-marketing', minStars: 30 },
+        { query: 'google-ads-api OR google-ads-mcp OR adwords automation', category: 'performance-marketing', minStars: 30 },
+        { query: 'tiktok-ads OR linkedin-ads OR ads-automation', category: 'performance-marketing', minStars: 30 },
+        { query: 'ad-creative-generation OR ad-copy-ai OR creative-automation', category: 'performance-marketing', minStars: 50 },
+
+        // --- Marketing analytics, attribution & BI dashboards ---
+        { query: 'open-source bi OR business-intelligence dashboard', category: 'analytics', minStars: 800 },
+        { query: 'marketing-attribution OR multi-touch-attribution', category: 'analytics', minStars: 30 },
+        { query: 'ga4 OR google-analytics mcp OR ga4-api', category: 'analytics', minStars: 30 },
+        { query: 'metabase OR superset OR lightdash OR redash', category: 'analytics', minStars: 1000 },
+        { query: 'performance-reporting OR marketing-dashboard OR kpi-dashboard', category: 'analytics', minStars: 30 },
+
+        // --- Market research, competitor intel & web research ---
+        { query: 'competitor-analysis OR market-research-ai OR competitor-intelligence', category: 'market-research', minStars: 30 },
+        { query: 'web-research-agent OR research-assistant OR deep-research', category: 'market-research', minStars: 100 },
+        { query: 'web-scraping research OR firecrawl OR trafilatura', category: 'market-research', minStars: 200 },
+        { query: 'reddit-scraper OR youtube-research OR social-listening', category: 'market-research', minStars: 50 },
+        { query: 'survey-analysis OR customer-feedback-ai OR voice-of-customer', category: 'market-research', minStars: 30 },
+
         // --- Sales & outreach ---
         { query: 'cold-email OR lead-generation OR outreach automation', category: 'sales', minStars: 50 },
         { query: 'open-source crm', category: 'sales', minStars: 200 },
@@ -496,10 +516,14 @@ export async function GET(request) {
         if (has('prompt engineering', 'awesome-prompts', 'system-prompt', 'prompt library')) return 'prompt';
         if (has('puppeteer', 'playwright', 'selenium', 'scraper', 'scraping', 'browser-automation', 'testing', 'e2e', 'ansible', 'kubernetes', 'devops', 'home-assistant')) return 'devtools';
         if (has('crm', 'cold-email', 'cold email', 'lead-generation', 'lead generation', 'outreach', 'prospect', 'sales pipeline', 'erpnext')) return 'sales';
+        // Performance marketing — Meta / Google / TikTok ads, ad-creative tooling
+        if (has('facebook ads', 'meta ads', 'meta-ads', 'facebook-ads', 'google ads', 'google-ads', 'adwords', 'tiktok ads', 'linkedin ads', 'ad-creative', 'ad creative', 'ads automation', 'ads-automation', 'paid-social', 'paid social', 'ppc')) return 'performance-marketing';
+        // Market research, competitor intel, web research agents
+        if (has('competitor analysis', 'competitor-analysis', 'market research', 'market-research', 'competitor intelligence', 'web research', 'web-research', 'deep research', 'survey analysis', 'voice of customer', 'social listening', 'reddit-scraper', 'youtube research')) return 'market-research';
         if (has('seo', 'copywriting', 'content-generation', 'social-media', 'social media', 'newsletter', 'marketing')) return 'marketing';
         if (has('saas boilerplate', 'saas-starter', 'boilerplate', 'stripe', 'subscription billing', 'starter kit')) return 'saas-starter';
         if (has('n8n', 'workflow', 'automation', 'zapier', 'no-code', 'low-code')) return 'automation';
-        if (has('analytics', 'dashboard', 'metrics', 'tracking', 'telemetry')) return 'analytics';
+        if (has('analytics', 'dashboard', 'metrics', 'tracking', 'telemetry', 'business intelligence', 'business-intelligence', 'bi-tool', 'metabase', 'superset', 'lightdash', 'redash', 'data visualization', 'data-visualization', 'kpi', 'reporting', 'attribution', 'ga4', 'google analytics', 'mixpanel', 'amplitude', 'product analytics', 'product-analytics')) return 'analytics';
         if (has('helpdesk', 'customer-support', 'customer support', 'ticketing', 'chatbot')) return 'support';
         if (has('figma', 'ui-generator', 'icon', 'design system', 'tailwind')) return 'design';
         // --- Emerging 2026/2027 categories (checked before the broad ai-agent rule) ---

@@ -7,15 +7,15 @@ const mono = JetBrains_Mono({ subsets: ['latin'], weight: ['400','500','600','70
 
 export const metadata = {
   title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, ChatGPT & Gemini',
-  description: 'Install open-source AI skills, agent personas, and ready-to-use playbooks for Claude, Gemini, and MCP. Build custom AI agents for SEO, outreach, and ecommerce ops — without writing code.',
-  keywords: 'WorkflowStacks, AI skills marketplace, OpenClaw skills, Claude skills, Gemini extensions, MCP servers, AI agents, prompt engineering, AI automation, no-code AI, AI for founders, AI for marketers, SEO automation, ecommerce AI',
+  description: 'Install open-source AI skills, agent personas, and ready-to-use playbooks for Claude, Gemini, and MCP. Build custom AI agents for paid ads, performance reporting, SEO, market research, outreach, and ecommerce — without writing code.',
+  keywords: 'WorkflowStacks, AI skills marketplace, Claude skills, Gemini extensions, MCP servers, AI agents, no-code AI, paid ads automation, Meta ads AI, Google ads AI, TikTok ads AI, performance marketing AI, performance reporting AI, marketing dashboards, attribution AI, market research AI, competitor intelligence AI, SEO automation, AEO, GEO, ecommerce AI, AI for founders, AI for agencies',
   authors: [{ name: 'WorkflowStacks' }],
   creator: 'WorkflowStacks',
   publisher: 'WorkflowStacks',
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'),
   openGraph: {
     title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, ChatGPT & Gemini',
-    description: 'Install open-source AI skills and build custom AI agents for SEO, outreach, and ecommerce — without coding.',
+    description: 'Install open-source AI skills and build custom AI agents for paid ads, performance reporting, SEO, outreach, and ecommerce — without coding.',
     type: 'website',
     locale: 'en_US',
     siteName: 'WorkflowStacks',
@@ -24,7 +24,7 @@ export const metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, ChatGPT & Gemini',
-    description: 'Install open-source AI skills and build custom AI agents for SEO, outreach, and ecommerce — without coding.',
+    description: 'Install open-source AI skills and build custom AI agents for paid ads, performance reporting, SEO, outreach, and ecommerce — without coding.',
   },
   robots: {
     index: true,

@@ -3,7 +3,7 @@
 > WorkflowStacks is a free marketplace of real, trending open-source AI skills, with a no-code agent builder, group-buy deals on AI tools, a founder problems board, and a global community of AI builders. The open-source catalog is 100% free — there is no paywall on the tools, and every skill's full source is viewable before use.
 
 ## What it is
-- A curated catalog of 180+ free, open-source AI skills (MCP servers, AI agents, automation, marketing, sales, dev tools, and more), each with an AI-written "how to use it" guide and live GitHub stats.
+- A curated catalog of 180+ free, open-source AI skills (MCP servers, AI agents, paid-ads automation for Meta/Google/TikTok, performance reporting & marketing dashboards, market research & competitor intel, SEO, outreach, sales, dev tools, and more), each with an AI-written "how to use it" guide and live GitHub stats.
 - An Agent Builder that combines skills into a ready-to-paste blueprint for Claude, ChatGPT, or Gemini — no code.
 - A monetization model that never charges for the free catalog: group-buy/affiliate deals on paid AI tools, optional premium "complete system" agents, and creator tools.
 
