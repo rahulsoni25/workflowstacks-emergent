@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/publish-category'];
 
 // Build GitHub API headers (token optional — works on free unauthenticated tier)
 function ghHeaders(accept = 'application/vnd.github+json') {
@@ -588,6 +588,22 @@ export async function GET(request) {
         removedTestSubscribers: subs.deletedCount,
         skillsRemaining: remaining
       });
+    }
+
+    // Bulk-publish all real skills in a category — for fresh content areas where
+    // the LLM rewrite queue is rate-limited but the GitHub data is already real.
+    // ?category=performance-marketing publishes every skill in that category with
+    // github_stars > 0 (proof the repo exists). Rewrites fill in polish later.
+    if (path === '/publish-category') {
+      const { searchParams } = new URL(request.url);
+      const cat = searchParams.get('category');
+      if (!cat) return Response.json({ error: 'category param required' }, { status: 400 });
+      const r = await database.collection('skills').updateMany(
+        { category: cat, published: false, github_stars: { $gt: 0 } },
+        { $set: { published: true } }
+      );
+      const nowPublished = await database.collection('skills').countDocuments({ category: cat, published: { $ne: false } });
+      return Response.json({ success: true, category: cat, published: r.modifiedCount, totalPublishedInCategory: nowPublished });
     }
 
     // Refresh live GitHub star/fork counts so displayed numbers don't drift stale.
