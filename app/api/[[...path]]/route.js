@@ -355,15 +355,23 @@ export async function GET(request) {
 
       // 4. Few or no local results → search GitHub directly (with auth token if set)
       // and silently ingest the top matches so the next searcher finds them.
+      // Use GitHub's relevance-ranked search (no sort=stars — that surfaces
+      // mega awesome-lists instead of real tools). Tight: name OR description
+      // only (not readme), 20+ stars (real but niche tools surface), and we
+      // exclude awesome-* lists which are reference lists, not usable tools.
       let discovered = 0;
+      let ghIngested = []; // track repos we just added, so we return them even if regex doesn't match
       try {
-        const ghQuery = encodeURIComponent(q + ' in:name,description,readme stars:>50');
-        const ghRes = await fetch(`https://api.github.com/search/repositories?q=${ghQuery}&sort=stars&order=desc&per_page=8`, {
+        const ghQuery = encodeURIComponent(q + ' in:name,description stars:>20 NOT awesome');
+        const ghRes = await fetch(`https://api.github.com/search/repositories?q=${ghQuery}&per_page=10`, {
           headers: ghHeaders(),
         });
         if (ghRes.ok) {
           const ghData = await ghRes.json();
-          const repos = ghData.items || [];
+          const repos = (ghData.items || [])
+            // Defense in depth — exclude obvious curated lists by name.
+            .filter((r) => !/^awesome[-_]/i.test(r.name) && !/^free[-_]for[-_]dev/i.test(r.name) && !/^public[-_]apis$/i.test(r.name))
+            .slice(0, 8);
           // Skip ones already in catalog
           const existingUrls = new Set(local.map(s => s.github_url));
           for (const repo of repos) {
@@ -403,6 +411,7 @@ export async function GET(request) {
               { $setOnInsert: doc },
               { upsert: true }
             );
+            ghIngested.push(repo.html_url);
             discovered++;
           }
         }
@@ -410,20 +419,25 @@ export async function GET(request) {
         // GitHub failure is silent — don't break the search UX
       }
 
-      // 5. Return merged results — re-query MongoDB to include the just-added repos
-      const merged = await database.collection('skills').find({
-        published: { $ne: false },
-        $or: [
-          { name: { $regex: q, $options: 'i' } },
-          { title_human: { $regex: q, $options: 'i' } },
-          { description: { $regex: q, $options: 'i' } },
-          { description_human: { $regex: q, $options: 'i' } },
-          { github_topics: { $in: [q.toLowerCase()] } },
-        ],
-      })
-        .sort({ github_stars: -1 })
-        .limit(20)
-        .toArray();
+      // 5. Return: the just-ingested GitHub matches (already relevance-ranked by
+      // GitHub) PLUS any existing local matches, deduped. Skipping the regex
+      // re-search means we trust GitHub's relevance ranking for query terms
+      // that aren't substrings of any name/description in our catalog yet.
+      let merged = local.slice();
+      const seen = new Set(local.map((s) => s.github_url));
+      if (ghIngested.length) {
+        const fresh = await database.collection('skills')
+          .find({ github_url: { $in: ghIngested } })
+          .toArray();
+        for (const s of fresh) {
+          if (!seen.has(s.github_url)) {
+            merged.push(s);
+            seen.add(s.github_url);
+          }
+        }
+      }
+      merged.sort((a, b) => (b.github_stars || 0) - (a.github_stars || 0));
+      merged = merged.slice(0, 20);
 
       return Response.json({ skills: merged, query: q, discovered });
     }
