@@ -10,7 +10,9 @@ export const metadata = {
   alternates: { canonical: '/discover' },
 }
 
-export const revalidate = 3600
+// 5 min — short enough that AI rewrite landings show up fast, long enough to
+// not hammer the DB on every page view.
+export const revalidate = 300
 
 const ts = (v) => (v ? new Date(v).getTime() : 0)
 const daysAgo = (v) => (v ? (Date.now() - ts(v)) / 86400000 : 1e9)
@@ -33,7 +35,7 @@ const SECTIONS = [
 
 async function getSkills() {
   try {
-    const res = await fetch(`${BASE}/api/skills`, { next: { revalidate: 3600 } })
+    const res = await fetch(`${BASE}/api/skills`, { next: { revalidate: 300 } })
     if (!res.ok) return []
     const d = await res.json()
     return d.skills || []
