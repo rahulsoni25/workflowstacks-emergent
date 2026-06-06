@@ -256,8 +256,8 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               className="flex flex-wrap justify-center gap-8 md:gap-12"
             >
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-rose-400">{stats?.agentsBuilt || 0}</div>
-                <div className="text-sm text-slate-400 mt-1">agents built</div>
+                <div className="text-3xl md:text-4xl font-bold text-rose-400">8/10</div>
+                <div className="text-sm text-slate-400 mt-1">avg quality score</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-white">{skillsFloor}+</div>
@@ -294,7 +294,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { icon: Star, t: 'We read & score 180+ repos', d: 'Only trending, high-star tools — across ads, analytics, research, SEO, outreach, and ecommerce — that clear an 8/10 quality gate, with live GitHub stats. You skip hours of wading through dead repos.' },
+              { icon: Star, t: `We read & score ${skillsFloor}+ repos`, d: 'Only trending, high-star tools — across ads, analytics, research, SEO, outreach, and ecommerce — that clear an 8/10 quality gate, with live GitHub stats. You skip hours of wading through dead repos.' },
               { icon: Code2, t: 'Every tool gets a usage guide', d: 'An AI-written install command, quick-start steps, and the one real gotcha — so you\'re productive in minutes, not after reading a README.' },
               { icon: Zap, t: 'One click = a working agent', d: 'The Builder merges the skills you pick into a single paste-ready blueprint for Claude, ChatGPT, or Gemini. That\'s the thing GitHub can\'t do for you.' },
             ].map((c, i) => {
@@ -464,7 +464,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                 </span>
               </div>
               <Link href="/skills" className="text-sm text-[#C6F24E] hover:text-[#A6D62E] transition-colors whitespace-nowrap">
-                Browse all 182+ skills →
+                Browse all {stats?.totalSkills || skillsFloor}+ skills →
               </Link>
             </div>
             <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-slate-700">
@@ -529,11 +529,10 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
           >
             <motion.p variants={fadeInUp} className="eyebrow mb-4 justify-center">// PRICING</motion.p>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
-              The tools are free. You pay for <span className="text-gradient-neptune">time, trust & savings</span>
+              <span className="text-[#C6F24E]">Catalog: free forever.</span> Pro is for sellers.
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-slate-400 text-lg max-w-2xl mx-auto">
-              The open-source skills are <strong className="text-[#C6F24E]">always free</strong> — you can read every line.
-              We earn from group-buy savings, done-for-you setups, and creator tools. Never from the free catalog.
+              If you're <strong className="text-white">using</strong> the catalog, it's $0 — forever, no paywall, all source visible. If you're <strong className="text-white">selling</strong> agents through WorkflowStacks, Pro removes the platform fee and unlocks creator tools.
             </motion.p>
           </motion.div>
 
@@ -747,7 +746,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
           </div>
           <div className="space-y-4">
             {[
-              { q: 'Isn\'t this just GitHub with extra steps?', a: 'The opposite — we remove the steps. We read 180+ repos, score them at 8/10+, write each tool\'s usage guide (install command, quick-start, real gotcha), and let you merge the ones you pick into one paste-ready agent. You skip hours of evaluating repos and wiring prompts. The tools stay free and open-source; we delete the work around them.' },
+              { q: 'Isn\'t this just GitHub with extra steps?', a: `The opposite — we remove the steps. We read ${skillsFloor}+ repos, score them at 8/10+, write each tool's usage guide (install command, quick-start, real gotcha), and let you merge the ones you pick into one paste-ready agent. You skip hours of evaluating repos and wiring prompts. The tools stay free and open-source; we delete the work around them.` },
               { q: 'If it\'s free, what\'s the catch?', a: 'No catch. The catalog is free forever and every skill\'s source is readable line-by-line before you use it. We earn from group-buy savings on paid AI tools, done-for-you agent setups, and creator tools — never by locking the free catalog behind a paywall.' },
               { q: 'Will it actually work in my AI tool?', a: 'Yes. The Builder outputs a system prompt / custom instruction that runs as-is in ChatGPT, Claude, or Gemini — paste it in and go. No API keys, no install, no code.' },
               { q: 'Do I need to know how to code?', a: 'No. WorkflowStacks is built for non-technical founders and marketers. You browse by outcome, pick the skills you want, and the Agent Builder generates a ready-to-paste blueprint for you.' },
