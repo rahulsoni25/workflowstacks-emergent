@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   Lock, RefreshCw, Copy, Key, Mail, Search, Eye, Edit, Send, Check, X,
-  LayoutDashboard, Package, Users, Shield, ExternalLink, Download, ChevronDown, ChevronRight,
+  LayoutDashboard, Package, Users, Shield, ExternalLink, Download, ChevronDown, ChevronRight, TrendingUp,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -201,6 +201,7 @@ export default function AdminPage() {
 function OverviewTab({ hdr, showToast, busy, setBusy }) {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [searchTrends, setSearchTrends] = useState([])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -210,6 +211,14 @@ function OverviewTab({ hdr, showToast, busy, setBusy }) {
       setStats(data)
     } catch { showToast('Failed to load overview') }
     finally { setLoading(false) }
+    // Trending searches — best-effort, never blocks the overview
+    try {
+      const tr = await fetch('/api/search-trends', { headers: hdr() })
+      if (tr.ok) {
+        const td = await tr.json()
+        setSearchTrends(td.trends || [])
+      }
+    } catch {}
   }, [hdr, showToast])
 
   useEffect(() => { load() }, [load])
@@ -284,6 +293,28 @@ function OverviewTab({ hdr, showToast, busy, setBusy }) {
           <Button onClick={load} size="sm" className={SECONDARY}>
             <RefreshCw className="w-3.5 h-3.5 mr-1.5" />Refresh
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-[#101314] border-[#262B2D]">
+        <CardHeader>
+          <CardTitle className="text-white text-sm font-medium flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-[#C6F24E]" /> Trending searches (last 7 days)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {searchTrends.length === 0 ? (
+            <p className="text-slate-500 text-sm">No searches yet. They'll appear as users start using the site.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {searchTrends.slice(0, 20).map((t) => (
+                <span key={t._id} className="inline-flex items-center gap-2 bg-[#0A0C0D] border border-[#262B2D] rounded-full px-3 py-1 text-sm text-slate-200">
+                  {t._id}
+                  <span className="text-[#C6F24E] font-mono text-xs">{t.count}</span>
+                </span>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

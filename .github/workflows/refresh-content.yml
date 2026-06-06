@@ -45,6 +45,12 @@ jobs:
             "$BASE_URL/api/dedupe" | tee /tmp/dedupe.json
           echo
 
+      - name: Auto-discover from trending searches
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/auto-discover-from-searches?limit=10" | tee /tmp/discover.json
+          echo
+
       - name: Refresh live GitHub star/fork counts (rotates through catalog)
         run: |
           curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \

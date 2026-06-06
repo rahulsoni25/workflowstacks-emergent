@@ -65,10 +65,15 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
   const loadSkills = async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams()
-      if (category !== 'all') params.append('category', category)
-      if (search) params.append('search', search)
-      const res = await fetch(`/api/skills?${params}`)
+      let res
+      if (search && search.trim()) {
+        // Use the smart search endpoint — it logs queries + auto-discovers from GitHub
+        res = await fetch(`/api/search?q=${encodeURIComponent(search.trim())}`)
+      } else {
+        const params = new URLSearchParams()
+        if (category !== 'all') params.append('category', category)
+        res = await fetch(`/api/skills?${params}`)
+      }
       const data = await res.json()
       setSkills(data.skills || [])
     } catch (e) {

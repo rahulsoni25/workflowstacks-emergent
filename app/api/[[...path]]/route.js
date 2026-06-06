@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches'];
 
 // Audit log — capture every admin action for security visibility.
 // Append-only collection: audit_logs { id, path, method, ip, ua, at }
@@ -316,6 +316,193 @@ export async function GET(request) {
     }
     
     // Get all skills
+    // Smart search — logs query, falls back to GitHub auto-discovery when local
+    // results are thin, then silently ingests matches so the next search finds them.
+    if (path === '/search') {
+      const { searchParams } = new URL(request.url);
+      const q = (searchParams.get('q') || '').trim();
+      if (!q) return Response.json({ skills: [], query: '' });
+      if (q.length > 200) return Response.json({ error: 'query too long' }, { status: 400 });
+
+      // 1. Log the query (anonymous — just text + timestamp) for trending analytics
+      try {
+        await database.collection('search_queries').insertOne({
+          id: uuidv4(),
+          q: q.toLowerCase(),
+          at: new Date(),
+        });
+      } catch {}
+
+      // 2. Local search first (fast)
+      const local = await database.collection('skills').find({
+        published: { $ne: false },
+        $or: [
+          { name: { $regex: q, $options: 'i' } },
+          { title_human: { $regex: q, $options: 'i' } },
+          { description: { $regex: q, $options: 'i' } },
+          { description_human: { $regex: q, $options: 'i' } },
+          { github_topics: { $in: [q.toLowerCase()] } },
+        ],
+      })
+        .sort({ github_stars: -1 })
+        .limit(20)
+        .toArray();
+
+      // 3. If we have plenty of local results, return immediately.
+      if (local.length >= 6) {
+        return Response.json({ skills: local, query: q, discovered: 0 });
+      }
+
+      // 4. Few or no local results → search GitHub directly (with auth token if set)
+      // and silently ingest the top matches so the next searcher finds them.
+      let discovered = 0;
+      try {
+        const ghQuery = encodeURIComponent(q + ' in:name,description,readme stars:>50');
+        const ghRes = await fetch(`https://api.github.com/search/repositories?q=${ghQuery}&sort=stars&order=desc&per_page=8`, {
+          headers: ghHeaders(),
+        });
+        if (ghRes.ok) {
+          const ghData = await ghRes.json();
+          const repos = ghData.items || [];
+          // Skip ones already in catalog
+          const existingUrls = new Set(local.map(s => s.github_url));
+          for (const repo of repos) {
+            if (existingUrls.has(repo.html_url)) continue;
+            const id = uuidv4();
+            const doc = {
+              id,
+              name: repo.name,
+              description: repo.description || '',
+              category: 'ai-agent', // default; reclassify cron will fix
+              price: 0,
+              rating: Math.min(5, (repo.stargazers_count / 1000) + 3.5),
+              installs: Math.floor(repo.stargazers_count * 2.5),
+              source_url: repo.html_url,
+              github_url: repo.html_url,
+              github_stars: repo.stargazers_count,
+              github_forks: repo.forks_count,
+              github_topics: repo.topics || [],
+              popularity_score: repo.stargazers_count + repo.forks_count * 5,
+              creator: repo.owner?.login,
+              creator_avatar: repo.owner?.avatar_url,
+              is_premium: false,
+              readme_preview: repo.description || '',
+              language: repo.language,
+              last_updated: repo.pushed_at,
+              created_at: repo.created_at,
+              updated_at: new Date(),
+              added_at: new Date(),
+              published: true, // auto-discovered = user signaled intent
+              rewrite_status: 'pending', // daily cron will rewrite title/desc
+              auto_discovered: true,
+              discovered_for_query: q,
+              stars_refreshed_at: new Date(),
+            };
+            await database.collection('skills').updateOne(
+              { github_url: repo.html_url },
+              { $setOnInsert: doc },
+              { upsert: true }
+            );
+            discovered++;
+          }
+        }
+      } catch (e) {
+        // GitHub failure is silent — don't break the search UX
+      }
+
+      // 5. Return merged results — re-query MongoDB to include the just-added repos
+      const merged = await database.collection('skills').find({
+        published: { $ne: false },
+        $or: [
+          { name: { $regex: q, $options: 'i' } },
+          { title_human: { $regex: q, $options: 'i' } },
+          { description: { $regex: q, $options: 'i' } },
+          { description_human: { $regex: q, $options: 'i' } },
+          { github_topics: { $in: [q.toLowerCase()] } },
+        ],
+      })
+        .sort({ github_stars: -1 })
+        .limit(20)
+        .toArray();
+
+      return Response.json({ skills: merged, query: q, discovered });
+    }
+
+    // Admin — top recent search queries (last 7 days)
+    if (path === '/search-trends') {
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const trends = await database.collection('search_queries').aggregate([
+        { $match: { at: { $gte: sevenDaysAgo } } },
+        { $group: { _id: '$q', count: { $sum: 1 }, lastSeen: { $max: '$at' } } },
+        { $sort: { count: -1 } },
+        { $limit: 50 },
+      ]).toArray();
+      return Response.json({ trends, count: trends.length });
+    }
+
+    // Admin/cron — auto-discover catalog additions from trending search queries
+    if (path === '/auto-discover-from-searches') {
+      const { searchParams } = new URL(request.url);
+      const limit = Math.min(20, parseInt(searchParams.get('limit') || '10', 10));
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      // Top recent queries that had < 6 results in our catalog (still worth enriching)
+      const topQueries = await database.collection('search_queries').aggregate([
+        { $match: { at: { $gte: sevenDaysAgo } } },
+        { $group: { _id: '$q', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+        { $limit: limit },
+      ]).toArray();
+
+      let totalAdded = 0;
+      const results = [];
+      for (const t of topQueries) {
+        const q = t._id;
+        try {
+          const ghQuery = encodeURIComponent(q + ' in:name,description stars:>50');
+          const ghRes = await fetch(`https://api.github.com/search/repositories?q=${ghQuery}&sort=stars&order=desc&per_page=5`, { headers: ghHeaders() });
+          if (!ghRes.ok) continue;
+          const data = await ghRes.json();
+          let added = 0;
+          for (const repo of (data.items || [])) {
+            const doc = {
+              id: uuidv4(),
+              name: repo.name,
+              description: repo.description || '',
+              category: 'ai-agent',
+              price: 0,
+              source_url: repo.html_url,
+              github_url: repo.html_url,
+              github_stars: repo.stargazers_count,
+              github_forks: repo.forks_count,
+              github_topics: repo.topics || [],
+              creator: repo.owner?.login,
+              creator_avatar: repo.owner?.avatar_url,
+              language: repo.language,
+              last_updated: repo.pushed_at,
+              created_at: repo.created_at,
+              updated_at: new Date(),
+              added_at: new Date(),
+              published: true,
+              rewrite_status: 'pending',
+              auto_discovered: true,
+              discovered_for_query: q,
+            };
+            const r = await database.collection('skills').updateOne(
+              { github_url: repo.html_url },
+              { $setOnInsert: doc },
+              { upsert: true }
+            );
+            if (r.upsertedCount > 0) added++;
+          }
+          results.push({ q, added, searches: t.count });
+          totalAdded += added;
+          // Polite delay
+          await new Promise((r) => setTimeout(r, 400));
+        } catch {}
+      }
+      return Response.json({ success: true, totalAdded, queries: results.length, results });
+    }
+
     if (path === '/skills') {
       const { searchParams } = new URL(request.url);
       const category = searchParams.get('category');
