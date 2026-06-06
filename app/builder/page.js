@@ -23,6 +23,23 @@ export default function BuilderPage() {
   const [publish, setPublish] = useState(false)
   const [handle, setHandle] = useState('')
   const [price, setPrice] = useState('')
+  const [dfyEmail, setDfyEmail] = useState('')
+  const [dfyRequested, setDfyRequested] = useState(false)
+
+  const requestDfy = async (e) => {
+    e.preventDefault()
+    if (!dfyEmail.trim()) return
+    try {
+      await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: dfyEmail.trim(), source: 'done-for-you', agent_goal: goal, skill_ids: selectedSkillIds }),
+      })
+      setDfyRequested(true)
+    } catch {
+      setDfyRequested(true)
+    }
+  }
 
   useEffect(() => {
     try { setHandle(getHandle()) } catch (e) {}
@@ -374,7 +391,7 @@ export default function BuilderPage() {
                   <p className="text-xs text-slate-500 mt-2">Opens a new chat with your prompt prefilled. We also copy it to your clipboard, so for longer agents just paste (Ctrl/⌘+V).</p>
                 </div>
 
-                {/* Done-for-You — immediate revenue path */}
+                {/* Done-for-You — captures interest until Stripe is set up */}
                 <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
@@ -382,13 +399,21 @@ export default function BuilderPage() {
                     </div>
                     <div className="flex-1">
                       <h4 className="text-white font-semibold mb-1">Want us to set this up for you?</h4>
-                      <p className="text-slate-400 text-sm mb-3">We'll configure and test this exact agent for your specific workflow — you get a ready-to-use, fully customised setup. One-time, no subscription.</p>
-                      <a href="https://buy.stripe.com/PLACEHOLDER_LINK" target="_blank" rel="noopener noreferrer">
-                        <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20" size="sm">
-                          Done-for-You Setup — $49 <ExternalLink className="w-3.5 h-3.5 ml-2" />
-                        </Button>
-                      </a>
-                      <p className="text-xs text-slate-500 mt-2">You'll be redirected to a secure Stripe checkout. We'll follow up within 24 hours.</p>
+                      <p className="text-slate-400 text-sm mb-3">We'll configure and test this exact agent for your specific workflow — you get a ready-to-use, fully customised setup. <strong className="text-amber-300">$49 one-time</strong>, no subscription.</p>
+                      {dfyRequested ? (
+                        <div className="flex items-center gap-2 text-emerald-300 text-sm bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
+                          <CheckCircle2 className="w-4 h-4" />
+                          Got it! We'll email you within 24 hours to confirm scope and send a $49 Stripe link.
+                        </div>
+                      ) : (
+                        <form onSubmit={requestDfy} className="flex flex-col sm:flex-row gap-2">
+                          <input type="email" value={dfyEmail} onChange={(e) => setDfyEmail(e.target.value)} required placeholder="your email" className="flex-1 bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50" />
+                          <Button type="submit" className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20" size="sm">
+                            Request Done-for-You — $49
+                          </Button>
+                        </form>
+                      )}
+                      <p className="text-xs text-slate-500 mt-2">No payment yet — we confirm scope first, then send a one-time Stripe checkout link.</p>
                     </div>
                   </div>
                 </div>

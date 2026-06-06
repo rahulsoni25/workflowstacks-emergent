@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/publish-category', '/add-skill'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill'];
 
 // Build GitHub API headers (token optional — works on free unauthenticated tier)
 function ghHeaders(accept = 'application/vnd.github+json') {
@@ -1072,6 +1072,16 @@ export async function GET(request) {
         .toArray();
 
       return Response.json({ agent, skills });
+    }
+
+    // List creator outreach leads — emails discovered by /find-creators
+    if (path === '/creator-leads') {
+      const leads = await database.collection('creator_leads')
+        .find({})
+        .sort({ stars: -1 })
+        .limit(200)
+        .toArray()
+      return Response.json({ leads, count: leads.length })
     }
 
     // Admin: list all creator applications (sorted newest first)
