@@ -27,16 +27,31 @@ jobs:
             "$BASE_URL/api/reclassify" | tee /tmp/reclassify.json
           echo
 
-      - name: Rewrite + gate — publish only listings scoring >= 8
+      - name: Rewrite titles + descriptions (judge-gated to 8/10+)
         run: |
-          for i in $(seq 1 40); do
+          # Groq free tier = ~12k TPM = ~6 enrichments / minute. Sleep 62s
+          # between batches so we don't get rate-limited and bail early.
+          for i in $(seq 1 25); do
             R=$(curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
-              "$BASE_URL/api/agent-rewrite?pending=true&limit=6") || break
+              "$BASE_URL/api/agent-rewrite?onlyNew=true&pending=true&top=true&limit=6") || break
             U=$(echo "$R" | jq -r '.updated // 0')
             P=$(echo "$R" | jq -r '.published // 0')
             echo "batch $i: updated=$U published=$P"
             [ "$U" = "0" ] && break
-            sleep 1
+            sleep 62
+          done
+
+      - name: Enrich skill use_guides (install / quick-start / gotcha)
+        run: |
+          # Second pass — fills in the per-skill "how to use it" content.
+          # Same rate-limit pacing.
+          for i in $(seq 1 25); do
+            R=$(curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/agent-rewrite?mode=enrich-skills&pending=true&top=true&limit=6") || break
+            E=$(echo "$R" | jq -r '.enriched // 0')
+            echo "batch $i: enriched=$E"
+            [ "$E" = "0" ] && break
+            sleep 62
           done
 
       - name: De-duplicate
