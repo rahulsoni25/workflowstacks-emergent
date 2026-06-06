@@ -34,7 +34,48 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update'];
+
+// Audit log — capture every admin action for security visibility.
+// Append-only collection: audit_logs { id, path, method, ip, ua, at }
+async function logAdmin(request, db, action) {
+  try {
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const ua = (request.headers.get('user-agent') || '').slice(0, 200)
+    await db.collection('audit_logs').insertOne({
+      id: uuidv4(),
+      action,
+      ip: ip.split(',')[0].trim(),
+      ua,
+      at: new Date(),
+    })
+  } catch {} // never throw — logging is best-effort
+}
+
+// Simple in-memory rate limiter per IP. Resets per cold start, which on
+// Vercel serverless is frequent — that's fine for abuse smoothing, not for
+// strict quota. 10 req / 60s window per IP.
+const _rl = new Map()
+function rateLimit(request, limit = 10, windowMs = 60_000) {
+  const ip = (request.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim()
+  const now = Date.now()
+  const key = ip
+  const slot = _rl.get(key) || { count: 0, reset: now + windowMs }
+  if (now > slot.reset) { slot.count = 0; slot.reset = now + windowMs }
+  slot.count++
+  _rl.set(key, slot)
+  if (slot.count > limit) return Response.json({ error: 'Too many requests' }, { status: 429 })
+  return null
+}
+
+function tooLong(obj, limits = { email: 254, default: 2000 }) {
+  for (const [k, v] of Object.entries(obj || {})) {
+    if (typeof v !== 'string') continue
+    const max = limits[k] || limits.default
+    if (v.length > max) return `${k} too long (max ${max})`
+  }
+  return null
+}
 
 // Build GitHub API headers (token optional — works on free unauthenticated tier)
 function ghHeaders(accept = 'application/vnd.github+json') {
@@ -267,6 +308,7 @@ export async function GET(request) {
     }
 
     const database = await connectDB();
+    if (ADMIN_PATHS.includes(path)) await logAdmin(request, database, `GET ${path}`);
 
     // Root endpoint
     if (path === '/' || path === '') {
@@ -1084,6 +1126,51 @@ export async function GET(request) {
       return Response.json({ leads, count: leads.length })
     }
 
+    if (path === '/audit-log') {
+      const logs = await database.collection('audit_logs').find({}).sort({ at: -1 }).limit(100).toArray()
+      return Response.json({ logs, count: logs.length })
+    }
+
+    if (path === '/admin-overview') {
+      const [skills, published, agents, subs, members, problems, deals, leads, apps, sendsToday] = await Promise.all([
+        database.collection('skills').countDocuments(),
+        database.collection('skills').countDocuments({ published: { $ne: false } }),
+        database.collection('agent_templates').countDocuments(),
+        database.collection('subscribers').countDocuments(),
+        database.collection('members').countDocuments(),
+        database.collection('problems').countDocuments(),
+        database.collection('deals').countDocuments(),
+        database.collection('creator_leads').countDocuments(),
+        database.collection('creator_applications').countDocuments({ status: 'pending' }),
+        database.collection('newsletter_sends').countDocuments({ sent_at: { $gte: new Date(Date.now() - 24*60*60*1000) } }),
+      ])
+      return Response.json({ skills, published, agents, subs, members, problems, deals, leads, pendingApps: apps, sendsToday })
+    }
+
+    if (path === '/subscribers') {
+      const subs = await database.collection('subscribers').find({}).sort({ created_at: -1 }).limit(500).toArray()
+      return Response.json({ subscribers: subs, count: subs.length })
+    }
+
+    if (path === '/newsletter/preview') {
+      const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000)
+      const recentSends = await database.collection('newsletter_sends').find({ sent_at: { $gte: sevenDaysAgo } }).toArray()
+      const recentIds = new Set(recentSends.map(s => s.skill_id))
+      const candidates = await database.collection('skills')
+        .find({ published: { $ne: false }, id: { $nin: [...recentIds] } })
+        .sort({ github_stars: -1 })
+        .limit(5)
+        .toArray()
+      const pick = candidates[0] || (await database.collection('skills').findOne({ published: { $ne: false } }, { sort: { github_stars: -1 } }))
+      const subCount = await database.collection('subscribers').countDocuments()
+      return Response.json({ pick, candidates: candidates.slice(0, 5), subscriberCount: subCount })
+    }
+
+    if (path === '/newsletter/sends') {
+      const sends = await database.collection('newsletter_sends').find({}).sort({ sent_at: -1 }).limit(50).toArray()
+      return Response.json({ sends, count: sends.length })
+    }
+
     // Admin: list all creator applications (sorted newest first)
     if (path === '/creator-applications') {
       const applications = await database.collection('creator_applications')
@@ -1268,6 +1355,60 @@ export async function POST(request) {
     }
 
     const database = await connectDB();
+    if (ADMIN_PATHS.includes(path)) await logAdmin(request, database, `POST ${path}`);
+
+    if (path === '/skill-update') {
+      const body = await request.json().catch(() => ({}))
+      const { id, set } = body
+      if (!id || !set) return Response.json({ error: 'id and set required' }, { status: 400 })
+      const allowed = ['title_human', 'description_human', 'category', 'published', 'is_premium', 'price', 'hidden_reason']
+      const filtered = {}
+      for (const k of allowed) if (k in set) filtered[k] = set[k]
+      if (!Object.keys(filtered).length) return Response.json({ error: 'no allowed fields' }, { status: 400 })
+      filtered.admin_updated_at = new Date()
+      await database.collection('skills').updateOne({ id }, { $set: filtered })
+      return Response.json({ success: true, updated: filtered })
+    }
+
+    if (path === '/creator-outreach/send') {
+      const body = await request.json().catch(() => ({}))
+      const { lead_id, subject, html } = body
+      if (!lead_id || !subject || !html) return Response.json({ error: 'lead_id, subject, html required' }, { status: 400 })
+      const lead = await database.collection('creator_leads').findOne({ _id: lead_id }) || await database.collection('creator_leads').findOne({ creator_username: lead_id })
+      if (!lead || !lead.email) return Response.json({ error: 'lead not found or no email' }, { status: 404 })
+      if (!process.env.RESEND_API_KEY) return Response.json({ error: 'RESEND_API_KEY not configured' }, { status: 500 })
+      const r = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: 'WorkflowStacks <hello@workflowstacks.com>',
+          to: [lead.email],
+          subject,
+          html,
+        }),
+      })
+      if (!r.ok) {
+        const err = await r.text()
+        return Response.json({ error: 'resend failed', detail: err.slice(0, 200) }, { status: 500 })
+      }
+      await database.collection('creator_leads').updateOne(
+        { creator_username: lead.creator_username },
+        { $set: { outreach_status: 'emailed', outreach_subject: subject, outreach_sent_at: new Date() } }
+      )
+      return Response.json({ success: true, sent_to: lead.email })
+    }
+
+    if (path === '/creator-leads/update') {
+      const body = await request.json().catch(() => ({}))
+      const { creator_username, status, note } = body
+      if (!creator_username || !status) return Response.json({ error: 'creator_username and status required' }, { status: 400 })
+      const valid = ['discovered', 'emailed', 'replied', 'declined', 'converted']
+      if (!valid.includes(status)) return Response.json({ error: 'invalid status' }, { status: 400 })
+      const set = { outreach_status: status, updated_at: new Date() }
+      if (note) set.outreach_note = note
+      await database.collection('creator_leads').updateOne({ creator_username }, { $set: set })
+      return Response.json({ success: true })
+    }
 
     // Seed packs and playbooks
     if (path === '/seed-packs') {
@@ -1420,7 +1561,9 @@ export async function POST(request) {
     
     // A founder requests a tool deal (demand radar — deduped, upvoted)
     if (path === '/deals/request') {
+      const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
       const body = await request.json();
+      const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 })
       const tool = (body.tool || '').toString().trim().slice(0, 60);
       if (!tool) return Response.json({ success: false, error: 'Tool name required' }, { status: 400 });
       const norm = tool.toLowerCase();
@@ -1469,7 +1612,9 @@ export async function POST(request) {
 
     // Post a workflow problem (demand side)
     if (path === '/problems') {
+      const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
       const body = await request.json();
+      const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 })
       const title = (body.title || '').toString().trim().slice(0, 140);
       if (!title) return Response.json({ success: false, error: 'A problem title is required' }, { status: 400 });
       const problem = {
@@ -1494,6 +1639,7 @@ export async function POST(request) {
 
     // Express interest in a group-buy deal (staged — no payment yet)
     if (path === '/deals/join') {
+      const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
       const body = await request.json();
       const email = (body.email || '').toString().trim().toLowerCase();
       if (!body.dealId || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -1523,6 +1669,7 @@ export async function POST(request) {
 
     // Become a featured member (LinkedIn-based, auto-listed, deduped)
     if (path === '/members/apply') {
+      const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
       const body = await request.json();
       const name = (body.name || '').toString().trim().slice(0, 80);
       const linkedinUrl = (body.linkedinUrl || '').toString().trim();
@@ -1561,7 +1708,9 @@ export async function POST(request) {
 
     // Email subscribe — stores waitlist emails (deduped)
     if (path === '/subscribe') {
+      const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
       const body = await request.json();
+      const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 })
       const email = (body.email || '').trim().toLowerCase();
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
         return Response.json({ success: false, error: 'Invalid email' }, { status: 400 });
@@ -1737,7 +1886,9 @@ export async function POST(request) {
 
     // Creator application — anyone can apply to list their tools
     if (path === '/creator-apply') {
+      const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
       const body = await request.json();
+      const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 })
       const email = (body.email || '').toString().trim().toLowerCase();
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
         return Response.json({ ok: false, error: 'Valid email is required' }, { status: 400 });
