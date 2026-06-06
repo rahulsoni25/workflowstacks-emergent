@@ -296,6 +296,43 @@ const agentPowersSkills = [
   }
 ];
 
+// Fallback prettifier for skills whose AI-rewritten title_human hasn't landed yet.
+// Cleans hyphens/underscores, fixes obvious all-caps acronyms, title-cases — so
+// "GitHubDaily" stays as-is, "applied-ml" → "Applied ML", "google-ads-mcp" →
+// "Google Ads MCP". Never overrides an existing title_human.
+const COMMON_ACRONYMS = new Set(['mcp', 'ai', 'llm', 'cli', 'sdk', 'api', 'ui', 'ux', 'ml', 'cv', 'nlp', 'rag', 'os', 'db', 'qa', 'seo', 'aeo', 'geo', 'crm', 'cms', 'pdf', 'aws', 'gcp', 'http', 'json', 'yaml', 'sql']);
+function prettyName(raw) {
+  if (!raw) return '';
+  // Preserve known good styling (camelCase, mixed case with internal caps, dotted names like llama.cpp).
+  if (/[a-z][A-Z]/.test(raw) || /\./.test(raw)) return raw;
+  return raw
+    .replace(/[-_]+/g, ' ')
+    .split(' ')
+    .map((w) => {
+      const lw = w.toLowerCase();
+      if (COMMON_ACRONYMS.has(lw)) return lw.toUpperCase();
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    })
+    .join(' ')
+    .trim();
+}
+function prettyDesc(raw) {
+  if (!raw) return '';
+  // Strip leading emoji + whitespace; capitalize first letter; trim CJK-only filler.
+  let s = raw.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\s]+/u, '').trim();
+  if (!s) return raw;
+  s = s.charAt(0).toUpperCase() + s.slice(1);
+  return s.length > 200 ? s.slice(0, 197) + '…' : s;
+}
+// Apply to a skills array — adds title_human/description_human ONLY if missing.
+function applyFallback(skills) {
+  return (skills || []).map((s) => ({
+    ...s,
+    title_human: s.title_human || prettyName(s.name),
+    description_human: s.description_human || prettyDesc(s.description),
+  }));
+}
+
 export async function GET(request) {
   const { pathname } = new URL(request.url);
   const path = pathname.replace('/api', '') || '/';
@@ -350,7 +387,7 @@ export async function GET(request) {
 
       // 3. If we have plenty of local results, return immediately.
       if (local.length >= 6) {
-        return Response.json({ skills: local, query: q, discovered: 0 });
+        return Response.json({ skills: applyFallback(local), query: q, discovered: 0 });
       }
 
       // 4. Few or no local results → search GitHub directly (with auth token if set)
@@ -439,7 +476,7 @@ export async function GET(request) {
       merged.sort((a, b) => (b.github_stars || 0) - (a.github_stars || 0));
       merged = merged.slice(0, 20);
 
-      return Response.json({ skills: merged, query: q, discovered });
+      return Response.json({ skills: applyFallback(merged), query: q, discovered });
     }
 
     // Admin — top recent search queries (last 7 days)
@@ -531,7 +568,7 @@ export async function GET(request) {
           .sort({ last_updated: -1, github_stars: -1 })
           .limit(8)
           .toArray();
-        return Response.json({ skills: newSkills });
+        return Response.json({ skills: applyFallback(newSkills) });
       }
 
       // Quality gate: only show published listings (unless ?all=true)
@@ -551,19 +588,19 @@ export async function GET(request) {
         .sort({ github_stars: -1 })
         .toArray();
 
-      return Response.json({ skills });
+      return Response.json({ skills: applyFallback(skills) });
     }
-    
+
     // Get skill by ID
     if (path.startsWith('/skills/')) {
       const id = path.split('/')[2];
       const skill = await database.collection('skills').findOne({ id });
-      
+
       if (!skill) {
         return Response.json({ error: 'Skill not found' }, { status: 404 });
       }
-      
-      return Response.json({ skill });
+
+      return Response.json({ skill: applyFallback([skill])[0] });
     }
     
     // Ingest from GitHub - Latest & Most Popular
@@ -713,7 +750,7 @@ export async function GET(request) {
         .limit(12)
         .toArray();
 
-      return Response.json({ skills });
+      return Response.json({ skills: applyFallback(skills) });
     }
 
     // Get hot skills (most stars, updated in last 30 days)
@@ -731,7 +768,7 @@ export async function GET(request) {
         .limit(12)
         .toArray();
 
-      return Response.json({ skills });
+      return Response.json({ skills: applyFallback(skills) });
     }
 
     // Get new skills (most recently added to the marketplace)
@@ -752,7 +789,7 @@ export async function GET(request) {
           .toArray();
       }
 
-      return Response.json({ skills });
+      return Response.json({ skills: applyFallback(skills) });
     }
     
     // Re-classify skills into correct categories by keyword (fixes mis-tags)
