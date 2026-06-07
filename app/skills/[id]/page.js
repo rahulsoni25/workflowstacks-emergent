@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import SkillDetailClient from './SkillDetailClient'
 
 // Note: invalid skill IDs render the not-found UI with HTTP 200 (a Next.js 14
@@ -26,7 +26,9 @@ async function getRelated(skill) {
 
 async function getSkill(id) {
   try {
-    const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 3600 } })
+    // Short cache window — slugs and rewrites land throughout the day, so 5 min
+    // keeps the per-skill page in sync without hammering the API on every view.
+    const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 300 } })
     if (!res.ok) return null
     const data = await res.json()
     return data.skill || null
@@ -121,9 +123,10 @@ export async function generateMetadata({ params }) {
 export default async function SkillDetailPage({ params }) {
   const skill = await getSkill(params.id)
   if (!skill) notFound()
-  // 301 redirect UUID URLs to their canonical slug URL (preserves backlinks)
+  // 308 permanent redirect UUID URLs to the canonical slug URL (preserves
+  // backlinks + tells search engines to update their index)
   if (skill.slug && params.id !== skill.slug && /^[0-9a-f-]{36}$/i.test(params.id)) {
-    redirect(`/skills/${skill.slug}`)
+    permanentRedirect(`/skills/${skill.slug}`)
   }
   const [sourceSpec, related] = await Promise.all([getSourceSpec(skill.github_url), getRelated(skill)])
 
