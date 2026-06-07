@@ -128,7 +128,7 @@ export default async function PlaybookDetailPage({ params }) {
                     <CardDescription className="text-slate-400 line-clamp-2">{skill.description_human || skill.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Link href={`/skills/${skill.id}`}>
+                    <Link href={`/skills/${skill.slug || skill.id}`}>
                       <Button variant="outline" className="w-full border-white/20 text-white">View Details</Button>
                     </Link>
                   </CardContent>

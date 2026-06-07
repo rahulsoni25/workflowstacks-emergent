@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs'];
 
 // Audit log — capture every admin action for security visibility.
 // Append-only collection: audit_logs { id, path, method, ip, ua, at }
@@ -66,6 +66,47 @@ function rateLimit(request, limit = 10, windowMs = 60_000) {
   _rl.set(key, slot)
   if (slot.count > limit) return Response.json({ error: 'Too many requests' }, { status: 429 })
   return null
+}
+
+// Slug generation — Pattern C (name-first, owner-name on collision).
+// Lowercase, hyphens, no diacritics/emoji, max 60 chars on a word boundary.
+function slugify(raw) {
+  if (!raw) return ''
+  let s = String(raw).toLowerCase()
+    // Strip emoji and pictographs
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
+    // Replace non-alphanumeric with hyphens (keep dots+digits in things like llama.cpp -> llama-cpp)
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+  if (s.length <= 60) return s
+  // Truncate at a hyphen boundary so we never end mid-word
+  const cut = s.slice(0, 60)
+  const last = cut.lastIndexOf('-')
+  return last > 30 ? cut.slice(0, last) : cut
+}
+
+// Pick a unique slug for a skill, deferring to the DB to check collisions.
+// Order: name → owner-name → owner-name-2 → owner-name-3 …
+async function uniqueSlug(database, name, owner, currentId = null) {
+  const base = slugify(name)
+  if (!base) return slugify(owner + '-' + (currentId || 'skill')) || ('skill-' + Date.now())
+  // Try base first
+  const baseHit = await database.collection('skills').findOne({ slug: base, id: { $ne: currentId } })
+  if (!baseHit) return base
+  // Try owner-base
+  const ownerSlug = owner ? slugify(owner + '-' + name) : null
+  if (ownerSlug) {
+    const ownerHit = await database.collection('skills').findOne({ slug: ownerSlug, id: { $ne: currentId } })
+    if (!ownerHit) return ownerSlug
+    // Try owner-base-2, -3, …
+    for (let i = 2; i < 50; i++) {
+      const candidate = ownerSlug + '-' + i
+      const hit = await database.collection('skills').findOne({ slug: candidate, id: { $ne: currentId } })
+      if (!hit) return candidate
+    }
+  }
+  // Last resort fallback
+  return base + '-' + Date.now().toString(36).slice(-4)
 }
 
 function tooLong(obj, limits = { email: 254, default: 2000 }) {
@@ -414,8 +455,10 @@ export async function GET(request) {
           for (const repo of repos) {
             if (existingUrls.has(repo.html_url)) continue;
             const id = uuidv4();
+            const slug = await uniqueSlug(database, repo.name, repo.owner?.login);
             const doc = {
               id,
+              slug,
               name: repo.name,
               description: repo.description || '',
               category: 'ai-agent', // default; reclassify cron will fix
@@ -515,8 +558,10 @@ export async function GET(request) {
           const data = await ghRes.json();
           let added = 0;
           for (const repo of (data.items || [])) {
+            const slug = await uniqueSlug(database, repo.name, repo.owner?.login);
             const doc = {
               id: uuidv4(),
+              slug,
               name: repo.name,
               description: repo.description || '',
               category: 'ai-agent',
@@ -591,10 +636,12 @@ export async function GET(request) {
       return Response.json({ skills: applyFallback(skills) });
     }
 
-    // Get skill by ID
+    // Get skill by slug or ID
     if (path.startsWith('/skills/')) {
-      const id = path.split('/')[2];
-      const skill = await database.collection('skills').findOne({ id });
+      const key = path.split('/')[2];
+      // Try slug first (the new canonical), then uuid for back-compat
+      const skill = await database.collection('skills').findOne({ slug: key })
+        || await database.collection('skills').findOne({ id: key });
 
       if (!skill) {
         return Response.json({ error: 'Skill not found' }, { status: 404 });
@@ -693,6 +740,9 @@ export async function GET(request) {
       let inserted = 0;
       let refreshed = 0;
       for (const s of scrapedSkills) {
+        // Pick a slug only when this repo isn't already in the catalog (skipped for known repos).
+        const existing = await database.collection('skills').findOne({ github_url: s.github_url }, { projection: { slug: 1 } });
+        const slug = existing?.slug ? null : await uniqueSlug(database, s.name, s.creator);
         const res = await database.collection('skills').updateOne(
           { github_url: s.github_url },
           {
@@ -711,6 +761,7 @@ export async function GET(request) {
             // Only set on first insert — preserves rewrites & reclassified category
             $setOnInsert: {
               id: s.id,
+              ...(slug ? { slug } : {}),
               category: s.category,
               creator: s.creator,
               creator_avatar: s.creator_avatar,
@@ -845,6 +896,28 @@ export async function GET(request) {
       return Response.json({ success: true, total: all.length, recategorized: changed });
     }
 
+    // Backfill slugs for every existing skill (admin only)
+    if (path === '/backfill-slugs') {
+      const { searchParams } = new URL(request.url);
+      const force = searchParams.get('force') === 'true'; // if true, regenerate even existing slugs
+      const skills = await database.collection('skills')
+        .find(force ? {} : { slug: { $exists: false } })
+        .toArray();
+      let assigned = 0;
+      let skipped = 0;
+      for (const s of skills) {
+        if (s.slug && !force) { skipped++; continue }
+        const slug = await uniqueSlug(database, s.name || s.title_human, s.creator, s.id);
+        if (!slug) { skipped++; continue }
+        await database.collection('skills').updateOne(
+          { id: s.id },
+          { $set: { slug, slug_assigned_at: new Date() } }
+        );
+        assigned++;
+      }
+      return Response.json({ success: true, total: skills.length, assigned, skipped });
+    }
+
     // Remove fake sample skills + test data (admin only)
     if (path === '/cleanup') {
       // Fake AgentPowers placeholder skills (not real GitHub repos)
@@ -896,8 +969,12 @@ export async function GET(request) {
         if (!r.ok) return Response.json({ error: `GitHub returned ${r.status}` }, { status: 400 });
         const data = await r.json();
         const id = uuidv4();
+        // Only assign slug on first insert — never overwrite an existing one.
+        const existing = await database.collection('skills').findOne({ github_url: data.html_url }, { projection: { slug: 1 } });
+        const slug = existing?.slug || await uniqueSlug(database, data.name, owner);
         const doc = {
           id,
+          slug,
           name: data.name,
           description: data.description || '',
           category,
@@ -1452,7 +1529,7 @@ export async function GET(request) {
       const installCmd = (skill.use_guide && skill.use_guide.install) ? skill.use_guide.install : null;
       const stars = skill.github_stars || 0;
       const ctaUrl = `https://claude.ai/new?q=${encodeURIComponent('Act as ' + skillName + '. ' + whatItDoes)}`;
-      const guideUrl = `https://workflowstacks.com/skills/${skill.id}`;
+      const guideUrl = `https://workflowstacks.com/skills/${skill.slug || skill.id}`;
 
       let sentCount = 0;
       for (const sub of subscribers) {
@@ -1978,15 +2055,19 @@ export async function POST(request) {
         return Response.json({ success: false, error: 'Name and description are required' }, { status: 400 });
       }
 
+      const name = String(body.name).slice(0, 120);
+      const creator = body.creator || 'Anonymous';
+      const slug = await uniqueSlug(database, name, creator);
       const skill = {
         id: uuidv4(),
-        name: String(body.name).slice(0, 120),
+        slug,
+        name,
         description: String(body.description).slice(0, 500),
         category: body.category || 'ai-tool',
         price: parseFloat(body.price) || 0,
         source_url: body.source_url || '',
         github_stars: 0,
-        creator: body.creator || 'Anonymous',
+        creator,
         is_premium: body.price > 0,
         readme_preview: '',
         created_at: new Date(),

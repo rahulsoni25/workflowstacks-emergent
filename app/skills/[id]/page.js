@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import SkillDetailClient from './SkillDetailClient'
 
 // Note: invalid skill IDs render the not-found UI with HTTP 200 (a Next.js 14
@@ -108,7 +108,7 @@ export async function generateMetadata({ params }) {
   const name = skill.title_human || skill.name
   const title = `${name} | WorkflowStacks`
   const description = clip(skill.description_human || skill.description || '')
-  const url = `/skills/${skill.id}`
+  const url = `/skills/${skill.slug || skill.id}`
   return {
     title,
     description,
@@ -121,6 +121,10 @@ export async function generateMetadata({ params }) {
 export default async function SkillDetailPage({ params }) {
   const skill = await getSkill(params.id)
   if (!skill) notFound()
+  // 301 redirect UUID URLs to their canonical slug URL (preserves backlinks)
+  if (skill.slug && params.id !== skill.slug && /^[0-9a-f-]{36}$/i.test(params.id)) {
+    redirect(`/skills/${skill.slug}`)
+  }
   const [sourceSpec, related] = await Promise.all([getSourceSpec(skill.github_url), getRelated(skill)])
 
   // Structured data for rich results
@@ -142,7 +146,7 @@ export default async function SkillDetailPage({ params }) {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: BASE },
       { '@type': 'ListItem', position: 2, name: 'Skills', item: `${BASE}/skills` },
-      { '@type': 'ListItem', position: 3, name: skill.title_human || skill.name, item: `${BASE}/skills/${skill.id}` },
+      { '@type': 'ListItem', position: 3, name: skill.title_human || skill.name, item: `${BASE}/skills/${skill.slug || skill.id}` },
     ],
   }
 

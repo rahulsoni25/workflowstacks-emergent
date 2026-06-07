@@ -49,7 +49,7 @@ export default async function SkillsPage() {
     itemListElement: skills.slice(0, 100).map((s, i) => ({
       '@type': 'ListItem',
       position: i + 1,
-      url: `${BASE}/skills/${s.id}`,
+      url: `${BASE}/skills/${s.slug || s.id}`,
       name: s.title_human || s.name,
     })),
   }

@@ -28,7 +28,7 @@ export default async function sitemap() {
     if (res.ok) {
       const data = await res.json()
       skillEntries = (data.skills || []).map((s) => ({
-        url: `${BASE}/skills/${s.id}`,
+        url: `${BASE}/skills/${s.slug || s.id}`,
         lastModified: s.last_updated ? new Date(s.last_updated) : now,
         changeFrequency: 'weekly',
         priority: 0.7,

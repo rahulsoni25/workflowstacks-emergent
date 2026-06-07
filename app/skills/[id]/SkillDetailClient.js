@@ -317,7 +317,7 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
             <p className="text-slate-400 text-sm mb-6">More {skill.category} tools founders pair with this one.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {related.map((r) => (
-                <Link key={r.id} href={`/skills/${r.id}`} className="block group">
+                <Link key={r.id} href={`/skills/${r.slug || r.id}`} className="block group">
                   <div className="h-full rounded-xl border border-slate-700/50 bg-slate-900/60 p-4 hover:border-teal-500/40 transition-all">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs text-slate-500">{r.category}</span>

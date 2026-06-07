@@ -469,7 +469,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             </div>
             <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-slate-700">
               {initialNewSkills.slice(0, 8).map((skill) => (
-                <Link key={skill.id} href={`/skills/${skill.id}`} className="flex-shrink-0 w-64 bg-[#101314] border border-[#262B2D] rounded-xl p-4 hover:border-[#C6F24E]/40 transition-all duration-200 group">
+                <Link key={skill.id} href={`/skills/${skill.slug || skill.id}`} className="flex-shrink-0 w-64 bg-[#101314] border border-[#262B2D] rounded-xl p-4 hover:border-[#C6F24E]/40 transition-all duration-200 group">
                   <div className="flex items-center justify-between mb-2">
                     <Badge className={`${getCategoryColor(skill.category)} border text-xs`}>
                       {skill.category}
@@ -708,7 +708,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                       </div>
                     </CardContent>
                     <CardFooter>
-                      <Link href={`/skills/${skill.id}`} className="w-full">
+                      <Link href={`/skills/${skill.slug || skill.id}`} className="w-full">
                         <Button className="w-full bg-[#0A0C0D] hover:bg-[#C6F24E]/10 text-[#ECEFEA] hover:text-[#C6F24E] border border-[#262B2D] hover:border-[#C6F24E]/40 transition-all" variant="outline">
                           View Details
                           <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />

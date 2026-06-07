@@ -124,7 +124,7 @@ export default function AgentClient({ agent, skills }) {
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {skills.map((s) => (
-                <Link key={s.id} href={`/skills/${s.id}`} className="block">
+                <Link key={s.id} href={`/skills/${s.slug || s.id}`} className="block">
                   <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 hover:border-teal-500/40 transition-all">
                     <div className="flex items-center justify-between">
                       <span className="text-white text-sm font-medium line-clamp-1">{s.title_human || s.name}</span>

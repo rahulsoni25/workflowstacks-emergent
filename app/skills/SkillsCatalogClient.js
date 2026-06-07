@@ -188,7 +188,7 @@ export default function SkillsCatalogClient({ skills = [] }) {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Link href={`/skills/${skill.id}`} className="w-full">
+                  <Link href={`/skills/${skill.slug || skill.id}`} className="w-full">
                     <Button className="w-full bg-slate-800 hover:bg-teal-500/20 text-slate-200 hover:text-teal-300 border border-slate-700 hover:border-teal-500/40 transition-all" variant="outline">
                       View Details
                       <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />

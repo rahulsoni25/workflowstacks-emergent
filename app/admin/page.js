@@ -498,7 +498,7 @@ function SkillsTab({ hdr, jhdr, showToast }) {
                       </td>
                       <td className="py-2 text-right">
                         <div className="flex justify-end gap-1.5">
-                          <a href={`/skills/${s.id}`} target="_blank" rel="noreferrer" className="inline-flex items-center text-xs text-[#C6F24E] hover:underline px-2 py-1">
+                          <a href={`/skills/${s.slug || s.id}`} target="_blank" rel="noreferrer" className="inline-flex items-center text-xs text-[#C6F24E] hover:underline px-2 py-1">
                             <Eye className="w-3.5 h-3.5 mr-1" />View
                           </a>
                           <button onClick={() => setEditing(s)} className="inline-flex items-center text-xs text-[#ECEFEA] hover:bg-white/5 px-2 py-1 rounded border border-[#323A3C]">
