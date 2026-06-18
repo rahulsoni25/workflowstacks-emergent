@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
   Lock, RefreshCw, Copy, Key, Mail, Search, Eye, Edit, Send, Check, X,
   LayoutDashboard, Package, Users, Shield, ExternalLink, Download, ChevronDown, ChevronRight, TrendingUp,
+  DollarSign, Map,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -122,7 +123,9 @@ export default function AdminPage() {
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'skills', label: 'Skills', icon: Package },
     { id: 'creators', label: 'Creators', icon: Users },
+    { id: 'dfy', label: 'Done-for-You', icon: DollarSign },
     { id: 'newsletter', label: 'Newsletter', icon: Mail },
+    { id: 'roadmap', label: 'Roadmap', icon: Map },
     { id: 'audit', label: 'Audit & Security', icon: Shield },
   ]
 
@@ -187,7 +190,9 @@ export default function AdminPage() {
         {activeTab === 'overview'   && <OverviewTab   hdr={hdr} showToast={showToast} busy={busy} setBusy={setBusy} />}
         {activeTab === 'skills'     && <SkillsTab     hdr={hdr} jhdr={jhdr} showToast={showToast} />}
         {activeTab === 'creators'   && <CreatorsTab   hdr={hdr} jhdr={jhdr} showToast={showToast} setApiKeyModal={setApiKeyModal} busy={busy} setBusy={setBusy} />}
+        {activeTab === 'dfy'        && <DfyTab        hdr={hdr} jhdr={jhdr} showToast={showToast} />}
         {activeTab === 'newsletter' && <NewsletterTab hdr={hdr} showToast={showToast} busy={busy} setBusy={setBusy} />}
+        {activeTab === 'roadmap'    && <RoadmapTab    hdr={hdr} jhdr={jhdr} showToast={showToast} />}
         {activeTab === 'audit'      && <AuditTab      hdr={hdr} showToast={showToast} />}
       </div>
     </div>
@@ -1011,6 +1016,274 @@ function NewsletterTab({ hdr, showToast, busy, setBusy }) {
           </CardContent>
         )}
       </Card>
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   4b. Done-for-You pipeline
+   ───────────────────────────────────────────────────────────────────────────── */
+
+const DFY_COLUMNS = [
+  { id: 'new', label: 'New' },
+  { id: 'contacted', label: 'Contacted' },
+  { id: 'quoted', label: 'Quoted' },
+  { id: 'paid', label: 'Paid' },
+  { id: 'delivered', label: 'Delivered' },
+]
+
+function DfyTab({ hdr, jhdr, showToast }) {
+  const [requests, setRequests] = useState([])
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [expanded, setExpanded] = useState(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    try {
+      const [rRes, sRes] = await Promise.all([
+        fetch('/api/dfy-requests', { headers: hdr() }),
+        fetch('/api/dfy-stats', { headers: hdr() }),
+      ])
+      const rData = await rRes.json().catch(() => ({}))
+      const sData = await sRes.json().catch(() => ({}))
+      setRequests(rData.requests || [])
+      setStats(sData || null)
+    } catch { showToast('Failed to load DfY') }
+    finally { setLoading(false) }
+  }, [hdr, showToast])
+
+  useEffect(() => { load() }, [load])
+
+  const updateRequest = async (id, set) => {
+    try {
+      const r = await fetch('/api/dfy-request/update', {
+        method: 'POST', headers: jhdr(),
+        body: JSON.stringify({ id, set }),
+      })
+      if (!r.ok) throw new Error()
+      setRequests((prev) => prev.map((req) => (req.id === id ? { ...req, ...set } : req)))
+      showToast('Updated')
+      // Reload stats so revenue counters reflect change
+      try {
+        const sRes = await fetch('/api/dfy-stats', { headers: hdr() })
+        setStats(await sRes.json())
+      } catch {}
+    } catch { showToast('Update failed') }
+  }
+
+  const grouped = useMemo(() => {
+    const g = { new: [], contacted: [], quoted: [], paid: [], delivered: [], declined: [] }
+    for (const r of requests) {
+      const st = r.status || 'new'
+      if (g[st]) g[st].push(r)
+    }
+    return g
+  }, [requests])
+
+  const inPipeline = (stats?.new || 0) + (stats?.contacted || 0) + (stats?.quoted || 0)
+
+  return (
+    <div className="space-y-6">
+      {/* Stats row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card className={CARD}>
+          <CardContent className="p-4">
+            <div className="text-[11px] uppercase tracking-wider text-[#7A8487] mb-1">Total revenue</div>
+            <div className="text-2xl font-bold text-[#C6F24E]">${stats?.totalPaidUsd ?? 0}</div>
+          </CardContent>
+        </Card>
+        <Card className={CARD}>
+          <CardContent className="p-4">
+            <div className="text-[11px] uppercase tracking-wider text-[#7A8487] mb-1"># paid</div>
+            <div className="text-2xl font-bold text-white">{stats?.paid ?? 0}</div>
+          </CardContent>
+        </Card>
+        <Card className={CARD}>
+          <CardContent className="p-4">
+            <div className="text-[11px] uppercase tracking-wider text-[#7A8487] mb-1"># in pipeline</div>
+            <div className="text-2xl font-bold text-white">{inPipeline}</div>
+          </CardContent>
+        </Card>
+        <Card className={CARD}>
+          <CardContent className="p-4">
+            <div className="text-[11px] uppercase tracking-wider text-[#7A8487] mb-1"># delivered</div>
+            <div className="text-2xl font-bold text-white">{stats?.delivered ?? 0}</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex justify-end">
+        <Button onClick={load} size="sm" className={SECONDARY}><RefreshCw className="w-3.5 h-3.5 mr-1.5" />Refresh</Button>
+      </div>
+
+      {/* Kanban */}
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          {DFY_COLUMNS.map((c) => <Skeleton key={c.id} className="h-40" />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          {DFY_COLUMNS.map((col) => (
+            <div key={col.id} className="space-y-2">
+              <div className="text-xs uppercase tracking-wider text-[#7A8487] flex items-center justify-between px-1">
+                <span>{col.label}</span>
+                <span className="text-[#C6F24E] font-mono">{grouped[col.id]?.length || 0}</span>
+              </div>
+              <div className="space-y-2 min-h-[200px]">
+                {(grouped[col.id] || []).map((r) => {
+                  const isOpen = expanded === r.id
+                  const tierPrice = { starter: 99, pro: 249, agency: 499 }[r.tier || 'starter']
+                  const nextCol = DFY_COLUMNS[DFY_COLUMNS.findIndex((c) => c.id === col.id) + 1]
+                  return (
+                    <div key={r.id} className={`${CARD} border rounded-lg p-3 text-sm`}>
+                      <div onClick={() => setExpanded(isOpen ? null : r.id)} className="cursor-pointer">
+                        <div className="font-semibold text-white truncate" title={r.email}>{r.name || r.email}</div>
+                        <div className="text-[#7A8487] text-xs truncate">{r.email}</div>
+                        <div className="text-[#ECEFEA] text-xs mt-1.5 line-clamp-2">{r.agent_goal || <span className="italic opacity-60">(no goal)</span>}</div>
+                        <div className="flex items-center justify-between mt-2">
+                          <Badge className="bg-[#0A0C0D] border border-[#262B2D] text-[#C6F24E]">{r.tier || 'starter'} · ${tierPrice}</Badge>
+                          <span className="text-[10px] text-[#7A8487]">{relTime(r.created_at)}</span>
+                        </div>
+                      </div>
+                      {isOpen && (
+                        <div className="mt-3 pt-3 border-t border-[#262B2D] space-y-2 text-xs">
+                          {r.preferred_contact_time && (
+                            <div><span className="text-[#7A8487]">Contact time:</span> <span className="text-[#ECEFEA]">{r.preferred_contact_time}</span></div>
+                          )}
+                          {r.skill_ids?.length > 0 && (
+                            <div>
+                              <span className="text-[#7A8487]">Skills:</span>{' '}
+                              <span className="text-[#ECEFEA]">{r.skill_ids.length} selected</span>
+                            </div>
+                          )}
+                          <div>
+                            <span className="text-[#7A8487] block mb-1">Notes:</span>
+                            <textarea
+                              defaultValue={r.notes || ''}
+                              onBlur={(e) => {
+                                if (e.target.value !== (r.notes || '')) updateRequest(r.id, { notes: e.target.value })
+                              }}
+                              rows={3}
+                              placeholder="Internal notes…"
+                              className="w-full bg-[#0A0C0D] border border-[#262B2D] text-white rounded-md px-2 py-1.5 text-xs"
+                            />
+                          </div>
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            {nextCol && (
+                              <button
+                                onClick={() => updateRequest(r.id, nextCol.id === 'paid' ? { status: 'paid', paid: true, paid_amount_usd: tierPrice } : { status: nextCol.id })}
+                                className="text-[10px] px-2 py-1 rounded border border-[#C6F24E]/30 text-[#C6F24E] hover:bg-[#C6F24E]/10"
+                              >
+                                → {nextCol.label}
+                              </button>
+                            )}
+                            <button
+                              onClick={() => updateRequest(r.id, { status: 'declined' })}
+                              className="text-[10px] px-2 py-1 rounded border border-red-500/30 text-red-300 hover:bg-red-500/10"
+                            >
+                              Decline
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+                {(grouped[col.id] || []).length === 0 && (
+                  <div className="text-[#7A8487] text-xs italic px-1 py-2">empty</div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {grouped.declined?.length > 0 && (
+        <Card className={CARD}>
+          <CardHeader>
+            <CardTitle className="text-white text-sm">Declined ({grouped.declined.length})</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1 text-xs text-[#7A8487]">
+            {grouped.declined.map((r) => (
+              <div key={r.id}>{r.email} — {truncate(r.agent_goal, 80)}</div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   4c. Roadmap (revenue model — static strategic guide)
+   ───────────────────────────────────────────────────────────────────────────── */
+
+const ROADMAP = [
+  {
+    tier: 'Tier 1 — Live revenue this month',
+    items: [
+      { id: 'dfy', title: 'Done-for-You service ($99/$249/$499)', status: 'live', desc: 'Builder form captures intent; pipeline tracked in /admin → DfY tab. Stripe link sent manually after scope confirmation.', mrr: '0 → $1k achievable' },
+      { id: 'affiliate', title: 'Affiliate revenue on /deals', status: 'in-progress', desc: '8 placeholder deals seeded. Apply for partner IDs (Cursor, Perplexity, Notion, Linear, Vercel, n8n, Resend, Replicate), drop links in /admin → Deals.', mrr: '0 → $200–500' },
+      { id: 'premium-playbooks', title: 'Premium playbooks ($19–$49 each)', status: 'planned', desc: 'Rewrite the 4 free playbooks as paid deliverables: 30-min walkthrough video + Notion template + custom GPT instructions + email support. Sell via Stripe Payment Links.', mrr: '0 → $300–600' },
+    ],
+  },
+  {
+    tier: 'Tier 2 — Recurring revenue (3–6 months)',
+    items: [
+      { id: 'pro-buyer', title: 'Pro tier reframed for BUYERS', status: 'planned', desc: 'Currently positioned for sellers (no sellers exist). Reframe: unlimited private agents, agent history, API access, ad-free. $5–9/mo.', mrr: '$500–2k' },
+      { id: 'groupbuy', title: 'Group-buy commissions', status: 'planned', desc: 'Pick one vendor (Perplexity recommended), email their BD, negotiate 25% off for 50+ pooled seats, take 15%.', mrr: '$500–1k per deal' },
+      { id: 'agency-tier', title: 'Agency tier ($99–$199/mo)', status: 'planned', desc: 'White-label agents agencies resell to clients. Same product, 10x willingness-to-pay.', mrr: '$1k–3k' },
+    ],
+  },
+  {
+    tier: 'Tier 3 — Long-term moats (12+ months)',
+    items: [
+      { id: 'creator-comm', title: 'Creator commissions (85/15)', status: 'planned', desc: 'Requires both buyers AND sellers at scale. Currently 0 paid agents.', mrr: 'depends on volume' },
+      { id: 'featured', title: 'Featured listings', status: 'planned', desc: 'Sponsored slots like Smithery. Requires traffic.', mrr: 'depends on traffic' },
+      { id: 'enterprise', title: 'Enterprise white-label contracts', status: 'planned', desc: 'License the platform to enterprises. 2026 problem.', mrr: '$5k–20k per contract' },
+    ],
+  },
+]
+
+function statusBadge(status) {
+  if (status === 'live') return 'bg-[#C6F24E]/15 text-[#C6F24E] border-[#C6F24E]/30'
+  if (status === 'in-progress') return 'bg-amber-500/15 text-amber-300 border-amber-500/30'
+  return 'bg-white/5 text-[#7A8487] border-[#323A3C]'
+}
+
+function RoadmapTab() {
+  return (
+    <div className="space-y-6">
+      <Card className={CARD}>
+        <CardContent className="p-4">
+          <p className="text-sm text-[#ECEFEA]">
+            <span className="text-[#7A8487]">Current revenue surface:</span> Done-for-You. <span className="text-[#7A8487]">Total runway:</span> $0 / mo so far. <span className="text-[#C6F24E]">Target: $1k MRR by August.</span>
+          </p>
+        </CardContent>
+      </Card>
+
+      {ROADMAP.map((section) => (
+        <div key={section.tier} className="space-y-3">
+          <h2 className="text-white font-semibold text-base">{section.tier}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {section.items.map((item) => (
+              <Card key={item.id} className={CARD}>
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-white font-semibold text-sm leading-snug">{item.title}</h3>
+                    <Badge className={`${statusBadge(item.status)} border text-[10px] shrink-0`}>{item.status}</Badge>
+                  </div>
+                  <p className="text-xs text-[#ECEFEA] leading-relaxed">{item.desc}</p>
+                  <div className="text-[11px] uppercase tracking-wider text-[#7A8487] pt-1 border-t border-[#262B2D]">
+                    MRR: <span className="text-[#C6F24E] normal-case tracking-normal font-mono">{item.mrr}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   )
 }

@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/seed-affiliate-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs', '/dfy-requests', '/dfy-request/update', '/dfy-stats', '/deals/all', '/deal-update'];
 
 // Audit log — capture every admin action for security visibility.
 // Append-only collection: audit_logs { id, path, method, ip, ua, at }
@@ -1339,6 +1339,36 @@ export async function GET(request) {
       });
     }
 
+    // Admin — all deals (including unapproved) for /admin Deals tab
+    if (path === '/deals/all') {
+      const deals = await database.collection('deals')
+        .find({})
+        .sort({ created_at: -1 })
+        .toArray();
+      return Response.json({ deals });
+    }
+
+    // Admin — list all Done-for-You requests
+    if (path === '/dfy-requests') {
+      const requests = await database.collection('dfy_requests')
+        .find({})
+        .sort({ created_at: -1 })
+        .toArray();
+      return Response.json({ requests, count: requests.length });
+    }
+
+    // Admin — DfY pipeline stats and revenue
+    if (path === '/dfy-stats') {
+      const all = await database.collection('dfy_requests').find({}).toArray();
+      const stats = { new: 0, contacted: 0, quoted: 0, paid: 0, delivered: 0, declined: 0, totalPaidUsd: 0 };
+      for (const r of all) {
+        const st = r.status || 'new';
+        if (stats[st] !== undefined) stats[st]++;
+        if (r.paid) stats.totalPaidUsd += (typeof r.paid_amount_usd === 'number' ? r.paid_amount_usd : 99);
+      }
+      return Response.json(stats);
+    }
+
     // Group-buy / affiliate tool deals (only approved ones show publicly)
     if (path === '/deals') {
       const deals = await database.collection('deals')
@@ -2019,6 +2049,109 @@ export async function POST(request) {
         id: member.id,
         message: res.upsertedCount === 0 ? "You're already in the directory!" : "You're in! Welcome to the network.",
       });
+    }
+
+    // Done-for-You — public request capture (rate-limited)
+    if (path === '/dfy-request') {
+      const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
+      const body = await request.json().catch(() => ({}));
+      const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 });
+      const { email, name, agent_goal, skill_ids, preferred_contact_time, tier } = body;
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return Response.json({ error: 'Valid email required' }, { status: 400 });
+      const doc = {
+        id: uuidv4(),
+        email: email.toLowerCase().trim(),
+        name: (name || '').trim().slice(0, 100),
+        agent_goal: (agent_goal || '').slice(0, 1000),
+        skill_ids: Array.isArray(skill_ids) ? skill_ids.slice(0, 30) : [],
+        preferred_contact_time: (preferred_contact_time || '').slice(0, 200),
+        tier: ['starter', 'pro', 'agency'].includes(tier) ? tier : 'starter',
+        source: 'builder',
+        status: 'new',
+        paid: false,
+        created_at: new Date(),
+      };
+      await database.collection('dfy_requests').insertOne(doc);
+      // Best-effort confirmation email via Resend (silent fail if no key)
+      if (process.env.RESEND_API_KEY) {
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'WorkflowStacks <hello@workflowstacks.com>',
+              to: [email],
+              subject: 'Done-for-You request received — we’ll confirm scope within 24h',
+              html: `<div style="font-family:system-ui;max-width:560px;margin:0 auto;padding:24px;background:#0A0C0D;color:#ECEFEA"><h2 style="color:#C6F24E">Got it.</h2><p>Thanks for the Done-for-You request. We’ll review your agent goal and reply within 24h with a scoped plan and a one-time Stripe checkout link.</p><p style="color:#8B928D;font-size:14px">Your goal: <em>${(agent_goal || '(none)').slice(0, 200)}</em></p><p style="color:#8B928D;font-size:14px">— WorkflowStacks</p></div>`,
+            }),
+          });
+        } catch {}
+      }
+      return Response.json({ ok: true, id: doc.id });
+    }
+
+    // Admin — update a DfY request (status, paid, notes, etc.)
+    if (path === '/dfy-request/update') {
+      const body = await request.json().catch(() => ({}));
+      const { id, set } = body;
+      if (!id || !set) return Response.json({ error: 'id and set required' }, { status: 400 });
+      const allowed = ['status', 'paid', 'paid_at', 'paid_amount_usd', 'stripe_session_id', 'notes'];
+      const filtered = {};
+      for (const k of allowed) if (k in set) filtered[k] = set[k];
+      if (!Object.keys(filtered).length) return Response.json({ error: 'no allowed fields' }, { status: 400 });
+      if (filtered.status) {
+        const validStatuses = ['new', 'contacted', 'quoted', 'paid', 'delivered', 'declined'];
+        if (!validStatuses.includes(filtered.status)) return Response.json({ error: 'invalid status' }, { status: 400 });
+      }
+      // Auto-set paid_at when flipping paid to true (if not provided)
+      if (filtered.paid === true && !filtered.paid_at) filtered.paid_at = new Date();
+      filtered.admin_updated_at = new Date();
+      await database.collection('dfy_requests').updateOne({ id }, { $set: filtered });
+      return Response.json({ success: true, updated: filtered });
+    }
+
+    // Admin — update a single deal (affiliate link / approval / metadata)
+    if (path === '/deal-update') {
+      const body = await request.json().catch(() => ({}));
+      const { id, set } = body;
+      if (!id || !set) return Response.json({ error: 'id and set required' }, { status: 400 });
+      const allowed = ['tool', 'category', 'blurb', 'dealType', 'link', 'code', 'savingsPct', 'retailPrice', 'groupPrice', 'slotsTotal', 'featured', 'approved'];
+      const filtered = {};
+      for (const k of allowed) if (k in set) filtered[k] = set[k];
+      if (!Object.keys(filtered).length) return Response.json({ error: 'no allowed fields' }, { status: 400 });
+      filtered.admin_updated_at = new Date();
+      await database.collection('deals').updateOne({ id }, { $set: filtered });
+      return Response.json({ success: true });
+    }
+
+    // Admin — seed affiliate-deal placeholders (each unapproved until link is filled in)
+    if (path === '/seed-affiliate-deals') {
+      const affiliatePlaceholders = [
+        { tool: 'Cursor', category: 'Productivity', dealType: 'affiliate', blurb: 'AI code editor with built-in agents. 20% off first year for WorkflowStacks readers (apply for partner ID).', savingsPct: 20, link: 'https://cursor.com', code: '' },
+        { tool: 'Perplexity Pro', category: 'Research', dealType: 'affiliate', blurb: 'AI search engine with sources. 1 free month + 20% off for paid plans.', savingsPct: 20, link: 'https://perplexity.ai/pro', code: '' },
+        { tool: 'Notion', category: 'Productivity', dealType: 'affiliate', blurb: '6 months Notion AI free for founders.', savingsPct: 100, link: 'https://notion.so', code: '' },
+        { tool: 'Linear', category: 'Productivity', dealType: 'affiliate', blurb: '3 months free on the Plus plan for early-stage founders.', savingsPct: 50, link: 'https://linear.app', code: '' },
+        { tool: 'Vercel', category: 'Developer', dealType: 'affiliate', blurb: '$100 of platform credit for new accounts.', savingsPct: 30, link: 'https://vercel.com', code: '' },
+        { tool: 'n8n Cloud', category: 'Automation', dealType: 'affiliate', blurb: '14-day free trial + 25% off annual plans.', savingsPct: 25, link: 'https://n8n.io', code: '' },
+        { tool: 'Resend', category: 'Developer', dealType: 'affiliate', blurb: 'Transactional email. 3000 free/mo + 20% off paid plans.', savingsPct: 20, link: 'https://resend.com', code: '' },
+        { tool: 'Replicate', category: 'Developer', dealType: 'affiliate', blurb: 'Run open-source AI models via API. $5 free credit.', savingsPct: 100, link: 'https://replicate.com', code: '' },
+      ];
+      let inserted = 0, skipped = 0;
+      for (const p of affiliatePlaceholders) {
+        const exists = await database.collection('deals').findOne({ tool: p.tool, dealType: 'affiliate' });
+        if (exists) { skipped++; continue; }
+        await database.collection('deals').insertOne({
+          id: uuidv4(),
+          ...p,
+          slotsTotal: 0,
+          slotsTaken: 0,
+          featured: false,
+          approved: false, // hidden until real affiliate link is dropped in via /admin
+          created_at: new Date(),
+        });
+        inserted++;
+      }
+      return Response.json({ success: true, inserted, skipped, total: affiliatePlaceholders.length });
     }
 
     // Email subscribe — stores waitlist emails (deduped)

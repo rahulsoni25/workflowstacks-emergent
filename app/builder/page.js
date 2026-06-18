@@ -24,22 +24,38 @@ export default function BuilderPage() {
   const [handle, setHandle] = useState('')
   const [price, setPrice] = useState('')
   const [dfyEmail, setDfyEmail] = useState('')
+  const [dfyName, setDfyName] = useState('')
+  const [dfyTime, setDfyTime] = useState('')
+  const [dfyTier, setDfyTier] = useState('starter')
   const [dfyRequested, setDfyRequested] = useState(false)
 
   const requestDfy = async (e) => {
     e.preventDefault()
     if (!dfyEmail.trim()) return
     try {
-      await fetch('/api/subscribe', {
+      await fetch('/api/dfy-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: dfyEmail.trim(), source: 'done-for-you', agent_goal: goal, skill_ids: selectedSkillIds }),
+        body: JSON.stringify({
+          email: dfyEmail.trim(),
+          name: dfyName.trim(),
+          agent_goal: goal,
+          skill_ids: selectedSkillIds,
+          preferred_contact_time: dfyTime.trim(),
+          tier: dfyTier,
+        }),
       })
       setDfyRequested(true)
     } catch {
       setDfyRequested(true)
     }
   }
+
+  const DFY_TIERS = [
+    { id: 'starter', label: 'Starter', price: 99, desc: 'We configure + test this one agent for you' },
+    { id: 'pro', label: 'Pro', price: 249, desc: 'Starter + custom skill picks + 1 week support' },
+    { id: 'agency', label: 'Agency', price: 499, desc: 'Pro + 3 agents + white-label setup' },
+  ]
 
   useEffect(() => {
     try { setHandle(getHandle()) } catch (e) {}
@@ -399,17 +415,61 @@ export default function BuilderPage() {
                     </div>
                     <div className="flex-1">
                       <h4 className="text-white font-semibold mb-1">Want us to set this up for you?</h4>
-                      <p className="text-slate-400 text-sm mb-3">We'll configure and test this exact agent for your specific workflow — you get a ready-to-use, fully customised setup. <strong className="text-amber-300">$49 one-time</strong>, no subscription.</p>
+                      <p className="text-slate-400 text-sm mb-3">We'll configure and test this exact agent for your specific workflow — you get a ready-to-use, fully customised setup. Pick a tier below; <strong className="text-amber-300">one-time payment</strong>, no subscription.</p>
                       {dfyRequested ? (
                         <div className="flex items-center gap-2 text-emerald-300 text-sm bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
                           <CheckCircle2 className="w-4 h-4" />
-                          Got it! We'll email you within 24 hours to confirm scope and send a $49 Stripe link.
+                          Application received. We'll email you within 24 hours to confirm scope and send a Stripe link.
                         </div>
                       ) : (
-                        <form onSubmit={requestDfy} className="flex flex-col sm:flex-row gap-2">
-                          <input type="email" value={dfyEmail} onChange={(e) => setDfyEmail(e.target.value)} required placeholder="your email" className="flex-1 bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50" />
-                          <Button type="submit" className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20" size="sm">
-                            Request Done-for-You — $49
+                        <form onSubmit={requestDfy} className="space-y-3">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            {DFY_TIERS.map((t) => {
+                              const active = dfyTier === t.id
+                              return (
+                                <button
+                                  key={t.id}
+                                  type="button"
+                                  onClick={() => setDfyTier(t.id)}
+                                  className={`text-left rounded-lg border p-3 transition-all ${
+                                    active
+                                      ? 'bg-amber-500/10 border-amber-500/60 ring-1 ring-amber-500/40'
+                                      : 'bg-slate-800/40 border-slate-700/60 hover:border-slate-500'
+                                  }`}
+                                >
+                                  <div className="flex items-baseline justify-between mb-1">
+                                    <span className="text-white font-semibold text-sm">{t.label}</span>
+                                    <span className="text-amber-300 font-bold text-sm">${t.price}</span>
+                                  </div>
+                                  <p className="text-xs text-slate-400 leading-snug">{t.desc}</p>
+                                </button>
+                              )
+                            })}
+                          </div>
+                          <input
+                            type="text"
+                            value={dfyName}
+                            onChange={(e) => setDfyName(e.target.value)}
+                            placeholder="your name"
+                            className="w-full bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50"
+                          />
+                          <input
+                            type="email"
+                            value={dfyEmail}
+                            onChange={(e) => setDfyEmail(e.target.value)}
+                            required
+                            placeholder="your email"
+                            className="w-full bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50"
+                          />
+                          <input
+                            type="text"
+                            value={dfyTime}
+                            onChange={(e) => setDfyTime(e.target.value)}
+                            placeholder="preferred contact time (e.g. weekdays 9–11am PT)"
+                            className="w-full bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50"
+                          />
+                          <Button type="submit" className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20" size="sm">
+                            Request Done-for-You — ${DFY_TIERS.find((t) => t.id === dfyTier)?.price}
                           </Button>
                         </form>
                       )}
