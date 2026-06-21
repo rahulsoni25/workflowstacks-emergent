@@ -34,7 +34,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/seed-affiliate-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs', '/dfy-requests', '/dfy-request/update', '/dfy-stats', '/deals/all', '/deal-update'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/seed-affiliate-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs', '/dfy-requests', '/dfy-request/update', '/dfy-stats', '/deals/all', '/deal-update', '/security/dns-check', '/security/audit-summary', '/security/run-now'];
 
 // Audit log — capture every admin action for security visibility.
 // Append-only collection: audit_logs { id, path, method, ip, ua, at }
@@ -66,6 +66,122 @@ function rateLimit(request, limit = 10, windowMs = 60_000) {
   _rl.set(key, slot)
   if (slot.count > limit) return Response.json({ error: 'Too many requests' }, { status: 429 })
   return null
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Security monitoring layer — DNS drift + admin auth anomaly
+// ─────────────────────────────────────────────────────────────────
+
+// Frozen baseline of what the email/domain DNS SHOULD look like.
+// Drift from this set is treated as a security signal (DNS hijack, accidental
+// deletion, attacker tampering). Update intentionally when records change.
+const DNS_BASELINE = {
+  domain: 'workflowstacks.com',
+  mx: [
+    { priority: 10, value: 'mx1.improvmx.com' },
+    { priority: 20, value: 'mx2.improvmx.com' },
+  ],
+  spfMustInclude: ['spf.improvmx.com', '_spf.resend.com'],
+  dmarcMustStartWith: 'v=DMARC1',
+  alias: 'cname.vercel-dns-017.com',
+}
+
+// DNS-over-HTTPS lookup (Vercel functions can't shell out to nslookup).
+async function dohResolve(name, type) {
+  const r = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(name)}&type=${type}`, {
+    headers: { Accept: 'application/dns-json' },
+    next: { revalidate: 0 },
+  })
+  if (!r.ok) throw new Error(`DoH ${type} ${name} → ${r.status}`)
+  const j = await r.json()
+  return Array.isArray(j.Answer) ? j.Answer.map((a) => a.data) : []
+}
+
+// Returns { ok, drift: [...] } — drift items describe what changed vs baseline.
+async function checkDnsBaseline() {
+  const drift = []
+  const d = DNS_BASELINE.domain
+  try {
+    // MX
+    const mxRaw = await dohResolve(d, 'MX')
+    const liveMx = mxRaw.map((s) => {
+      const m = s.match(/^(\d+)\s+(.+?)\.?$/)
+      return m ? { priority: parseInt(m[1], 10), value: m[2].toLowerCase() } : null
+    }).filter(Boolean).sort((a, b) => a.priority - b.priority)
+    const want = DNS_BASELINE.mx.slice().sort((a, b) => a.priority - b.priority)
+    if (liveMx.length !== want.length) drift.push({ type: 'MX', issue: 'count_mismatch', expected: want.length, actual: liveMx.length, live: liveMx })
+    else for (let i = 0; i < want.length; i++) {
+      if (liveMx[i].priority !== want[i].priority || liveMx[i].value !== want[i].value) {
+        drift.push({ type: 'MX', issue: 'record_mismatch', expected: want[i], actual: liveMx[i] })
+      }
+    }
+
+    // SPF (TXT @ — quoted strings from DoH)
+    const txtRoot = (await dohResolve(d, 'TXT')).map((s) => s.replace(/^"|"$/g, ''))
+    const spf = txtRoot.find((t) => t.startsWith('v=spf1'))
+    if (!spf) drift.push({ type: 'SPF', issue: 'missing', expected: DNS_BASELINE.spfMustInclude })
+    else for (const must of DNS_BASELINE.spfMustInclude) {
+      if (!spf.includes(must)) drift.push({ type: 'SPF', issue: 'missing_include', expected: must, actual: spf })
+    }
+
+    // DMARC (TXT _dmarc)
+    const dmarcTxt = (await dohResolve(`_dmarc.${d}`, 'TXT')).map((s) => s.replace(/^"|"$/g, ''))
+    const dmarc = dmarcTxt.find((t) => t.startsWith(DNS_BASELINE.dmarcMustStartWith))
+    if (!dmarc) drift.push({ type: 'DMARC', issue: 'missing', expected: DNS_BASELINE.dmarcMustStartWith })
+
+    return { ok: drift.length === 0, drift, checkedAt: new Date().toISOString(), live: { mx: liveMx, spf, dmarc: dmarc || null } }
+  } catch (e) {
+    return { ok: false, drift: [{ type: 'LOOKUP', issue: 'doh_failed', message: e.message }], checkedAt: new Date().toISOString() }
+  }
+}
+
+// Aggregate audit_logs for anomaly signals.
+async function auditAnomalyCheck(db) {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000)
+  const logs = await db.collection('audit_logs').find({ at: { $gte: since } }).toArray()
+  const totalEvents = logs.length
+  const uniqueIps = new Set(logs.map((l) => l.ip || 'unknown')).size
+  const denied = logs.filter((l) => l.action && l.action.startsWith('DENIED')).length
+  const byIp = {}
+  for (const l of logs) byIp[l.ip] = (byIp[l.ip] || 0) + 1
+  const topIp = Object.entries(byIp).sort((a, b) => b[1] - a[1])[0] || ['none', 0]
+
+  // Anomaly thresholds — tune as we learn normal patterns.
+  const flags = []
+  if (denied >= 5) flags.push({ severity: 'high', signal: 'auth_brute_force', detail: `${denied} denied admin attempts in 24h` })
+  if (topIp[1] >= 200) flags.push({ severity: 'medium', signal: 'ip_volume_spike', detail: `${topIp[0]} made ${topIp[1]} admin requests in 24h` })
+  if (uniqueIps >= 10) flags.push({ severity: 'low', signal: 'unusual_ip_diversity', detail: `${uniqueIps} distinct IPs hit admin in 24h (usually 1-2)` })
+
+  return { ok: flags.length === 0, totalEvents, uniqueIps, denied, topIp: { ip: topIp[0], count: topIp[1] }, flags, windowStart: since.toISOString() }
+}
+
+// Log a denied admin attempt so brute force shows up in audit_logs.
+async function logAdminDenied(request, db, action) {
+  try {
+    const ip = (request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown').split(',')[0].trim()
+    const ua = (request.headers.get('user-agent') || '').slice(0, 200)
+    await db.collection('audit_logs').insertOne({ id: uuidv4(), action: `DENIED ${action}`, ip, ua, at: new Date() })
+  } catch {}
+}
+
+// Send a security alert via Resend. Fails silently — never throws.
+async function sendSecurityAlert(subject, body) {
+  if (!process.env.RESEND_API_KEY) return { sent: false, reason: 'no_resend_key' }
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'WorkflowStacks Security <hello@workflowstacks.com>',
+        to: ['rahul@workflowstacks.com'],
+        subject: `[SECURITY] ${subject}`,
+        text: body,
+      }),
+    })
+    return { sent: r.ok, status: r.status }
+  } catch (e) {
+    return { sent: false, reason: e.message }
+  }
 }
 
 // Slug generation — Pattern C (name-first, owner-name on collision).
@@ -379,10 +495,11 @@ export async function GET(request) {
   const path = pathname.replace('/api', '') || '/';
 
   try {
-    // Gate admin/expensive endpoints
+    // Gate admin/expensive endpoints. Log denied attempts to audit_logs so
+    // brute-force patterns surface in the daily security check.
     if (ADMIN_PATHS.includes(path)) {
       const denied = requireAdmin(request);
-      if (denied) return denied;
+      if (denied) { try { const db = await connectDB(); await logAdminDenied(request, db, `GET ${path}`) } catch {} ; return denied; }
     }
 
     const database = await connectDB();
@@ -1476,6 +1593,55 @@ export async function GET(request) {
       return Response.json({ logs, count: logs.length })
     }
 
+    // Security monitoring — on-demand DNS drift check (admin)
+    if (path === '/security/dns-check') {
+      const result = await checkDnsBaseline()
+      return Response.json(result)
+    }
+
+    // Security monitoring — admin auth anomaly summary (admin)
+    if (path === '/security/audit-summary') {
+      const result = await auditAnomalyCheck(database)
+      return Response.json(result)
+    }
+
+    // Security monitoring — full check on demand (admin), emails if drift/anomaly
+    if (path === '/security/run-now') {
+      const dns = await checkDnsBaseline()
+      const audit = await auditAnomalyCheck(database)
+      let alert = { sent: false, reason: 'no_findings' }
+      if (!dns.ok || !audit.ok) {
+        const lines = []
+        if (!dns.ok) lines.push('DNS drift:', JSON.stringify(dns.drift, null, 2))
+        if (!audit.ok) lines.push('Audit anomalies:', JSON.stringify(audit.flags, null, 2))
+        alert = await sendSecurityAlert('Manual run — anomaly detected', lines.join('\n\n'))
+      }
+      await database.collection('security_runs').insertOne({ id: uuidv4(), at: new Date(), source: 'manual', dns, audit, alert })
+      return Response.json({ dns, audit, alert })
+    }
+
+    // Cron-triggered daily security monitor. Protected by CRON_SECRET header so
+    // the URL alone can't trigger emails. Vercel cron includes the secret.
+    if (path === '/cron/security-monitor') {
+      const cronSecret = process.env.CRON_SECRET
+      const provided = request.headers.get('authorization') || ''
+      if (cronSecret && provided !== `Bearer ${cronSecret}`) {
+        return Response.json({ error: 'Unauthorized — cron secret required' }, { status: 401 })
+      }
+      const dns = await checkDnsBaseline()
+      const audit = await auditAnomalyCheck(database)
+      let alert = { sent: false, reason: 'no_findings' }
+      if (!dns.ok || !audit.ok) {
+        const lines = [`Time: ${new Date().toISOString()}`, '']
+        if (!dns.ok) { lines.push('━━ DNS DRIFT ━━'); lines.push(JSON.stringify(dns.drift, null, 2)); lines.push('') }
+        if (!audit.ok) { lines.push('━━ AUDIT ANOMALIES ━━'); lines.push(JSON.stringify(audit.flags, null, 2)); lines.push(''); lines.push(`Window: ${audit.windowStart} → now`); lines.push(`Events: ${audit.totalEvents} | Unique IPs: ${audit.uniqueIps} | Denied: ${audit.denied}`) }
+        lines.push('', '— WorkflowStacks Security Monitor')
+        alert = await sendSecurityAlert('Daily check — anomaly detected', lines.join('\n'))
+      }
+      await database.collection('security_runs').insertOne({ id: uuidv4(), at: new Date(), source: 'cron', dns, audit, alert })
+      return Response.json({ ok: true, dns: { ok: dns.ok, drift: dns.drift }, audit: { ok: audit.ok, flags: audit.flags }, alert })
+    }
+
     if (path === '/admin-overview') {
       const [skills, published, agents, subs, members, problems, deals, leads, apps, sendsToday] = await Promise.all([
         database.collection('skills').countDocuments(),
@@ -1693,10 +1859,10 @@ export async function POST(request) {
   const path = pathname.replace('/api', '') || '/';
 
   try {
-    // Gate admin/expensive endpoints
+    // Gate admin/expensive endpoints. Log denied attempts so brute-force shows up.
     if (ADMIN_PATHS.includes(path)) {
       const denied = requireAdmin(request);
-      if (denied) return denied;
+      if (denied) { try { const db = await connectDB(); await logAdminDenied(request, db, `POST ${path}`) } catch {} ; return denied; }
     }
 
     const database = await connectDB();
