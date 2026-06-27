@@ -10,7 +10,6 @@ import { MongoClient } from 'mongodb'
 
 const client = new MongoClient(process.env.MONGO_URL)
 let db
-let indexEnsured = false
 
 async function connectDB() {
   if (!db) {
@@ -20,51 +19,33 @@ async function connectDB() {
   return db
 }
 
-// Ensure the text index exists. Runs once per cold start. Idempotent.
-async function ensureTextIndex(database) {
-  if (indexEnsured) return
-  try {
-    // Weights: explainer fields outrank raw GitHub description because they're
-    // already plain-English job-to-be-done content. use_case_example wins.
-    await database.collection('skills').createIndex(
-      {
-        'explainer.use_case_example': 'text',
-        'explainer.what_you_can_make': 'text',
-        'explainer.how_it_helps': 'text',
-        'explainer.what_it_is': 'text',
-        title_human: 'text',
-        name: 'text',
-        description_human: 'text',
-        description: 'text',
-        category: 'text',
-        github_topics: 'text',
-      },
-      {
-        name: 'skill_usecase_text_idx',
-        weights: {
-          'explainer.use_case_example': 20,
-          'explainer.what_you_can_make': 16,
-          'explainer.how_it_helps': 10,
-          'explainer.what_it_is': 8,
-          title_human: 14,
-          name: 12,
-          description_human: 6,
-          description: 4,
-          category: 6,
-          github_topics: 5,
-        },
-        default_language: 'english',
-      }
-    )
-    indexEnsured = true
-  } catch (e) {
-    // If index already exists with same name but different shape, drop and recreate
-    if (/already exists/i.test(e.message) || /IndexOptionsConflict/i.test(e.message)) {
-      try { await database.collection('skills').dropIndex('skill_usecase_text_idx') } catch {}
-      // Don't retry inline — next request will rebuild
-    }
-    console.log('ensureTextIndex:', e.message)
-  }
+// Tokenize + stem the query for fuzzier matching. Drops noise words and short
+// tokens, lowercases everything, and reduces "transcribed/transcribing/transcription"
+// to their shared root so all three forms hit the same skill.
+const NOISE = new Set([
+  'the','a','an','my','your','our','for','of','to','from','with','in','on','at',
+  'is','are','be','can','do','i','we','you','it','that','this','and','or','but',
+  'how','what','when','where','want','need','please','help','make','build','create',
+  'use','using','about','some','any','find','show','give','let','tell','best','top','good',
+])
+function lightStem(t) {
+  // Cheap suffix stripping — good enough for our domain
+  return t
+    .replace(/(ization|isation|ations|ation)$/i, 'ate')
+    .replace(/(ribed|ribing|ription)$/i, 'ribe')
+    .replace(/(ies)$/i, 'y')
+    .replace(/(ing|ed|es|s)$/i, '')
+}
+function tokenize(q) {
+  return Array.from(new Set(
+    String(q || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(t => t.length >= 3 && !NOISE.has(t))
+      .map(lightStem)
+      .filter(t => t.length >= 3)
+  ))
 }
 
 // Pick the best matched snippet to show the user WHY this hit. We look for the
@@ -107,35 +88,88 @@ export async function POST(request) {
   }
 
   const database = await connectDB()
-  await ensureTextIndex(database)
+  const tokens = tokenize(query)
+  if (tokens.length === 0) {
+    return Response.json({ query, results: [], total: 0, message: 'Query too generic — add more specific words' })
+  }
 
-  // $text search uses the configured weights to rank. Only return non-hidden skills.
-  // Exclude heavy fields to keep payload small (readme_preview is big).
+  // Build an OR of regex matches (case-insensitive) against the candidate fields.
+  // For 700-ish docs this is plenty fast and avoids text-index conflicts entirely.
+  const fieldRegexes = (field) => tokens.map(t => ({ [field]: { $regex: t, $options: 'i' } }))
+  const ors = [
+    ...fieldRegexes('explainer.use_case_example'),
+    ...fieldRegexes('explainer.what_you_can_make'),
+    ...fieldRegexes('explainer.how_it_helps'),
+    ...fieldRegexes('explainer.what_it_is'),
+    ...fieldRegexes('title_human'),
+    ...fieldRegexes('name'),
+    ...fieldRegexes('description_human'),
+    ...fieldRegexes('description'),
+    ...fieldRegexes('category'),
+    ...fieldRegexes('github_topics'),
+  ]
   const projection = {
     id: 1, slug: 1, name: 1, title_human: 1, description: 1, description_human: 1,
     category: 1, creator: 1, owner: 1, language: 1, github_stars: 1, github_url: 1,
-    github_topics: 1, explainer: 1, score: { $meta: 'textScore' },
+    github_topics: 1, explainer: 1, hidden: 1,
   }
-  let results = []
+
+  let candidates = []
   try {
-    results = await database.collection('skills')
-      .find(
-        { $text: { $search: query }, hidden: { $ne: true } },
-        { projection }
-      )
-      .sort({ score: { $meta: 'textScore' }, github_stars: -1 })
-      .limit(limit)
+    candidates = await database.collection('skills')
+      .find({ $or: ors, hidden: { $ne: true } }, { projection })
+      .limit(150) // pull a wider set, then rank in JS
       .toArray()
   } catch (e) {
     return Response.json({ query, results: [], error: e.message }, { status: 500 })
   }
 
+  // Weighted relevance score: more matches in higher-value fields = higher rank.
+  // The same weights as the original text-index plan, applied per-token.
+  const WEIGHTS = {
+    'explainer.use_case_example': 20,
+    'explainer.what_you_can_make': 16,
+    'explainer.how_it_helps': 10,
+    'explainer.what_it_is': 8,
+    title_human: 14,
+    name: 12,
+    description_human: 6,
+    description: 4,
+    category: 6,
+    github_topics: 5,
+  }
+  function fieldText(s, path) {
+    const parts = path.split('.')
+    let v = s
+    for (const p of parts) v = v ? v[p] : null
+    if (Array.isArray(v)) return v.join(' ')
+    return typeof v === 'string' ? v : ''
+  }
+  function scoreOne(s) {
+    let score = 0
+    for (const [path, w] of Object.entries(WEIGHTS)) {
+      const t = fieldText(s, path).toLowerCase()
+      if (!t) continue
+      for (const tok of tokens) {
+        if (t.includes(tok)) score += w
+      }
+    }
+    // Tiny tiebreaker: popular skills win when scores are close
+    score += Math.log10(Math.max(1, s.github_stars || 0)) * 0.5
+    return score
+  }
+  const ranked = candidates
+    .map(s => ({ ...s, score: scoreOne(s) }))
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+
   // Attach matched snippet for UI display
-  for (const r of results) {
+  for (const r of ranked) {
     r.matched = buildSnippet(r, query)
   }
 
-  return Response.json({ query, total: results.length, results })
+  return Response.json({ query, tokens, total: ranked.length, results: ranked })
 }
 
 // GET: tiny health check + sample queries the UI can prefill
