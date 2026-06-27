@@ -67,20 +67,31 @@ export default function BuilderPage() {
   }
   const clearUseCaseSearch = () => { setUseCaseQuery(''); setUseCaseResults(null) }
 
-  // Fetch recommendations whenever Step 2 becomes active with a goal.
+  // LLM reads the goal, picks 4-7 skills that together fully solve it.
   // Re-fires if the user edits the goal then comes back to Step 2.
+  const [recContext, setRecContext] = useState('')
+  const [recSummary, setRecSummary] = useState('')
+  const [recMissing, setRecMissing] = useState('')
+  const [recConfidence, setRecConfidence] = useState('')
   useEffect(() => {
     if (step !== 2 || !goal || !goal.trim()) return
-    if (recommendedGoal === goal && recommendations) return // already fetched for this goal
+    if (recommendedGoal === goal && recommendations) return
     setRecommendationsLoading(true)
     setRecommendedGoal(goal)
-    fetch('/api/search-skills', {
+    setRecContext(''); setRecSummary(''); setRecMissing(''); setRecConfidence('')
+    fetch('/api/recommend-skills', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: goal, limit: 8 }),
+      body: JSON.stringify({ goal }),
     })
       .then(r => r.json())
-      .then(j => setRecommendations(j.results || []))
+      .then(j => {
+        setRecommendations(j.recommended || [])
+        setRecContext(j.context_understood || '')
+        setRecSummary(j.solution_summary || '')
+        setRecMissing(j.what_is_missing || '')
+        setRecConfidence(j.confidence || '')
+      })
       .catch(() => setRecommendations([]))
       .finally(() => setRecommendationsLoading(false))
   }, [step, goal])
@@ -399,7 +410,10 @@ export default function BuilderPage() {
                       )}
                     </div>
                     {recommendationsLoading && (
-                      <div className="text-sm text-slate-400 py-2">⏳ Picking the best skills for your goal…</div>
+                      <div className="text-sm text-slate-300 py-3 flex items-center gap-2">
+                        <span className="inline-block w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
+                        Reading your goal and selecting the exact stack that solves it…
+                      </div>
                     )}
                     {!recommendationsLoading && recommendations && recommendations.length === 0 && (
                       <div className="text-sm text-slate-400 py-2">
@@ -407,9 +421,27 @@ export default function BuilderPage() {
                       </div>
                     )}
                     {!recommendationsLoading && recommendations && recommendations.length > 0 && (
-                      <div className="space-y-2">
-                        {recommendations.map((s, idx) => {
+                      <div className="space-y-3">
+                        {/* What WorkflowStacks understood about the goal */}
+                        {recContext && (
+                          <div className="p-2.5 bg-slate-900/50 border border-slate-700/50 rounded text-xs">
+                            <div className="text-violet-300 font-semibold uppercase tracking-wide text-[10px] mb-1">What we understood</div>
+                            <p className="text-slate-200">{recContext}</p>
+                          </div>
+                        )}
+                        {/* How the picked skills combine to solve it */}
+                        {recSummary && (
+                          <div className="p-2.5 bg-teal-500/5 border border-teal-500/30 rounded text-xs">
+                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Recommended solution</div>
+                            <p className="text-slate-100">{recSummary}</p>
+                          </div>
+                        )}
+                        {recommendations.map((s) => {
                           const isSelected = selectedSkillIds.includes(s.id)
+                          const role = s._rec_role || 'primary'
+                          const roleStyle = role === 'primary' ? 'bg-violet-500/20 text-violet-200 border-violet-500/40' :
+                                           role === 'secondary' ? 'bg-cyan-500/15 text-cyan-200 border-cyan-500/30' :
+                                           'bg-slate-700/40 text-slate-300 border-slate-700/50'
                           return (
                             <div
                               key={s.id}
@@ -423,12 +455,13 @@ export default function BuilderPage() {
                               <div className="flex items-start gap-2">
                                 <div className="flex flex-col items-center flex-shrink-0 mt-0.5">
                                   <Checkbox checked={isSelected} />
-                                  <span className="text-[10px] text-violet-300 font-bold mt-1">#{idx + 1}</span>
+                                  <span className="text-[10px] text-violet-300 font-bold mt-1">#{s._rec_rank ?? '?'}</span>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                  <div className="flex items-center gap-2 mb-1 flex-wrap">
                                     <h4 className="text-white font-semibold text-sm">{s.title_human || s.name}</h4>
                                     <Badge className={getCategoryColor(s.category)}>{s.category}</Badge>
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded border ${roleStyle} font-medium uppercase tracking-wide`}>{role}</span>
                                     {s.explainer?.difficulty && (
                                       <span className={`text-[10px] px-1.5 py-0.5 rounded ${
                                         s.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
@@ -443,10 +476,14 @@ export default function BuilderPage() {
                                       <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">💵 {s.explainer.cost_to_run}</span>
                                     )}
                                   </div>
-                                  {s.matched?.snippet && (
-                                    <p className="text-xs text-slate-300 italic mt-1">
-                                      <span className="text-violet-300 font-medium not-italic">Why we picked this: </span>
-                                      "{s.matched.snippet}"
+                                  {s._rec_what_it_handles && (
+                                    <p className="text-[11px] text-slate-400 mb-1">
+                                      <span className="text-violet-300 font-medium">Handles:</span> {s._rec_what_it_handles}
+                                    </p>
+                                  )}
+                                  {s._rec_why && (
+                                    <p className="text-xs text-slate-200">
+                                      <span className="text-violet-300 font-medium">Why this: </span>{s._rec_why}
                                     </p>
                                   )}
                                   {Array.isArray(s.explainer?.best_with_tools) && s.explainer.best_with_tools.length > 0 && (
@@ -459,8 +496,22 @@ export default function BuilderPage() {
                             </div>
                           )
                         })}
-                        <div className="text-[11px] text-slate-500 pt-1 border-t border-slate-700/40 mt-2">
-                          Want something different? Use the search below to refine, or scroll the full catalog.
+                        {/* Honest gap callout when the catalog can't fully cover the goal */}
+                        {recMissing && recMissing.length > 0 && (
+                          <div className="p-2.5 bg-amber-500/5 border border-amber-500/30 rounded text-xs">
+                            <span className="text-amber-300 font-semibold uppercase tracking-wide text-[10px]">Missing capability: </span>
+                            <span className="text-slate-200">{recMissing}</span>
+                          </div>
+                        )}
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 pt-2 border-t border-slate-700/40">
+                          <span>
+                            Confidence: <span className={`font-semibold ${
+                              recConfidence === 'high' ? 'text-emerald-300' :
+                              recConfidence === 'low' ? 'text-orange-300' :
+                              'text-slate-300'
+                            }`}>{recConfidence || '—'}</span>
+                          </span>
+                          <span>Refine with search below, or browse the full catalog →</span>
                         </div>
                       </div>
                     )}
