@@ -405,30 +405,116 @@ export default function BuilderPage() {
                                   </button>
                                 </div>
                                 <p className={`text-slate-400 text-sm ${isExpanded ? '' : 'line-clamp-2'}`}>{skill.description}</p>
+                                {/* Quick-glance trust signals — visible on the card without expansion */}
+                                {skill.explainer && (
+                                  <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[10px]">
+                                    {skill.explainer.difficulty && (
+                                      <span className={`px-1.5 py-0.5 rounded ${
+                                        skill.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
+                                        skill.explainer.difficulty === 'advanced' ? 'bg-orange-500/15 text-orange-300' :
+                                        'bg-slate-500/15 text-slate-300'
+                                      }`}>{skill.explainer.difficulty}</span>
+                                    )}
+                                    {skill.explainer.time_to_setup && (
+                                      <span className="px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">⏱ {skill.explainer.time_to_setup}</span>
+                                    )}
+                                    {skill.explainer.cost_to_run && (
+                                      <span className="px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">💵 {skill.explainer.cost_to_run}</span>
+                                    )}
+                                  </div>
+                                )}
                                 {isExpanded && (
                                   <div
                                     onClick={(e) => e.stopPropagation()}
-                                    className="mt-3 p-3 bg-slate-900/60 border border-slate-700/60 rounded-md space-y-3 text-xs"
+                                    className="mt-3 p-4 bg-slate-900/60 border border-slate-700/60 rounded-md space-y-3 text-xs"
                                   >
-                                    {info && (
+                                    {/* Rich LLM-generated explainer (preferred) */}
+                                    {skill.explainer ? (
                                       <>
                                         <div>
-                                          <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">What kind of skill is this?</div>
-                                          <p className="text-slate-300">{info.whatItIs}</p>
+                                          <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">What it is</div>
+                                          <p className="text-slate-200 text-sm leading-relaxed">{skill.explainer.what_it_is}</p>
                                         </div>
-                                        <div>
-                                          <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Best for</div>
-                                          <ul className="text-slate-300 space-y-1 list-disc list-inside marker:text-teal-500/60">
-                                            {info.bestFor.map((b, i) => <li key={i}>{b}</li>)}
-                                          </ul>
-                                        </div>
+                                        {skill.explainer.what_you_can_make && (
+                                          <div>
+                                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">What you can make</div>
+                                            <p className="text-slate-300">{skill.explainer.what_you_can_make}</p>
+                                          </div>
+                                        )}
+                                        {skill.explainer.how_it_helps && (
+                                          <div>
+                                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">How it helps</div>
+                                            <p className="text-slate-300">{skill.explainer.how_it_helps}</p>
+                                          </div>
+                                        )}
+                                        {skill.explainer.use_case_example && (
+                                          <div className="p-2.5 bg-teal-500/5 border border-teal-500/20 rounded">
+                                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Real use case</div>
+                                            <p className="text-slate-200 italic">"{skill.explainer.use_case_example}"</p>
+                                          </div>
+                                        )}
+                                        {(skill.explainer.for_novice || skill.explainer.for_pro) && (
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            {skill.explainer.for_novice && (
+                                              <div className="p-2 bg-emerald-500/5 border border-emerald-500/20 rounded">
+                                                <div className="text-emerald-300 font-semibold text-[10px] uppercase tracking-wide mb-0.5">If you're new</div>
+                                                <p className="text-slate-300">{skill.explainer.for_novice}</p>
+                                              </div>
+                                            )}
+                                            {skill.explainer.for_pro && (
+                                              <div className="p-2 bg-violet-500/5 border border-violet-500/20 rounded">
+                                                <div className="text-violet-300 font-semibold text-[10px] uppercase tracking-wide mb-0.5">If you're senior</div>
+                                                <p className="text-slate-300">{skill.explainer.for_pro}</p>
+                                              </div>
+                                            )}
+                                          </div>
+                                        )}
+                                        {skill.explainer.common_confusions && (
+                                          <div>
+                                            <div className="text-amber-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Common confusion</div>
+                                            <p className="text-slate-300">{skill.explainer.common_confusions}</p>
+                                          </div>
+                                        )}
+                                        {Array.isArray(skill.explainer.works_well_with) && skill.explainer.works_well_with.length > 0 && (
+                                          <div>
+                                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Works well with</div>
+                                            <div className="flex flex-wrap gap-1.5">
+                                              {skill.explainer.works_well_with.map((w, i) => (
+                                                <span key={i} className="px-2 py-0.5 bg-slate-700/40 border border-slate-700/60 rounded text-slate-300">{w}</span>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
+                                        {skill.explainer.why_its_here && (
+                                          <div className="text-slate-500 text-[11px] pt-1 border-t border-slate-700/40">
+                                            <span className="text-slate-400">Why we list it:</span> {skill.explainer.why_its_here}
+                                          </div>
+                                        )}
                                       </>
-                                    )}
-                                    {fullDescription && fullDescription !== skill.description && (
-                                      <div>
-                                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">In plain English</div>
-                                        <p className="text-slate-300">{fullDescription}</p>
-                                      </div>
+                                    ) : (
+                                      // Fallback to generic category info while enrichment is pending
+                                      <>
+                                        {info && (
+                                          <>
+                                            <div>
+                                              <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">What kind of skill is this?</div>
+                                              <p className="text-slate-300">{info.whatItIs}</p>
+                                            </div>
+                                            <div>
+                                              <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Best for</div>
+                                              <ul className="text-slate-300 space-y-1 list-disc list-inside marker:text-teal-500/60">
+                                                {info.bestFor.map((b, i) => <li key={i}>{b}</li>)}
+                                              </ul>
+                                            </div>
+                                          </>
+                                        )}
+                                        {fullDescription && fullDescription !== skill.description && (
+                                          <div>
+                                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">In plain English</div>
+                                            <p className="text-slate-300">{fullDescription}</p>
+                                          </div>
+                                        )}
+                                      </>
                                     )}
                                     <div className="flex flex-wrap items-center gap-3 text-slate-500 pt-1">
                                       {skill.creator && <span>By <span className="text-slate-300">{skill.creator}</span></span>}

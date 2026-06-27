@@ -76,6 +76,23 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                 </div>
                 <h1 className="text-4xl text-white mb-2 font-semibold leading-tight tracking-tight">{skill.title_human || skill.name}</h1>
                 <CardDescription className="text-xl text-slate-300">{skill.description_human || skill.description}</CardDescription>
+                {skill.explainer && (
+                  <div className="flex flex-wrap items-center gap-2 mt-3">
+                    {skill.explainer.difficulty && (
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        skill.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
+                        skill.explainer.difficulty === 'advanced' ? 'bg-orange-500/15 text-orange-300' :
+                        'bg-slate-500/15 text-slate-300'
+                      }`}>{skill.explainer.difficulty}</span>
+                    )}
+                    {skill.explainer.time_to_setup && (
+                      <span className="text-xs px-2 py-1 rounded-full bg-slate-700/40 text-slate-200">⏱ {skill.explainer.time_to_setup}</span>
+                    )}
+                    {skill.explainer.cost_to_run && (
+                      <span className="text-xs px-2 py-1 rounded-full bg-slate-700/40 text-slate-200">💵 {skill.explainer.cost_to_run}</span>
+                    )}
+                  </div>
+                )}
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Trust strip — verifiable signals (vs competitors' self-attestation) */}
@@ -109,6 +126,71 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                 </div>
 
                 <Separator className="bg-slate-700/50" />
+
+                {/* Plain-English explainer — LLM-generated, works for novice AND professional */}
+                {skill.explainer && (
+                  <div className="space-y-4 bg-slate-800/30 border border-slate-700/50 rounded-lg p-5">
+                    <div>
+                      <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">What it is</div>
+                      <p className="text-slate-100 text-base leading-relaxed">{skill.explainer.what_it_is}</p>
+                    </div>
+                    {skill.explainer.what_you_can_make && (
+                      <div>
+                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">What you can make with it</div>
+                        <p className="text-slate-200">{skill.explainer.what_you_can_make}</p>
+                      </div>
+                    )}
+                    {skill.explainer.how_it_helps && (
+                      <div>
+                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">How it helps</div>
+                        <p className="text-slate-200">{skill.explainer.how_it_helps}</p>
+                      </div>
+                    )}
+                    {skill.explainer.use_case_example && (
+                      <div className="p-4 bg-teal-500/5 border border-teal-500/30 rounded-md">
+                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">Real use case example</div>
+                        <p className="text-slate-100 italic">"{skill.explainer.use_case_example}"</p>
+                      </div>
+                    )}
+                    {(skill.explainer.for_novice || skill.explainer.for_pro) && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {skill.explainer.for_novice && (
+                          <div className="p-3 bg-emerald-500/5 border border-emerald-500/30 rounded-md">
+                            <div className="text-emerald-300 font-semibold uppercase tracking-wide text-xs mb-1">If you're new</div>
+                            <p className="text-slate-200 text-sm">{skill.explainer.for_novice}</p>
+                          </div>
+                        )}
+                        {skill.explainer.for_pro && (
+                          <div className="p-3 bg-violet-500/5 border border-violet-500/30 rounded-md">
+                            <div className="text-violet-300 font-semibold uppercase tracking-wide text-xs mb-1">If you're senior</div>
+                            <p className="text-slate-200 text-sm">{skill.explainer.for_pro}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {skill.explainer.common_confusions && (
+                      <div className="p-3 bg-amber-500/5 border border-amber-500/30 rounded-md">
+                        <div className="text-amber-300 font-semibold uppercase tracking-wide text-xs mb-1">Common confusion cleared up</div>
+                        <p className="text-slate-200 text-sm">{skill.explainer.common_confusions}</p>
+                      </div>
+                    )}
+                    {Array.isArray(skill.explainer.works_well_with) && skill.explainer.works_well_with.length > 0 && (
+                      <div>
+                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">Works well with</div>
+                        <div className="flex flex-wrap gap-2">
+                          {skill.explainer.works_well_with.map((w, i) => (
+                            <span key={i} className="px-2.5 py-1 bg-slate-700/40 border border-slate-700 rounded text-slate-200 text-sm">{w}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {skill.explainer.why_its_here && (
+                      <div className="text-slate-400 text-xs pt-2 border-t border-slate-700/40">
+                        <span className="text-slate-300 font-medium">Why we list it on WorkflowStacks:</span> {skill.explainer.why_its_here}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* How to use it — the on-page deliverable (Smithery/Claw Mart-grade) */}
                 {guide ? (

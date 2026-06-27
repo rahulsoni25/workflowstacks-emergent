@@ -28,7 +28,9 @@ function requireAdmin(request) {
 // Pick the LLM provider. Groq is cheap+fast for bulk enrichment of 500+ skills.
 function resolveProvider() {
   if (process.env.GROQ_API_KEY) {
-    return { name: 'groq', model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile' };
+    // 8B-instant has much higher TPM on free tier (30k vs 12k for 70B). Quality is
+    // good enough for templated explainer JSON. Override via GROQ_MODEL env if needed.
+    return { name: 'groq', model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant' };
   }
   if (process.env.OPENROUTER_API_KEY) {
     return { name: 'openrouter', model: process.env.REWRITE_MODEL || 'anthropic/claude-3.5-haiku' };
@@ -189,10 +191,11 @@ export async function POST(request) {
 
   const out = { provider: PROVIDER.name, model: PROVIDER.model, attempted: candidates.length, enriched: 0, errors: [], samples: [] };
 
-  for (const skill of candidates) {
+  for (let i = 0; i < candidates.length; i++) {
+    const skill = candidates[i];
     try {
       const userPrompt = buildUserPrompt(skill);
-      const raw = await callLLMJson(SYSTEM_PROMPT, userPrompt, 900);
+      const raw = await callLLMJson(SYSTEM_PROMPT, userPrompt, 700);
       const explainer = parseExplainer(raw, skill.name);
       explainer.generated_at = new Date();
       explainer.model = PROVIDER.model;
