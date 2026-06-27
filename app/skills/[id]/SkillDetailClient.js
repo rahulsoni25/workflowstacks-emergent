@@ -174,9 +174,19 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                         <p className="text-slate-200 text-sm">{skill.explainer.common_confusions}</p>
                       </div>
                     )}
+                    {Array.isArray(skill.explainer.best_with_tools) && skill.explainer.best_with_tools.length > 0 && (
+                      <div className="p-4 bg-cyan-500/5 border border-cyan-500/30 rounded-md">
+                        <div className="text-cyan-300 font-semibold uppercase tracking-wide text-xs mb-2">Best inside these AI tools</div>
+                        <div className="flex flex-wrap gap-2">
+                          {skill.explainer.best_with_tools.map((t, i) => (
+                            <span key={i} className="px-3 py-1 bg-cyan-500/15 border border-cyan-500/40 rounded text-cyan-100 text-sm font-medium">{t}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {Array.isArray(skill.explainer.works_well_with) && skill.explainer.works_well_with.length > 0 && (
                       <div>
-                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">Works well with</div>
+                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">Pairs with</div>
                         <div className="flex flex-wrap gap-2">
                           {skill.explainer.works_well_with.map((w, i) => (
                             <span key={i} className="px-2.5 py-1 bg-slate-700/40 border border-slate-700 rounded text-slate-200 text-sm">{w}</span>

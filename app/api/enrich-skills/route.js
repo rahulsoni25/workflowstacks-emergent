@@ -137,6 +137,7 @@ Return ONLY this JSON shape:
   "time_to_setup": "Realistic estimate. Choose one: '5 minutes' | '30 minutes' | '1-2 hours' | 'Half a day' | '1-2 days'",
   "cost_to_run": "Choose one of these patterns: 'Free' | 'Free (self-hosted)' | 'Free + LLM API costs' | 'Free tier + paid plans' | 'Paid (~$X/mo)' | 'Pay per use'",
   "works_well_with": ["2-4 short companion suggestions", "e.g., 'Claude API'", "'Stripe webhook'", "'Notion database'"],
+  "best_with_tools": ["1-4 specific AI tools/IDEs this skill is designed for or works best inside. Choose ONLY from this list: 'Claude Desktop', 'Claude Code', 'Claude API', 'Cursor', 'Codex CLI', 'GPT (ChatGPT)', 'Gemini', 'Gemini Code Assist', 'Antigravity', 'GitHub Copilot', 'Continue', 'Aider', 'Windsurf', 'Self-hosted', 'Any AI Client'. Pick what the skill is genuinely designed for — e.g., a claude-skill should usually list 'Claude Desktop' or 'Claude Code'; an MCP server usually works in 'Claude Desktop', 'Cursor', 'Codex CLI', 'Continue'; an n8n-style automation usually lists 'Self-hosted', 'Any AI Client'; a prompt template usually lists 'GPT (ChatGPT)', 'Claude Desktop', 'Gemini'. If genuinely tool-agnostic, use 'Any AI Client'."],
   "common_confusions": "1 sentence clearing up the most common confusion a first-time reader has about this skill."
 }`;
 }
@@ -161,6 +162,15 @@ function parseExplainer(raw, skillName) {
   obj.time_to_setup = obj.time_to_setup || 'Varies';
   obj.cost_to_run = obj.cost_to_run || 'Varies';
   obj.works_well_with = Array.isArray(obj.works_well_with) ? obj.works_well_with.slice(0, 4) : [];
+  // Filter to known tool labels to keep the surface predictable in UI
+  const ALLOWED_TOOLS = new Set([
+    'Claude Desktop', 'Claude Code', 'Claude API', 'Cursor', 'Codex CLI',
+    'GPT (ChatGPT)', 'Gemini', 'Gemini Code Assist', 'Antigravity',
+    'GitHub Copilot', 'Continue', 'Aider', 'Windsurf', 'Self-hosted', 'Any AI Client'
+  ])
+  obj.best_with_tools = Array.isArray(obj.best_with_tools)
+    ? obj.best_with_tools.filter(t => ALLOWED_TOOLS.has(t)).slice(0, 4)
+    : []
   obj.common_confusions = obj.common_confusions || '';
   return obj;
 }

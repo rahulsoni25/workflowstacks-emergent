@@ -421,6 +421,11 @@ export default function BuilderPage() {
                                     {skill.explainer.cost_to_run && (
                                       <span className="px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">💵 {skill.explainer.cost_to_run}</span>
                                     )}
+                                    {Array.isArray(skill.explainer.best_with_tools) && skill.explainer.best_with_tools.length > 0 && (
+                                      <span className="px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300">
+                                        🛠 Best with: {skill.explainer.best_with_tools.join(' · ')}
+                                      </span>
+                                    )}
                                   </div>
                                 )}
                                 {isExpanded && (
@@ -475,9 +480,19 @@ export default function BuilderPage() {
                                             <p className="text-slate-300">{skill.explainer.common_confusions}</p>
                                           </div>
                                         )}
+                                        {Array.isArray(skill.explainer.best_with_tools) && skill.explainer.best_with_tools.length > 0 && (
+                                          <div className="p-2.5 bg-cyan-500/5 border border-cyan-500/20 rounded">
+                                            <div className="text-cyan-300 font-semibold uppercase tracking-wide text-[10px] mb-1.5">Best inside these tools</div>
+                                            <div className="flex flex-wrap gap-1.5">
+                                              {skill.explainer.best_with_tools.map((t, i) => (
+                                                <span key={i} className="px-2 py-0.5 bg-cyan-500/15 border border-cyan-500/30 rounded text-cyan-100 font-medium">{t}</span>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        )}
                                         {Array.isArray(skill.explainer.works_well_with) && skill.explainer.works_well_with.length > 0 && (
                                           <div>
-                                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Works well with</div>
+                                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Pairs with</div>
                                             <div className="flex flex-wrap gap-1.5">
                                               {skill.explainer.works_well_with.map((w, i) => (
                                                 <span key={i} className="px-2 py-0.5 bg-slate-700/40 border border-slate-700/60 rounded text-slate-300">{w}</span>
