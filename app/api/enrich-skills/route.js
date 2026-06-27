@@ -25,11 +25,10 @@ function requireAdmin(request) {
   return null;
 }
 
-// Pick the LLM provider. Groq is cheap+fast for bulk enrichment of 500+ skills.
-function resolveProvider() {
+// Pick the LLM provider. Defaults: Groq for low cost. Caller can override per-request
+// via { provider: 'openrouter'|'anthropic'|'groq', model: '...' } to escape rate limits.
+function defaultProvider() {
   if (process.env.GROQ_API_KEY) {
-    // 8B-instant has much higher TPM on free tier (30k vs 12k for 70B). Quality is
-    // good enough for templated explainer JSON. Override via GROQ_MODEL env if needed.
     return { name: 'groq', model: process.env.GROQ_MODEL || 'llama-3.1-8b-instant' };
   }
   if (process.env.OPENROUTER_API_KEY) {
@@ -41,34 +40,41 @@ function resolveProvider() {
   return { name: 'none', model: null };
 }
 
-const PROVIDER = resolveProvider();
+function resolveProvider(override) {
+  if (override?.provider === 'openrouter' && process.env.OPENROUTER_API_KEY) {
+    return { name: 'openrouter', model: override.model || 'anthropic/claude-3.5-haiku' };
+  }
+  if (override?.provider === 'anthropic' && process.env.ANTHROPIC_API_KEY) {
+    return { name: 'anthropic', model: override.model || 'claude-3-5-haiku-latest' };
+  }
+  if (override?.provider === 'groq' && process.env.GROQ_API_KEY) {
+    return { name: 'groq', model: override.model || 'llama-3.1-8b-instant' };
+  }
+  return defaultProvider();
+}
 
-// JSON-mode chat completion with the chosen provider.
-async function callLLMJson(system, user, maxTokens = 900) {
-  if (PROVIDER.name === 'groq') {
+// JSON-mode chat completion against the given provider.
+async function callLLMJson(provider, system, user, maxTokens = 900) {
+  if (provider.name === 'groq') {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.GROQ_API_KEY}` },
       body: JSON.stringify({
-        model: PROVIDER.model,
-        max_tokens: maxTokens,
+        model: provider.model, max_tokens: maxTokens,
         response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user },
-        ],
+        messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
       }),
     });
     if (!res.ok) throw new Error(`Groq ${res.status}: ${(await res.text()).substring(0, 200)}`);
     const data = await res.json();
     return data.choices?.[0]?.message?.content || '';
   }
-  if (PROVIDER.name === 'openrouter') {
+  if (provider.name === 'openrouter') {
     const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`, 'X-Title': 'WorkflowStacks' },
       body: JSON.stringify({
-        model: PROVIDER.model, max_tokens: maxTokens,
+        model: provider.model, max_tokens: maxTokens,
         response_format: { type: 'json_object' },
         messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
       }),
@@ -77,11 +83,11 @@ async function callLLMJson(system, user, maxTokens = 900) {
     const data = await res.json();
     return data.choices?.[0]?.message?.content || '';
   }
-  if (PROVIDER.name === 'anthropic') {
+  if (provider.name === 'anthropic') {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({ model: PROVIDER.model, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] }),
+      body: JSON.stringify({ model: provider.model, max_tokens: maxTokens, system, messages: [{ role: 'user', content: user }] }),
     });
     if (!res.ok) throw new Error(`Anthropic ${res.status}: ${(await res.text()).substring(0, 200)}`);
     const data = await res.json();
@@ -179,42 +185,59 @@ export async function POST(request) {
   const denied = requireAdmin(request);
   if (denied) return denied;
 
-  if (PROVIDER.name === 'none') {
-    return Response.json({ error: 'No LLM provider configured (set GROQ_API_KEY)' }, { status: 500 });
-  }
-
   let body = {};
   try { body = await request.json(); } catch {}
   const limit = Math.min(Math.max(parseInt(body.limit || 20, 10), 1), 100);
   const force = !!body.force;
   const dryRun = !!body.dryRun;
   const idsFilter = Array.isArray(body.ids) && body.ids.length > 0 ? body.ids : null;
+  // Per-request provider override — lets the caller route around Groq TPM caps
+  // by sending { provider: "openrouter", model: "anthropic/claude-3.5-haiku" }
+  const provider = resolveProvider({ provider: body.provider, model: body.model });
+
+  if (provider.name === 'none') {
+    return Response.json({ error: 'No LLM provider configured (set GROQ_API_KEY, OPENROUTER_API_KEY, or ANTHROPIC_API_KEY)' }, { status: 500 });
+  }
 
   const database = await connectDB();
   const skills = database.collection('skills');
 
   // Find skills to enrich: by id list, or all without explainer (unless force).
-  const query = idsFilter
-    ? { $or: [{ id: { $in: idsFilter } }, { slug: { $in: idsFilter } }] }
-    : (force ? {} : { $or: [{ explainer: { $exists: false } }, { explainer: null }] });
+  // Special selector: needsBestWithTools=true picks already-enriched skills that
+  // lack the best_with_tools field (added later) so the second-pass re-runs them.
+  let query
+  if (idsFilter) {
+    query = { $or: [{ id: { $in: idsFilter } }, { slug: { $in: idsFilter } }] }
+  } else if (body.needsBestWithTools) {
+    query = {
+      explainer: { $exists: true, $ne: null },
+      $or: [
+        { 'explainer.best_with_tools': { $exists: false } },
+        { 'explainer.best_with_tools': { $size: 0 } },
+      ],
+    }
+  } else if (force) {
+    query = {}
+  } else {
+    query = { $or: [{ explainer: { $exists: false } }, { explainer: null }] }
+  }
   const candidates = await skills.find(query).limit(limit).toArray();
 
-  const out = { provider: PROVIDER.name, model: PROVIDER.model, attempted: candidates.length, enriched: 0, errors: [], samples: [] };
+  const out = { provider: provider.name, model: provider.model, attempted: candidates.length, enriched: 0, errors: [], samples: [] };
 
   for (let i = 0; i < candidates.length; i++) {
     const skill = candidates[i];
     try {
       const userPrompt = buildUserPrompt(skill);
-      const raw = await callLLMJson(SYSTEM_PROMPT, userPrompt, 700);
+      const raw = await callLLMJson(provider, SYSTEM_PROMPT, userPrompt, 700);
       const explainer = parseExplainer(raw, skill.name);
       explainer.generated_at = new Date();
-      explainer.model = PROVIDER.model;
+      explainer.model = provider.model;
 
       if (dryRun) {
         out.samples.push({ id: skill.id, name: skill.title_human || skill.name, explainer });
       } else {
         await skills.updateOne({ id: skill.id }, { $set: { explainer } });
-        // Keep a small sample so the caller can inspect quality without re-running
         if (out.samples.length < 3) out.samples.push({ id: skill.id, name: skill.title_human || skill.name, explainer });
       }
       out.enriched++;
@@ -232,9 +255,15 @@ export async function GET(request) {
   if (denied) return denied;
   const database = await connectDB();
   const skills = database.collection('skills');
-  const [total, enriched] = await Promise.all([
+  const [total, enriched, withBestTools] = await Promise.all([
     skills.countDocuments(),
     skills.countDocuments({ explainer: { $exists: true, $ne: null } }),
+    skills.countDocuments({ 'explainer.best_with_tools.0': { $exists: true } }),
   ]);
-  return Response.json({ total, enriched, pending: total - enriched, provider: PROVIDER.name, model: PROVIDER.model });
+  const provider = defaultProvider();
+  return Response.json({
+    total, enriched, pending: total - enriched,
+    withBestTools, needsBestTools: enriched - withBestTools,
+    defaultProvider: provider.name, defaultModel: provider.model,
+  });
 }
