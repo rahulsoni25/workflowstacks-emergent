@@ -35,6 +35,10 @@ export default function BuilderPage() {
   const [useCaseQuery, setUseCaseQuery] = useState('')
   const [useCaseResults, setUseCaseResults] = useState(null)
   const [useCaseLoading, setUseCaseLoading] = useState(false)
+  // Goal-based recommendations: auto-fired when Step 2 loads with a goal
+  const [recommendations, setRecommendations] = useState(null)
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false)
+  const [recommendedGoal, setRecommendedGoal] = useState('')
   const SAMPLE_USECASES = [
     'transcribe meetings',
     'build a chatbot for my docs',
@@ -62,6 +66,31 @@ export default function BuilderPage() {
     }
   }
   const clearUseCaseSearch = () => { setUseCaseQuery(''); setUseCaseResults(null) }
+
+  // Fetch recommendations whenever Step 2 becomes active with a goal.
+  // Re-fires if the user edits the goal then comes back to Step 2.
+  useEffect(() => {
+    if (step !== 2 || !goal || !goal.trim()) return
+    if (recommendedGoal === goal && recommendations) return // already fetched for this goal
+    setRecommendationsLoading(true)
+    setRecommendedGoal(goal)
+    fetch('/api/search-skills', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: goal, limit: 8 }),
+    })
+      .then(r => r.json())
+      .then(j => setRecommendations(j.results || []))
+      .catch(() => setRecommendations([]))
+      .finally(() => setRecommendationsLoading(false))
+  }, [step, goal])
+
+  const addAllRecommended = () => {
+    if (!recommendations) return
+    const next = new Set(selectedSkillIds)
+    for (const r of recommendations) next.add(r.id)
+    setSelectedSkillIds(Array.from(next))
+  }
 
   // Plain-English "what this category gives you" — shown in the expanded info panel
   // so a non-technical user understands the role of each skill at a glance.
@@ -349,6 +378,95 @@ export default function BuilderPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Recommended by WorkflowStacks — auto-picked based on the goal in Step 1 */}
+                {goal && goal.trim() && (
+                  <div className="p-4 bg-gradient-to-r from-violet-500/10 via-cyan-500/10 to-teal-500/10 border border-violet-500/30 rounded-lg">
+                    <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-violet-300" />
+                        <span className="text-sm font-semibold text-white">Recommended by WorkflowStacks</span>
+                        <span className="text-xs text-slate-400">for "<span className="text-slate-200">{goal.length > 80 ? goal.slice(0, 80) + '…' : goal}</span>"</span>
+                      </div>
+                      {recommendations && recommendations.length > 0 && (
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={addAllRecommended}
+                          className="bg-violet-500 hover:bg-violet-600 text-white text-xs px-3 h-7"
+                        >
+                          Add all {recommendations.length}
+                        </Button>
+                      )}
+                    </div>
+                    {recommendationsLoading && (
+                      <div className="text-sm text-slate-400 py-2">⏳ Picking the best skills for your goal…</div>
+                    )}
+                    {!recommendationsLoading && recommendations && recommendations.length === 0 && (
+                      <div className="text-sm text-slate-400 py-2">
+                        No strong matches yet — try the use-case search below or browse the full catalog.
+                      </div>
+                    )}
+                    {!recommendationsLoading && recommendations && recommendations.length > 0 && (
+                      <div className="space-y-2">
+                        {recommendations.map((s, idx) => {
+                          const isSelected = selectedSkillIds.includes(s.id)
+                          return (
+                            <div
+                              key={s.id}
+                              onClick={() => toggleSkill(s.id)}
+                              className={`p-3 rounded-md border cursor-pointer transition ${
+                                isSelected
+                                  ? 'bg-violet-500/15 border-violet-500/60'
+                                  : 'bg-slate-900/50 border-slate-700/60 hover:border-violet-500/40'
+                              }`}
+                            >
+                              <div className="flex items-start gap-2">
+                                <div className="flex flex-col items-center flex-shrink-0 mt-0.5">
+                                  <Checkbox checked={isSelected} />
+                                  <span className="text-[10px] text-violet-300 font-bold mt-1">#{idx + 1}</span>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                                    <h4 className="text-white font-semibold text-sm">{s.title_human || s.name}</h4>
+                                    <Badge className={getCategoryColor(s.category)}>{s.category}</Badge>
+                                    {s.explainer?.difficulty && (
+                                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                        s.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
+                                        s.explainer.difficulty === 'advanced' ? 'bg-orange-500/15 text-orange-300' :
+                                        'bg-slate-500/15 text-slate-300'
+                                      }`}>{s.explainer.difficulty}</span>
+                                    )}
+                                    {s.explainer?.time_to_setup && (
+                                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">⏱ {s.explainer.time_to_setup}</span>
+                                    )}
+                                    {s.explainer?.cost_to_run && (
+                                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">💵 {s.explainer.cost_to_run}</span>
+                                    )}
+                                  </div>
+                                  {s.matched?.snippet && (
+                                    <p className="text-xs text-slate-300 italic mt-1">
+                                      <span className="text-violet-300 font-medium not-italic">Why we picked this: </span>
+                                      "{s.matched.snippet}"
+                                    </p>
+                                  )}
+                                  {Array.isArray(s.explainer?.best_with_tools) && s.explainer.best_with_tools.length > 0 && (
+                                    <div className="mt-1 text-[10px] text-cyan-300">
+                                      Best with: {s.explainer.best_with_tools.join(' · ')}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                        <div className="text-[11px] text-slate-500 pt-1 border-t border-slate-700/40 mt-2">
+                          Want something different? Use the search below to refine, or scroll the full catalog.
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Use-case search — "what are you trying to do?" — picks skills by job-to-be-done */}
                 <div className="p-3 bg-gradient-to-r from-teal-500/5 to-cyan-500/5 border border-teal-500/20 rounded-md">
                   <label className="block text-xs font-semibold uppercase tracking-wide text-teal-300 mb-1.5">
