@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Zap, CheckCircle2, Copy, Sparkles, ExternalLink, Search, X } from 'lucide-react'
+import { ArrowLeft, Zap, CheckCircle2, Copy, Sparkles, ExternalLink, Search, X, HelpCircle, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,6 +30,47 @@ export default function BuilderPage() {
   const [dfyRequested, setDfyRequested] = useState(false)
   const [skillQuery, setSkillQuery] = useState('')
   const [skillCategory, setSkillCategory] = useState('all')
+  const [expandedSkillId, setExpandedSkillId] = useState(null)
+
+  // Plain-English "what this category gives you" — shown in the expanded info panel
+  // so a non-technical user understands the role of each skill at a glance.
+  const CATEGORY_INFO = {
+    'claude-skill': {
+      label: 'Claude Skill',
+      whatItIs: 'A capability you add to Claude — used inside Claude Desktop, Claude Code, or via the Claude API.',
+      bestFor: ['Extending Claude with a specific workflow', 'Drop-in expertise without rebuilding from scratch', 'Reusing the same skill across teams']
+    },
+    'mcp-server': {
+      label: 'MCP Server',
+      whatItIs: 'Lets Claude / Cursor / Codex connect to an external service (DB, API, tool) via the Model Context Protocol.',
+      bestFor: ['Giving your AI access to live data', 'Letting agents act on external systems (Slack, Gmail, Jira, etc.)', 'Standardized tool-use across AI clients']
+    },
+    'ai-agent': {
+      label: 'AI Agent',
+      whatItIs: 'An autonomous agent — runs multi-step tasks on your behalf with minimal supervision.',
+      bestFor: ['Long-running tasks (research, code, content)', 'Coordinating multiple tools to complete a goal', 'Replacing repetitive workflows end-to-end']
+    },
+    'ai-tool': {
+      label: 'AI Tool',
+      whatItIs: 'A standalone AI-powered tool — run directly or integrate via API.',
+      bestFor: ['Adding AI capability to your stack quickly', 'Specialized jobs (transcription, summarization, image gen, etc.)', 'Avoiding building infrastructure yourself']
+    },
+    'prompt': {
+      label: 'Prompt Template',
+      whatItIs: 'A ready-to-use prompt template you drop into ChatGPT, Claude, Gemini, or your own LLM.',
+      bestFor: ['Repeatable outputs without re-engineering each time', 'Bootstrapping a use case fast', 'Comparing approaches across models']
+    },
+    'automation': {
+      label: 'Automation',
+      whatItIs: 'A workflow automation platform — chain steps, AI calls, and integrations without writing custom code.',
+      bestFor: ['No-code multi-step pipelines', 'Connecting AI to your existing apps (CRM, email, DB)', 'Self-hosting or cloud — your choice']
+    },
+    'gemini-extension': {
+      label: 'Gemini Extension',
+      whatItIs: 'A capability added to Google Gemini.',
+      bestFor: ['Extending Gemini with a specific workflow', 'Tapping Gemini\'s long context with new tools']
+    },
+  }
 
   const requestDfy = async (e) => {
     e.preventDefault()
@@ -331,28 +372,85 @@ export default function BuilderPage() {
                           <div className="text-center py-12 text-slate-500 text-sm">
                             No skills match your search. Try a different keyword or clear filters.
                           </div>
-                        ) : filtered.map((skill) => (
-                    <div
-                      key={skill.id}
-                      onClick={() => toggleSkill(skill.id)}
-                      className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                        selectedSkillIds.includes(skill.id)
-                          ? 'bg-teal-500/10 border-teal-500/50'
-                          : 'bg-slate-800/30 border-slate-700/50 hover:border-slate-600'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Checkbox checked={selectedSkillIds.includes(skill.id)} className="mt-1" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-white font-semibold text-sm">{skill.title_human || skill.name}</h3>
-                            <Badge className={getCategoryColor(skill.category)}>{skill.category}</Badge>
+                        ) : filtered.map((skill) => {
+                          const isExpanded = expandedSkillId === skill.id
+                          const info = CATEGORY_INFO[skill.category]
+                          const fullDescription = skill.description_human || skill.description || ''
+                          return (
+                          <div
+                            key={skill.id}
+                            onClick={() => toggleSkill(skill.id)}
+                            className={`p-4 rounded-lg border cursor-pointer transition-all ${
+                              selectedSkillIds.includes(skill.id)
+                                ? 'bg-teal-500/10 border-teal-500/50'
+                                : 'bg-slate-800/30 border-slate-700/50 hover:border-slate-600'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <Checkbox checked={selectedSkillIds.includes(skill.id)} className="mt-1" />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="text-white font-semibold text-sm">{skill.title_human || skill.name}</h3>
+                                  <Badge className={getCategoryColor(skill.category)}>{skill.category}</Badge>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setExpandedSkillId(isExpanded ? null : skill.id) }}
+                                    className="ml-auto inline-flex items-center gap-1 text-xs text-slate-400 hover:text-teal-300 transition-colors"
+                                    aria-label={isExpanded ? 'Hide details' : 'What is this skill?'}
+                                    title={isExpanded ? 'Hide details' : 'What is this skill? How can it help?'}
+                                  >
+                                    <HelpCircle className="w-4 h-4" />
+                                    <span className="hidden sm:inline">{isExpanded ? 'Hide' : 'What is this?'}</span>
+                                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                                  </button>
+                                </div>
+                                <p className={`text-slate-400 text-sm ${isExpanded ? '' : 'line-clamp-2'}`}>{skill.description}</p>
+                                {isExpanded && (
+                                  <div
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="mt-3 p-3 bg-slate-900/60 border border-slate-700/60 rounded-md space-y-3 text-xs"
+                                  >
+                                    {info && (
+                                      <>
+                                        <div>
+                                          <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">What kind of skill is this?</div>
+                                          <p className="text-slate-300">{info.whatItIs}</p>
+                                        </div>
+                                        <div>
+                                          <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Best for</div>
+                                          <ul className="text-slate-300 space-y-1 list-disc list-inside marker:text-teal-500/60">
+                                            {info.bestFor.map((b, i) => <li key={i}>{b}</li>)}
+                                          </ul>
+                                        </div>
+                                      </>
+                                    )}
+                                    {fullDescription && fullDescription !== skill.description && (
+                                      <div>
+                                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">In plain English</div>
+                                        <p className="text-slate-300">{fullDescription}</p>
+                                      </div>
+                                    )}
+                                    <div className="flex flex-wrap items-center gap-3 text-slate-500 pt-1">
+                                      {skill.creator && <span>By <span className="text-slate-300">{skill.creator}</span></span>}
+                                      {skill.language && <span>· {skill.language}</span>}
+                                      {skill.github_stars > 0 && <span>· ⭐ {skill.github_stars.toLocaleString()}</span>}
+                                    </div>
+                                    <a
+                                      href={`/skills/${skill.slug || skill.id}`}
+                                      target="_blank"
+                                      rel="noopener"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="inline-flex items-center gap-1 text-teal-400 hover:text-teal-300 font-semibold pt-1"
+                                    >
+                                      Open full details <ExternalLink className="w-3 h-3" />
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-slate-400 text-sm line-clamp-2">{skill.description}</p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                          )
+                        })}
                       </div>
                     </>
                   )
