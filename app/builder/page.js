@@ -31,6 +31,37 @@ export default function BuilderPage() {
   const [skillQuery, setSkillQuery] = useState('')
   const [skillCategory, setSkillCategory] = useState('all')
   const [expandedSkillId, setExpandedSkillId] = useState(null)
+  // Use-case search: server-side, matches against explainer fields
+  const [useCaseQuery, setUseCaseQuery] = useState('')
+  const [useCaseResults, setUseCaseResults] = useState(null)
+  const [useCaseLoading, setUseCaseLoading] = useState(false)
+  const SAMPLE_USECASES = [
+    'transcribe meetings',
+    'build a chatbot for my docs',
+    'send personalized cold emails',
+    'generate images from text',
+    'analyze a spreadsheet with AI',
+    'turn a PDF into structured data',
+  ]
+  const runUseCaseSearch = async (q) => {
+    const query = (q ?? useCaseQuery).trim()
+    if (!query) { setUseCaseResults(null); return }
+    setUseCaseLoading(true)
+    try {
+      const r = await fetch('/api/search-skills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, limit: 12 }),
+      })
+      const j = await r.json()
+      setUseCaseResults(j.results || [])
+    } catch (e) {
+      setUseCaseResults([])
+    } finally {
+      setUseCaseLoading(false)
+    }
+  }
+  const clearUseCaseSearch = () => { setUseCaseQuery(''); setUseCaseResults(null) }
 
   // Plain-English "what this category gives you" — shown in the expanded info panel
   // so a non-technical user understands the role of each skill at a glance.
@@ -318,7 +349,94 @@ export default function BuilderPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Search + category filter — fast way to find a skill by name without scrolling */}
+                {/* Use-case search — "what are you trying to do?" — picks skills by job-to-be-done */}
+                <div className="p-3 bg-gradient-to-r from-teal-500/5 to-cyan-500/5 border border-teal-500/20 rounded-md">
+                  <label className="block text-xs font-semibold uppercase tracking-wide text-teal-300 mb-1.5">
+                    🎯 What do you want to do? <span className="text-slate-500 normal-case font-normal">— let us pick the right skills</span>
+                  </label>
+                  <form
+                    onSubmit={(e) => { e.preventDefault(); runUseCaseSearch() }}
+                    className="flex gap-2"
+                  >
+                    <input
+                      value={useCaseQuery}
+                      onChange={(e) => setUseCaseQuery(e.target.value)}
+                      placeholder="e.g., transcribe meetings, build a chatbot for my docs…"
+                      className="flex-1 bg-slate-900/60 border border-slate-700/60 rounded-md px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-teal-500/50 outline-none"
+                      aria-label="Describe your use case"
+                    />
+                    <Button type="submit" disabled={useCaseLoading || !useCaseQuery.trim()} className="bg-teal-500 hover:bg-teal-600 text-white text-sm px-4">
+                      {useCaseLoading ? '…' : 'Find skills'}
+                    </Button>
+                    {useCaseResults && (
+                      <Button type="button" variant="outline" onClick={clearUseCaseSearch} className="border-slate-700 text-slate-300 text-sm px-3">Clear</Button>
+                    )}
+                  </form>
+                  {!useCaseResults && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {SAMPLE_USECASES.map((s) => (
+                        <button
+                          key={s}
+                          type="button"
+                          onClick={() => { setUseCaseQuery(s); runUseCaseSearch(s) }}
+                          className="text-[11px] px-2 py-0.5 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 rounded text-slate-300 hover:text-white transition"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  {useCaseResults && (
+                    <div className="mt-3 space-y-2">
+                      <div className="text-xs text-slate-400">
+                        {useCaseResults.length === 0
+                          ? 'No matches yet. Try simpler keywords like "image generation" or browse all skills below.'
+                          : `Top ${useCaseResults.length} skills for "${useCaseQuery}" — click to add, or scroll for full catalog below.`}
+                      </div>
+                      {useCaseResults.map((s) => {
+                        const isSelected = selectedSkillIds.includes(s.id)
+                        return (
+                          <div
+                            key={s.id}
+                            onClick={() => toggleSkill(s.id)}
+                            className={`p-3 rounded-md border cursor-pointer transition ${
+                              isSelected
+                                ? 'bg-teal-500/10 border-teal-500/50'
+                                : 'bg-slate-900/40 border-slate-700/60 hover:border-teal-500/30'
+                            }`}
+                          >
+                            <div className="flex items-start gap-2">
+                              <Checkbox checked={isSelected} className="mt-0.5" />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                  <h4 className="text-white font-semibold text-sm">{s.title_human || s.name}</h4>
+                                  <Badge className={getCategoryColor(s.category)}>{s.category}</Badge>
+                                  {s.explainer?.difficulty && (
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                      s.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
+                                      s.explainer.difficulty === 'advanced' ? 'bg-orange-500/15 text-orange-300' :
+                                      'bg-slate-500/15 text-slate-300'
+                                    }`}>{s.explainer.difficulty}</span>
+                                  )}
+                                </div>
+                                {s.matched?.snippet && (
+                                  <p className="text-xs text-slate-300 italic">"{s.matched.snippet}"</p>
+                                )}
+                                {Array.isArray(s.explainer?.best_with_tools) && s.explainer.best_with_tools.length > 0 && (
+                                  <div className="mt-1 text-[10px] text-cyan-300">
+                                    Best with: {s.explainer.best_with_tools.join(' · ')}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Keyword search + category filter — when you know the name */}
                 <div className="flex flex-col sm:flex-row gap-2">
                   <div className="relative flex-1">
                     <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
