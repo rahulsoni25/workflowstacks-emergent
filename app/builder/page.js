@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { ArrowLeft, Zap, CheckCircle2, Copy, Sparkles, ExternalLink, Search, X, HelpCircle, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,8 +14,10 @@ import { motion } from 'framer-motion'
 import { getUserId, getHandle, setHandle as saveHandle } from '@/lib/identity'
 
 export default function BuilderPage() {
-  const [step, setStep] = useState(1)
-  const [goal, setGoal] = useState('')
+  const searchParams = useSearchParams()
+  const initialGoal = searchParams?.get('goal') || ''
+  const [step, setStep] = useState(initialGoal ? 2 : 1)
+  const [goal, setGoal] = useState(initialGoal)
   const [skills, setSkills] = useState([])
   const [selectedSkillIds, setSelectedSkillIds] = useState([])
   const [loading, setLoading] = useState(false)
@@ -101,6 +104,100 @@ export default function BuilderPage() {
     const next = new Set(selectedSkillIds)
     for (const r of recommendations) next.add(r.id)
     setSelectedSkillIds(Array.from(next))
+  }
+
+  // "Deploy this stack" — adds primary picks (defaults to all rec'd if no roles),
+  // then triggers blueprint generation and advances to Step 3.
+  const deployRecommendedStack = async () => {
+    if (!recommendations || recommendations.length === 0) return
+    const primaries = recommendations.filter(r => (r._rec_role || 'primary') === 'primary')
+    const targets = primaries.length > 0 ? primaries : recommendations
+    const newIds = Array.from(new Set([...selectedSkillIds, ...targets.map(r => r.id)]))
+    setSelectedSkillIds(newIds)
+    // Wait one tick so the state is committed before generateAgent reads it
+    setTimeout(() => {
+      // Inline generation (mirrors handleGenerateAgent but uses newIds directly)
+      setLoading(true)
+      fetch('/api/agent-templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal: goal.trim(),
+          selectedSkillIds: newIds,
+          userId: getUserId(),
+          isPublic: publish,
+          creatorName: publish ? (saveHandle(handle) || 'anonymous') : undefined,
+          price: publish ? (parseFloat(price) || 0) : 0,
+        }),
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) { setAgentBlueprint(data.template); setStep(3) }
+          else alert('Error generating agent: ' + (data.error || 'Unknown error'))
+        })
+        .catch(() => alert('Error generating agent'))
+        .finally(() => setLoading(false))
+    }, 50)
+  }
+
+  // Save this recommendation as a public, shareable Stack record + go to its URL.
+  const saveAndShareStack = async () => {
+    if (!recommendations || recommendations.length === 0) return
+    try {
+      const r = await fetch('/api/stacks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal,
+          name: recContext || goal,
+          skillIds: recommendations.map(r => r.id),
+          creatorHandle: handle || 'anonymous',
+          context: recContext,
+          summary: recSummary,
+          confidence: recConfidence,
+          public: true,
+        }),
+      })
+      const j = await r.json()
+      if (j.url) window.location.href = j.url
+      else alert('Failed to save: ' + (j.error || 'unknown'))
+    } catch (e) {
+      alert('Error saving stack: ' + e.message)
+    }
+  }
+
+  // Aggregate cost + time across the recommended stack so users see the
+  // total at a glance ("Free + LLM API costs · ~3 hours total to set up").
+  const stackTotals = (recs) => {
+    if (!recs || recs.length === 0) return { cost: '', time: '', minutes: 0 }
+    const costs = new Set()
+    let totalMinutes = 0
+    for (const r of recs) {
+      const c = r?.explainer?.cost_to_run || ''
+      if (c) costs.add(c)
+      const t = r?.explainer?.time_to_setup || ''
+      // Parse "5 minutes", "30 minutes", "1-2 hours", "Half a day", "1-2 days"
+      const lower = t.toLowerCase()
+      const numMatch = lower.match(/(\d+)\s*(?:-\s*\d+)?/)
+      const n = numMatch ? parseInt(numMatch[1], 10) : 0
+      if (lower.includes('minute')) totalMinutes += n
+      else if (lower.includes('hour')) totalMinutes += n * 60
+      else if (lower.includes('half a day')) totalMinutes += 4 * 60
+      else if (lower.includes('day')) totalMinutes += n * 8 * 60
+    }
+    const hrs = Math.round(totalMinutes / 60)
+    const time = totalMinutes === 0 ? 'Varies' :
+      totalMinutes < 60 ? `${totalMinutes} min total` :
+      hrs < 8 ? `~${hrs} hours total` :
+      `~${Math.round(hrs / 8)} days total`
+    // Cost: dedupe + summarize
+    const arr = Array.from(costs)
+    const cost = arr.length === 0 ? 'Varies' :
+      arr.every(c => c.toLowerCase().includes('free') && !c.toLowerCase().includes('paid')) ? 'All Free' :
+      arr.length === 1 ? arr[0] :
+      arr.length <= 3 ? arr.join(' · ') :
+      'Mix of free + paid'
+    return { cost, time }
   }
 
   // Plain-English "what this category gives you" — shown in the expanded info panel
@@ -390,7 +487,64 @@ export default function BuilderPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Recommended by WorkflowStacks — auto-picked based on the goal in Step 1 */}
-                {goal && goal.trim() && (
+                {goal && goal.trim() && (() => {
+                  const totals = stackTotals(recommendations)
+                  const primaries = (recommendations || []).filter(r => (r._rec_role || 'primary') === 'primary')
+                  const secondaries = (recommendations || []).filter(r => r._rec_role === 'secondary')
+                  const optionals = (recommendations || []).filter(r => r._rec_role === 'optional')
+                  const renderCard = (s, sectionKey) => {
+                    const isSelected = selectedSkillIds.includes(s.id)
+                    const role = s._rec_role || 'primary'
+                    const roleStyle = role === 'primary' ? 'bg-violet-500/20 text-violet-200 border-violet-500/40' :
+                                     role === 'secondary' ? 'bg-cyan-500/15 text-cyan-200 border-cyan-500/30' :
+                                     'bg-slate-700/40 text-slate-300 border-slate-700/50'
+                    return (
+                      <div
+                        key={`${sectionKey}-${s.id}`}
+                        onClick={() => toggleSkill(s.id)}
+                        className={`p-3 rounded-md border cursor-pointer transition ${
+                          isSelected ? 'bg-violet-500/15 border-violet-500/60' : 'bg-slate-900/50 border-slate-700/60 hover:border-violet-500/40'
+                        }`}
+                      >
+                        <div className="flex items-start gap-2">
+                          <div className="flex flex-col items-center flex-shrink-0 mt-0.5">
+                            <Checkbox checked={isSelected} />
+                            <span className="text-[10px] text-violet-300 font-bold mt-1">#{s._rec_rank ?? '?'}</span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h4 className="text-white font-semibold text-sm">{s.title_human || s.name}</h4>
+                              <Badge className={getCategoryColor(s.category)}>{s.category}</Badge>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded border ${roleStyle} font-medium uppercase tracking-wide`}>{role}</span>
+                              {s.explainer?.difficulty && (
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded ${
+                                  s.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
+                                  s.explainer.difficulty === 'advanced' ? 'bg-orange-500/15 text-orange-300' :
+                                  'bg-slate-500/15 text-slate-300'
+                                }`}>{s.explainer.difficulty}</span>
+                              )}
+                              {s.explainer?.time_to_setup && <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">⏱ {s.explainer.time_to_setup}</span>}
+                              {s.explainer?.cost_to_run && <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">💵 {s.explainer.cost_to_run}</span>}
+                            </div>
+                            {s._rec_what_it_handles && (
+                              <p className="text-[11px] text-slate-400 mb-1">
+                                <span className="text-violet-300 font-medium">Handles:</span> {s._rec_what_it_handles}
+                              </p>
+                            )}
+                            {s._rec_why && (
+                              <p className="text-xs text-slate-200">
+                                <span className="text-violet-300 font-medium">Why this: </span>{s._rec_why}
+                              </p>
+                            )}
+                            {Array.isArray(s.explainer?.best_with_tools) && s.explainer.best_with_tools.length > 0 && (
+                              <div className="mt-1 text-[10px] text-cyan-300">Best with: {s.explainer.best_with_tools.join(' · ')}</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  }
+                  return (
                   <div className="p-4 bg-gradient-to-r from-violet-500/10 via-cyan-500/10 to-teal-500/10 border border-violet-500/30 rounded-lg">
                     <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
                       <div className="flex items-center gap-2">
@@ -399,14 +553,25 @@ export default function BuilderPage() {
                         <span className="text-xs text-slate-400">for "<span className="text-slate-200">{goal.length > 80 ? goal.slice(0, 80) + '…' : goal}</span>"</span>
                       </div>
                       {recommendations && recommendations.length > 0 && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          onClick={addAllRecommended}
-                          className="bg-violet-500 hover:bg-violet-600 text-white text-xs px-3 h-7"
-                        >
-                          Add all {recommendations.length}
-                        </Button>
+                        <div className="flex items-center gap-1.5">
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={saveAndShareStack}
+                            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs px-3 h-7"
+                            title="Save as a public, shareable stack page"
+                          >
+                            🔗 Save & share
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={addAllRecommended}
+                            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs px-3 h-7"
+                          >
+                            + Add all {recommendations.length}
+                          </Button>
+                        </div>
                       )}
                     </div>
                     {recommendationsLoading && (
@@ -436,66 +601,86 @@ export default function BuilderPage() {
                             <p className="text-slate-100">{recSummary}</p>
                           </div>
                         )}
-                        {recommendations.map((s) => {
-                          const isSelected = selectedSkillIds.includes(s.id)
-                          const role = s._rec_role || 'primary'
-                          const roleStyle = role === 'primary' ? 'bg-violet-500/20 text-violet-200 border-violet-500/40' :
-                                           role === 'secondary' ? 'bg-cyan-500/15 text-cyan-200 border-cyan-500/30' :
-                                           'bg-slate-700/40 text-slate-300 border-slate-700/50'
-                          return (
-                            <div
-                              key={s.id}
-                              onClick={() => toggleSkill(s.id)}
-                              className={`p-3 rounded-md border cursor-pointer transition ${
-                                isSelected
-                                  ? 'bg-violet-500/15 border-violet-500/60'
-                                  : 'bg-slate-900/50 border-slate-700/60 hover:border-violet-500/40'
-                              }`}
-                            >
-                              <div className="flex items-start gap-2">
-                                <div className="flex flex-col items-center flex-shrink-0 mt-0.5">
-                                  <Checkbox checked={isSelected} />
-                                  <span className="text-[10px] text-violet-300 font-bold mt-1">#{s._rec_rank ?? '?'}</span>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                    <h4 className="text-white font-semibold text-sm">{s.title_human || s.name}</h4>
-                                    <Badge className={getCategoryColor(s.category)}>{s.category}</Badge>
-                                    <span className={`text-[10px] px-1.5 py-0.5 rounded border ${roleStyle} font-medium uppercase tracking-wide`}>{role}</span>
-                                    {s.explainer?.difficulty && (
-                                      <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                                        s.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
-                                        s.explainer.difficulty === 'advanced' ? 'bg-orange-500/15 text-orange-300' :
-                                        'bg-slate-500/15 text-slate-300'
-                                      }`}>{s.explainer.difficulty}</span>
-                                    )}
-                                    {s.explainer?.time_to_setup && (
-                                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">⏱ {s.explainer.time_to_setup}</span>
-                                    )}
-                                    {s.explainer?.cost_to_run && (
-                                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">💵 {s.explainer.cost_to_run}</span>
-                                    )}
-                                  </div>
-                                  {s._rec_what_it_handles && (
-                                    <p className="text-[11px] text-slate-400 mb-1">
-                                      <span className="text-violet-300 font-medium">Handles:</span> {s._rec_what_it_handles}
-                                    </p>
-                                  )}
-                                  {s._rec_why && (
-                                    <p className="text-xs text-slate-200">
-                                      <span className="text-violet-300 font-medium">Why this: </span>{s._rec_why}
-                                    </p>
-                                  )}
-                                  {Array.isArray(s.explainer?.best_with_tools) && s.explainer.best_with_tools.length > 0 && (
-                                    <div className="mt-1 text-[10px] text-cyan-300">
-                                      Best with: {s.explainer.best_with_tools.join(' · ')}
+                        {/* Workflow diagram — horizontal flow of skill roles */}
+                        {recommendations.length >= 2 && (
+                          <div className="bg-slate-900/40 border border-slate-700/50 rounded-md p-3 overflow-x-auto">
+                            <div className="text-violet-300 font-semibold uppercase tracking-wide text-[10px] mb-2">How it flows</div>
+                            <div className="flex items-center gap-2 min-w-max">
+                              {recommendations.slice(0, 7).map((s, i) => (
+                                <div key={`flow-${s.id}`} className="flex items-center gap-2">
+                                  <div className="flex flex-col items-center text-center min-w-[110px] max-w-[150px]">
+                                    <div className="bg-gradient-to-br from-violet-500/30 to-cyan-500/30 border border-violet-500/40 rounded-md px-2 py-1.5 w-full">
+                                      <div className="text-[10px] font-semibold text-white truncate" title={s.title_human || s.name}>{s.title_human || s.name}</div>
+                                      {s._rec_what_it_handles && (
+                                        <div className="text-[9px] text-slate-300 mt-0.5 truncate" title={s._rec_what_it_handles}>{s._rec_what_it_handles}</div>
+                                      )}
                                     </div>
+                                  </div>
+                                  {i < Math.min(recommendations.length, 7) - 1 && (
+                                    <span className="text-violet-400 text-lg leading-none">→</span>
                                   )}
                                 </div>
-                              </div>
+                              ))}
                             </div>
-                          )
-                        })}
+                          </div>
+                        )}
+                        {/* Total cost + time + primary CTA */}
+                        <div className="bg-gradient-to-r from-violet-500/15 to-cyan-500/15 border border-violet-500/40 rounded-md p-3 flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex flex-wrap items-center gap-3 text-xs">
+                            <div>
+                              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Stack cost</div>
+                              <div className="text-slate-100 font-medium">💵 {totals.cost}</div>
+                            </div>
+                            <div className="h-8 w-px bg-slate-600/60" />
+                            <div>
+                              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Setup</div>
+                              <div className="text-slate-100 font-medium">⏱ {totals.time}</div>
+                            </div>
+                            <div className="h-8 w-px bg-slate-600/60" />
+                            <div>
+                              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Skills</div>
+                              <div className="text-slate-100 font-medium">{recommendations.length} picked</div>
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            onClick={deployRecommendedStack}
+                            disabled={loading}
+                            className="bg-gradient-to-r from-violet-500 to-cyan-500 hover:from-violet-600 hover:to-cyan-600 text-white font-semibold text-sm px-4 h-9 shadow-lg shadow-violet-500/20"
+                          >
+                            {loading ? '⏳ Building…' : '🚀 Deploy this stack →'}
+                          </Button>
+                        </div>
+                        {/* Essential picks — primaries */}
+                        {primaries.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-violet-300 font-semibold uppercase tracking-wide text-[10px]">★ Essential</span>
+                              <span className="text-slate-500">— the core of the solution</span>
+                            </div>
+                            {primaries.map(s => renderCard(s, 'primary'))}
+                          </div>
+                        )}
+                        {/* Recommended picks — secondaries */}
+                        {secondaries.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-cyan-300 font-semibold uppercase tracking-wide text-[10px]">+ Recommended</span>
+                              <span className="text-slate-500">— makes the stack stronger</span>
+                            </div>
+                            {secondaries.map(s => renderCard(s, 'secondary'))}
+                          </div>
+                        )}
+                        {/* Optional picks */}
+                        {optionals.length > 0 && (
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-xs">
+                              <span className="text-slate-300 font-semibold uppercase tracking-wide text-[10px]">○ Optional</span>
+                              <span className="text-slate-500">— extras you can add later</span>
+                            </div>
+                            {optionals.map(s => renderCard(s, 'optional'))}
+                          </div>
+                        )}
                         {/* Honest gap callout when the catalog can't fully cover the goal */}
                         {recMissing && recMissing.length > 0 && (
                           <div className="p-2.5 bg-amber-500/5 border border-amber-500/30 rounded text-xs">
@@ -516,7 +701,8 @@ export default function BuilderPage() {
                       </div>
                     )}
                   </div>
-                )}
+                  )
+                })()}
 
                 {/* Use-case search — "what are you trying to do?" — picks skills by job-to-be-done */}
                 <div className="p-3 bg-gradient-to-r from-teal-500/5 to-cyan-500/5 border border-teal-500/20 rounded-md">

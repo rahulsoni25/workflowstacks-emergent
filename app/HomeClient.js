@@ -223,23 +223,64 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             <p className="text-2xl md:text-3xl font-semibold text-white mb-6 tracking-tight">
               Stack the skills.{' '}<span style={{ color: '#C6F24E' }}>Ship the agent.</span>
             </p>
-            <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
               Built for founders and marketing agencies who want to install open-source AI skills, agents, and personas that handle <strong className="text-white">paid ads, performance reporting, SEO, outreach, market research, and ecommerce ops</strong> — without writing code.
             </p>
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
-              <Link href="/builder">
-                <Button size="lg" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] px-8 py-6 text-lg shadow-2xl shadow-lime-500/20 rounded-xl font-semibold">
-                  <Zap className="w-5 h-5 mr-2" />
-                  Build Your AI Agent — Free
+            {/* Goal Input — the new front door. User types their goal, we recommend the exact stack. */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                const fd = new FormData(e.currentTarget)
+                const g = (fd.get('goal') || '').toString().trim()
+                if (g) window.location.href = `/builder?goal=${encodeURIComponent(g)}`
+              }}
+              className="max-w-2xl mx-auto mb-8"
+            >
+              <div className="bg-[#101314]/80 backdrop-blur-sm border border-[#262B2D] rounded-xl p-2 flex flex-col sm:flex-row items-stretch gap-2 shadow-2xl shadow-black/40">
+                <input
+                  name="goal"
+                  type="text"
+                  placeholder="What do you want to build? e.g., a social media manager that posts daily…"
+                  className="flex-1 bg-transparent text-white placeholder:text-slate-500 outline-none px-4 py-3 text-base"
+                  aria-label="Your goal"
+                />
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] px-6 text-base shadow-lg shadow-lime-500/20 rounded-lg font-semibold whitespace-nowrap"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Recommend my stack →
                 </Button>
+              </div>
+              <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-xs">
+                <span className="text-slate-500">Try:</span>
+                {[
+                  'a chatbot for my docs',
+                  'transcribe meetings and summarize',
+                  'social media auto-poster',
+                  'a research agent for market analysis',
+                ].map(s => (
+                  <a
+                    key={s}
+                    href={`/builder?goal=${encodeURIComponent(s)}`}
+                    className="px-2 py-0.5 bg-[#101314] hover:bg-[#1a1d1f] border border-[#262B2D] rounded text-slate-300 hover:text-white transition"
+                  >
+                    {s}
+                  </a>
+                ))}
+              </div>
+            </form>
+
+            {/* Secondary CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
+              <Link href="/builder" className="text-slate-400 hover:text-white text-sm underline underline-offset-4">
+                Or build manually from the catalog
               </Link>
-              <Link href="/playbooks">
-                <Button size="lg" variant="outline" className="border-[#323A3C] text-[#ECEFEA] hover:bg-white/5 px-8 py-6 text-lg rounded-xl">
-                  <Play className="w-5 h-5 mr-2" />
-                  Browse Playbooks
-                </Button>
+              <span className="text-slate-600 hidden sm:inline">·</span>
+              <Link href="/playbooks" className="text-slate-400 hover:text-white text-sm underline underline-offset-4">
+                Browse playbooks
               </Link>
             </div>
 

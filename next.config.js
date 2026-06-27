@@ -13,6 +13,15 @@ const nextConfig = {
     }
     return config;
   },
+  async rewrites() {
+    // Brand-evolution: 'stacks' is the new term for packs (more accurate for what
+    // they are — curated combinations that solve a goal). Both URLs work; canonical
+    // remains /packs for now to avoid SEO churn. We'll flip in a future pass.
+    return [
+      { source: '/stacks', destination: '/packs' },
+      { source: '/stacks/:id', destination: '/packs/:id' },
+    ]
+  },
   async headers() {
     return [
       {
