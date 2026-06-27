@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Zap, CheckCircle2, Copy, Sparkles, ExternalLink } from 'lucide-react'
+import { ArrowLeft, Zap, CheckCircle2, Copy, Sparkles, ExternalLink, Search, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -28,6 +28,8 @@ export default function BuilderPage() {
   const [dfyTime, setDfyTime] = useState('')
   const [dfyTier, setDfyTier] = useState('starter')
   const [dfyRequested, setDfyRequested] = useState(false)
+  const [skillQuery, setSkillQuery] = useState('')
+  const [skillCategory, setSkillCategory] = useState('all')
 
   const requestDfy = async (e) => {
     e.preventDefault()
@@ -275,8 +277,61 @@ export default function BuilderPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="max-h-[500px] overflow-y-auto space-y-3 pr-2">
-                  {skills.map((skill) => (
+                {/* Search + category filter — fast way to find a skill by name without scrolling */}
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <input
+                      value={skillQuery}
+                      onChange={(e) => setSkillQuery(e.target.value)}
+                      placeholder="Search skills by name, description, or creator…"
+                      className="w-full bg-slate-800/60 border border-slate-700/60 rounded-md pl-9 pr-9 py-2 text-sm text-white placeholder:text-slate-500 focus:border-teal-500/50 outline-none"
+                      aria-label="Search skills"
+                    />
+                    {skillQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSkillQuery('')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white"
+                        aria-label="Clear search"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  <select
+                    value={skillCategory}
+                    onChange={(e) => setSkillCategory(e.target.value)}
+                    className="bg-slate-800/60 border border-slate-700/60 rounded-md px-3 py-2 text-sm text-white focus:border-teal-500/50 outline-none"
+                    aria-label="Filter by category"
+                  >
+                    <option value="all">All categories</option>
+                    {Array.from(new Set(skills.map((s) => s.category).filter(Boolean))).sort().map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                {(() => {
+                  const q = skillQuery.trim().toLowerCase()
+                  const filtered = skills.filter((s) => {
+                    if (skillCategory !== 'all' && s.category !== skillCategory) return false
+                    if (!q) return true
+                    return [s.title_human, s.name, s.description, s.description_human, s.creator]
+                      .filter(Boolean).some((f) => String(f).toLowerCase().includes(q))
+                  })
+                  return (
+                    <>
+                      <div className="text-xs text-slate-500">
+                        Showing {filtered.length} of {skills.length} skills
+                        {skillQuery && <span> matching "{skillQuery}"</span>}
+                        {skillCategory !== 'all' && <span> in {skillCategory}</span>}
+                      </div>
+                      <div className="max-h-[500px] overflow-y-auto space-y-3 pr-2">
+                        {filtered.length === 0 ? (
+                          <div className="text-center py-12 text-slate-500 text-sm">
+                            No skills match your search. Try a different keyword or clear filters.
+                          </div>
+                        ) : filtered.map((skill) => (
                     <div
                       key={skill.id}
                       onClick={() => toggleSkill(skill.id)}
@@ -298,7 +353,10 @@ export default function BuilderPage() {
                       </div>
                     </div>
                   ))}
-                </div>
+                      </div>
+                    </>
+                  )
+                })()}
 
                 {/* Publish to community — the viral loop */}
                 <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-4 mb-4">
