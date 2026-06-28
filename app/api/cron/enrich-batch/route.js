@@ -17,26 +17,30 @@ export async function GET(request) {
     return Response.json({ error: 'ADMIN_SECRET not set — cannot self-call enrich endpoint' }, { status: 500 })
   }
 
-  // Pass 1: enrich 5 unenriched skills
+  // Larger per-run batches when called from GH Actions (every 15 min) — finishes
+  // the catalog in hours, not weeks. Stays under 60s Vercel function timeout.
+  const limit = Math.min(parseInt(new URL(request.url).searchParams.get('limit') || '20', 10), 30)
+
+  // Pass 1: enrich N unenriched skills
   let pass1 = { attempted: 0, enriched: 0, errors: [] }
   try {
     const r = await fetch(`${BASE}/api/enrich-skills`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-secret': process.env.ADMIN_SECRET },
-      body: JSON.stringify({ limit: 5 }),
+      body: JSON.stringify({ limit }),
     })
     pass1 = await r.json()
   } catch (e) {
     pass1 = { error: e.message }
   }
 
-  // Pass 2: refill best_with_tools on 5 legacy-prompt skills
+  // Pass 2: refill best_with_tools on N legacy-prompt skills
   let pass2 = { attempted: 0, enriched: 0, errors: [] }
   try {
     const r = await fetch(`${BASE}/api/enrich-skills`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-admin-secret': process.env.ADMIN_SECRET },
-      body: JSON.stringify({ limit: 5, needsBestWithTools: true }),
+      body: JSON.stringify({ limit, needsBestWithTools: true }),
     })
     pass2 = await r.json()
   } catch (e) {
