@@ -149,9 +149,8 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               <Link href="/problems">
                 <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">Problems</Button>
               </Link>
-              <Link href="/deals">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">Deals</Button>
-              </Link>
+              {/* Deals link demoted into the More dropdown until the page has
+                  real content — kept out of primary nav to avoid dead-end clicks. */}
 
               {/* More ▾ — hover/focus dropdown for secondary destinations */}
               <div className="relative group">
@@ -224,7 +223,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               Stack the skills.{' '}<span style={{ color: '#C6F24E' }}>Ship the agent.</span>
             </p>
             <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Built for founders and marketing agencies who want to install open-source AI skills, agents, and personas that handle <strong className="text-white">paid ads, performance reporting, SEO, outreach, market research, and ecommerce ops</strong> — without writing code.
+              <strong className="text-white">For non-technical founders.</strong> Install a working AI agent in 3 clicks — no code, no API keys. Pre-built playbooks cover paid ads, SEO, outreach, market research, and ecommerce ops. <span className="text-slate-400">(Marketing agencies and ecommerce teams use it too.)</span>
             </p>
 
             {/* Goal Input — the new front door. User types their goal, we recommend the exact stack. */}

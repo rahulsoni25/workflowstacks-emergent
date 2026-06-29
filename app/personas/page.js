@@ -63,7 +63,7 @@ export default async function PersonasPage() {
                   <CardDescription className="text-slate-400 text-base">{persona.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-slate-400"><Target className="w-4 h-4" /><span>Best for: {persona.audience}s</span></div>
+                  <div className="flex items-center gap-2 text-sm text-slate-400"><Target className="w-4 h-4" /><span>Best for: {persona.audience}{/(?:s|sh|ch|x|z|y)$/i.test(persona.audience || '') ? '' : 's'}</span></div>
                   <Link href={`/personas/${persona.id}`} className="block">
                     <Button className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
                       <Zap className="w-4 h-4 mr-2" />See What This Agent Does
