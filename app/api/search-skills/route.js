@@ -117,7 +117,7 @@ export async function POST(request) {
   let candidates = []
   try {
     candidates = await database.collection('skills')
-      .find({ $or: ors, hidden: { $ne: true } }, { projection })
+      .find({ $or: ors, hidden: { $ne: true }, published: { $ne: false } }, { projection })
       .limit(150) // pull a wider set, then rank in JS
       .toArray()
   } catch (e) {

@@ -67,7 +67,7 @@ async function preFilterCandidates(database, goal, max = 60) {
     category: 1, github_stars: 1, github_topics: 1, explainer: 1,
   }
   const docs = await database.collection('skills')
-    .find({ $or: ors, hidden: { $ne: true } }, { projection })
+    .find({ $or: ors, hidden: { $ne: true }, published: { $ne: false } }, { projection })
     .limit(max * 2).toArray()
   // Score by token-hit count + log-stars tiebreaker, take top `max`
   function score(s) {
