@@ -7,6 +7,7 @@
 // show WHY each result is relevant.
 
 import { MongoClient } from 'mongodb'
+import { TOOLS_ONLY } from '../../../lib/catalog-gates'
 
 const client = new MongoClient(process.env.MONGO_URL)
 let db
@@ -117,7 +118,7 @@ export async function POST(request) {
   let candidates = []
   try {
     candidates = await database.collection('skills')
-      .find({ $or: ors, hidden: { $ne: true }, published: { $ne: false } }, { projection })
+      .find({ $or: ors, hidden: { $ne: true }, published: { $ne: false }, ...TOOLS_ONLY }, { projection })
       .limit(150) // pull a wider set, then rank in JS
       .toArray()
   } catch (e) {

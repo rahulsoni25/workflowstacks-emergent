@@ -569,10 +569,10 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
           >
             <motion.p variants={fadeInUp} className="eyebrow mb-4 justify-center">// PRICING</motion.p>
             <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
-              <span className="text-[#C6F24E]">Catalog: free forever.</span> Pro is for sellers.
+              <span className="text-[#C6F24E]">Catalog: free forever.</span> Or we build it for you.
             </motion.h2>
             <motion.p variants={fadeInUp} className="text-slate-400 text-lg max-w-2xl mx-auto">
-              If you're <strong className="text-white">using</strong> the catalog, it's $0 — forever, no paywall, all source visible. If you're <strong className="text-white">selling</strong> agents through WorkflowStacks, Pro removes the platform fee and unlocks creator tools.
+              <strong className="text-white">Using</strong> the catalog is $0 — forever, no paywall, all source visible. Want the outcome without the setup? We <strong className="text-white">build your agent for you</strong> — working, in your tools, within 7 days.
             </motion.p>
           </motion.div>
 
@@ -584,14 +584,14 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                 cta: 'Get Started Free', primary: false, badge: null,
               },
               {
-                name: 'Pro', price: '$19', period: '/month', desc: 'For serious creators & power users',
-                features: ['0% selling fees (keep 100%)', 'Private & unlisted agents', 'Sales analytics + custom branding', 'Early access to group-buy deals', 'API access'],
-                cta: 'Join the waitlist', primary: true, badge: 'Planned', waitlist: true,
+                name: 'Done-For-You', price: 'From $500', period: '/agent', desc: 'We build it. You run it.',
+                features: ['Your exact workflow, built by us', 'Working in YOUR tools within 7 days', 'Built from proven open-source skills', '30 days of tweaks included', 'Pay once — you own everything'],
+                cta: 'Get my agent built', primary: true, badge: 'New', href: '/build-for-me',
               },
               {
-                name: 'Enterprise', price: 'Custom', period: '', desc: 'For agencies & teams',
-                features: ['White-label agents', 'Team seats & SSO', 'Done-for-you agent setup', 'Custom skill ingestion', 'Dedicated support'],
-                cta: 'Talk to us', primary: false, badge: null, waitlist: true,
+                name: 'Agencies & Teams', price: 'Custom', period: '', desc: 'Ongoing automation partner',
+                features: ['Multiple agents, one partner', 'White-label for your clients', 'Custom skill ingestion', 'Priority support'],
+                cta: 'Talk to us', primary: false, badge: null, href: '/build-for-me',
               },
             ].map((plan, i) => (
               <motion.div
@@ -626,19 +626,11 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                         </li>
                       ))}
                     </ul>
-                    {plan.waitlist ? (
-                      <a href="#newsletter" className="block mt-6">
-                        <Button className={`w-full ${plan.primary ? 'bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-[#323A3C]'}`} size="lg">
-                          {plan.cta}
-                        </Button>
-                      </a>
-                    ) : (
-                      <Link href="/builder" className="block mt-6">
-                        <Button className={`w-full ${plan.primary ? 'bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-[#323A3C]'}`} size="lg">
-                          {plan.cta}
-                        </Button>
-                      </Link>
-                    )}
+                    <Link href={plan.href || '/builder'} className="block mt-6">
+                      <Button className={`w-full ${plan.primary ? 'bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-[#323A3C]'}`} size="lg">
+                        {plan.cta}
+                      </Button>
+                    </Link>
                   </CardContent>
                 </Card>
               </motion.div>

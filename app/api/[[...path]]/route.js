@@ -1,5 +1,7 @@
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
+import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalog-gates';
+import { rateLimit } from '../../../lib/rate-limit';
 
 const client = new MongoClient(process.env.MONGO_URL);
 let db;
@@ -52,21 +54,8 @@ async function logAdmin(request, db, action) {
   } catch {} // never throw — logging is best-effort
 }
 
-// Simple in-memory rate limiter per IP. Resets per cold start, which on
-// Vercel serverless is frequent — that's fine for abuse smoothing, not for
-// strict quota. 10 req / 60s window per IP.
-const _rl = new Map()
-function rateLimit(request, limit = 10, windowMs = 60_000) {
-  const ip = (request.headers.get('x-forwarded-for') || 'unknown').split(',')[0].trim()
-  const now = Date.now()
-  const key = ip
-  const slot = _rl.get(key) || { count: 0, reset: now + windowMs }
-  if (now > slot.reset) { slot.count = 0; slot.reset = now + windowMs }
-  slot.count++
-  _rl.set(key, slot)
-  if (slot.count > limit) return Response.json({ error: 'Too many requests' }, { status: 429 })
-  return null
-}
+// Rate limiter moved to lib/rate-limit.js so the standalone route files
+// (recommend-skills, search-skills) can share it.
 
 // ─────────────────────────────────────────────────────────────────
 // Security monitoring layer — DNS drift + admin auth anomaly
@@ -287,6 +276,9 @@ async function scrapeGitHub(topicQueries, opts = {}) {
         if (seenRepos.has(repo.full_name) || repo.archived) continue;
         seenRepos.add(repo.full_name);
 
+        // Trust gate: never list fork-farms or account-automation spam
+        if (isSpamRepo(repo)) continue;
+
         // Fetch README only when we have a token; otherwise fall back to description
         let readmePreview = repo.description || '';
         if (fetchReadmes) {
@@ -310,18 +302,14 @@ async function scrapeGitHub(topicQueries, opts = {}) {
         const starScore = Math.min(50, (repo.stargazers_count / 1000) * 10);
         const forkScore = Math.min(20, (repo.forks_count / 100) * 10);
         const popularityScore = starScore + forkScore + recencyBonus;
-        
-        // Quality rating
-        const rating = Math.min(5, (repo.stargazers_count / 1000) + 3.5 + (recencyBonus / 10));
-        
+
         const skill = {
           id: uuidv4(),
           name: repo.name,
           description: repo.description || 'No description available',
           category: category,
+          content_type: classifyContentType(repo),
           price: 0,
-          rating: parseFloat(rating.toFixed(1)),
-          installs: Math.floor(repo.stargazers_count * 2.5 + repo.forks_count * 10),
           source_url: repo.html_url,
           github_url: repo.html_url,
           github_stars: repo.stargazers_count,
@@ -352,106 +340,6 @@ async function scrapeGitHub(topicQueries, opts = {}) {
 
   return skills;
 }
-
-// Sample AgentPowers.ai data
-const agentPowersSkills = [
-  {
-    id: uuidv4(),
-    name: 'Code Reviewer Pro',
-    description: 'AI-powered code review assistant that analyzes your code for bugs, security issues, and best practices',
-    category: 'claude-skill',
-    price: 12,
-    rating: 4.8,
-    installs: 4200,
-    source_url: 'https://agentpowers.ai/skills/code-reviewer',
-    github_url: 'https://github.com/agentpowers/code-reviewer',
-    github_stars: 856,
-    creator: 'AgentPowers',
-    is_premium: true,
-    readme_preview: '# Code Reviewer Pro\n\nAutomated code review with AI...',
-    created_at: new Date('2024-01-15')
-  },
-  {
-    id: uuidv4(),
-    name: 'Security Scanner',
-    description: 'Comprehensive security analysis for your applications, detecting vulnerabilities and suggesting fixes',
-    category: 'claude-skill',
-    price: 19,
-    rating: 4.9,
-    installs: 3100,
-    source_url: 'https://agentpowers.ai/skills/security-scanner',
-    github_url: 'https://github.com/agentpowers/security-scanner',
-    github_stars: 1240,
-    creator: 'AgentPowers',
-    is_premium: true,
-    readme_preview: '# Security Scanner\n\nFind security vulnerabilities...',
-    created_at: new Date('2024-02-01')
-  },
-  {
-    id: uuidv4(),
-    name: 'Prompt Optimizer',
-    description: 'Optimize your AI prompts for better results across all models',
-    category: 'prompt',
-    price: 0,
-    rating: 4.6,
-    installs: 8900,
-    source_url: 'https://agentpowers.ai/skills/prompt-optimizer',
-    github_url: 'https://github.com/agentpowers/prompt-optimizer',
-    github_stars: 2340,
-    creator: 'AgentPowers',
-    is_premium: false,
-    readme_preview: '# Prompt Optimizer\n\nImprove your prompts...',
-    created_at: new Date('2024-01-20')
-  },
-  {
-    id: uuidv4(),
-    name: 'Data Analyzer',
-    description: 'Advanced data analysis and visualization tool for complex datasets',
-    category: 'gemini-extension',
-    price: 15,
-    rating: 4.7,
-    installs: 2800,
-    source_url: 'https://agentpowers.ai/skills/data-analyzer',
-    github_url: 'https://github.com/agentpowers/data-analyzer',
-    github_stars: 678,
-    creator: 'AgentPowers',
-    is_premium: true,
-    readme_preview: '# Data Analyzer\n\nAnalyze complex data...',
-    created_at: new Date('2024-02-10')
-  },
-  {
-    id: uuidv4(),
-    name: 'API Builder',
-    description: 'Automatically generate REST APIs from your database schema',
-    category: 'mcp-server',
-    price: 0,
-    rating: 4.5,
-    installs: 5600,
-    source_url: 'https://agentpowers.ai/skills/api-builder',
-    github_url: 'https://github.com/agentpowers/api-builder',
-    github_stars: 1890,
-    creator: 'AgentPowers',
-    is_premium: false,
-    readme_preview: '# API Builder\n\nGenerate APIs automatically...',
-    created_at: new Date('2024-01-25')
-  },
-  {
-    id: uuidv4(),
-    name: 'Document Generator',
-    description: 'Create professional documentation from your codebase automatically',
-    category: 'claude-skill',
-    price: 8,
-    rating: 4.4,
-    installs: 3400,
-    source_url: 'https://agentpowers.ai/skills/doc-generator',
-    github_url: 'https://github.com/agentpowers/doc-generator',
-    github_stars: 945,
-    creator: 'AgentPowers',
-    is_premium: true,
-    readme_preview: '# Document Generator\n\nAuto-generate documentation...',
-    created_at: new Date('2024-02-05')
-  }
-];
 
 // Fallback prettifier for skills whose AI-rewritten title_human hasn't landed yet.
 // Cleans hyphens/underscores, fixes obvious all-caps acronyms, title-cases — so
@@ -571,6 +459,7 @@ export async function GET(request) {
           const existingUrls = new Set(local.map(s => s.github_url));
           for (const repo of repos) {
             if (existingUrls.has(repo.html_url)) continue;
+            if (isSpamRepo(repo)) continue;
             const id = uuidv4();
             const slug = await uniqueSlug(database, repo.name, repo.owner?.login);
             const doc = {
@@ -579,9 +468,8 @@ export async function GET(request) {
               name: repo.name,
               description: repo.description || '',
               category: 'ai-agent', // default; reclassify cron will fix
+              content_type: classifyContentType(repo),
               price: 0,
-              rating: Math.min(5, (repo.stargazers_count / 1000) + 3.5),
-              installs: Math.floor(repo.stargazers_count * 2.5),
               source_url: repo.html_url,
               github_url: repo.html_url,
               github_stars: repo.stargazers_count,
@@ -726,15 +614,20 @@ export async function GET(request) {
       // same added_at batch timestamp. "New" here means "active on GitHub recently."
       if (searchParams.get('new') === 'true') {
         const newSkills = await database.collection('skills')
-          .find({ published: { $ne: false }, last_updated: { $exists: true } })
+          .find({ published: { $ne: false }, last_updated: { $exists: true }, ...TOOLS_ONLY })
           .sort({ last_updated: -1, github_stars: -1 })
           .limit(8)
           .toArray();
         return Response.json({ skills: applyFallback(newSkills) });
       }
 
-      // Quality gate: only show published listings (unless ?all=true)
-      let query = searchParams.get('all') === 'true' ? {} : { published: { $ne: false } };
+      // Quality gate: only show published listings (unless ?all=true).
+      // Learning material lives on the /learn shelf (?type=resource), never
+      // in the skills library — mega-list repos were drowning real tools.
+      let query = searchParams.get('all') === 'true' ? {} : { published: { $ne: false }, ...TOOLS_ONLY };
+      if (searchParams.get('type') === 'resource') {
+        query = { published: { $ne: false }, content_type: 'resource' };
+      }
       if (category && category !== 'all') {
         query.category = category;
       }
@@ -913,7 +806,7 @@ export async function GET(request) {
     // Get trending skills (high popularity score, recently updated)
     if (path === '/trending') {
       const skills = await database.collection('skills')
-        .find({ popularity_score: { $exists: true }, published: { $ne: false } })
+        .find({ popularity_score: { $exists: true }, published: { $ne: false }, ...TOOLS_ONLY })
         .sort({ popularity_score: -1, last_updated: -1 })
         .limit(12)
         .toArray();
@@ -930,7 +823,8 @@ export async function GET(request) {
         .find({
           last_updated: { $gte: thirtyDaysAgo },
           github_stars: { $exists: true },
-          published: { $ne: false }
+          published: { $ne: false },
+          ...TOOLS_ONLY
         })
         .sort({ github_stars: -1 })
         .limit(12)
@@ -1059,12 +953,49 @@ export async function GET(request) {
       const subs = await database.collection('subscribers').deleteMany({
         email: 'founder@example.com'
       });
+      // Integrity migration (2026-07-15): strip fabricated metrics. `installs`
+      // and `rating` were synthesized from stars — the site promises real
+      // numbers only. Idempotent: matches 0 docs after the first run.
+      const metrics = await database.collection('skills').updateMany(
+        { $or: [{ installs: { $exists: true } }, { rating: { $exists: true } }] },
+        { $unset: { installs: '', rating: '' } }
+      );
+      // Retro trust-gate pass: apply the same rules the scrapers now enforce
+      // to everything already in the catalog. Spam gets hidden (reversible);
+      // learning mega-repos get reshelved as content_type:'resource' so their
+      // pages stay live but they leave the skills library and recommender.
+      let retroHidden = 0, retroResources = 0, retroTools = 0;
+      const unclassified = await database.collection('skills')
+        .find(
+          { content_type: { $exists: false } },
+          { projection: { _id: 1, name: 1, description: 1, github_topics: 1, github_stars: 1, github_forks: 1 } }
+        )
+        .toArray();
+      for (const doc of unclassified) {
+        const spamReason = isSpamRepo(doc);
+        if (spamReason) {
+          await database.collection('skills').updateOne(
+            { _id: doc._id },
+            { $set: { content_type: 'tool', published: false, hidden: true, hidden_reason: `trust-gate: ${spamReason}` } }
+          );
+          retroHidden++;
+        } else {
+          const type = classifyContentType(doc);
+          await database.collection('skills').updateOne(
+            { _id: doc._id },
+            { $set: { content_type: type } }
+          );
+          if (type === 'resource') retroResources++; else retroTools++;
+        }
+      }
       const remaining = await database.collection('skills').countDocuments();
       return Response.json({
         success: true,
         removedFakeSamples: fakes.deletedCount,
         removedTestUploads: tests.deletedCount,
         removedTestSubscribers: subs.deletedCount,
+        strippedFabricatedMetrics: metrics.modifiedCount,
+        trustGate: { hidden: retroHidden, reshelvedAsResources: retroResources, confirmedTools: retroTools },
         skillsRemaining: remaining
       });
     }
@@ -1095,9 +1026,8 @@ export async function GET(request) {
           name: data.name,
           description: data.description || '',
           category,
+          content_type: classifyContentType(data),
           price: 0,
-          rating: Math.min(5, (data.stargazers_count / 1000) + 3.5),
-          installs: Math.floor(data.stargazers_count * 2.5),
           source_url: ghUrl,
           github_url: data.html_url,
           github_stars: data.stargazers_count,
@@ -1361,7 +1291,7 @@ export async function GET(request) {
       const sort = searchParams.get('sort');
       const sortSpec = sort === 'new' ? { created_at: -1 } : { copyCount: -1, remixCount: -1, created_at: -1 };
       const agents = await database.collection('agent_templates')
-        .find({ isPublic: true })
+        .find({ isPublic: true, pending_review: { $ne: true } })
         .sort(sortSpec)
         .limit(60)
         .toArray();
@@ -2391,6 +2321,7 @@ export async function POST(request) {
     
     // Create Agent Template
     if (path === '/agent-templates') {
+      const rl = rateLimit(request, 5, 60_000); if (rl) return rl;
       const body = await request.json();
       const { goal, selectedSkillIds, isPublic, userId, creatorName, price } = body;
       const agentPrice = Math.max(0, Math.min(999, parseFloat(price) || 0));
@@ -2453,6 +2384,9 @@ export async function POST(request) {
         skills: selectedSkills.map(s => ({ id: s.id, name: s.name, category: s.category })),
         agentBlueprint: agentBlueprint,
         isPublic: isPublic || false,
+        // Public agents wait for approval before appearing on public lists —
+        // unauthenticated creation + instant public display was a spam vector.
+        pending_review: !!isPublic,
         userId: userId || null,
         creatorName: (creatorName || '').toString().replace(/^@/, '').slice(0, 30) || 'anonymous',
         price: agentPrice,
@@ -2487,6 +2421,7 @@ export async function POST(request) {
 
     // React (thumbs-up) a skill — increments reactions_up, returns new count
     if (path.startsWith('/skills/') && path.endsWith('/react')) {
+      const rl = rateLimit(request, 30, 60_000); if (rl) return rl;
       const parts = path.split('/');
       // path is /skills/{id}/react → parts = ['', 'skills', id, 'react']
       const skillId = parts[2];
@@ -2500,6 +2435,57 @@ export async function POST(request) {
       if (!result) return Response.json({ error: 'Skill not found' }, { status: 404 });
 
       return Response.json({ ok: true, reactions_up: result.reactions_up || 1 });
+    }
+
+    // Done-for-you agent build request — the paid offer's intake form.
+    // Every submission is a founder telling us which agent outcomes have
+    // money behind them, so store everything and notify immediately.
+    if (path === '/dfy-request') {
+      const rl = rateLimit(request, 5, 60_000); if (rl) return rl;
+      const body = await request.json().catch(() => ({}));
+      const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 });
+
+      const email = (body.email || '').toString().trim().toLowerCase();
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        return Response.json({ ok: false, error: 'Valid email is required' }, { status: 400 });
+      }
+      const goal = (body.goal || '').toString().trim();
+      if (goal.length < 20) {
+        return Response.json({ ok: false, error: 'Tell us a bit more about what you want automated (20+ characters).' }, { status: 400 });
+      }
+
+      const reqDoc = {
+        id: uuidv4(),
+        name: (body.name || '').toString().trim().slice(0, 100),
+        email,
+        goal: goal.slice(0, 2000),
+        tools: (body.tools || '').toString().trim().slice(0, 500),
+        budget: (body.budget || '').toString().trim().slice(0, 50),
+        source_goal: (body.source_goal || '').toString().trim().slice(0, 600), // recommender goal that led here, if any
+        status: 'new',
+        created_at: new Date(),
+      };
+      await database.collection('dfy_requests').insertOne(reqDoc);
+
+      // Notify — best-effort, never blocks the response
+      if (process.env.RESEND_API_KEY) {
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'WorkflowStacks <hello@workflowstacks.com>',
+              to: ['rahul@workflowstacks.com'],
+              subject: `💰 New done-for-you request: ${reqDoc.goal.slice(0, 60)}`,
+              text: `Name: ${reqDoc.name || '—'}\nEmail: ${reqDoc.email}\nBudget: ${reqDoc.budget || '—'}\nTools: ${reqDoc.tools || '—'}\n\nGoal:\n${reqDoc.goal}\n\nRecommender goal: ${reqDoc.source_goal || '—'}`,
+            }),
+          });
+        } catch (e) {
+          console.error('DFY notify failed:', e.message);
+        }
+      }
+
+      return Response.json({ ok: true });
     }
 
     // Creator application — anyone can apply to list their tools

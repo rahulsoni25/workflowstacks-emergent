@@ -10,6 +10,8 @@
 // not just keyword overlap. Quality vs the regex-only recommender is huge.
 
 import { MongoClient } from 'mongodb'
+import { TOOLS_ONLY } from '../../../lib/catalog-gates'
+import { rateLimit } from '../../../lib/rate-limit'
 
 const client = new MongoClient(process.env.MONGO_URL)
 let db
@@ -67,7 +69,7 @@ async function preFilterCandidates(database, goal, max = 60) {
     category: 1, github_stars: 1, github_topics: 1, explainer: 1,
   }
   const docs = await database.collection('skills')
-    .find({ $or: ors, hidden: { $ne: true }, published: { $ne: false } }, { projection })
+    .find({ $or: ors, hidden: { $ne: true }, published: { $ne: false }, ...TOOLS_ONLY }, { projection })
     .limit(max * 2).toArray()
   // Score by token-hit count + log-stars tiebreaker, take top `max`
   function score(s) {
@@ -176,6 +178,10 @@ Order by rank: 1 = most essential. Maximum 7 picks.`
 // ---- Route handler ----
 
 export async function POST(request) {
+  // Public endpoint that triggers a paid/quota'd LLM call — abuse smoothing
+  // so one script can't drain the Groq quota and break it for real visitors.
+  const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
+
   let body = {}
   try { body = await request.json() } catch {}
   const goal = (body.goal || '').toString().trim()

@@ -2,9 +2,9 @@ const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergen
 
 // Static, indexable routes
 const STATIC_ROUTES = [
-  '', '/skills', '/discover', '/problems', '/deals', '/partner', '/members', '/join', '/community', '/packs', '/playbooks', '/personas', '/builder', '/upload',
+  '', '/skills', '/discover', '/problems', '/deals', '/partner', '/members', '/join', '/community', '/packs', '/playbooks', '/personas', '/builder', '/upload', '/build-for-me',
   '/learn', '/learn/how-it-works', '/learn/agents', '/learn/skills',
-  '/learn/mcp', '/learn/creators', '/learn/security',
+  '/learn/mcp', '/learn/creators', '/learn/security', '/learn/resources',
   '/about', '/docs', '/help', '/enterprise', '/founder-launch',
   '/privacy', '/terms',
   '/submit',
@@ -21,19 +21,24 @@ export default async function sitemap() {
     priority: path === '' ? 1 : path === '/skills' ? 0.9 : 0.6,
   }))
 
-  // Dynamic per-skill detail pages (published only)
+  // Dynamic per-skill detail pages (published only). Tools and learning
+  // resources are fetched separately — /api/skills now returns tools only,
+  // but resource pages stay live and must stay indexed.
   let skillEntries = []
   try {
-    const res = await fetch(`${BASE}/api/skills`, { next: { revalidate: 86400 } })
-    if (res.ok) {
-      const data = await res.json()
-      skillEntries = (data.skills || []).map((s) => ({
-        url: `${BASE}/skills/${s.slug || s.id}`,
-        lastModified: s.last_updated ? new Date(s.last_updated) : now,
-        changeFrequency: 'weekly',
-        priority: 0.7,
-      }))
-    }
+    const [toolsRes, resourcesRes] = await Promise.all([
+      fetch(`${BASE}/api/skills`, { next: { revalidate: 86400 } }),
+      fetch(`${BASE}/api/skills?type=resource`, { next: { revalidate: 86400 } }),
+    ])
+    const docs = []
+    if (toolsRes.ok) docs.push(...((await toolsRes.json()).skills || []))
+    if (resourcesRes.ok) docs.push(...((await resourcesRes.json()).skills || []))
+    skillEntries = docs.map((s) => ({
+      url: `${BASE}/skills/${s.slug || s.id}`,
+      lastModified: s.last_updated ? new Date(s.last_updated) : now,
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    }))
   } catch (e) {
     // Sitemap still valid with just static routes if the API is unreachable
   }

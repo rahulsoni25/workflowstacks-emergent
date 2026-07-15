@@ -698,6 +698,19 @@ export default function BuilderPage() {
                           </span>
                           <span>Refine with search below, or browse the full catalog →</span>
                         </div>
+                        {/* Done-for-you bridge: the recommender shows WHAT to build;
+                            this is the escape hatch for people who don't want to build it */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#C6F24E]/5 border border-[#C6F24E]/25 rounded-md">
+                          <span className="text-xs text-slate-300">
+                            Don't want to set this up yourself? <span className="text-white font-semibold">We'll build this exact stack for you, working in your tools, within 7 days.</span>
+                          </span>
+                          <Link
+                            href={`/build-for-me?goal=${encodeURIComponent(goal || '')}`}
+                            className="text-xs font-semibold text-[#C6F24E] hover:text-[#A6D62E] whitespace-nowrap"
+                          >
+                            Get it built →
+                          </Link>
+                        </div>
                       </div>
                     )}
                   </div>

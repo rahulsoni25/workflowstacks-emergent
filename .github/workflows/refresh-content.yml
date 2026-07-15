@@ -60,6 +60,12 @@ jobs:
             "$BASE_URL/api/dedupe" | tee /tmp/dedupe.json
           echo
 
+      - name: Cleanup — strip legacy fabricated metrics, purge test data
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/cleanup" | tee /tmp/cleanup.json
+          echo
+
       - name: Auto-discover from trending searches
         run: |
           curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \

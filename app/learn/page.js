@@ -15,6 +15,7 @@ const TOPICS = [
   { href: '/learn/skills', icon: Layers, title: 'Understanding Skills', desc: 'What a skill is, where they come from, and how to use them.' },
   { href: '/learn/mcp', icon: BookOpen, title: 'MCP Servers', desc: 'Connect AI to real tools and data via the Model Context Protocol.' },
   { href: '/learn/creators', icon: Users, title: 'For Creators', desc: 'Publish your own skills and reach founders building with AI.' },
+  { href: '/learn/resources', icon: BookOpen, title: 'Learning Resources', desc: 'The most-starred curated lists, courses, and books on GitHub.' },
   { href: '/learn/security', icon: Shield, title: 'Security & Trust', desc: 'How we source skills and keep the marketplace safe.' },
 ]
 

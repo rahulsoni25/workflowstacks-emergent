@@ -1,5 +1,6 @@
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
+import { isSpamRepo, classifyContentType } from '../../../../lib/catalog-gates';
 
 const client = new MongoClient(process.env.MONGO_URL);
 let db;
@@ -49,6 +50,9 @@ async function scrapeGitHub(topicQueries, opts = {}) {
         if (seenRepos.has(repo.full_name) || repo.archived) continue;
         seenRepos.add(repo.full_name);
 
+        // Trust gate: never list fork-farms or account-automation spam
+        if (isSpamRepo(repo)) continue;
+
         let readmePreview = repo.description || '';
         if (fetchReadmes) {
           try {
@@ -68,16 +72,14 @@ async function scrapeGitHub(topicQueries, opts = {}) {
         const starScore = Math.min(50, (repo.stargazers_count / 1000) * 10);
         const forkScore = Math.min(20, (repo.forks_count / 100) * 10);
         const popularityScore = starScore + forkScore + recencyBonus;
-        const rating = Math.min(5, (repo.stargazers_count / 1000) + 3.5 + (recencyBonus / 10));
-        
+
         const skill = {
           id: uuidv4(),
           name: repo.name,
           description: repo.description || 'No description available',
           category: category,
+          content_type: classifyContentType(repo),
           price: 0,
-          rating: parseFloat(rating.toFixed(1)),
-          installs: Math.floor(repo.stargazers_count * 2.5 + repo.forks_count * 10),
           source_url: repo.html_url,
           github_url: repo.html_url,
           github_stars: repo.stargazers_count,
