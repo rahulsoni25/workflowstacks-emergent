@@ -31,7 +31,7 @@ export default function BuildForMeClient() {
       const res = await fetch('/api/dfy-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, source_goal: params.get('goal') || '' }),
+        body: JSON.stringify({ ...form, source: 'build-for-me', source_goal: params.get('goal') || '' }),
       })
       const data = await res.json()
       if (!res.ok || !data.ok) throw new Error(data.error || 'Something went wrong — try again.')

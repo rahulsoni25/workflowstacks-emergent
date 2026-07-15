@@ -2152,22 +2152,41 @@ export async function POST(request) {
       const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
       const body = await request.json().catch(() => ({}));
       const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 });
-      const { email, name, agent_goal, skill_ids, preferred_contact_time, tier } = body;
+      const { email, name, agent_goal, goal, tools, budget, source_goal, skill_ids, preferred_contact_time, tier, source } = body;
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return Response.json({ error: 'Valid email required' }, { status: 400 });
+      const goalText = ((agent_goal || goal) || '').toString().trim();
       const doc = {
         id: uuidv4(),
         email: email.toLowerCase().trim(),
         name: (name || '').trim().slice(0, 100),
-        agent_goal: (agent_goal || '').slice(0, 1000),
+        agent_goal: goalText.slice(0, 2000),
+        tools: (tools || '').toString().trim().slice(0, 500),
+        budget: (budget || '').toString().trim().slice(0, 50),
+        source_goal: (source_goal || '').toString().trim().slice(0, 600), // recommender goal that led here, if any
         skill_ids: Array.isArray(skill_ids) ? skill_ids.slice(0, 30) : [],
         preferred_contact_time: (preferred_contact_time || '').slice(0, 200),
         tier: ['starter', 'pro', 'agency'].includes(tier) ? tier : 'starter',
-        source: 'builder',
+        source: source === 'build-for-me' ? 'build-for-me' : 'builder',
         status: 'new',
         paid: false,
         created_at: new Date(),
       };
       await database.collection('dfy_requests').insertOne(doc);
+      // Notify the owner — every request is revenue signal; never blocks the response
+      if (process.env.RESEND_API_KEY) {
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'WorkflowStacks <hello@workflowstacks.com>',
+              to: ['rahul@workflowstacks.com'],
+              subject: `💰 New done-for-you request: ${(goalText || '(no goal)').slice(0, 60)}`,
+              text: `Name: ${doc.name || '—'}\nEmail: ${doc.email}\nBudget: ${doc.budget || '—'}\nTools: ${doc.tools || '—'}\nSource: ${doc.source}\n\nGoal:\n${goalText || '—'}\n\nRecommender goal: ${doc.source_goal || '—'}`,
+            }),
+          });
+        } catch {}
+      }
       // Best-effort confirmation email via Resend (silent fail if no key)
       if (process.env.RESEND_API_KEY) {
         try {
@@ -2178,7 +2197,7 @@ export async function POST(request) {
               from: 'WorkflowStacks <hello@workflowstacks.com>',
               to: [email],
               subject: 'Done-for-You request received — we’ll confirm scope within 24h',
-              html: `<div style="font-family:system-ui;max-width:560px;margin:0 auto;padding:24px;background:#0A0C0D;color:#ECEFEA"><h2 style="color:#C6F24E">Got it.</h2><p>Thanks for the Done-for-You request. We’ll review your agent goal and reply within 24h with a scoped plan and a one-time Stripe checkout link.</p><p style="color:#8B928D;font-size:14px">Your goal: <em>${(agent_goal || '(none)').slice(0, 200)}</em></p><p style="color:#8B928D;font-size:14px">— WorkflowStacks</p></div>`,
+              html: `<div style="font-family:system-ui;max-width:560px;margin:0 auto;padding:24px;background:#0A0C0D;color:#ECEFEA"><h2 style="color:#C6F24E">Got it.</h2><p>Thanks for the Done-for-You request. We’ll review your agent goal and reply within 24h with a scoped plan and a one-time Stripe checkout link.</p><p style="color:#8B928D;font-size:14px">Your goal: <em>${(goalText || '(none)').slice(0, 200)}</em></p><p style="color:#8B928D;font-size:14px">— WorkflowStacks</p></div>`,
             }),
           });
         } catch {}
@@ -2435,57 +2454,6 @@ export async function POST(request) {
       if (!result) return Response.json({ error: 'Skill not found' }, { status: 404 });
 
       return Response.json({ ok: true, reactions_up: result.reactions_up || 1 });
-    }
-
-    // Done-for-you agent build request — the paid offer's intake form.
-    // Every submission is a founder telling us which agent outcomes have
-    // money behind them, so store everything and notify immediately.
-    if (path === '/dfy-request') {
-      const rl = rateLimit(request, 5, 60_000); if (rl) return rl;
-      const body = await request.json().catch(() => ({}));
-      const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 });
-
-      const email = (body.email || '').toString().trim().toLowerCase();
-      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-        return Response.json({ ok: false, error: 'Valid email is required' }, { status: 400 });
-      }
-      const goal = (body.goal || '').toString().trim();
-      if (goal.length < 20) {
-        return Response.json({ ok: false, error: 'Tell us a bit more about what you want automated (20+ characters).' }, { status: 400 });
-      }
-
-      const reqDoc = {
-        id: uuidv4(),
-        name: (body.name || '').toString().trim().slice(0, 100),
-        email,
-        goal: goal.slice(0, 2000),
-        tools: (body.tools || '').toString().trim().slice(0, 500),
-        budget: (body.budget || '').toString().trim().slice(0, 50),
-        source_goal: (body.source_goal || '').toString().trim().slice(0, 600), // recommender goal that led here, if any
-        status: 'new',
-        created_at: new Date(),
-      };
-      await database.collection('dfy_requests').insertOne(reqDoc);
-
-      // Notify — best-effort, never blocks the response
-      if (process.env.RESEND_API_KEY) {
-        try {
-          await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              from: 'WorkflowStacks <hello@workflowstacks.com>',
-              to: ['rahul@workflowstacks.com'],
-              subject: `💰 New done-for-you request: ${reqDoc.goal.slice(0, 60)}`,
-              text: `Name: ${reqDoc.name || '—'}\nEmail: ${reqDoc.email}\nBudget: ${reqDoc.budget || '—'}\nTools: ${reqDoc.tools || '—'}\n\nGoal:\n${reqDoc.goal}\n\nRecommender goal: ${reqDoc.source_goal || '—'}`,
-            }),
-          });
-        } catch (e) {
-          console.error('DFY notify failed:', e.message);
-        }
-      }
-
-      return Response.json({ ok: true });
     }
 
     // Creator application — anyone can apply to list their tools
