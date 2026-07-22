@@ -1,0 +1,93 @@
+{
+  "name": "Inbox Reply Triage — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📥 Inbox Reply Triage\n\n**What it does:** watches your inbox and, for every new email, classifies it — Hot lead / Needs reply / FYI / Ignore — with a one-line reason and a suggested reply. It logs each to a `Triage` sheet so you open your day to a ranked list instead of an undifferentiated pile. Nothing is auto-sent.\n\n### Setup (≈6 minutes)\n1. **New email** node → connect your Gmail account. (It triggers on incoming mail.)\n2. **Classify (AI)** → add your OpenAI API key.\n3. Make a Google Sheet with a tab `Triage` (headers: From, Subject, Priority, Why, Suggested Reply, At). Open **Log to Triage** → connect Google → pick it.\n4. Activate the workflow (toggle top-right) so it runs on new mail.\n\n💡 Sort the `Triage` sheet by Priority to work top-down. Edit the categories in the prompt to fit your world.\n💡 Not on Gmail? Swap the trigger + log for Outlook/IMAP — the AI step stays the same.\n\n— Free template from workflowstacks.com",
+        "height": 640,
+        "width": 460,
+        "color": 5
+      },
+      "id": "bb020001-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -200]
+    },
+    {
+      "parameters": {
+        "pollTimes": { "item": [{ "mode": "everyMinute" }] },
+        "simple": true,
+        "filters": {},
+        "options": {}
+      },
+      "id": "bb020001-0002-4000-8000-000000000002",
+      "name": "New email",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [480, 60]
+    },
+    {
+      "parameters": {
+        "modelId": { "__rl": true, "mode": "list", "value": "gpt-4o-mini", "cachedResultName": "gpt-4o-mini" },
+        "messages": {
+          "values": [
+            {
+              "content": "=You triage a founder's incoming email. Return STRICT JSON only.\n\nFrom: {{ $json.from?.value?.[0]?.address || $json.from || 'unknown' }}\nSubject: {{ $json.subject }}\nBody: {{ ($json.snippet || $json.text || '').toString().slice(0, 1200) }}\n\nReturn:\n{\n  \"priority\": \"Hot lead\" | \"Needs reply\" | \"FYI\" | \"Ignore\",\n  \"why\": \"under 12 words - what this email actually is and why that priority\",\n  \"suggested_reply\": \"if priority is Hot lead or Needs reply, a 2-3 sentence draft reply the founder can edit and send. Otherwise empty string.\"\n}\n\nRules: 'Hot lead' = a real buying/partnership signal. 'Needs reply' = a real person expecting a response. 'FYI' = notifications/receipts worth seeing. 'Ignore' = cold sales spam, newsletters, automated noise. Return ONLY the JSON.",
+              "role": "user"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "bb020001-0003-4000-8000-000000000003",
+      "name": "Classify (AI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [760, 60]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "t-from", "name": "From", "value": "={{ $('New email').item.json.from?.value?.[0]?.address || $('New email').item.json.from || '' }}", "type": "string" },
+            { "id": "t-subject", "name": "Subject", "value": "={{ $('New email').item.json.subject }}", "type": "string" },
+            { "id": "t-prio", "name": "Priority", "value": "={{ $json.message.content.priority }}", "type": "string" },
+            { "id": "t-why", "name": "Why", "value": "={{ $json.message.content.why }}", "type": "string" },
+            { "id": "t-reply", "name": "Suggested Reply", "value": "={{ $json.message.content.suggested_reply }}", "type": "string" },
+            { "id": "t-at", "name": "At", "value": "={{ $now.format('yyyy-MM-dd HH:mm') }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bb020001-0004-4000-8000-000000000004",
+      "name": "Shape the row",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1040, 60]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "list", "value": "" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "" },
+        "columns": { "mappingMode": "autoMapInputData", "value": {}, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "bb020001-0005-4000-8000-000000000005",
+      "name": "Log to Triage",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1280, 60]
+    }
+  ],
+  "connections": {
+    "New email": { "main": [[{ "node": "Classify (AI)", "type": "main", "index": 0 }]] },
+    "Classify (AI)": { "main": [[{ "node": "Shape the row", "type": "main", "index": 0 }]] },
+    "Shape the row": { "main": [[{ "node": "Log to Triage", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false }
+}

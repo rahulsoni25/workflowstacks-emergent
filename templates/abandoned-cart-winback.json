@@ -1,0 +1,117 @@
+{
+  "name": "Abandoned Cart Win-Back — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🛒 Abandoned Cart Win-Back\n\n**What it does:** reads your abandoned carts from a spreadsheet and drafts a personalized, non-pushy win-back email for each — referencing the exact product they left behind. Drafts land in a `Win-Back Drafts` tab for your approval; nothing sends automatically.\n\n### Setup (≈5 minutes)\n1. Google Sheet, tab `Abandoned`, headers: **Customer Name**, **Email**, **Product**, **Cart Value**, **Draft** (leave empty). Export abandoned carts here from Shopify, Woo, or wherever.\n2. Add an empty tab named `Win-Back Drafts`.\n3. **Get abandoned carts** → connect Google → pick your spreadsheet + `Abandoned`.\n4. **Write win-back (AI)** → add your OpenAI API key.\n5. **Save drafts** → same spreadsheet + `Win-Back Drafts` tab.\n6. Execute. Review the drafts, then send from your email tool.\n\n💡 Keep it to one gentle nudge — the prompt avoids desperate discount-spam. Edit the tone to match your brand.\n\n— Free template from workflowstacks.com",
+        "height": 640,
+        "width": 460,
+        "color": 4
+      },
+      "id": "cc030001-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -200]
+    },
+    {
+      "parameters": {},
+      "id": "cc030001-0002-4000-8000-000000000002",
+      "name": "When clicking Execute",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [480, 60]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "mode": "list", "value": "" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "" },
+        "options": {}
+      },
+      "id": "cc030001-0003-4000-8000-000000000003",
+      "name": "Get abandoned carts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [700, 60]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            { "id": "c-draft-empty", "leftValue": "={{ $json.Draft }}", "rightValue": "", "operator": { "type": "string", "operation": "empty", "singleValue": true } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cc030001-0004-4000-8000-000000000004",
+      "name": "Only carts without a draft",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [920, 60]
+    },
+    {
+      "parameters": {
+        "modelId": { "__rl": true, "mode": "list", "value": "gpt-4o-mini", "cachedResultName": "gpt-4o-mini" },
+        "messages": {
+          "values": [
+            {
+              "content": "=You write a win-back email for a customer who left items in their cart. Sound like a helpful human from a small brand, not a discount machine.\n\nCustomer: {{ $json['Customer Name'] }}\nProduct left behind: {{ $json.Product }}\nCart value: {{ $json['Cart Value'] }}\n\nWrite the email body only (no subject line):\n- 3-4 short sentences. Address them by first name.\n- Reference the specific product warmly, not desperately.\n- One gentle reason to come back (in stock, easy checkout, here to help with questions) - do NOT invent a discount unless none is mentioned; if you offer nothing, that's fine.\n- End with a light, low-pressure close.\n- No 'HURRY', no fake scarcity, no exclamation pileups, no emojis.\n\nReturn ONLY the email body text.",
+              "role": "user"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cc030001-0005-4000-8000-000000000005",
+      "name": "Write win-back (AI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1160, 40]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "w-name", "name": "Customer Name", "value": "={{ $('Only carts without a draft').item.json['Customer Name'] }}", "type": "string" },
+            { "id": "w-email", "name": "Email", "value": "={{ $('Only carts without a draft').item.json.Email }}", "type": "string" },
+            { "id": "w-product", "name": "Product", "value": "={{ $('Only carts without a draft').item.json.Product }}", "type": "string" },
+            { "id": "w-draft", "name": "Draft", "value": "={{ $json.message.content }}", "type": "string" },
+            { "id": "w-at", "name": "Drafted At", "value": "={{ $now.format('yyyy-MM-dd HH:mm') }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cc030001-0006-4000-8000-000000000006",
+      "name": "Shape the draft",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1400, 40]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "list", "value": "" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "" },
+        "columns": { "mappingMode": "autoMapInputData", "value": {}, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "cc030001-0007-4000-8000-000000000007",
+      "name": "Save drafts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1620, 40]
+    }
+  ],
+  "connections": {
+    "When clicking Execute": { "main": [[{ "node": "Get abandoned carts", "type": "main", "index": 0 }]] },
+    "Get abandoned carts": { "main": [[{ "node": "Only carts without a draft", "type": "main", "index": 0 }]] },
+    "Only carts without a draft": { "main": [[{ "node": "Write win-back (AI)", "type": "main", "index": 0 }]] },
+    "Write win-back (AI)": { "main": [[{ "node": "Shape the draft", "type": "main", "index": 0 }]] },
+    "Shape the draft": { "main": [[{ "node": "Save drafts", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false }
+}

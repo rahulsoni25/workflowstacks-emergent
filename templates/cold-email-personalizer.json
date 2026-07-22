@@ -1,0 +1,118 @@
+{
+  "name": "Cold Email Personalizer — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ✉️ Cold Email Personalizer\n\n**What it does:** takes a spreadsheet of prospects and writes a genuinely specific, one-line personalized opener for each — plus a 1-5 specificity score so you can spot the weak ones. Generic \"I loved your work\" openers get low scores; real, researched lines get high ones.\n\n### Setup (≈5 minutes)\n1. Google Sheet, tab `Prospects`, headers: **Name**, **Company**, **Role**, **Context** (something real you know about them / their company), **Opener** (leave empty).\n2. Add an empty tab named `Personalized`.\n3. **Get prospects** → connect Google → pick your spreadsheet + `Prospects`.\n4. **Write opener (AI)** → add your OpenAI API key.\n5. **Save personalized** → same spreadsheet + `Personalized` tab.\n6. Execute. Each prospect gets a tailored opener + a specificity score you can trust.\n\n💡 The better the `Context` you paste in, the sharper the opener. Garbage in, generic out.\n\n— Free template from workflowstacks.com",
+        "height": 640,
+        "width": 460,
+        "color": 3
+      },
+      "id": "aa010001-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -200]
+    },
+    {
+      "parameters": {},
+      "id": "aa010001-0002-4000-8000-000000000002",
+      "name": "When clicking Execute",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [480, 60]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "mode": "list", "value": "" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "" },
+        "options": {}
+      },
+      "id": "aa010001-0003-4000-8000-000000000003",
+      "name": "Get prospects",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [700, 60]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            { "id": "c-open-empty", "leftValue": "={{ $json.Opener }}", "rightValue": "", "operator": { "type": "string", "operation": "empty", "singleValue": true } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "aa010001-0004-4000-8000-000000000004",
+      "name": "Only prospects without an opener",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [920, 60]
+    },
+    {
+      "parameters": {
+        "modelId": { "__rl": true, "mode": "list", "value": "gpt-4o-mini", "cachedResultName": "gpt-4o-mini" },
+        "messages": {
+          "values": [
+            {
+              "content": "=You write the opening line of a cold email. Return STRICT JSON only.\n\nProspect:\nName: {{ $json.Name }}\nCompany: {{ $json.Company }}\nRole: {{ $json.Role }}\nContext I know: {{ $json.Context }}\n\nReturn:\n{\n  \"opener\": \"ONE sentence, under 25 words, that references the specific Context in a natural way. No flattery clichés ('love your work', 'big fan'), no 'I hope this finds you well', no mention of your own product. It should be impossible to send to anyone else.\",\n  \"specificity\": 1-5 integer (5 = references a concrete, specific detail only this prospect would recognize; 1 = generic and could go to anyone),\n  \"why\": \"6-12 words on what makes it land or fall flat\"\n}\n\nIf Context is empty or vague, write the best opener you can and score it honestly low. Return ONLY the JSON.",
+              "role": "user"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "aa010001-0005-4000-8000-000000000005",
+      "name": "Write opener (AI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1160, 40]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "s-name", "name": "Name", "value": "={{ $('Only prospects without an opener').item.json.Name }}", "type": "string" },
+            { "id": "s-company", "name": "Company", "value": "={{ $('Only prospects without an opener').item.json.Company }}", "type": "string" },
+            { "id": "s-opener", "name": "Opener", "value": "={{ $json.message.content.opener }}", "type": "string" },
+            { "id": "s-score", "name": "Specificity", "value": "={{ $json.message.content.specificity }}", "type": "number" },
+            { "id": "s-why", "name": "Why", "value": "={{ $json.message.content.why }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "aa010001-0006-4000-8000-000000000006",
+      "name": "Shape the result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1400, 40]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "list", "value": "" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "" },
+        "columns": { "mappingMode": "autoMapInputData", "value": {}, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "aa010001-0007-4000-8000-000000000007",
+      "name": "Save personalized",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1620, 40]
+    }
+  ],
+  "connections": {
+    "When clicking Execute": { "main": [[{ "node": "Get prospects", "type": "main", "index": 0 }]] },
+    "Get prospects": { "main": [[{ "node": "Only prospects without an opener", "type": "main", "index": 0 }]] },
+    "Only prospects without an opener": { "main": [[{ "node": "Write opener (AI)", "type": "main", "index": 0 }]] },
+    "Write opener (AI)": { "main": [[{ "node": "Shape the result", "type": "main", "index": 0 }]] },
+    "Shape the result": { "main": [[{ "node": "Save personalized", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false }
+}

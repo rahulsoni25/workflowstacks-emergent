@@ -11,7 +11,7 @@ export const metadata = {
   alternates: { canonical: '/templates' },
 }
 
-const PERSONA_LABEL = { ecommerce: '🛍️ Ecommerce', agency: '📈 Agency', founder: '🚀 Founder' }
+const PERSONA_LABEL = { ecommerce: '🛍️ Ecommerce', agency: '📈 Agency', founder: '🚀 Founder', sales: '📣 Sales' }
 
 export default function TemplatesIndexPage() {
   const templates = Object.values(TEMPLATES)
