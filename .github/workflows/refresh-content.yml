@@ -60,6 +60,12 @@ jobs:
             "$BASE_URL/api/dedupe" | tee /tmp/dedupe.json
           echo
 
+      - name: Extract MCP configs from repos (small batch)
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/enrich-mcp-configs?limit=10" | tee /tmp/mcp.json
+          echo
+
       - name: Cleanup — strip legacy fabricated metrics, purge test data
         run: |
           curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \

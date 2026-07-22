@@ -1,6 +1,7 @@
 import { TEMPLATES } from '../lib/templates'
 import { BUNDLES } from '../lib/bundles'
 import { OUTCOMES } from '../lib/outcomes'
+import { MCP_SERVERS } from '../lib/mcp-servers'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 
@@ -11,6 +12,8 @@ const STATIC_ROUTES = [
   ...Object.keys(TEMPLATES).map((slug) => `/templates/${slug}`),
   ...Object.keys(BUNDLES).map((slug) => `/bundles/${slug}`),
   ...Object.keys(OUTCOMES).map((slug) => `/automate/${slug}`),
+  '/mcp',
+  ...Object.keys(MCP_SERVERS).map((slug) => `/mcp/${slug}`),
   '/learn', '/learn/how-it-works', '/learn/agents', '/learn/skills',
   '/learn/mcp', '/learn/creators', '/learn/security', '/learn/resources',
   '/about', '/docs', '/help', '/enterprise', '/founder-launch',

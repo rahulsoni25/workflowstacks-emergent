@@ -72,7 +72,14 @@ export default function TemplatesIndexPage() {
           </CardContent>
         </Card>
 
-        <p className="text-sm text-slate-500 text-center mt-12">
+        <p className="text-sm text-slate-400 text-center mt-10">
+          Using Claude Desktop?{' '}
+          <Link href="/mcp" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">
+            Add tools to Claude with copy-paste MCP configs →
+          </Link>
+        </p>
+
+        <p className="text-sm text-slate-500 text-center mt-4">
           Need something these don't cover?{' '}
           <Link href="/build-for-me" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">
             We'll build your agent for you — from $500.
