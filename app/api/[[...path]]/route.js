@@ -2286,9 +2286,17 @@ export async function POST(request) {
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
         return Response.json({ success: false, error: 'Invalid email' }, { status: 400 });
       }
+      // Optional attribution — where the signup came from (e.g. a template
+      // download). Whitelisted + length-capped; never trust raw source strings.
+      const source = ['newsletter', 'template-download'].includes(body.source) ? body.source : 'newsletter';
+      const template = (body.template || '').toString().trim().slice(0, 60);
       await database.collection('subscribers').updateOne(
         { email },
-        { $setOnInsert: { email, created_at: new Date() } },
+        {
+          $setOnInsert: { email, created_at: new Date(), source },
+          ...(template ? { $addToSet: { templates_downloaded: template } } : {}),
+          $set: { last_seen_at: new Date() },
+        },
         { upsert: true }
       );
       return Response.json({ success: true });
