@@ -1,4 +1,5 @@
 import { TEMPLATES } from '../lib/templates'
+import { BUNDLES } from '../lib/bundles'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 
@@ -7,6 +8,7 @@ const STATIC_ROUTES = [
   '', '/skills', '/discover', '/problems', '/deals', '/partner', '/members', '/join', '/community', '/packs', '/playbooks', '/personas', '/builder', '/upload', '/build-for-me',
   '/templates',
   ...Object.keys(TEMPLATES).map((slug) => `/templates/${slug}`),
+  ...Object.keys(BUNDLES).map((slug) => `/bundles/${slug}`),
   '/learn', '/learn/how-it-works', '/learn/agents', '/learn/skills',
   '/learn/mcp', '/learn/creators', '/learn/security', '/learn/resources',
   '/about', '/docs', '/help', '/enterprise', '/founder-launch',

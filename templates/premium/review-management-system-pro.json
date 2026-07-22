@@ -1,0 +1,167 @@
+{
+  "name": "Review Management System PRO — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ⭐ Review Management System PRO\n\n**What it does:** a full review pipeline, not just a drafter.\n1. Reads every un-actioned review from your Google Sheet.\n2. Routes by rating:\n   • ⭐⭐⭐ or below → drafts a careful, de-escalating reply AND emails YOU a priority alert so you can step in.\n   • ⭐⭐⭐⭐+ → drafts a warm thank-you reply.\n3. Tags each review's sentiment (positive / neutral / at-risk).\n4. Logs everything — reply + sentiment + timestamp — to a `Handled` tab for your records.\n\nNothing is ever posted automatically. You approve every reply.\n\n### Setup (≈7 minutes)\n1. Google Sheet, tab `Reviews`, headers: **Customer Name**, **Rating**, **Review**, **Reply** (empty).\n2. Add an empty tab named `Handled`.\n3. **Get reviews** → connect Google → pick spreadsheet + `Reviews`.\n4. **Draft reply (AI)** → add your OpenAI API key.\n5. **Priority alert** node → connect Gmail; set YOUR email in the To field.\n6. **Log to Handled** → same spreadsheet + `Handled` tab.\n7. Execute. Negative reviews ping your inbox; all drafts land in `Handled`.\n\n💡 This is the PRO version of the free Review Reply Drafter — it adds routing, owner alerts, sentiment, and logging.\n\n— WorkflowStacks Premium",
+        "height": 720,
+        "width": 480,
+        "color": 1
+      },
+      "id": "f6a7b8c9-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-60, -240]
+    },
+    {
+      "parameters": {},
+      "id": "f6a7b8c9-0002-4000-8000-000000000002",
+      "name": "When clicking Execute",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [480, 120]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "mode": "list", "value": "" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "" },
+        "options": {}
+      },
+      "id": "f6a7b8c9-0003-4000-8000-000000000003",
+      "name": "Get reviews",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [700, 120]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            {
+              "id": "cond-reply-empty",
+              "leftValue": "={{ $json.Reply }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "empty", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f6a7b8c9-0004-4000-8000-000000000004",
+      "name": "Only un-actioned reviews",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [920, 120]
+    },
+    {
+      "parameters": {
+        "modelId": { "__rl": true, "mode": "list", "value": "gpt-4o-mini", "cachedResultName": "gpt-4o-mini" },
+        "messages": {
+          "values": [
+            {
+              "content": "=You handle customer reviews for a small brand. Return STRICT JSON only.\n\nReview:\nCustomer: {{ $json['Customer Name'] }}\nRating: {{ $json.Rating }} / 5\nText: {{ $json.Review }}\n\nReturn exactly:\n{\n  \"sentiment\": \"positive\" | \"neutral\" | \"at-risk\",\n  \"reply\": \"a 2-4 sentence reply addressing the customer by first name. If rating is 3 or below: acknowledge the specific problem, apologize once sincerely, state one concrete fix, invite them to email support - never argue or blame. If 4+: thank them specifically for what they praised. No emojis, no exclamation pileups.\"\n}\n\nReturn ONLY the JSON object.",
+              "role": "user"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "id": "f6a7b8c9-0005-4000-8000-000000000005",
+      "name": "Draft reply (AI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1160, 120]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            { "id": "a-name", "name": "Customer Name", "value": "={{ $('Only un-actioned reviews').item.json['Customer Name'] }}", "type": "string" },
+            { "id": "a-rating", "name": "Rating", "value": "={{ Number($('Only un-actioned reviews').item.json.Rating) }}", "type": "number" },
+            { "id": "a-review", "name": "Original Review", "value": "={{ $('Only un-actioned reviews').item.json.Review }}", "type": "string" },
+            { "id": "a-reply", "name": "Drafted Reply", "value": "={{ $json.message.content.reply }}", "type": "string" },
+            { "id": "a-sent", "name": "Sentiment", "value": "={{ $json.message.content.sentiment }}", "type": "string" },
+            { "id": "a-date", "name": "Handled At", "value": "={{ $now.format('yyyy-MM-dd HH:mm') }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f6a7b8c9-0006-4000-8000-000000000006",
+      "name": "Shape the record",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1400, 120]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            {
+              "id": "cond-low-rating",
+              "leftValue": "={{ $json.Rating }}",
+              "rightValue": 3,
+              "operator": { "type": "number", "operation": "lte", "singleValue": true }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f6a7b8c9-0007-4000-8000-000000000007",
+      "name": "Negative review?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1620, 120]
+    },
+    {
+      "parameters": {
+        "sendTo": "you@example.com",
+        "subject": "=⚠️ Priority: {{ $json.Rating }}★ review from {{ $json['Customer Name'] }}",
+        "emailType": "text",
+        "message": "=A review needs your attention.\n\nCustomer: {{ $json['Customer Name'] }}\nRating: {{ $json.Rating }}/5\nSentiment: {{ $json.Sentiment }}\n\nReview:\n{{ $json['Original Review'] }}\n\nSuggested reply (edit before posting):\n{{ $json['Drafted Reply'] }}\n",
+        "options": {}
+      },
+      "id": "f6a7b8c9-0008-4000-8000-000000000008",
+      "name": "Priority alert",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1860, 20]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "list", "value": "" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "" },
+        "columns": { "mappingMode": "autoMapInputData", "value": {}, "matchingColumns": [], "schema": [] },
+        "options": {}
+      },
+      "id": "f6a7b8c9-0009-4000-8000-000000000009",
+      "name": "Log to Handled",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1860, 220]
+    }
+  ],
+  "connections": {
+    "When clicking Execute": { "main": [[{ "node": "Get reviews", "type": "main", "index": 0 }]] },
+    "Get reviews": { "main": [[{ "node": "Only un-actioned reviews", "type": "main", "index": 0 }]] },
+    "Only un-actioned reviews": { "main": [[{ "node": "Draft reply (AI)", "type": "main", "index": 0 }]] },
+    "Draft reply (AI)": { "main": [[{ "node": "Shape the record", "type": "main", "index": 0 }]] },
+    "Shape the record": { "main": [[{ "node": "Negative review?", "type": "main", "index": 0 }]] },
+    "Negative review?": {
+      "main": [
+        [{ "node": "Priority alert", "type": "main", "index": 0 }],
+        [{ "node": "Log to Handled", "type": "main", "index": 0 }]
+      ]
+    },
+    "Priority alert": { "main": [[{ "node": "Log to Handled", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "meta": { "templateCredsSetupCompleted": false }
+}

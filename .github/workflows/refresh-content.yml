@@ -66,6 +66,17 @@ jobs:
             "$BASE_URL/api/cleanup" | tee /tmp/cleanup.json
           echo
 
+      - name: Weekly digest email (Mondays only)
+        if: github.event_name == 'schedule'
+        run: |
+          if [ "$(date -u +%u)" = "1" ]; then
+            curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/digest/send" | tee /tmp/digest.json
+            echo
+          else
+            echo "Not Monday — skipping digest."
+          fi
+
       - name: Auto-discover from trending searches
         run: |
           curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \

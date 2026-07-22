@@ -59,6 +59,19 @@ export default function TemplatesIndexPage() {
           ))}
         </div>
 
+        <Card className="bg-gradient-to-br from-[#C6F24E]/10 to-transparent border-[#C6F24E]/25 mt-10">
+          <CardContent className="py-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-xs tracking-widest uppercase text-[#C6F24E] font-semibold mb-1">Premium · one-time</p>
+              <h2 className="text-white font-bold text-lg">Ecommerce Pro Pack — $29</h2>
+              <p className="text-slate-400 text-sm mt-1 max-w-md">A full review-management system: routes negative reviews to a priority alert, tags sentiment, logs everything. The PRO upgrade to the free drafter.</p>
+            </div>
+            <Link href="/bundles/ecommerce-pro-pack">
+              <Button className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold">See what's inside</Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         <p className="text-sm text-slate-500 text-center mt-12">
           Need something these don't cover?{' '}
           <Link href="/build-for-me" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">

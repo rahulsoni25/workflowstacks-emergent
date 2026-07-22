@@ -1,4 +1,5 @@
 import { getStripe, SITE_URL, PLATFORM_FEE_PCT } from '@/lib/stripe'
+import { getBundle } from '@/lib/bundles'
 import { getDb } from '@/lib/mongo'
 
 export const runtime = 'nodejs'
@@ -10,6 +11,33 @@ export async function POST(request) {
 
   const body = await request.json().catch(() => ({}))
   const db = await getDb()
+
+  // --- Premium bundle: one-time purchase, WorkflowStacks is the seller ---
+  if (body.bundleId) {
+    const bundle = getBundle(body.bundleId)
+    if (!bundle) return Response.json({ error: 'Bundle not found' }, { status: 400 })
+    try {
+      const session = await stripe.checkout.sessions.create({
+        mode: 'payment',
+        line_items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: { name: bundle.title, description: bundle.tagline },
+            unit_amount: Math.round(Number(bundle.price_usd) * 100),
+          },
+          quantity: 1,
+        }],
+        // Collect the buyer's email so the webhook can deliver the download link
+        customer_creation: 'always',
+        success_url: `${SITE_URL}/bundles/${bundle.slug}?purchased=1&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${SITE_URL}/bundles/${bundle.slug}`,
+        metadata: { bundleId: bundle.slug, type: 'bundle' },
+      })
+      return Response.json({ url: session.url })
+    } catch (e) {
+      return Response.json({ error: e.message }, { status: 500 })
+    }
+  }
 
   // --- Group-buy deal: lock a seat (charged now, refundable if it doesn't fill) ---
   if (body.dealId) {

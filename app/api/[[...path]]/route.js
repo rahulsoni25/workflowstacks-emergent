@@ -2,6 +2,7 @@ import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalog-gates';
 import { rateLimit } from '../../../lib/rate-limit';
+import { TEMPLATES } from '../../../lib/templates';
 
 const client = new MongoClient(process.env.MONGO_URL);
 let db;
@@ -1631,6 +1632,8 @@ export async function GET(request) {
 
     // Admin: send skill-of-the-day newsletter via Resend
     if (path === '/newsletter/send') {
+      const denied = requireAdmin(request);
+      if (denied) return denied;
       const subscribers = await database.collection('subscribers').find({}).toArray();
       if (subscribers.length === 0) {
         return Response.json({ ok: false, message: 'No subscribers yet.' });
@@ -1721,6 +1724,84 @@ export async function GET(request) {
       });
 
       return Response.json({ ok: true, sent: sentCount, skill: skill.name });
+    }
+
+    // Admin: weekly digest — email the whole list the newest working templates
+    // + a few notable fresh tools. Turns one-time downloaders into repeat
+    // visitors. Called by the weekly GitHub Action (passes x-admin-secret).
+    if (path === '/digest/send') {
+      const denied = requireAdmin(request);
+      if (denied) return denied;
+      if (!process.env.RESEND_API_KEY) {
+        return Response.json({ ok: false, error: 'RESEND_API_KEY not set' }, { status: 500 });
+      }
+      const subscribers = await database.collection('subscribers').find({}).toArray();
+      if (subscribers.length === 0) return Response.json({ ok: false, message: 'No subscribers yet.' });
+
+      const templates = Object.values(TEMPLATES).slice(0, 5);
+      const freshTools = await database.collection('skills')
+        .find({ published: { $ne: false }, ...TOOLS_ONLY, github_stars: { $exists: true } })
+        .sort({ added_at: -1, github_stars: -1 })
+        .limit(4)
+        .toArray();
+
+      const tplRows = templates.map((t) => `
+        <tr><td style="padding:10px 0;border-bottom:1px solid #262626;">
+          <a href="https://workflowstacks.com/templates/${t.slug}" style="color:#C6F24E;font-weight:600;text-decoration:none;font-size:15px;">${t.title}</a>
+          <div style="color:#a3a3a3;font-size:13px;margin-top:3px;">${t.outcome}</div>
+        </td></tr>`).join('');
+      const toolRows = freshTools.map((s) => `
+        <tr><td style="padding:8px 0;border-bottom:1px solid #262626;">
+          <a href="https://workflowstacks.com/skills/${s.slug || s.id}" style="color:#e5e5e5;font-weight:600;text-decoration:none;font-size:14px;">${s.title_human || s.name}</a>
+          <span style="color:#737373;font-size:12px;"> · ${(s.github_stars || 0).toLocaleString()}★</span>
+        </td></tr>`).join('');
+
+      let sentCount = 0;
+      for (const sub of subscribers) {
+        const unsubUrl = `https://workflowstacks.com/unsubscribe?email=${encodeURIComponent(sub.email)}`;
+        const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WorkflowStacks</title></head>
+<body style="margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e5e5e5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <tr><td style="text-align:center;padding-bottom:28px;"><span style="font-size:22px;font-weight:700;color:#fff;">WorkflowStacks</span></td></tr>
+    <tr><td style="background:#1a1a1a;border-radius:12px;padding:28px;">
+      <h1 style="color:#fff;font-size:20px;margin:0 0 4px;">Working templates you can run this week</h1>
+      <p style="color:#a3a3a3;font-size:14px;margin:0 0 20px;">Download, import into n8n, running in ~5 minutes — free.</p>
+      <table width="100%" cellpadding="0" cellspacing="0">${tplRows}</table>
+      <h2 style="color:#fff;font-size:16px;margin:26px 0 6px;">Fresh tools worth a look</h2>
+      <table width="100%" cellpadding="0" cellspacing="0">${toolRows}</table>
+      <div style="text-align:center;margin-top:26px;">
+        <a href="https://workflowstacks.com/templates" style="display:inline-block;background:#C6F24E;color:#0A0C0D;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;">Browse all templates</a>
+      </div>
+    </td></tr>
+    <tr><td style="text-align:center;padding-top:20px;color:#525252;font-size:12px;">
+      You’re getting this because you downloaded a WorkflowStacks template.<br>
+      <a href="${unsubUrl}" style="color:#737373;">Unsubscribe</a>
+    </td></tr>
+  </table>
+</body></html>`;
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+            body: JSON.stringify({
+              from: 'WorkflowStacks <newsletter@workflowstacks.com>',
+              to: sub.email,
+              subject: '🛠️ New working templates + fresh AI tools this week',
+              html,
+            }),
+          });
+          sentCount++;
+        } catch (e) {
+          console.error('Digest send error for', sub.email, e.message);
+        }
+      }
+
+      await database.collection('newsletter_sends').insertOne({
+        type: 'digest',
+        sent_at: new Date(),
+        recipient_count: sentCount,
+      });
+      return Response.json({ ok: true, sent: sentCount, templates: templates.length, tools: freshTools.length });
     }
 
     // Admin: discover creator leads from skills with github_url + creator field
