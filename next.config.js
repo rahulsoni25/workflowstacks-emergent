@@ -13,6 +13,18 @@ const nextConfig = {
     }
     return config;
   },
+  async redirects() {
+    // Canonical host is the apex (workflowstacks.com) — everything (canonicals,
+    // sitemap, JSON-LD) declares it. 308 any www traffic to apex permanently.
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.workflowstacks.com' }],
+        destination: 'https://workflowstacks.com/:path*',
+        permanent: true,
+      },
+    ]
+  },
   async rewrites() {
     // Brand-evolution: 'stacks' is the new term for packs (more accurate for what
     // they are — curated combinations that solve a goal). Both URLs work; canonical
