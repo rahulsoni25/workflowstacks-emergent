@@ -1,0 +1,117 @@
+{
+  "name": "Meeting Summary Email — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📝 Meeting Summary Email\n\n**What it does:** gives you a private form URL. Paste any meeting transcript into it (from Zoom, Meet, Otter, Fireflies — anything) and within seconds a clean summary email lands in your inbox: key decisions, action items with owners, and open questions.\n\n### Setup (≈5 minutes)\n1. Open **Summarize (AI)** → add your OpenAI API key.\n2. Open **Email the summary** → connect your Gmail account.\n3. Click **Execute workflow** once, then open the **Paste your transcript** node and copy its **Form URL** — bookmark it.\n4. After any meeting: open the URL, paste the transcript, enter your email, submit. Done.\n\n💡 Activate the workflow (toggle top-right) to make the form URL permanent.\n💡 Not on Gmail? Swap the Gmail node for the Outlook or SMTP node — the rest stays the same.\n\n— Free template from workflowstacks.com",
+        "height": 560,
+        "width": 460,
+        "color": 6
+      },
+      "id": "c3d4e5f6-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -160]
+    },
+    {
+      "parameters": {
+        "formTitle": "Meeting → Summary",
+        "formDescription": "Paste a transcript, get a clean summary email with decisions and action items.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Meeting title",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Transcript",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Send summary to (email)",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0002-4000-8000-000000000002",
+      "name": "Paste your transcript",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [480, 60]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You turn raw meeting transcripts into summaries an executive actually reads.\n\nMeeting: {{ $json['Meeting title'] }}\n\nTranscript:\n{{ $json.Transcript }}\n\nProduce EXACTLY this structure in plain text:\n\nTL;DR\nOne or two sentences - the single most important outcome of this meeting.\n\nKEY DECISIONS\n- Each decision on its own line. If none were made, write \"No decisions made.\"\n\nACTION ITEMS\n- [Owner] Task - deadline if mentioned. Infer the owner from the transcript; if unclear, write [Unassigned].\n\nOPEN QUESTIONS\n- Unresolved points that need follow-up. If none, omit this section.\n\nRules: be specific, use names from the transcript, never invent anything not said, keep the whole summary under 250 words.",
+              "role": "user"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c3d4e5f6-0003-4000-8000-000000000003",
+      "name": "Summarize (AI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [760, 60]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Paste your transcript').item.json['Send summary to (email)'] }}",
+        "subject": "=Summary: {{ $('Paste your transcript').item.json['Meeting title'] }}",
+        "emailType": "text",
+        "message": "={{ $json.message.content }}",
+        "options": {}
+      },
+      "id": "c3d4e5f6-0004-4000-8000-000000000004",
+      "name": "Email the summary",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1040, 60]
+    }
+  ],
+  "connections": {
+    "Paste your transcript": {
+      "main": [
+        [
+          {
+            "node": "Summarize (AI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize (AI)": {
+      "main": [
+        [
+          {
+            "node": "Email the summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

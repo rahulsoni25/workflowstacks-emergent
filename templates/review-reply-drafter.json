@@ -1,0 +1,236 @@
+{
+  "name": "Review Reply Drafter — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 💬 Review Reply Drafter\n\n**What it does:** reads customer reviews from your Google Sheet and drafts a personalized, on-brand reply for every review that doesn't have one yet — including careful, de-escalating replies to negative reviews. Drafts land in a `Drafted Replies` tab for your approval; nothing is ever sent automatically.\n\n### Setup (≈5 minutes)\n1. Make a Google Sheet with a tab named `Reviews` and these headers in row 1: **Customer Name**, **Rating**, **Review**, **Reply** (leave empty). Paste your reviews in (export them from Shopify, Judge.me, Loox, Amazon, or anywhere).\n2. Add a second empty tab named `Drafted Replies`.\n3. Open **Get reviews** → connect Google → pick your spreadsheet + the `Reviews` tab.\n4. Open **Draft reply (AI)** → add your OpenAI API key.\n5. Open **Save drafts** → same spreadsheet, `Drafted Replies` tab.\n6. Click **Execute workflow** — drafts appear, you approve & post them.\n\n💡 Edit the prompt in **Draft reply (AI)** to match your brand voice.\n\n— Free template from workflowstacks.com",
+        "height": 620,
+        "width": 460,
+        "color": 5
+      },
+      "id": "b2c3d4e5-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -180]
+    },
+    {
+      "parameters": {},
+      "id": "b2c3d4e5-0002-4000-8000-000000000002",
+      "name": "When clicking Execute",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [480, 60]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0003-4000-8000-000000000003",
+      "name": "Get reviews",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [700, 60]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-reply-empty",
+              "leftValue": "={{ $json.Reply }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0004-4000-8000-000000000004",
+      "name": "Only reviews without a reply",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [920, 60]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You reply to customer reviews on behalf of a small ecommerce brand. You sound like a real, caring human — never corporate, never scripted.\n\nDraft a reply to this review:\n\nCustomer: {{ $json['Customer Name'] }}\nRating: {{ $json.Rating }} / 5\nReview: {{ $json.Review }}\n\nRules:\n- 2-4 sentences. Address the customer by first name.\n- 4-5 stars: thank them specifically for what they praised — mirror their words, don't be generic.\n- 3 stars or below: acknowledge the specific problem first, apologize once sincerely, state one concrete thing you'll do (replacement, refund contact, fix), and invite them to email support. Never argue, never make excuses, never blame the customer or shipping.\n- No emojis, no exclamation-mark pileups, no \"we're sorry you feel that way\".\n- Return ONLY the reply text.",
+              "role": "user"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0005-4000-8000-000000000005",
+      "name": "Draft reply (AI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1160, 40]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-name",
+              "name": "Customer Name",
+              "value": "={{ $('Only reviews without a reply').item.json['Customer Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-rating",
+              "name": "Rating",
+              "value": "={{ $('Only reviews without a reply').item.json.Rating }}",
+              "type": "string"
+            },
+            {
+              "id": "set-review",
+              "name": "Original Review",
+              "value": "={{ $('Only reviews without a reply').item.json.Review }}",
+              "type": "string"
+            },
+            {
+              "id": "set-reply",
+              "name": "Drafted Reply",
+              "value": "={{ $json.message.content }}",
+              "type": "string"
+            },
+            {
+              "id": "set-date",
+              "name": "Drafted At",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0006-4000-8000-000000000006",
+      "name": "Shape the draft",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1400, 40]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "b2c3d4e5-0007-4000-8000-000000000007",
+      "name": "Save drafts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1620, 40]
+    }
+  ],
+  "connections": {
+    "When clicking Execute": {
+      "main": [
+        [
+          {
+            "node": "Get reviews",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get reviews": {
+      "main": [
+        [
+          {
+            "node": "Only reviews without a reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only reviews without a reply": {
+      "main": [
+        [
+          {
+            "node": "Draft reply (AI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft reply (AI)": {
+      "main": [
+        [
+          {
+            "node": "Shape the draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shape the draft": {
+      "main": [
+        [
+          {
+            "node": "Save drafts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

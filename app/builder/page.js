@@ -76,6 +76,7 @@ export default function BuilderPage() {
   const [recSummary, setRecSummary] = useState('')
   const [recMissing, setRecMissing] = useState('')
   const [recConfidence, setRecConfidence] = useState('')
+  const [recTemplate, setRecTemplate] = useState(null)
   useEffect(() => {
     if (step !== 2 || !goal || !goal.trim()) return
     if (recommendedGoal === goal && recommendations) return
@@ -94,6 +95,7 @@ export default function BuilderPage() {
         setRecSummary(j.solution_summary || '')
         setRecMissing(j.what_is_missing || '')
         setRecConfidence(j.confidence || '')
+        setRecTemplate(j.matched_template || null)
       })
       .catch(() => setRecommendations([]))
       .finally(() => setRecommendationsLoading(false))
@@ -587,6 +589,21 @@ export default function BuilderPage() {
                     )}
                     {!recommendationsLoading && recommendations && recommendations.length > 0 && (
                       <div className="space-y-3">
+                        {/* A hand-built WORKING template beats a skill list — show it first */}
+                        {recTemplate && (
+                          <div className="p-3 bg-[#C6F24E]/10 border border-[#C6F24E]/40 rounded-md">
+                            <div className="text-[#C6F24E] font-semibold uppercase tracking-wide text-[10px] mb-1">⚡ Ready-made template for this goal</div>
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div>
+                                <p className="text-white text-sm font-semibold">{recTemplate.title}</p>
+                                <p className="text-slate-300 text-xs mt-0.5">{recTemplate.outcome} Import into n8n, running in ~{recTemplate.setup_minutes} min.</p>
+                              </div>
+                              <Link href={`/templates/${recTemplate.slug}`} className="text-xs font-semibold bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] px-3 py-1.5 rounded whitespace-nowrap">
+                                Get the working template →
+                              </Link>
+                            </div>
+                          </div>
+                        )}
                         {/* What WorkflowStacks understood about the goal */}
                         {recContext && (
                           <div className="p-2.5 bg-slate-900/50 border border-slate-700/50 rounded text-xs">

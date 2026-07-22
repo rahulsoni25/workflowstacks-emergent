@@ -12,6 +12,7 @@
 import { MongoClient } from 'mongodb'
 import { TOOLS_ONLY } from '../../../lib/catalog-gates'
 import { rateLimit } from '../../../lib/rate-limit'
+import { matchTemplate } from '../../../lib/templates'
 
 const client = new MongoClient(process.env.MONGO_URL)
 let db
@@ -141,6 +142,7 @@ Hard rules:
 - Each picked skill must contribute meaningfully to the goal. No filler.
 - If two candidates do the same job, pick the better ONE and drop the other.
 - Cover the WHOLE workflow: data in → processing → output → distribution where relevant.
+- AUDIENCE FIT: assume the user is a non-technical founder unless the goal itself uses developer language (API, self-host, SDK, deploy, docker, etc.). For non-technical users, NEVER pick research frameworks, academic projects, or tools that require writing code or running servers — prefer hosted tools, no-code automation platforms, and things installable in minutes. A technically perfect pick the user cannot run is a WRONG pick.
 - If a critical capability is MISSING from the candidates, say so honestly in "what_is_missing".
 - Output ONLY valid JSON. No commentary, no markdown fences.`
 
@@ -195,11 +197,16 @@ export async function POST(request) {
 
   const database = await connectDB()
 
+  // Stage 0: does a hand-built working template already solve this goal?
+  // A download that runs beats any list of repos — surface it first.
+  const matchedTemplate = matchTemplate(goal)
+
   // Stage 1: pre-filter the catalog to the most relevant candidates
   const candidates = await preFilterCandidates(database, goal, 60)
   if (candidates.length === 0) {
     return Response.json({
       goal,
+      matched_template: matchedTemplate,
       context_understood: 'Could not find any catalog matches for this goal — try simpler keywords.',
       solution_summary: '',
       recommended: [],
@@ -246,6 +253,7 @@ export async function POST(request) {
 
   return Response.json({
     goal,
+    matched_template: matchedTemplate,
     context_understood: recObj.context_understood || '',
     solution_summary: recObj.solution_summary || '',
     what_is_missing: recObj.what_is_missing || '',
