@@ -91,14 +91,14 @@ async function preFilterCandidates(database, goal, max = 60) {
 
 // ---- Stage 2: LLM picks the actual solution ----
 
-function defaultProvider() {
-  if (process.env.GROQ_API_KEY) {
-    return { name: 'groq', model: process.env.GROQ_REC_MODEL || 'llama-3.3-70b-versatile' }
-  }
-  if (process.env.OPENROUTER_API_KEY) {
-    return { name: 'openrouter', model: 'anthropic/claude-haiku-4.5' }
-  }
-  return { name: 'none', model: null }
+// Ordered provider chain — try each until one succeeds. Groq is cheapest/
+// fastest but has a hard daily token cap on the free tier; when it 429s we
+// fall through to OpenRouter instead of degrading the whole recommender.
+function providerChain() {
+  const chain = []
+  if (process.env.GROQ_API_KEY) chain.push({ name: 'groq', model: process.env.GROQ_REC_MODEL || 'llama-3.3-70b-versatile' })
+  if (process.env.OPENROUTER_API_KEY) chain.push({ name: 'openrouter', model: 'anthropic/claude-haiku-4.5' })
+  return chain
 }
 
 async function callLLMJson(provider, system, user, maxTokens = 1200) {
@@ -190,8 +190,8 @@ export async function POST(request) {
   if (!goal) return Response.json({ error: 'Missing goal' }, { status: 400 })
   if (goal.length > 600) return Response.json({ error: 'Goal too long (max 600 chars)' }, { status: 400 })
 
-  const provider = defaultProvider()
-  if (provider.name === 'none') {
+  const providers = providerChain()
+  if (providers.length === 0) {
     return Response.json({ error: 'No LLM provider configured' }, { status: 500 })
   }
 
@@ -215,22 +215,43 @@ export async function POST(request) {
     })
   }
 
-  // Stage 2: LLM picks the actual solution
-  let recObj
-  try {
-    const raw = await callLLMJson(provider, SYSTEM_PROMPT, buildUserPrompt(goal, candidates), 1400)
-    const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim()
-    recObj = JSON.parse(cleaned)
-  } catch (e) {
+  // Stage 2: LLM picks the actual solution — walk the provider chain so a
+  // rate-limited Groq falls through to OpenRouter before we give up.
+  let recObj, usedProvider, lastErr
+  for (const provider of providers) {
+    try {
+      const raw = await callLLMJson(provider, SYSTEM_PROMPT, buildUserPrompt(goal, candidates), 1400)
+      const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/i, '').trim()
+      recObj = JSON.parse(cleaned)
+      usedProvider = provider
+      break
+    } catch (e) {
+      lastErr = e
+    }
+  }
+
+  if (!recObj) {
+    // Every provider failed (e.g. all quotas exhausted). Degrade gracefully:
+    // return the top pre-filtered candidates as FULL skill objects so the UI
+    // still renders real names/cards — never bare "#?" placeholders.
+    const fallback = candidates.slice(0, 5).map((c, i) => ({
+      ...c,
+      _rec_rank: i + 1,
+      _rec_role: 'primary',
+      _rec_why: 'Top keyword match (smart recommender is busy — refreshing shortly).',
+      _rec_what_it_handles: c.category,
+    }))
     return Response.json({
-      goal, error: 'LLM call failed: ' + e.message,
-      // Best-effort fallback: regex top 5
-      recommended: candidates.slice(0, 5).map((c, i) => ({
-        skill_id: c.id, rank: i + 1, role: 'primary',
-        why_picked: 'Keyword match in catalog (LLM unavailable)',
-        what_it_handles: c.category,
-      })),
+      goal,
+      matched_template: matchedTemplate,
+      context_understood: 'Showing the closest matches from the catalog.',
+      solution_summary: '',
+      what_is_missing: '',
       confidence: 'low',
+      degraded: true,
+      error: 'LLM unavailable: ' + (lastErr?.message || 'unknown'),
+      candidate_count: candidates.length,
+      recommended: fallback,
     }, { status: 200 })
   }
 
@@ -260,7 +281,7 @@ export async function POST(request) {
     confidence: recObj.confidence || 'medium',
     candidate_count: candidates.length,
     recommended,
-    provider: provider.name,
-    model: provider.model,
+    provider: usedProvider.name,
+    model: usedProvider.model,
   })
 }
