@@ -1,0 +1,224 @@
+{
+  "name": "AI Product Description Writer — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🛍️ AI Product Description Writer\n\n**What it does:** reads products from your Google Sheet, writes a polished, conversion-focused description for every product that doesn't have one, and saves the results to a `Generated` tab.\n\n### Setup (≈5 minutes)\n1. Make a Google Sheet with a tab named `Products` and these column headers in row 1: **Product Name**, **Features**, **Tone** (optional), **Description** (leave empty).\n2. Add a second empty tab named `Generated`.\n3. Open the **Get products** node → connect your Google account → pick your spreadsheet + the `Products` tab.\n4. Open the **Write description (AI)** node → add your OpenAI API key as a credential (any OpenAI-compatible key works).\n5. Open the **Save to Generated tab** node → pick the same spreadsheet + the `Generated` tab.\n6. Click **Execute workflow**. Done — descriptions appear in the `Generated` tab.\n\n💡 Change the writing style by editing the prompt inside **Write description (AI)**.\n\n— Free template from workflowstacks.com",
+        "height": 620,
+        "width": 460,
+        "color": 4
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -180]
+    },
+    {
+      "parameters": {},
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "When clicking Execute",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [480, 60]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Get products",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [700, 60]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond-desc-empty",
+              "leftValue": "={{ $json.Description }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "name": "Only products without a description",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [920, 60]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an ecommerce copywriter who writes product descriptions that convert without sounding like ads.\n\nWrite a product description for the following product.\n\nProduct name: {{ $json['Product Name'] }}\nKey features: {{ $json.Features }}\nTone: {{ $json.Tone || 'friendly and confident' }}\n\nRules:\n- 2 short paragraphs, 60-110 words total.\n- Lead with the customer benefit, not the product.\n- Weave in the key features naturally - never as a list.\n- No clichés (\"game-changer\", \"elevate\", \"unleash\"), no exclamation marks, no emojis.\n- Write in the requested tone.\n- Return ONLY the description text, nothing else.",
+              "role": "user"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0005-4000-8000-000000000005",
+      "name": "Write description (AI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1160, 40]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-name",
+              "name": "Product Name",
+              "value": "={{ $('Only products without a description').item.json['Product Name'] }}",
+              "type": "string"
+            },
+            {
+              "id": "set-desc",
+              "name": "AI Description",
+              "value": "={{ $json.message.content }}",
+              "type": "string"
+            },
+            {
+              "id": "set-date",
+              "name": "Generated At",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0006-4000-8000-000000000006",
+      "name": "Shape the result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1400, 40]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0007-4000-8000-000000000007",
+      "name": "Save to Generated tab",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1620, 40]
+    }
+  ],
+  "connections": {
+    "When clicking Execute": {
+      "main": [
+        [
+          {
+            "node": "Get products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get products": {
+      "main": [
+        [
+          {
+            "node": "Only products without a description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only products without a description": {
+      "main": [
+        [
+          {
+            "node": "Write description (AI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write description (AI)": {
+      "main": [
+        [
+          {
+            "node": "Shape the result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shape the result": {
+      "main": [
+        [
+          {
+            "node": "Save to Generated tab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
