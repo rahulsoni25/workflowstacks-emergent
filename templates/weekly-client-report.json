@@ -1,0 +1,159 @@
+{
+  "name": "Weekly Client Report — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📊 Weekly Client Report\n\n**What it does:** every Monday morning, reads the week's metrics from your Google Sheet, writes a clear client-facing narrative report (what happened, why, what's next), and emails it — so your Monday reporting takes zero minutes.\n\n### Setup (≈5 minutes)\n1. Make a Google Sheet with a tab named `Metrics`. Row 1 headers are up to you — e.g. **Week**, **Ad Spend**, **Revenue**, **ROAS**, **Sessions**, **Conversions**, **Notes**. Paste or export each week's numbers as a new row (from GA4, Meta Ads Manager, Shopify — anywhere).\n2. Open **Get this week's metrics** → connect Google → pick your spreadsheet + the `Metrics` tab.\n3. Open **Write the report (AI)** → add your OpenAI API key.\n4. Open **Email the report** → connect Gmail and set the client's email address in the To field.\n5. Toggle the workflow **Active** (top-right). It now runs every Monday at 8:00 — or click Execute any time to send one now.\n\n💡 One client per copy: duplicate this workflow for each client, point each at its own sheet.\n💡 Edit the prompt in **Write the report (AI)** to match how you talk to clients.\n\n— Free template from workflowstacks.com",
+        "height": 640,
+        "width": 460,
+        "color": 3
+      },
+      "id": "d4e5f6a7-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -200]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [1],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "d4e5f6a7-0002-4000-8000-000000000002",
+      "name": "Every Monday 8:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [480, 60]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "id": "d4e5f6a7-0003-4000-8000-000000000003",
+      "name": "Get this week's metrics",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [700, 60]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "d4e5f6a7-0004-4000-8000-000000000004",
+      "name": "Combine all rows",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [920, 60]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You write weekly performance reports for a marketing agency's client. The client is busy and non-technical — they want clarity, not dashboards.\n\nHere is the metrics data from the tracking sheet (most recent rows are the latest weeks):\n{{ JSON.stringify($json.data) }}\n\nWrite the weekly report in plain text with EXACTLY this structure:\n\nTHIS WEEK AT A GLANCE\n2-3 sentences: the single most important result this week, in plain language, with the key numbers.\n\nWHAT MOVED AND WHY\n- 3-5 bullets comparing this week to the previous week(s): what went up, what went down, and the most likely reason. Use real numbers and percentage changes.\n\nWHAT WE'RE DOING NEXT WEEK\n- 2-3 bullets with concrete next actions based on the data.\n\nRules: use only numbers present in the data — never invent metrics. If there's only one week of data, skip comparisons and describe the baseline. Keep the whole report under 250 words. No greetings or sign-offs — the email adds those.",
+              "role": "user"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d4e5f6a7-0005-4000-8000-000000000005",
+      "name": "Write the report (AI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1160, 40]
+    },
+    {
+      "parameters": {
+        "sendTo": "client@example.com",
+        "subject": "=Weekly performance report — {{ $now.format('dd MMM yyyy') }}",
+        "emailType": "text",
+        "message": "=Hi,\n\nHere's your weekly report:\n\n{{ $json.message.content }}\n\nQuestions? Just reply to this email.\n",
+        "options": {}
+      },
+      "id": "d4e5f6a7-0006-4000-8000-000000000006",
+      "name": "Email the report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1400, 40]
+    }
+  ],
+  "connections": {
+    "Every Monday 8:00": {
+      "main": [
+        [
+          {
+            "node": "Get this week's metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get this week's metrics": {
+      "main": [
+        [
+          {
+            "node": "Combine all rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine all rows": {
+      "main": [
+        [
+          {
+            "node": "Write the report (AI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the report (AI)": {
+      "main": [
+        [
+          {
+            "node": "Email the report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

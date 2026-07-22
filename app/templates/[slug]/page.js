@@ -1,9 +1,11 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Download, Check, Clock, FileJson, Wrench } from 'lucide-react'
+import { ArrowLeft, Check, Clock, FileJson, Wrench } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { getTemplate, TEMPLATES } from '@/lib/templates'
+import DownloadButtons from './DownloadButtons'
 
 // Outcome-template landing pages — "download a working agent" is the new
 // magic moment. One static page per hand-built, tested template.
@@ -58,12 +60,10 @@ export default function TemplatePage({ params }) {
           <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-teal-400" />Free, you own it</span>
         </div>
 
-        <div className="text-center mb-14">
-          <a href={`/api/templates/${tpl.slug}`} download>
-            <Button size="lg" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20 px-8">
-              <Download className="w-4 h-4 mr-2" />Download the workflow (free)
-            </Button>
-          </a>
+        <div className="mb-14">
+          <Suspense fallback={null}>
+            <DownloadButtons slug={tpl.slug} filename={tpl.filename} />
+          </Suspense>
         </div>
 
         <Card className="bg-slate-900/60 border-slate-700/50 mb-8">

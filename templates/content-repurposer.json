@@ -1,0 +1,117 @@
+{
+  "name": "Content Repurposer — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## ♻️ Content Repurposer\n\n**What it does:** gives you a private form URL. Paste one piece of content (blog post, newsletter, video script) and get back an email with four ready-to-post formats: a LinkedIn post, an X thread, an Instagram caption, and a short email blurb — all in the original's voice.\n\n### Setup (≈5 minutes)\n1. Open **Repurpose (AI)** → add your OpenAI API key.\n2. Open **Email the formats** → connect your Gmail account.\n3. Click **Execute workflow** once, then open the **Paste your content** node and copy its **Form URL** — bookmark it.\n4. After publishing anything: open the URL, paste the content, submit. Four formats arrive in your inbox.\n\n💡 Activate the workflow (toggle top-right) to make the form URL permanent.\n💡 Agencies: duplicate per client and tweak the prompt with each client's voice rules.\n\n— Free template from workflowstacks.com",
+        "height": 560,
+        "width": 460,
+        "color": 7
+      },
+      "id": "e5f6a7b8-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -160]
+    },
+    {
+      "parameters": {
+        "formTitle": "Content → 4 formats",
+        "formDescription": "Paste one piece of content, get LinkedIn + X + Instagram + email versions back by email.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Content title",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Paste your content",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Send results to (email)",
+              "fieldType": "email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e5f6a7b8-0002-4000-8000-000000000002",
+      "name": "Paste your content",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [480, 60]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You repurpose long-form content into social formats. You keep the author's voice — you never flatten it into generic marketing speak.\n\nOriginal content, titled \"{{ $json['Content title'] }}\":\n{{ $json['Paste your content'] }}\n\nProduce EXACTLY this structure in plain text:\n\n=== LINKEDIN POST ===\n120-200 words. Open with the single most surprising or useful idea (no \"I'm excited to share\"). Short paragraphs, one line of air between them. End with a genuine question to the reader. No hashtags.\n\n=== X THREAD ===\n5-7 numbered tweets. Tweet 1 is a hook that stands alone (under 200 characters, no \"a thread 🧵\"). Each following tweet delivers one complete idea. Final tweet summarizes the takeaway.\n\n=== INSTAGRAM CAPTION ===\n60-120 words. Conversational, line breaks for rhythm. End with 3-5 relevant hashtags on their own line.\n\n=== EMAIL BLURB ===\n40-70 words for a newsletter: what the piece is about and one reason to care. End with \"Read the full piece:\" on its own line (the author adds the link).\n\nRules: pull real ideas, numbers, and phrases from the original — never invent claims it doesn't make. Match the original's tone. No emojis unless the original uses them.",
+              "role": "user"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e5f6a7b8-0003-4000-8000-000000000003",
+      "name": "Repurpose (AI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [760, 60]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Paste your content').item.json['Send results to (email)'] }}",
+        "subject": "=4 formats ready: {{ $('Paste your content').item.json['Content title'] }}",
+        "emailType": "text",
+        "message": "={{ $json.message.content }}",
+        "options": {}
+      },
+      "id": "e5f6a7b8-0004-4000-8000-000000000004",
+      "name": "Email the formats",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1040, 60]
+    }
+  ],
+  "connections": {
+    "Paste your content": {
+      "main": [
+        [
+          {
+            "node": "Repurpose (AI)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Repurpose (AI)": {
+      "main": [
+        [
+          {
+            "node": "Email the formats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

@@ -598,7 +598,7 @@ export default function BuilderPage() {
                                 <p className="text-white text-sm font-semibold">{recTemplate.title}</p>
                                 <p className="text-slate-300 text-xs mt-0.5">{recTemplate.outcome} Import into n8n, running in ~{recTemplate.setup_minutes} min.</p>
                               </div>
-                              <Link href={`/templates/${recTemplate.slug}`} className="text-xs font-semibold bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] px-3 py-1.5 rounded whitespace-nowrap">
+                              <Link href={`/templates/${recTemplate.slug}?goal=${encodeURIComponent(goal || '')}`} className="text-xs font-semibold bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] px-3 py-1.5 rounded whitespace-nowrap">
                                 Get the working template →
                               </Link>
                             </div>
