@@ -57,6 +57,12 @@ async function logAdmin(request, db, action) {
 // Rate limiter moved to lib/rate-limit.js so the standalone route files
 // (recommend-skills, search-skills) can share it.
 
+// User input must never reach $regex raw — crafted patterns can trigger
+// catastrophic backtracking (DoS) or match-everything queries.
+function escapeRegex(s) {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // ─────────────────────────────────────────────────────────────────
 // Security monitoring layer — DNS drift + admin auth anomaly
 // ─────────────────────────────────────────────────────────────────
@@ -417,13 +423,14 @@ export async function GET(request) {
       } catch {}
 
       // 2. Local search first (fast)
+      const qSafe = escapeRegex(q);
       const local = await database.collection('skills').find({
         published: { $ne: false },
         $or: [
-          { name: { $regex: q, $options: 'i' } },
-          { title_human: { $regex: q, $options: 'i' } },
-          { description: { $regex: q, $options: 'i' } },
-          { description_human: { $regex: q, $options: 'i' } },
+          { name: { $regex: qSafe, $options: 'i' } },
+          { title_human: { $regex: qSafe, $options: 'i' } },
+          { description: { $regex: qSafe, $options: 'i' } },
+          { description_human: { $regex: qSafe, $options: 'i' } },
           { github_topics: { $in: [q.toLowerCase()] } },
         ],
       })
@@ -632,9 +639,10 @@ export async function GET(request) {
         query.category = category;
       }
       if (search) {
+        const searchSafe = escapeRegex(search);
         query.$or = [
-          { name: { $regex: search, $options: 'i' } },
-          { description: { $regex: search, $options: 'i' } }
+          { name: { $regex: searchSafe, $options: 'i' } },
+          { description: { $regex: searchSafe, $options: 'i' } }
         ];
       }
 

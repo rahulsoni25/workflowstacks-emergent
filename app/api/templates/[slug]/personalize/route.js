@@ -66,10 +66,16 @@ export async function POST(request, { params }) {
     try {
       const rewritten = await rewritePrompt(originalPrompt, goal)
       if (rewritten && rewritten.length > 100) {
-        const before = extractExpressions(originalPrompt)
+        // Security gate: the rewritten prompt must contain EXACTLY the same
+        // set of {{ }} expressions as the original — none lost, and critically
+        // NONE ADDED. n8n expressions can execute code inside the importer's
+        // instance, so a goal crafted to smuggle new expressions through the
+        // LLM must fail closed to the stock template.
+        const before = new Set(extractExpressions(originalPrompt))
         const after = new Set(extractExpressions(rewritten))
-        const allKept = before.every((e) => after.has(e))
-        if (allKept) {
+        const sameSet = before.size === after.size
+          && [...before].every((e) => after.has(e))
+        if (sameSet) {
           node.parameters.messages.values[0].content = rewritten
           workflow.name = `${workflow.name} (personalized)`
           personalized = true
