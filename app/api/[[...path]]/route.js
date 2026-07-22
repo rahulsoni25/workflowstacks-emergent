@@ -2,7 +2,7 @@ import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalog-gates';
 import { rateLimit } from '../../../lib/rate-limit';
-import { TEMPLATES } from '../../../lib/templates';
+import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 
 const client = new MongoClient(process.env.MONGO_URL);
 let db;
@@ -1348,7 +1348,18 @@ export async function GET(request) {
         .sort({ upvotes: -1, created_at: -1 })
         .limit(120)
         .toArray();
-      return Response.json({ problems });
+      // Attach the matching template's public meta so the board can show a
+      // "solve it now" download path. Legacy problems (no stored slug) get
+      // matched on the fly — DFY is the fallback when nothing matches.
+      const withMatch = problems.map((p) => {
+        const slug = p.matched_template_slug || matchTemplate(`${p.title} ${p.description || ''}`)?.slug || null;
+        const t = slug ? TEMPLATES[slug] : null;
+        return {
+          ...p,
+          matched_template: t ? { slug: t.slug, title: t.title } : null,
+        };
+      });
+      return Response.json({ problems: withMatch });
     }
 
     // Admin: review submitted deals + approve them (id=all approves every pending)
@@ -2147,17 +2158,22 @@ export async function POST(request) {
       const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 })
       const title = (body.title || '').toString().trim().slice(0, 140);
       if (!title) return Response.json({ success: false, error: 'A problem title is required' }, { status: 400 });
+      const description = (body.description || '').toString().slice(0, 600);
+      // Demand → supply: if a working template already solves this, record it
+      // so the board can offer an instant "solve it now" path.
+      const matched = matchTemplate(`${title} ${description}`);
       const problem = {
         id: uuidv4(),
         title,
-        description: (body.description || '').toString().slice(0, 600),
+        description,
         category: (body.category || 'Ops').toString().slice(0, 30),
         author: (body.author || 'anonymous').toString().replace(/^@/, '').slice(0, 30) || 'anonymous',
+        matched_template_slug: matched?.slug || null,
         upvotes: 1,
         created_at: new Date(),
       };
       await database.collection('problems').insertOne(problem);
-      return Response.json({ success: true, problem });
+      return Response.json({ success: true, problem, matched_template: matched });
     }
 
     if (path === '/problems/upvote') {

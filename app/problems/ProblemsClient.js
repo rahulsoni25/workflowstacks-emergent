@@ -138,6 +138,15 @@ export default function ProblemsClient({ initialProblems = [] }) {
                     </div>
                     <h3 className="text-white font-semibold">{p.title}</h3>
                     {p.description && <p className="text-slate-400 text-sm mt-1 line-clamp-2">{p.description}</p>}
+                    {p.matched_template ? (
+                      <Link href={`/templates/${p.matched_template.slug}`} className="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-[#C6F24E] hover:text-[#A6D62E]">
+                        ⚡ Ready template: {p.matched_template.title} — solve it now →
+                      </Link>
+                    ) : (
+                      <Link href={`/build-for-me?goal=${encodeURIComponent(p.title)}`} className="inline-flex items-center gap-1.5 mt-2 text-xs text-slate-400 hover:text-slate-200">
+                        🛠️ No template yet — we’ll build it for you →
+                      </Link>
+                    )}
                   </div>
                   <Button onClick={() => buildAgent(p)} disabled={building === p.id} size="sm" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white shrink-0">
                     <Zap className="w-4 h-4 mr-1.5" />{building === p.id ? 'Matching skills…' : 'Build the agent'}

@@ -5,6 +5,7 @@ import { ArrowLeft, Check, Clock, FileJson, Wrench } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { getTemplate, TEMPLATES } from '@/lib/templates'
+import { outcomesForTemplate } from '@/lib/outcomes'
 import DownloadButtons from './DownloadButtons'
 
 // Outcome-template landing pages — "download a working agent" is the new
@@ -34,6 +35,7 @@ const IMPORT_STEPS = [
 export default function TemplatePage({ params }) {
   const tpl = getTemplate(params.slug)
   if (!tpl) notFound()
+  const relatedOutcomes = outcomesForTemplate(tpl.slug)
 
   return (
     <div className="min-h-screen bg-neptune">
@@ -93,6 +95,19 @@ export default function TemplatePage({ params }) {
             </Card>
           ))}
         </div>
+
+        {relatedOutcomes.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-white font-bold text-xl mb-4">Use this to…</h2>
+            <div className="flex flex-wrap gap-2">
+              {relatedOutcomes.map((o) => (
+                <Link key={o.slug} href={`/automate/${o.slug}`} className="text-sm text-slate-300 bg-slate-900/60 border border-slate-700/50 hover:border-[#C6F24E]/40 rounded-full px-4 py-2 transition-colors">
+                  {o.h1}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         <Card className="bg-[#C6F24E]/5 border-[#C6F24E]/25">
           <CardContent className="py-6 flex flex-wrap items-center justify-between gap-4">
