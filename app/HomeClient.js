@@ -320,6 +320,83 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
         </div>
       </section>
 
+      {/* Try it now — surface the real, testable tools + templates up front */}
+      <section className="py-20 px-4 border-t border-[#262B2D]">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-10">
+            <p className="eyebrow mb-4 justify-center">// TRY IT NOW</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
+              Working tools you can <span className="text-gradient-neptune">grab and run today</span>
+            </h2>
+            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+              Real automations — not prompts. Download a free template, or buy a done-in-minutes premium tool. Set it up yourself or let us do it.
+            </p>
+          </div>
+
+          {/* Premium tools */}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-[#C6F24E]">Premium tools · buy once</h3>
+            <Link href="/tools" className="text-sm text-slate-400 hover:text-white">All tools →</Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+            {[
+              { title: 'Lead Finder', price: '$39', desc: 'City + business type → a spreadsheet of real leads.', href: '/bundles/lead-finder' },
+              { title: 'Competitor Watch', price: '$29', desc: 'Emailed the moment a rival changes price or pitch.', href: '/bundles/competitor-watch' },
+              { title: 'Rank Tracker', price: '$29', desc: 'A weekly email of where you rank on Google.', href: '/bundles/rank-tracker' },
+              { title: 'Review Watchdog', price: '$29', desc: 'Catch every bad review the day it lands.', href: '/bundles/review-watchdog' },
+            ].map((t) => (
+              <Link key={t.href} href={t.href}>
+                <Card className="bg-[#101314] border border-[#262B2D] hover:border-[#C6F24E]/40 transition-all h-full">
+                  <CardContent className="py-5">
+                    <div className="flex items-baseline justify-between mb-1.5">
+                      <h4 className="text-white font-bold">{t.title}</h4>
+                      <span className="text-[#C6F24E] font-extrabold text-sm">{t.price}</span>
+                    </div>
+                    <p className="text-slate-400 text-sm leading-relaxed">{t.desc}</p>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          {/* Free templates */}
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-teal-300">Free templates · 11 and counting</h3>
+            <Link href="/templates" className="text-sm text-slate-400 hover:text-white">All templates →</Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[
+              { title: 'AI Product Descriptions', persona: '🛍️ Ecommerce', href: '/templates/ai-product-descriptions' },
+              { title: 'Cold Email Personalizer', persona: '📣 Sales', href: '/templates/cold-email-personalizer' },
+              { title: 'Inbox Reply Triage', persona: '🚀 Founder', href: '/templates/inbox-reply-triage' },
+              { title: 'Weekly Client Report', persona: '📈 Agency', href: '/templates/weekly-client-report' },
+              { title: 'ICP Fit Checker', persona: '📣 Sales', href: '/templates/icp-fit-checker' },
+              { title: 'Meeting Summary Email', persona: '🚀 Founder', href: '/templates/meeting-summary-email' },
+            ].map((t) => (
+              <Link key={t.href} href={t.href}>
+                <Card className="bg-[#101314] border border-[#262B2D] hover:border-teal-500/40 transition-all h-full">
+                  <CardContent className="py-4 flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-[11px] text-slate-500 mb-0.5">{t.persona}</p>
+                      <h4 className="text-white font-semibold text-sm">{t.title}</h4>
+                    </div>
+                    <Download className="w-4 h-4 text-teal-400/70 shrink-0" />
+                  </CardContent>
+                </Card>
+              </Link>
+            ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <Link href="/tools">
+              <Button size="lg" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold">
+                Browse all tools &amp; templates <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* The wedge — answer "isn't this just GitHub with extra steps?" out loud */}
       <section className="py-20 px-4 border-t border-[#262B2D]">
         <div className="container mx-auto max-w-6xl">
