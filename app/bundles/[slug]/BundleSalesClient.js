@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { ArrowLeft, Check, Lock, Loader2 } from 'lucide-react'
+import { ArrowLeft, Check, Lock, Loader2, KeyRound, Wrench } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -61,7 +61,14 @@ export default function BundleSalesClient({ bundle }) {
         <p className="text-xs tracking-widest uppercase text-[#C6F24E] font-semibold mb-3">Premium · one-time</p>
         <h1 className="text-4xl font-bold text-white mb-2 leading-tight">{bundle.title}</h1>
         <p className="text-lg text-slate-300 mb-6">{bundle.tagline}</p>
-        <p className="text-slate-400 mb-8">{bundle.description}</p>
+        <p className="text-slate-400 mb-6">{bundle.description}</p>
+
+        {bundle.needs && (
+          <div className="flex items-center gap-2 mb-8 text-sm text-slate-400">
+            <KeyRound className="w-4 h-4 text-amber-300/70" />
+            <span>What it needs: <span className="text-slate-300">{bundle.needs}</span></span>
+          </div>
+        )}
 
         <Card className="bg-slate-900/60 border-slate-700/50 mb-8">
           <CardContent className="py-6">
@@ -88,6 +95,21 @@ export default function BundleSalesClient({ bundle }) {
           </Button>
         </div>
         {state === 'error' && <p className="text-sm text-amber-400 mt-3 text-center">{error}</p>}
+
+        <Card className="bg-gradient-to-br from-teal-500/10 to-transparent border-teal-500/25 mt-6">
+          <CardContent className="py-5 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <Wrench className="w-5 h-5 text-teal-300 mt-0.5" />
+              <div>
+                <h2 className="text-white font-semibold text-sm mb-1">Don’t want to touch the setup?</h2>
+                <p className="text-slate-400 text-sm">Buy it, and we’ll set it up in your tools — keys, connections, tested — within a few days.</p>
+              </div>
+            </div>
+            <Link href={`/build-for-me?goal=${encodeURIComponent('Set up the ' + bundle.title + ' tool for me')}`}>
+              <Button className="bg-white/5 hover:bg-white/10 text-white border border-[#323A3C] whitespace-nowrap">Add done-for-you setup</Button>
+            </Link>
+          </CardContent>
+        </Card>
 
         <p className="text-center text-sm text-slate-500 mt-10">
           Want the free single-purpose versions first?{' '}

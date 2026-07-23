@@ -62,12 +62,12 @@ export default function TemplatesIndexPage() {
         <Card className="bg-gradient-to-br from-[#C6F24E]/10 to-transparent border-[#C6F24E]/25 mt-10">
           <CardContent className="py-6 flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-xs tracking-widest uppercase text-[#C6F24E] font-semibold mb-1">Premium · one-time</p>
-              <h2 className="text-white font-bold text-lg">Ecommerce Pro Pack — $29</h2>
-              <p className="text-slate-400 text-sm mt-1 max-w-md">A full review-management system: routes negative reviews to a priority alert, tags sentiment, logs everything. The PRO upgrade to the free drafter.</p>
+              <p className="text-xs tracking-widest uppercase text-[#C6F24E] font-semibold mb-1">Premium tools · buy once</p>
+              <h2 className="text-white font-bold text-lg">Lead Finder, Rank Tracker, Competitor Watch &amp; more</h2>
+              <p className="text-slate-400 text-sm mt-1 max-w-md">The automations every business needs — find leads, track your Google rankings, watch competitors, catch bad reviews. From $29, or done-for-you.</p>
             </div>
-            <Link href="/bundles/ecommerce-pro-pack">
-              <Button className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold">See what's inside</Button>
+            <Link href="/tools">
+              <Button className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold">See the tools</Button>
             </Link>
           </CardContent>
         </Card>

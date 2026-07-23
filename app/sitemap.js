@@ -10,6 +10,7 @@ const STATIC_ROUTES = [
   '', '/skills', '/discover', '/problems', '/deals', '/partner', '/members', '/join', '/community', '/packs', '/playbooks', '/personas', '/builder', '/upload', '/build-for-me',
   '/templates',
   ...Object.keys(TEMPLATES).map((slug) => `/templates/${slug}`),
+  '/tools',
   ...Object.keys(BUNDLES).map((slug) => `/bundles/${slug}`),
   ...Object.keys(OUTCOMES).map((slug) => `/automate/${slug}`),
   '/mcp',

@@ -1,0 +1,96 @@
+{
+  "name": "Rank Tracker PRO — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📈 Rank Tracker PRO\n\n**What it does:** every Monday it checks where your website ranks on Google for the keywords you care about, logs the position, and emails you a clean report — so you actually know if your SEO is working.\n\n### Setup (≈8 minutes)\n1. Get a **SerpAPI key** (free tier available): serpapi.com → sign up → copy your key.\n2. Google Sheet, tab `Keywords`, headers: **Keyword**, **Domain** (e.g. yoursite.com), **Last Rank**.\n3. **Get keywords** → connect Google → pick your spreadsheet + `Keywords`.\n4. **Search Google (SerpAPI)** → set the `api_key` query field to your SerpAPI key.\n5. **Email the report** → connect Gmail; set your email in the To field.\n6. **Update Last Rank** → same spreadsheet + `Keywords` tab.\n7. Activate the workflow. It runs weekly and reports movement.\n\n💡 Rank 0 in the report means \"not found in the top results\" for that keyword.\n💡 Want us to wire it up? Add done-for-you at checkout.\n\n— WorkflowStacks Premium Tool",
+        "height": 700,
+        "width": 480,
+        "color": 3
+      },
+      "id": "30c00001-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-60, -240]
+    },
+    {
+      "parameters": { "rule": { "interval": [ { "field": "weeks", "weeksInterval": 1, "triggerAtDay": [1], "triggerAtHour": 8 } ] } },
+      "id": "30c00001-0002-4000-8000-000000000002",
+      "name": "Every Monday 8:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [460, 120]
+    },
+    {
+      "parameters": { "documentId": { "__rl": true, "mode": "list", "value": "" }, "sheetName": { "__rl": true, "mode": "list", "value": "" }, "options": {} },
+      "id": "30c00001-0003-4000-8000-000000000003",
+      "name": "Get keywords",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [680, 120]
+    },
+    {
+      "parameters": {
+        "url": "https://serpapi.com/search",
+        "sendQuery": true,
+        "queryParameters": { "parameters": [ { "name": "engine", "value": "google" }, { "name": "q", "value": "={{ $json.Keyword }}" }, { "name": "num", "value": "100" }, { "name": "api_key", "value": "YOUR_SERPAPI_KEY" } ] },
+        "options": {}
+      },
+      "id": "30c00001-0004-4000-8000-000000000004",
+      "name": "Search Google (SerpAPI)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 120]
+    },
+    {
+      "parameters": {
+        "jsCode": "const domain = ($('Get keywords').item.json.Domain || '').toLowerCase().replace(/^https?:\\/\\//,'').replace(/^www\\./,'').replace(/\\/$/,'');\nconst results = $input.first().json.organic_results || [];\nlet rank = 0;\nfor (const r of results) {\n  const link = (r.link || '').toLowerCase();\n  if (domain && link.includes(domain)) { rank = r.position || 0; break; }\n}\nreturn [{ json: {\n  Keyword: $('Get keywords').item.json.Keyword,\n  Domain: $('Get keywords').item.json.Domain,\n  'Old Rank': $('Get keywords').item.json['Last Rank'] || '',\n  'Last Rank': rank,\n} }];"
+      },
+      "id": "30c00001-0005-4000-8000-000000000005",
+      "name": "Find our position",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 120]
+    },
+    {
+      "parameters": { "operation": "update", "documentId": { "__rl": true, "mode": "list", "value": "" }, "sheetName": { "__rl": true, "mode": "list", "value": "" }, "columns": { "mappingMode": "defineBelow", "value": { "Keyword": "={{ $json.Keyword }}", "Last Rank": "={{ $json['Last Rank'] }}" }, "matchingColumns": ["Keyword"], "schema": [] }, "options": {} },
+      "id": "30c00001-0006-4000-8000-000000000006",
+      "name": "Update Last Rank",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1340, 120]
+    },
+    {
+      "parameters": { "aggregate": "aggregateAllItemData", "options": {} },
+      "id": "30c00001-0007-4000-8000-000000000007",
+      "name": "Combine rows",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [1560, 120]
+    },
+    {
+      "parameters": {
+        "sendTo": "you@example.com",
+        "subject": "=Weekly rank report — {{ $now.format('dd MMM yyyy') }}",
+        "emailType": "text",
+        "message": "=Your keyword rankings this week (rank 0 = not in top 100):\n\n{{ $json.data.map(r => `${r.Keyword}: #${r['Last Rank']}` + (r['Old Rank'] !== '' && r['Old Rank'] != r['Last Rank'] ? ` (was #${r['Old Rank']})` : '')).join('\\n') }}\n",
+        "options": {}
+      },
+      "id": "30c00001-0008-4000-8000-000000000008",
+      "name": "Email the report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1780, 120]
+    }
+  ],
+  "connections": {
+    "Every Monday 8:00": { "main": [[{ "node": "Get keywords", "type": "main", "index": 0 }]] },
+    "Get keywords": { "main": [[{ "node": "Search Google (SerpAPI)", "type": "main", "index": 0 }]] },
+    "Search Google (SerpAPI)": { "main": [[{ "node": "Find our position", "type": "main", "index": 0 }]] },
+    "Find our position": { "main": [[{ "node": "Update Last Rank", "type": "main", "index": 0 }]] },
+    "Update Last Rank": { "main": [[{ "node": "Combine rows", "type": "main", "index": 0 }]] },
+    "Combine rows": { "main": [[{ "node": "Email the report", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }, "pinData": {}, "meta": { "templateCredsSetupCompleted": false }
+}

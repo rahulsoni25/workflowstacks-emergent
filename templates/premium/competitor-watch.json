@@ -1,0 +1,127 @@
+{
+  "name": "Competitor Watch PRO — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 👀 Competitor Watch PRO\n\n**What it does:** every morning it checks the competitor pages you list, uses AI to read the one thing you care about on each (their price, their headline, their plan), and emails you the moment anything changes — with the old vs new value. No more manually refreshing rivals' pages.\n\n### Setup (≈8 minutes)\n1. Google Sheet, tab `Watches`, headers: **URL**, **Label**, **Watch For** (e.g. \"the Pro plan monthly price\"), **Last Value** (leave empty).\n2. **Get watch list** → connect Google → pick your spreadsheet + `Watches`.\n3. **Fetch the page** node is ready (no key needed).\n4. **Read the value (AI)** → add your OpenAI API key.\n5. **Email the change** → connect Gmail; set your email in the To field.\n6. **Update Last Value** → same spreadsheet + `Watches` tab.\n7. Activate the workflow. It runs daily at 8:00 and only emails you when something actually moved.\n\n💡 Self-contained — it only reads the public pages you point it at. No scraping service needed.\n💡 Be specific in **Watch For** — \"the Starter plan price\" beats \"the pricing\".\n\n— WorkflowStacks Premium Tool",
+        "height": 720,
+        "width": 480,
+        "color": 1
+      },
+      "id": "10a00001-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-60, -240]
+    },
+    {
+      "parameters": { "rule": { "interval": [ { "field": "days", "triggerAtHour": 8 } ] } },
+      "id": "10a00001-0002-4000-8000-000000000002",
+      "name": "Every day 8:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [460, 120]
+    },
+    {
+      "parameters": { "documentId": { "__rl": true, "mode": "list", "value": "" }, "sheetName": { "__rl": true, "mode": "list", "value": "" }, "options": {} },
+      "id": "10a00001-0003-4000-8000-000000000003",
+      "name": "Get watch list",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [680, 120]
+    },
+    {
+      "parameters": { "url": "={{ $json.URL }}", "options": { "response": { "response": { "responseFormat": "text" } } } },
+      "id": "10a00001-0004-4000-8000-000000000004",
+      "name": "Fetch the page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 120]
+    },
+    {
+      "parameters": {
+        "modelId": { "__rl": true, "mode": "list", "value": "gpt-4o-mini", "cachedResultName": "gpt-4o-mini" },
+        "messages": { "values": [ { "content": "=You extract one specific value from a web page's raw text. Return ONLY that value as a short plain string — no explanation, no quotes.\n\nWhat to find: {{ $('Get watch list').item.json['Watch For'] }}\n\nPage text (truncated):\n{{ $json.data.toString().replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').slice(0, 6000) }}\n\nIf you cannot find it, return exactly: NOT_FOUND", "role": "user" } ] },
+        "options": {}
+      },
+      "id": "10a00001-0005-4000-8000-000000000005",
+      "name": "Read the value (AI)",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [1120, 120]
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [
+          { "id": "w-url", "name": "URL", "value": "={{ $('Get watch list').item.json.URL }}", "type": "string" },
+          { "id": "w-label", "name": "Label", "value": "={{ $('Get watch list').item.json.Label }}", "type": "string" },
+          { "id": "w-watch", "name": "Watch For", "value": "={{ $('Get watch list').item.json['Watch For'] }}", "type": "string" },
+          { "id": "w-old", "name": "Old Value", "value": "={{ $('Get watch list').item.json['Last Value'] }}", "type": "string" },
+          { "id": "w-new", "name": "Last Value", "value": "={{ $json.message.content.trim() }}", "type": "string" }
+        ] },
+        "options": {}
+      },
+      "id": "10a00001-0006-4000-8000-000000000006",
+      "name": "Shape the check",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1340, 120]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            { "id": "c-changed", "leftValue": "={{ $json['Last Value'] }}", "rightValue": "={{ $json['Old Value'] }}", "operator": { "type": "string", "operation": "notEquals" } },
+            { "id": "c-found", "leftValue": "={{ $json['Last Value'] }}", "rightValue": "NOT_FOUND", "operator": { "type": "string", "operation": "notEquals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "10a00001-0007-4000-8000-000000000007",
+      "name": "Did it change?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1560, 120]
+    },
+    {
+      "parameters": {
+        "sendTo": "you@example.com",
+        "subject": "=⚡ {{ $json.Label }} changed: {{ $json['Watch For'] }}",
+        "emailType": "text",
+        "message": "={{ $json.Label }} ({{ $json.URL }})\n\nWatching: {{ $json['Watch For'] }}\n\nWas:  {{ $json['Old Value'] || '(first check)' }}\nNow:  {{ $json['Last Value'] }}\n",
+        "options": {}
+      },
+      "id": "10a00001-0008-4000-8000-000000000008",
+      "name": "Email the change",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1800, 20]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "mode": "list", "value": "" },
+        "sheetName": { "__rl": true, "mode": "list", "value": "" },
+        "columns": { "mappingMode": "defineBelow", "value": { "URL": "={{ $json.URL }}", "Last Value": "={{ $json['Last Value'] }}" }, "matchingColumns": ["URL"], "schema": [] },
+        "options": {}
+      },
+      "id": "10a00001-0009-4000-8000-000000000009",
+      "name": "Update Last Value",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1800, 220]
+    }
+  ],
+  "connections": {
+    "Every day 8:00": { "main": [[{ "node": "Get watch list", "type": "main", "index": 0 }]] },
+    "Get watch list": { "main": [[{ "node": "Fetch the page", "type": "main", "index": 0 }]] },
+    "Fetch the page": { "main": [[{ "node": "Read the value (AI)", "type": "main", "index": 0 }]] },
+    "Read the value (AI)": { "main": [[{ "node": "Shape the check", "type": "main", "index": 0 }]] },
+    "Shape the check": { "main": [[{ "node": "Did it change?", "type": "main", "index": 0 }]] },
+    "Did it change?": { "main": [[{ "node": "Email the change", "type": "main", "index": 0 }], [{ "node": "Update Last Value", "type": "main", "index": 0 }]] },
+    "Email the change": { "main": [[{ "node": "Update Last Value", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }, "pinData": {}, "meta": { "templateCredsSetupCompleted": false }
+}
