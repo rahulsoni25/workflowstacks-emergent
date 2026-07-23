@@ -72,6 +72,12 @@ jobs:
             "$BASE_URL/api/cleanup" | tee /tmp/cleanup.json
           echo
 
+      - name: Did-it-work follow-ups (validates rung 1)
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/did-it-work" | tee /tmp/diw.json
+          echo
+
       - name: Weekly digest email (Mondays only)
         if: github.event_name == 'schedule'
         run: |

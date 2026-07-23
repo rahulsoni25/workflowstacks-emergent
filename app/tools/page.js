@@ -3,6 +3,8 @@ import { ArrowLeft, ArrowRight, KeyRound, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { BUNDLES } from '@/lib/bundles'
+import { COMING_SOON } from '@/lib/coming-soon'
+import ComingSoon from './ComingSoon'
 
 export const metadata = {
   title: 'Premium AI Tools — Lead Finder, Rank Tracker & More | WorkflowStacks',
@@ -73,6 +75,12 @@ export default function ToolsPage() {
             </div>
           </>
         )}
+
+        <div className="mt-16 mb-4">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-1">Coming soon — vote with your email</h2>
+          <p className="text-slate-500 text-sm">We build the ones people actually want. Tap “notify me” on any you’d use.</p>
+        </div>
+        <ComingSoon tools={COMING_SOON} />
 
         <p className="text-sm text-slate-500 text-center mt-12">
           Prefer free? <Link href="/templates" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">Browse 11 free workflow templates</Link>.
