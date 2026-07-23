@@ -1,0 +1,61 @@
+{
+  "name": "ICP Fit Checker — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🎯 ICP Fit Checker\n\n**What it does:** scores every lead in a spreadsheet against your ideal customer profile (1-5) with a one-line reason, so you spend outreach time on the prospects who’ll actually buy — not the whole list.\n\n### Setup (≈5 minutes)\n1. Google Sheet, tab `Leads`, headers: **Company**, **What They Do**, **Size / Notes**, **Fit** (leave empty).\n2. Add an empty tab named `Scored`.\n3. **Get leads** → connect Google → pick your spreadsheet + `Leads`.\n4. **Score fit (AI)** → add your OpenAI API key, then EDIT the prompt: replace the ICP description with YOUR ideal customer (industry, size, pain, who buys).\n5. **Save scores** → same spreadsheet + `Scored` tab.\n6. Execute. Sort `Scored` by Fit and work top-down.\n\n💡 The score is only as good as your ICP description — be specific about who you win with.\n\n— Free template from workflowstacks.com",
+        "height": 640,
+        "width": 460,
+        "color": 3
+      },
+      "id": "dd040001-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -200]
+    },
+    { "parameters": {}, "id": "dd040001-0002-4000-8000-000000000002", "name": "When clicking Execute", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "position": [480, 60] },
+    {
+      "parameters": { "documentId": { "__rl": true, "mode": "list", "value": "" }, "sheetName": { "__rl": true, "mode": "list", "value": "" }, "options": {} },
+      "id": "dd040001-0003-4000-8000-000000000003", "name": "Get leads", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.5, "position": [700, 60]
+    },
+    {
+      "parameters": {
+        "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 }, "conditions": [ { "id": "c-fit-empty", "leftValue": "={{ $json.Fit }}", "rightValue": "", "operator": { "type": "string", "operation": "empty", "singleValue": true } } ], "combinator": "and" },
+        "options": {}
+      },
+      "id": "dd040001-0004-4000-8000-000000000004", "name": "Only unscored leads", "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [920, 60]
+    },
+    {
+      "parameters": {
+        "modelId": { "__rl": true, "mode": "list", "value": "gpt-4o-mini", "cachedResultName": "gpt-4o-mini" },
+        "messages": { "values": [ { "content": "=You score how well a lead fits an ideal customer profile. Return STRICT JSON only.\n\n=== MY IDEAL CUSTOMER PROFILE (edit this to describe YOUR best customers) ===\nB2B SaaS and service businesses, 2-50 employees, that sell online and feel the pain of manual, repetitive work. Best fit: a founder or small team without dedicated ops staff. Poor fit: large enterprises, pure consumer apps, agencies reselling.\n=== END ICP ===\n\nLead:\nCompany: {{ $json.Company }}\nWhat they do: {{ $json['What They Do'] }}\nSize / notes: {{ $json['Size / Notes'] }}\n\nReturn:\n{\n  \"fit\": 1-5 integer (5 = textbook ICP match, 1 = clearly not a fit),\n  \"why\": \"under 14 words - the single biggest reason for the score\"\n}\nReturn ONLY the JSON.", "role": "user" } ] },
+        "jsonOutput": true, "options": {}
+      },
+      "id": "dd040001-0005-4000-8000-000000000005", "name": "Score fit (AI)", "type": "@n8n/n8n-nodes-langchain.openAi", "typeVersion": 1.8, "position": [1160, 40]
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [
+          { "id": "f-company", "name": "Company", "value": "={{ $('Only unscored leads').item.json.Company }}", "type": "string" },
+          { "id": "f-fit", "name": "Fit", "value": "={{ $json.message.content.fit }}", "type": "number" },
+          { "id": "f-why", "name": "Why", "value": "={{ $json.message.content.why }}", "type": "string" }
+        ] },
+        "options": {}
+      },
+      "id": "dd040001-0006-4000-8000-000000000006", "name": "Shape the result", "type": "n8n-nodes-base.set", "typeVersion": 3.4, "position": [1400, 40]
+    },
+    {
+      "parameters": { "operation": "append", "documentId": { "__rl": true, "mode": "list", "value": "" }, "sheetName": { "__rl": true, "mode": "list", "value": "" }, "columns": { "mappingMode": "autoMapInputData", "value": {}, "matchingColumns": [], "schema": [] }, "options": {} },
+      "id": "dd040001-0007-4000-8000-000000000007", "name": "Save scores", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.5, "position": [1620, 40]
+    }
+  ],
+  "connections": {
+    "When clicking Execute": { "main": [[{ "node": "Get leads", "type": "main", "index": 0 }]] },
+    "Get leads": { "main": [[{ "node": "Only unscored leads", "type": "main", "index": 0 }]] },
+    "Only unscored leads": { "main": [[{ "node": "Score fit (AI)", "type": "main", "index": 0 }]] },
+    "Score fit (AI)": { "main": [[{ "node": "Shape the result", "type": "main", "index": 0 }]] },
+    "Shape the result": { "main": [[{ "node": "Save scores", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }, "pinData": {}, "meta": { "templateCredsSetupCompleted": false }
+}

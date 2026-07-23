@@ -1,0 +1,61 @@
+{
+  "name": "Objection Prep Card — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🛡️ Objection Prep Card\n\n**What it does:** for each upcoming deal in a spreadsheet, generates the 3 objections you’re most likely to hear and a strong, honest response to each — so you walk into every call already prepared instead of improvising.\n\n### Setup (≈5 minutes)\n1. Google Sheet, tab `Deals`, headers: **Prospect**, **What You’re Selling**, **Context** (their situation, budget signals, who’s involved), **Prep** (leave empty).\n2. Add an empty tab named `Prep Cards`.\n3. **Get deals** → connect Google → pick your spreadsheet + `Deals`.\n4. **Build prep (AI)** → add your OpenAI API key.\n5. **Save prep cards** → same spreadsheet + `Prep Cards` tab.\n6. Execute. Read the card before each call.\n\n💡 Better `Context` = sharper objections. Mention price sensitivity, competitors, or the decision-maker if you know them.\n\n— Free template from workflowstacks.com",
+        "height": 620,
+        "width": 460,
+        "color": 6
+      },
+      "id": "ee050001-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -200]
+    },
+    { "parameters": {}, "id": "ee050001-0002-4000-8000-000000000002", "name": "When clicking Execute", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "position": [480, 60] },
+    {
+      "parameters": { "documentId": { "__rl": true, "mode": "list", "value": "" }, "sheetName": { "__rl": true, "mode": "list", "value": "" }, "options": {} },
+      "id": "ee050001-0003-4000-8000-000000000003", "name": "Get deals", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.5, "position": [700, 60]
+    },
+    {
+      "parameters": {
+        "conditions": { "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 }, "conditions": [ { "id": "c-prep-empty", "leftValue": "={{ $json.Prep }}", "rightValue": "", "operator": { "type": "string", "operation": "empty", "singleValue": true } } ], "combinator": "and" },
+        "options": {}
+      },
+      "id": "ee050001-0004-4000-8000-000000000004", "name": "Only deals without prep", "type": "n8n-nodes-base.if", "typeVersion": 2.2, "position": [920, 60]
+    },
+    {
+      "parameters": {
+        "modelId": { "__rl": true, "mode": "list", "value": "gpt-4o-mini", "cachedResultName": "gpt-4o-mini" },
+        "messages": { "values": [ { "content": "=You prep a founder for a sales call. Anticipate real objections and arm them with honest, non-pushy responses.\n\nProspect: {{ $json.Prospect }}\nSelling: {{ $json['What You\\'re Selling'] }}\nContext: {{ $json.Context }}\n\nWrite a prep card in plain text, EXACTLY this shape:\n\nLIKELY OBJECTIONS\n1. \"<the objection in their words>\"\n   → <a 1-2 sentence response: acknowledge it honestly, then reframe with a concrete point. Never dismissive, never a hard sell.>\n2. \"<objection>\"\n   → <response>\n3. \"<objection>\"\n   → <response>\n\nONE THING TO ASK THEM\n<a single sharp discovery question that surfaces the real blocker>\n\nRules: base objections on the actual context given; the more specific the better. No generic 'it's too expensive' unless context implies price sensitivity. Return ONLY the prep card text.", "role": "user" } ] },
+        "options": {}
+      },
+      "id": "ee050001-0005-4000-8000-000000000005", "name": "Build prep (AI)", "type": "@n8n/n8n-nodes-langchain.openAi", "typeVersion": 1.8, "position": [1160, 40]
+    },
+    {
+      "parameters": {
+        "assignments": { "assignments": [
+          { "id": "p-prospect", "name": "Prospect", "value": "={{ $('Only deals without prep').item.json.Prospect }}", "type": "string" },
+          { "id": "p-prep", "name": "Prep Card", "value": "={{ $json.message.content }}", "type": "string" },
+          { "id": "p-at", "name": "Prepared At", "value": "={{ $now.format('yyyy-MM-dd HH:mm') }}", "type": "string" }
+        ] },
+        "options": {}
+      },
+      "id": "ee050001-0006-4000-8000-000000000006", "name": "Shape the card", "type": "n8n-nodes-base.set", "typeVersion": 3.4, "position": [1400, 40]
+    },
+    {
+      "parameters": { "operation": "append", "documentId": { "__rl": true, "mode": "list", "value": "" }, "sheetName": { "__rl": true, "mode": "list", "value": "" }, "columns": { "mappingMode": "autoMapInputData", "value": {}, "matchingColumns": [], "schema": [] }, "options": {} },
+      "id": "ee050001-0007-4000-8000-000000000007", "name": "Save prep cards", "type": "n8n-nodes-base.googleSheets", "typeVersion": 4.5, "position": [1620, 40]
+    }
+  ],
+  "connections": {
+    "When clicking Execute": { "main": [[{ "node": "Get deals", "type": "main", "index": 0 }]] },
+    "Get deals": { "main": [[{ "node": "Only deals without prep", "type": "main", "index": 0 }]] },
+    "Only deals without prep": { "main": [[{ "node": "Build prep (AI)", "type": "main", "index": 0 }]] },
+    "Build prep (AI)": { "main": [[{ "node": "Shape the card", "type": "main", "index": 0 }]] },
+    "Shape the card": { "main": [[{ "node": "Save prep cards", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }, "pinData": {}, "meta": { "templateCredsSetupCompleted": false }
+}

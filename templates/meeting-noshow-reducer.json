@@ -1,0 +1,71 @@
+{
+  "name": "Meeting No-Show Reducer — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 📅 Meeting No-Show Reducer\n\n**What it does:** every morning it checks your meetings sheet and emails a friendly, confirming reminder to anyone you’re meeting TOMORROW — cutting no-shows without you lifting a finger.\n\n### Setup (≈6 minutes)\n1. Google Sheet, tab `Meetings`, headers: **Name**, **Email**, **Meeting Date** (as YYYY-MM-DD, e.g. 2026-07-25), **Topic**.\n2. **Get meetings** → connect Google → pick your spreadsheet + `Meetings`.\n3. **Email the reminder** → connect your Gmail account.\n4. Activate the workflow (toggle top-right). It runs daily at 9:00 and reminds everyone scheduled for the next day.\n\n💡 Keep the sheet current — add meetings as you book them. Past rows are ignored automatically.\n💡 This one DOES send automatically (reminders are low-risk). Edit the message in **Email the reminder** to match your voice.\n\n— Free template from workflowstacks.com",
+        "height": 600,
+        "width": 460,
+        "color": 5
+      },
+      "id": "ff060001-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -180]
+    },
+    {
+      "parameters": { "rule": { "interval": [ { "field": "days", "triggerAtHour": 9 } ] } },
+      "id": "ff060001-0002-4000-8000-000000000002",
+      "name": "Every day 9:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [480, 60]
+    },
+    {
+      "parameters": { "documentId": { "__rl": true, "mode": "list", "value": "" }, "sheetName": { "__rl": true, "mode": "list", "value": "" }, "options": {} },
+      "id": "ff060001-0003-4000-8000-000000000003",
+      "name": "Get meetings",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [700, 60]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "loose", "version": 2 },
+          "conditions": [
+            { "id": "c-tomorrow", "leftValue": "={{ $json['Meeting Date'] }}", "rightValue": "={{ $now.plus({ days: 1 }).format('yyyy-MM-dd') }}", "operator": { "type": "string", "operation": "equals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ff060001-0004-4000-8000-000000000004",
+      "name": "Meeting is tomorrow?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [920, 60]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=Quick reminder: our meeting tomorrow ({{ $json.Topic }})",
+        "emailType": "text",
+        "message": "=Hi {{ $json.Name }},\n\nJust a quick note to confirm we're still on for tomorrow to talk about {{ $json.Topic }}. Looking forward to it.\n\nIf anything's changed on your end, no problem at all — just reply here and we'll find a better time.\n\nSee you then!\n",
+        "options": {}
+      },
+      "id": "ff060001-0005-4000-8000-000000000005",
+      "name": "Email the reminder",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1160, 40]
+    }
+  ],
+  "connections": {
+    "Every day 9:00": { "main": [[{ "node": "Get meetings", "type": "main", "index": 0 }]] },
+    "Get meetings": { "main": [[{ "node": "Meeting is tomorrow?", "type": "main", "index": 0 }]] },
+    "Meeting is tomorrow?": { "main": [[{ "node": "Email the reminder", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" }, "pinData": {}, "meta": { "templateCredsSetupCompleted": false }
+}
