@@ -28,7 +28,7 @@ export function generateMetadata({ params }) {
 const IMPORT_STEPS = [
   { title: 'Download the workflow', desc: 'One JSON file — it contains the whole automation, with setup instructions inside.' },
   { title: 'Import into n8n', desc: 'In n8n (free at n8n.io): Workflows → ⋮ menu → "Import from File" → pick the downloaded file.' },
-  { title: 'Connect your accounts', desc: 'The workflow tells you exactly which nodes to open — connect Google Sheets and your AI key. ~5 minutes.' },
+  { title: 'Connect your accounts', desc: 'The workflow tells you exactly which nodes to open — connect the accounts listed under "What you need". ~5 minutes.' },
   { title: 'Click Execute', desc: 'That\'s it. It runs. Edit the prompt inside any time to change the output style.' },
 ]
 

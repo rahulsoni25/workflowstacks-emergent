@@ -1,0 +1,104 @@
+{
+  "name": "AI Support Agent (Chat) — WorkflowStacks",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 💬 AI Support Agent (Chat)\n\n**What it does:** a chat agent that answers your customers' questions from YOUR business info — prices, shipping, returns, FAQs — with memory of the conversation. It only answers from what you give it; anything it doesn't know, it says so and offers a human. Nothing is invented.\n\n### Setup (≈5 minutes)\n1. Open **OpenAI Chat Model** → add your OpenAI API key (any OpenAI-compatible key works).\n2. Open **Support Agent** → edit the **System Message** → replace the `[PASTE YOUR BUSINESS INFO HERE]` block with your real info: what you sell, prices, shipping times, return policy, FAQs, contact email.\n3. Click the **Chat** button at the bottom of the canvas — and talk to your agent.\n\n### Put it on your website (optional)\nOpen **When chat message received** → set *Make Chat Publicly Available*, then **activate** the workflow. n8n gives you a hosted chat page URL you can link or embed.\n\n💡 The agent remembers the conversation (last 10 messages) — follow-up questions just work.\n\n— Free template from workflowstacks.com",
+        "height": 640,
+        "width": 460,
+        "color": 5
+      },
+      "id": "c7d8e9f0-0001-4000-8000-000000000001",
+      "name": "Setup instructions",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-40, -180]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "c7d8e9f0-0002-4000-8000-000000000002",
+      "name": "When chat message received",
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [480, 60],
+      "webhookId": "c7d8e9f0-aaaa-4000-8000-000000000099"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are the friendly customer support agent for the business described below.\n\nRules:\n- Answer ONLY from the business info provided. If the answer is not in it, say you're not sure and offer to connect the customer with a human at the contact email.\n- Keep replies short, warm, and concrete. No corporate clichés.\n- Never invent policies, prices, discounts, or promises.\n- If a customer is upset, acknowledge it once, then focus on the concrete next step.\n\n=== BUSINESS INFO (edit this!) ===\n[PASTE YOUR BUSINESS INFO HERE — what you sell, prices, shipping times, return policy, FAQs, opening hours, contact email]\n=== END BUSINESS INFO ==="
+        }
+      },
+      "id": "c7d8e9f0-0003-4000-8000-000000000003",
+      "name": "Support Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [760, 60]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "options": {}
+      },
+      "id": "c7d8e9f0-0004-4000-8000-000000000004",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "id": "c7d8e9f0-0005-4000-8000-000000000005",
+      "name": "Chat Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [860, 300]
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Support Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Support Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Support Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
