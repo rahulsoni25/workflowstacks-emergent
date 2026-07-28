@@ -49,7 +49,7 @@ export default function FounderLaunchPage() {
             Founder Launch Assistant
           </h1>
           <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            Validate your offer and get your first 10 customers in 48 hours with AI-powered market research, competitor analysis, and outreach
+            Validate your offer and plan your path to your first customers with AI-powered market research, competitor analysis, and outreach
           </p>
         </div>
 
