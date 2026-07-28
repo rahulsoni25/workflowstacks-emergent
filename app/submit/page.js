@@ -22,7 +22,7 @@ const STATS = [
 const STEPS = [
   { n: '1', title: 'Submit your tool', body: 'Fill in the form — takes under 5 minutes. Include a GitHub link if it\'s open-source.' },
   { n: '2', title: 'We review + publish', body: 'Our team checks quality and fit. You\'ll hear back by email within a few days.' },
-  { n: '3', title: 'Buyers find you, you earn', body: 'Your tool goes live to our launch audience and Fluo Digital\'s client network. Creators earn a revenue share on every sale — full terms shared during onboarding.' },
+  { n: '3', title: 'Buyers find you, you earn', body: 'Your tool goes live to our launch audience and client network. Creators earn a revenue share on every sale — full terms shared during onboarding.' },
 ]
 
 export default function SubmitPage() {
@@ -124,7 +124,7 @@ export default function SubmitPage() {
             Earn from every sale
           </h1>
           <p className="text-slate-400 text-lg leading-relaxed max-w-lg mx-auto">
-            WorkflowStacks surfaces your tool to our launch audience and Fluo Digital's client network. You submit, we curate, you earn.
+            WorkflowStacks surfaces your tool to our launch audience and client network. You submit, we curate, you earn.
           </p>
         </div>
 

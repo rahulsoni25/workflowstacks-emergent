@@ -19,7 +19,7 @@ export default function LearnCreatorsPage() {
       </header>
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center">For Creators</h1>
-        <p className="text-xl text-slate-300 text-center mb-16 max-w-2xl mx-auto">Share your AI skills with our launch audience and Fluo Digital's client network. Get discovered, build reputation, and earn.</p>
+        <p className="text-xl text-slate-300 text-center mb-16 max-w-2xl mx-auto">Share your AI skills with our launch audience and client network. Get discovered, build reputation, and earn.</p>
         
         <div className="space-y-8">
           <Card className="bg-gradient-to-br from-teal-500/10 to-cyan-500/10 border-teal-500/30">
