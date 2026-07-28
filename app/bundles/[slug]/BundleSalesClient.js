@@ -10,12 +10,28 @@ import { Card, CardContent } from '@/components/ui/card'
 export default function BundleSalesClient({ bundle }) {
   const searchParams = useSearchParams()
   const justPurchased = searchParams.get('purchased') === '1'
+  const sessionId = searchParams.get('session_id') || ''
   const [state, setState] = useState('idle') // idle | working | error
   const [error, setError] = useState('')
+  const [unlockUrl, setUnlockUrl] = useState('')
 
   useEffect(() => {
     if (justPurchased) window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [justPurchased])
+
+  // Claim the purchase straight from the checkout redirect so the buyer gets
+  // their download immediately, without waiting on the delivery email.
+  useEffect(() => {
+    if (!justPurchased || !sessionId) return
+    fetch('/api/bundles/claim', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ session_id: sessionId }),
+    })
+      .then((r) => r.json())
+      .then((d) => { if (d.unlock_url) setUnlockUrl(d.unlock_url) })
+      .catch(() => {})
+  }, [justPurchased, sessionId])
 
   async function buy() {
     setState('working')
@@ -52,8 +68,19 @@ export default function BundleSalesClient({ bundle }) {
           <Card className="bg-[#C6F24E]/10 border-[#C6F24E]/40 mb-8">
             <CardContent className="py-5 text-center">
               <Check className="w-8 h-8 text-[#C6F24E] mx-auto mb-2" />
-              <p className="text-white font-semibold">Purchase complete — check your email.</p>
-              <p className="text-slate-300 text-sm mt-1">We sent your private download link to your inbox. It's yours to keep.</p>
+              <p className="text-white font-semibold">Purchase complete!</p>
+              {unlockUrl ? (
+                <>
+                  <p className="text-slate-300 text-sm mt-1 mb-4">Your download is ready — the link is yours to keep.</p>
+                  <Link href={unlockUrl}>
+                    <Button className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold">
+                      Download {bundle.title} →
+                    </Button>
+                  </Link>
+                </>
+              ) : (
+                <p className="text-slate-300 text-sm mt-1">Preparing your download… We'll also email your private link so you never lose it.</p>
+              )}
             </CardContent>
           </Card>
         )}
