@@ -17,7 +17,7 @@ const STATIC_ROUTES = [
   ...Object.keys(MCP_SERVERS).map((slug) => `/mcp/${slug}`),
   '/learn', '/learn/how-it-works', '/learn/agents', '/learn/skills',
   '/learn/mcp', '/learn/creators', '/learn/security', '/learn/resources',
-  '/about', '/docs', '/help', '/enterprise', '/founder-launch',
+  '/about', '/docs', '/help', '/enterprise', '/founder-launch', '/pricing',
   '/privacy', '/terms',
   '/submit',
 ]
