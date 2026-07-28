@@ -9,16 +9,20 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
+// NOTE: revenue-share wording is intentionally unspecified here — the exact
+// split is an owner decision (85% vs 80/20 was inconsistent across channels).
+// Final terms are shared during creator onboarding; don't put a number on
+// this page until the owner confirms one.
 const STATS = [
-  { icon: Sparkles, value: '182', label: 'tools indexed' },
-  { icon: DollarSign, value: '85%', label: 'revenue to creators' },
-  { icon: Clock, value: '48h', label: 'review time' },
+  { icon: Sparkles, value: '1,500+', label: 'skills indexed' },
+  { icon: DollarSign, value: 'Rev share', label: 'on every sale' },
+  { icon: Clock, value: 'Days', label: 'typical review time' },
 ]
 
 const STEPS = [
   { n: '1', title: 'Submit your tool', body: 'Fill in the form — takes under 5 minutes. Include a GitHub link if it\'s open-source.' },
-  { n: '2', title: 'We review + publish', body: 'Our team checks quality and fit. You\'ll hear back by email within 48 hours.' },
-  { n: '3', title: 'Founders buy, you earn', body: 'Your tool goes live to thousands of founders. You keep 85% of every sale, paid monthly.' },
+  { n: '2', title: 'We review + publish', body: 'Our team checks quality and fit. You\'ll hear back by email within a few days.' },
+  { n: '3', title: 'Buyers find you, you earn', body: 'Your tool goes live to our launch audience and Fluo Digital\'s client network. Creators earn a revenue share on every sale — full terms shared during onboarding.' },
 ]
 
 export default function SubmitPage() {
@@ -78,7 +82,7 @@ export default function SubmitPage() {
               </div>
               <h1 className="text-2xl font-bold text-white mb-3">Application received!</h1>
               <p className="text-slate-400 mb-6">
-                We'll review within 48 hours and email you at{' '}
+                We'll review your application and email you at{' '}
                 <span className="text-teal-400 font-medium">{form.email}</span>.
               </p>
               <Link href="/">
@@ -117,10 +121,10 @@ export default function SubmitPage() {
             <Sparkles className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl font-bold text-white mb-3 leading-tight">
-            Earn 85% of every sale
+            Earn from every sale
           </h1>
           <p className="text-slate-400 text-lg leading-relaxed max-w-lg mx-auto">
-            WorkflowStacks surfaces your tool to thousands of founders. You submit, we curate, you earn. Review within 48 hours.
+            WorkflowStacks surfaces your tool to our launch audience and Fluo Digital's client network. You submit, we curate, you earn.
           </p>
         </div>
 
@@ -248,7 +252,7 @@ export default function SubmitPage() {
               </Button>
 
               <p className="text-center text-xs text-slate-500">
-                We review every application. You'll hear back within 48 hours.
+                We review every application. You'll hear back within a few days.
               </p>
             </form>
           </CardContent>

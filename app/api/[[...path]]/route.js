@@ -2598,7 +2598,7 @@ export async function POST(request) {
       };
 
       await database.collection('creator_applications').insertOne(application);
-      return Response.json({ ok: true, message: 'Application received! We review within 48 hours.' });
+      return Response.json({ ok: true, message: 'Application received! We review every application and reply within a few days.' });
     }
 
     // Admin: approve a creator application, generate API key, upsert creator record
