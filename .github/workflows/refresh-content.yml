@@ -9,7 +9,7 @@ on:
   workflow_dispatch: {} # manual "Run workflow" button
 
 env:
-  BASE_URL: https://workflowstacks-emergent.vercel.app
+  BASE_URL: https://workflowstacks.com
 
 jobs:
   refresh:

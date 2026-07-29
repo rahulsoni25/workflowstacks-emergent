@@ -1,0 +1,99 @@
+name: Fortnightly SEO/AEO/GEO optimize
+
+# Runs autonomously on the 1st and 16th (a ~15-day cycle) and self-heals the
+# catalog's SEO health. No approval step — it fixes what it can, then reports.
+#
+# ORDER MATTERS:
+#   1. Audit first, so the run records the score it started from.
+#   2. Deterministic hygiene (/api/seo-optimize) — duplicate titles, meta
+#      length. Bounded, reversible text transforms. No generation.
+#   3. Judge-gated rewriting (/api/agent-rewrite) ONLY for records too thin to
+#      fix mechanically, targeting 9/10. This reuses the existing rewriter
+#      rather than adding a second one.
+#   4. Re-audit and open an issue if it still can't reach the pass mark.
+#
+# WHY THE CAPS: Google's scaled-content-abuse policy targets bulk machine-
+# generated pages, and this repo already disabled /api/rewrite-titles (410)
+# after automated titling produced junk. Small caps plus a 45-day per-record
+# cooldown mean the site improves steadily instead of churning — Google
+# distrusts pages that rewrite themselves constantly.
+
+on:
+  schedule:
+    - cron: '0 4 1,16 * *' # 04:00 UTC on the 1st and 16th
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Report only — make no changes'
+        type: boolean
+        default: false
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Audit — score before
+        id: before
+        run: node scripts/seo-check.mjs
+        continue-on-error: true
+
+      - name: Fix — deterministic SEO hygiene (capped)
+        run: |
+          DRY="${{ inputs.dry_run && 'true' || 'false' }}"
+          curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/seo-optimize?limit=40&dryRun=$DRY" | tee /tmp/seo-fix.json
+          echo
+
+      - name: Fix — rewrite records too thin to repair mechanically
+        if: ${{ !inputs.dry_run }}
+        run: |
+          # Judge-gated to 9/10. Small batches: the free LLM tier rate-limits,
+          # and a slow steady climb is the point — not a bulk regeneration.
+          for i in 1 2 3; do
+            R=$(curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/agent-rewrite?pending=true&gateMin=9&limit=5") || break
+            echo "batch $i: $(echo "$R" | jq -c '{updated,published}' 2>/dev/null || echo "$R")"
+            [ "$(echo "$R" | jq -r '.updated // 0' 2>/dev/null)" = "0" ] && break
+            sleep 62
+          done
+
+      - name: Audit — score after
+        id: after
+        run: node scripts/seo-check.mjs
+        continue-on-error: true
+
+      - name: Report — open an issue if still below the pass mark
+        if: steps.after.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const summary = process.env.GITHUB_STEP_SUMMARY
+            const body = [
+              'The fortnightly SEO/AEO/GEO optimizer ran and could not reach the pass mark on its own.',
+              '',
+              'Everything mechanically fixable has already been applied. What remains needs a human —',
+              'typically: pages whose copy is too thin to repair without inventing claims, or a',
+              'structural issue (schema, sitemap, canonicals) that lives in code rather than the database.',
+              '',
+              fs.existsSync(summary) ? fs.readFileSync(summary, 'utf8') : 'See the Action logs.',
+            ].join('\n')
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `SEO/AEO/GEO below pass mark — ${new Date().toISOString().slice(0,10)}`,
+              body,
+              labels: ['seo'],
+            })
