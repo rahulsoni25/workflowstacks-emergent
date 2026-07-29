@@ -64,8 +64,8 @@ export default function RootLayout({ children }) {
     '@type': 'Organization',
     name: 'WorkflowStacks',
     description: 'A free marketplace for open-source AI skills, an agent builder, and group-buy tool deals for founders.',
-    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app',
-    logo: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'}/icon.svg`,
+    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com',
+    logo: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'}/icon.svg`,
     sameAs: ['https://github.com/rahulsoni25/workflowstacks-emergent'],
   }
 

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { getTemplate, TEMPLATES } from '@/lib/templates'
 import { outcomesForTemplate } from '@/lib/outcomes'
+import { softwareApplicationSchema, breadcrumbSchema } from '@/lib/schema'
 import DownloadButtons from './DownloadButtons'
 
 // Outcome-template landing pages — "download a working agent" is the new
@@ -37,8 +38,24 @@ export default function TemplatePage({ params }) {
   if (!tpl) notFound()
   const relatedOutcomes = outcomesForTemplate(tpl.slug)
 
+  // A template IS downloadable software, not an article about one. Priced at
+  // 0 because these are genuinely free — the schema must match the page.
+  const appSchema = softwareApplicationSchema({
+    name: tpl.title,
+    description: `${tpl.outcome} Free, importable n8n workflow — set up in about ${tpl.setup_minutes} minutes, no code.`,
+    url: `/templates/${tpl.slug}`,
+    priceUsd: 0,
+  })
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Templates', path: '/templates' },
+    { name: tpl.title, path: `/templates/${tpl.slug}` },
+  ])
+
   return (
     <div className="min-h-screen bg-neptune">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(appSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
