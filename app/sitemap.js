@@ -3,7 +3,57 @@ import { BUNDLES } from '../lib/bundles'
 import { OUTCOMES } from '../lib/outcomes'
 import { MCP_SERVERS } from '../lib/mcp-servers'
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'
+
+// --- Why this file gates skill pages -----------------------------------
+// Google Search Console (2026-07-29) reported 1,450 URLs "Discovered –
+// currently not indexed" and 45 "Crawled – currently not indexed". Google
+// sampled 45 skill pages, indexed none, then stopped crawling the rest.
+//
+// Skill pages are largely derived from third-party GitHub READMEs. At 1,749
+// of 1,827 sitemap URLs (96%) they consume nearly all crawl budget on a
+// domain with little authority, starving the pages that are original work
+// (templates, /automate outcome pages, MCP configs) — the ones that can
+// actually rank. Google's scaled-content-abuse policy judges usefulness, not
+// production method, so volume alone is a liability here.
+//
+// The gate below submits only skill pages carrying our OWN substantive
+// content (a real use_guide), top rewrite quality, and enough upstream
+// notability to have genuine search demand.
+//
+// IMPORTANT: this narrows the sitemap only. Every skill page stays live,
+// internally linked, and indexable — removing a URL from a sitemap is a
+// discovery hint, not a deindex request. Already-indexed pages keep their
+// index status. Raise these thresholds' generosity as domain authority grows.
+const SKILL_SITEMAP_GATE = {
+  minRewriteScore: 9, // top tier; publish gate is 8, so 9 = best ~22% (351/1578)
+  minStars: 1000, // upstream notability => real query volume for the tool name
+  minGuideRichness: 600, // chars of OUR written guidance; ~1/3 of the catalog falls below this
+}
+
+// use_guide is an OBJECT ({whatItDoes, whenToUse[], install, quickStart,
+// examplePrompt, gotcha}), not a string. `install` is deliberately excluded —
+// it's generic boilerplate ("git clone ...") on most entries, so counting it
+// would inflate thin pages. The remaining fields are what we actually wrote.
+function guideRichness(g) {
+  if (!g || typeof g !== 'object') return 0
+  const text = [g.whatItDoes, g.quickStart, g.examplePrompt, g.gotcha]
+    .filter((x) => typeof x === 'string')
+    .join(' ')
+  const whenToUse = Array.isArray(g.whenToUse) ? g.whenToUse.join(' ') : ''
+  return text.length + whenToUse.length
+}
+
+function passesSkillGate(s) {
+  const score = typeof s.rewrite_score === 'number' ? s.rewrite_score : 0
+  const stars = typeof s.github_stars === 'number' ? s.github_stars : 0
+  return (
+    !s.dead_repo &&
+    score >= SKILL_SITEMAP_GATE.minRewriteScore &&
+    stars >= SKILL_SITEMAP_GATE.minStars &&
+    guideRichness(s.use_guide) >= SKILL_SITEMAP_GATE.minGuideRichness
+  )
+}
 
 // Static, indexable routes
 const STATIC_ROUTES = [
@@ -22,6 +72,18 @@ const STATIC_ROUTES = [
   '/submit',
 ]
 
+// Priority tells Google which of OUR pages matter most relative to each
+// other. Original work (templates, outcome pages, MCP configs, paid tools)
+// outranks catalog pages — the reverse of the previous ordering, which gave
+// derivative skill pages a higher priority than hand-built templates.
+function priorityFor(path) {
+  if (path === '') return 1
+  if (path.startsWith('/templates') || path.startsWith('/automate')) return 0.9
+  if (path.startsWith('/tools') || path.startsWith('/bundles') || path.startsWith('/mcp')) return 0.8
+  if (path === '/skills' || path === '/pricing' || path.startsWith('/learn')) return 0.7
+  return 0.5
+}
+
 export const revalidate = 86400 // refresh sitemap daily
 
 export default async function sitemap() {
@@ -30,26 +92,26 @@ export default async function sitemap() {
     url: `${BASE}${path}`,
     lastModified: now,
     changeFrequency: path === '' || path === '/skills' ? 'daily' : path === '/submit' ? 'monthly' : 'weekly',
-    priority: path === '' ? 1 : path === '/skills' ? 0.9 : 0.6,
+    priority: priorityFor(path),
   }))
 
-  // Dynamic per-skill detail pages (published only). Tools and learning
-  // resources are fetched separately — /api/skills now returns tools only,
-  // but resource pages stay live and must stay indexed.
+  // Dynamic per-skill detail pages (published only), filtered by the quality
+  // gate above. Tools and learning resources are fetched separately —
+  // /api/skills returns tools only; resource pages stay live either way.
   let skillEntries = []
   try {
     const [toolsRes, resourcesRes] = await Promise.all([
-      fetch(`${BASE}/api/skills`, { next: { revalidate: 86400 } }),
-      fetch(`${BASE}/api/skills?type=resource`, { next: { revalidate: 86400 } }),
+      fetch(`${BASE}/api/skills?limit=2000`, { next: { revalidate: 86400 } }),
+      fetch(`${BASE}/api/skills?type=resource&limit=2000`, { next: { revalidate: 86400 } }),
     ])
     const docs = []
     if (toolsRes.ok) docs.push(...((await toolsRes.json()).skills || []))
     if (resourcesRes.ok) docs.push(...((await resourcesRes.json()).skills || []))
-    skillEntries = docs.map((s) => ({
+    skillEntries = docs.filter(passesSkillGate).map((s) => ({
       url: `${BASE}/skills/${s.slug || s.id}`,
       lastModified: s.last_updated ? new Date(s.last_updated) : now,
       changeFrequency: 'weekly',
-      priority: 0.7,
+      priority: 0.5,
     }))
   } catch (e) {
     // Sitemap still valid with just static routes if the API is unreachable
