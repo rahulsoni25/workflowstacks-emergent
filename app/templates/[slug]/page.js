@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { getTemplate, TEMPLATES } from '@/lib/templates'
 import { outcomesForTemplate } from '@/lib/outcomes'
+import { kitForTemplate } from '@/lib/kits'
 import { softwareApplicationSchema, breadcrumbSchema } from '@/lib/schema'
 import DownloadButtons from './DownloadButtons'
 
@@ -37,6 +38,7 @@ export default function TemplatePage({ params }) {
   const tpl = getTemplate(params.slug)
   if (!tpl) notFound()
   const relatedOutcomes = outcomesForTemplate(tpl.slug)
+  const kit = kitForTemplate(tpl.slug)
 
   // A template IS downloadable software, not an article about one. Priced at
   // 0 because these are genuinely free — the schema must match the page.
@@ -112,6 +114,15 @@ export default function TemplatePage({ params }) {
             </Card>
           ))}
         </div>
+
+        {kit && (
+          <div className="mb-12">
+            <h2 className="text-white font-bold text-xl mb-4">Finish editing it with</h2>
+            <Link href={`/kits/${kit.slug}`} className="inline-flex items-center gap-2 text-sm text-slate-300 bg-slate-900/60 border border-slate-700/50 hover:border-[#C6F24E]/40 rounded-full px-4 py-2 transition-colors">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C6F24E]" />{kit.title}
+            </Link>
+          </div>
+        )}
 
         {relatedOutcomes.length > 0 && (
           <div className="mb-12">

@@ -2,6 +2,8 @@ import { TEMPLATES } from '../lib/templates'
 import { BUNDLES } from '../lib/bundles'
 import { OUTCOMES } from '../lib/outcomes'
 import { MCP_SERVERS } from '../lib/mcp-servers'
+import { KITS } from '../lib/kits'
+import { SLASH_COMMANDS } from '../lib/commands'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'
 
@@ -63,8 +65,12 @@ const STATIC_ROUTES = [
   '/tools',
   ...Object.keys(BUNDLES).map((slug) => `/bundles/${slug}`),
   ...Object.keys(OUTCOMES).map((slug) => `/automate/${slug}`),
+  '/kits',
+  ...Object.keys(KITS).map((slug) => `/kits/${slug}`),
   '/mcp',
   ...Object.keys(MCP_SERVERS).map((slug) => `/mcp/${slug}`),
+  '/commands',
+  ...Object.keys(SLASH_COMMANDS).map((slug) => `/commands/${slug}`),
   '/learn', '/learn/how-it-works', '/learn/agents', '/learn/skills',
   '/learn/mcp', '/learn/creators', '/learn/security', '/learn/resources',
   '/about', '/docs', '/help', '/enterprise', '/founder-launch', '/pricing',
@@ -79,7 +85,7 @@ const STATIC_ROUTES = [
 function priorityFor(path) {
   if (path === '') return 1
   if (path.startsWith('/templates') || path.startsWith('/automate')) return 0.9
-  if (path.startsWith('/tools') || path.startsWith('/bundles') || path.startsWith('/mcp')) return 0.8
+  if (path.startsWith('/tools') || path.startsWith('/bundles') || path.startsWith('/mcp') || path.startsWith('/kits') || path.startsWith('/commands')) return 0.8
   if (path === '/skills' || path === '/pricing' || path.startsWith('/learn')) return 0.7
   return 0.5
 }

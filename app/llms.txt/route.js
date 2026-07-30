@@ -2,6 +2,8 @@ import { TEMPLATES } from '@/lib/templates'
 import { BUNDLES } from '@/lib/bundles'
 import { MCP_SERVERS } from '@/lib/mcp-servers'
 import { OUTCOMES } from '@/lib/outcomes'
+import { KITS, kitItemCount } from '@/lib/kits'
+import { SLASH_COMMANDS } from '@/lib/commands'
 import { SITE_URL } from '@/lib/schema'
 
 export const revalidate = 86400
@@ -21,6 +23,8 @@ export async function GET() {
   const bundles = Object.values(BUNDLES)
   const mcp = Object.values(MCP_SERVERS)
   const outcomes = Object.values(OUTCOMES)
+  const kits = Object.values(KITS)
+  const commands = Object.values(SLASH_COMMANDS)
 
   const body = `# WorkflowStacks
 
@@ -49,6 +53,18 @@ ${mcp.map((m) => `- [${m.title || m.name}](${SITE_URL}/mcp/${m.slug})`).join('\n
 ## Automation guides by outcome
 
 ${outcomes.map((o) => `- [${o.title || o.h1}](${SITE_URL}/automate/${o.slug})`).join('\n')}
+
+## Finishing kits (${kits.length})
+
+Curated, link-only sets of free/paid-tier creative assets (captions, badges, LUTs, overlays, SFX, music) matched to a specific ad style — not a generic stock library. We host none of these files; every pick links to its real source, and each includes what it actually costs.
+
+${kits.map((k) => `- [${k.title}](${SITE_URL}/kits/${k.slug}) — ${k.outcome} ${kitItemCount(k)} picks. Pairs with: ${k.template}.`).join('\n')}
+
+## Claude Code slash commands (${commands.length})
+
+Hand-verified slash commands for Claude Code. Each page shows the actual command file (not a description of one), credits its original author, and links to the source repo.
+
+${commands.map((c) => `- [${c.name}](${SITE_URL}/commands/${c.slug}) — ${c.blurb} License: ${c.license}, by ${c.author}.`).join('\n')}
 
 ## Services
 
