@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Search, Star, Download, Github, Sparkles, Zap, Code2, Brain, ArrowRight, Shield, Clock, TrendingUp, Users, ChevronRight, ChevronDown, Check, Mail, Play, Target, Layers, Bot } from 'lucide-react'
+import { Search, Star, Download, Github, Sparkles, Zap, Code2, Brain, ArrowRight, Shield, Clock, TrendingUp, Users, ChevronRight, Check, Mail, Play, Target, Layers, Bot } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -9,7 +9,6 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
-import WsMark from '@/components/WsMark'
 
 const fadeInUp = {
   initial: { opacity: 0, y: 30 },
@@ -130,65 +129,6 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
 
   return (
     <div className="min-h-screen bg-neptune">
-      {/* Sticky Header */}
-      <header className="border-b border-[#262B2D] bg-[#0A0C0D]/80 backdrop-blur-xl sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#C6F24E' }}>
-                <WsMark className="w-6 h-6" style={{ color: '#0A0C0D' }} />
-              </div>
-              <span className="wm text-xl text-slate-100">workflow<span className="s" style={{ color: '#C6F24E' }}>stacks</span></span>
-            </Link>
-            <nav className="hidden md:flex items-center gap-1">
-              {/* Primary destinations only — secondary links live under "More" so the
-                  bar stays focused on the core Build-an-Agent action. */}
-              <Link href="/discover">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">Discover</Button>
-              </Link>
-              <Link href="/problems">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">Problems</Button>
-              </Link>
-              {/* Deals link demoted into the More dropdown until the page has
-                  real content — kept out of primary nav to avoid dead-end clicks. */}
-
-              {/* More ▾ — hover/focus dropdown for secondary destinations */}
-              <div className="relative group">
-                <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white hover:bg-white/5 text-sm">
-                  More <ChevronDown className="w-3.5 h-3.5 ml-1 group-hover:rotate-180 transition-transform" />
-                </Button>
-                <div className="absolute right-0 top-full pt-2 hidden group-hover:block z-50">
-                  <div className="min-w-[190px] rounded-xl border border-[#262B2D] bg-[#101314] backdrop-blur-xl p-1.5 shadow-2xl shadow-black/40">
-                    {[
-                      { href: '/playbooks', label: 'Playbooks', note: 'Solve one problem' },
-                      { href: '/personas', label: 'Personas', note: 'Role-in-a-box' },
-                      { href: '/packs', label: 'Starter Packs', note: 'Skill bundles' },
-                      { href: '/community', label: 'Community gallery', note: 'Agents others built' },
-                      { href: '/members', label: 'Members', note: 'The network' },
-                      { href: '/my-agents', label: 'My Agents', note: 'Your saved builds' },
-                      { href: '/help', label: 'How it works' },
-                    ].map((l) => (
-                      <Link key={l.href} href={l.href} className="block rounded-lg px-3 py-2 hover:bg-white/5 transition-colors">
-                        <span className="block text-sm text-slate-200">{l.label}</span>
-                        {l.note && <span className="block text-[11px] text-slate-500">{l.note}</span>}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-px h-6 bg-slate-700 mx-2"></div>
-              <Link href="/builder">
-                <Button size="sm" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20">
-                  <Zap className="w-3.5 h-3.5 mr-1.5" />
-                  Build Agent
-                </Button>
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 md:py-28 px-4">
         {/* Background Effects */}
@@ -214,6 +154,28 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             >
               <span className="w-2 h-2 rounded-full animate-pulse" style={{background:'#C6F24E', boxShadow:'0 0 0 4px rgba(198,242,78,0.18)'}}></span>
               <span className="text-slate-200 font-mono text-xs tracking-wider uppercase">Live marketplace — {skillsFloor}+ AI skills indexed</span>
+            </motion.div>
+
+            {/* Product Hunt badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.25 }}
+              className="mb-6"
+            >
+              <a
+                href="https://www.producthunt.com/products/build-sell-ai-agents-get-paid?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-build-sell-ai-agents-get-paid"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block"
+              >
+                <img
+                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1208788&theme=dark&t=1785496270323"
+                  alt="Build & Sell AI Agents, Get Paid - Build AI agents from 1,500+ Skills — or Sell Your Own | Product Hunt"
+                  width="250"
+                  height="54"
+                />
+              </a>
             </motion.div>
 
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-white mb-4 leading-[0.92] tracking-tight">

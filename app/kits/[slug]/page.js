@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, Check, Clock, Layers, Wrench } from 'lucide-react'
+import { Check, Clock, Layers, Wrench } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { getKit, KITS, kitItemCount } from '@/lib/kits'
 import { getTemplate } from '@/lib/templates'
 import { itemListSchema, breadcrumbSchema } from '@/lib/schema'
+import Breadcrumb from '@/components/Breadcrumb'
 import AssetLink from './AssetLink'
 
 // Finishing Kits — curated, link-only asset bundles matched to one specific
@@ -50,15 +51,10 @@ export default function KitPage({ params }) {
     <div className="min-h-screen bg-neptune">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(listSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
-      <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
-        <div className="container mx-auto px-4 py-4">
-          <Link href="/kits">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
-              <ArrowLeft className="w-4 h-4 mr-2" />All kits
-            </Button>
-          </Link>
-        </div>
-      </header>
+      <Breadcrumb
+        trail={[{ label: 'Home', href: '/' }, { label: 'Kits', href: '/kits' }, { label: kit.title }]}
+        pill={`${kit.groups.length} categories`}
+      />
 
       <div className="container mx-auto px-4 py-16 max-w-3xl">
         <p className="text-xs tracking-widest uppercase text-[#C6F24E] text-center mb-4 font-semibold">

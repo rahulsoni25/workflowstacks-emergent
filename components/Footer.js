@@ -2,26 +2,37 @@ import Link from 'next/link'
 import { Sparkles } from 'lucide-react'
 import WsMark from '@/components/WsMark'
 
+// Mirrors the groups in components/SiteHeader.js so the footer and the
+// header nav never drift apart the way the old footer had.
 const footerLinks = {
-  marketplace: {
-    title: 'Marketplace',
+  templatesAndTools: {
+    title: 'Templates & Tools',
     links: [
-      { label: 'Browse Skills', href: '/' },
-      { label: 'AI Agents', href: '/?category=ai-agent' },
-      { label: 'Claude Skills', href: '/?category=claude-skill' },
-      { label: 'MCP Servers', href: '/?category=mcp-server' },
-      { label: 'Prompts', href: '/?category=prompt' },
+      { label: 'Workflow Templates', href: '/templates' },
+      { label: 'Finishing Kits', href: '/kits' },
+      { label: 'MCP Configs', href: '/mcp' },
+      { label: 'Slash Commands', href: '/commands' },
+      { label: 'Premium Tools', href: '/tools' },
+      { label: 'Bundles', href: '/bundles' },
     ]
   },
-  solutions: {
-    title: 'Solutions',
+  browse: {
+    title: 'Browse',
     links: [
-      { label: 'For Founders', href: '/personas' },
-      { label: 'For Agencies', href: '/personas' },
-      { label: 'For Ecommerce', href: '/personas' },
-      { label: 'Agent Builder', href: '/builder' },
+      { label: 'All Skills', href: '/skills' },
+      { label: 'Discover', href: '/discover' },
+      { label: 'Personas', href: '/personas' },
       { label: 'Starter Packs', href: '/packs' },
       { label: 'Playbooks', href: '/playbooks' },
+    ]
+  },
+  community: {
+    title: 'Community',
+    links: [
+      { label: 'Problems Board', href: '/problems' },
+      { label: 'Deals', href: '/deals' },
+      { label: 'Community Gallery', href: '/community' },
+      { label: 'Members', href: '/members' },
     ]
   },
   learn: {
@@ -32,13 +43,13 @@ const footerLinks = {
       { label: 'What Are Agents', href: '/learn/agents' },
       { label: 'What Is MCP', href: '/learn/mcp' },
       { label: 'For Creators', href: '/learn/creators' },
-      { label: 'Submit a Tool', href: '/submit' },
       { label: 'Security', href: '/learn/security' },
     ]
   },
   company: {
     title: 'Company',
     links: [
+      { label: 'Pricing', href: '/pricing' },
       { label: 'Become a Creator', href: '/submit' },
       { label: 'About', href: '/about' },
       { label: 'Enterprise', href: '/enterprise' },
@@ -90,7 +101,7 @@ export default function Footer() {
         </div>
 
         {/* Link Columns */}
-        <nav className="grid flex-1 gap-8 text-sm sm:grid-cols-2 lg:grid-cols-4" aria-label="Footer navigation">
+        <nav className="grid flex-1 gap-8 text-sm sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" aria-label="Footer navigation">
           {Object.values(footerLinks).map((section) => (
             <div key={section.title}>
               <h4 className="mb-4 text-[#8B928D] font-mono text-xs uppercase tracking-wider">

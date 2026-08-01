@@ -1,4 +1,5 @@
 import './globals.css'
+import SiteHeader from '@/components/SiteHeader'
 import Footer from '@/components/Footer'
 import { Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 
@@ -85,6 +86,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className="flex min-h-screen flex-col bg-neptune">
+        <SiteHeader />
         <main className="flex-1">{children}</main>
         <Footer />
       </body>

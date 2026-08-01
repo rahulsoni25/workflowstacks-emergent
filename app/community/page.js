@@ -1,8 +1,9 @@
 import Link from 'next/link'
-import { ArrowLeft, Zap, Repeat, Trophy, User, Sparkles } from 'lucide-react'
+import { Zap, Repeat, Trophy, User, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import Breadcrumb from '@/components/Breadcrumb'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 
@@ -31,12 +32,10 @@ export default async function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-neptune">
-      <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
-          <Link href="/builder"><Button className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white"><Zap className="w-4 h-4 mr-2" />Build & share yours</Button></Link>
-        </div>
-      </header>
+      <Breadcrumb
+        trail={[{ label: 'Home', href: '/' }, { label: 'Community' }]}
+        right={<Link href="/builder"><Button size="sm" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white"><Zap className="w-4 h-4 mr-2" />Build & share yours</Button></Link>}
+      />
 
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="text-center mb-12">
