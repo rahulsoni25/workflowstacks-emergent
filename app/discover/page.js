@@ -35,7 +35,7 @@ const SECTIONS = [
 
 async function getSkills() {
   try {
-    const res = await fetch(`${BASE}/api/skills`, { next: { revalidate: 300 } })
+    const res = await fetch(`${BASE}/api/skills`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     const d = await res.json()
     return d.skills || []

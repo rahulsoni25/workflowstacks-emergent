@@ -104,11 +104,17 @@ export default async function sitemap() {
   // Dynamic per-skill detail pages (published only), filtered by the quality
   // gate above. Tools and learning resources are fetched separately —
   // /api/skills returns tools only; resource pages stay live either way.
+  //
+  // AbortSignal.timeout guards against the catalog query being slow/hung —
+  // without it, an unresponsive API hangs this fetch forever (fetch has no
+  // implicit timeout), which stalls Next's static export for EVERY page in
+  // the build, not just this one. Better to fail fast into the existing
+  // static-routes-only fallback below than block the whole deploy.
   let skillEntries = []
   try {
     const [toolsRes, resourcesRes] = await Promise.all([
-      fetch(`${BASE}/api/skills?limit=2000`, { next: { revalidate: 86400 } }),
-      fetch(`${BASE}/api/skills?type=resource&limit=2000`, { next: { revalidate: 86400 } }),
+      fetch(`${BASE}/api/skills?limit=2000`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(15_000) }),
+      fetch(`${BASE}/api/skills?type=resource&limit=2000`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(15_000) }),
     ])
     const docs = []
     if (toolsRes.ok) docs.push(...((await toolsRes.json()).skills || []))

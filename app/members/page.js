@@ -33,7 +33,7 @@ const CAT_COLOR = {
 
 async function getMembers() {
   try {
-    const res = await fetch(`${BASE}/api/members`, { next: { revalidate: 120 } })
+    const res = await fetch(`${BASE}/api/members`, { next: { revalidate: 120 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     const d = await res.json()
     return d.members || []

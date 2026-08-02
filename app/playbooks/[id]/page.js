@@ -10,7 +10,7 @@ export const revalidate = 600
 
 async function getPlaybook(id) {
   try {
-    const res = await fetch(`${BASE}/api/playbooks/${id}`, { next: { revalidate: 600 } })
+    const res = await fetch(`${BASE}/api/playbooks/${id}`, { next: { revalidate: 600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     const data = await res.json()
     return data.playbook ? { playbook: data.playbook, skills: data.skills || [] } : null

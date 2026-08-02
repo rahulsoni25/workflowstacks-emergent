@@ -10,7 +10,7 @@ export const revalidate = 600
 
 async function getPersona(id) {
   try {
-    const res = await fetch(`${BASE}/api/personas/${id}`, { next: { revalidate: 600 } })
+    const res = await fetch(`${BASE}/api/personas/${id}`, { next: { revalidate: 600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     const data = await res.json()
     return data.persona ? { persona: data.persona, skills: data.skills || [] } : null

@@ -20,7 +20,7 @@ function audienceColor(a) {
 
 async function getPacks() {
   try {
-    const res = await fetch(`${BASE}/api/packs`, { next: { revalidate: 600 } })
+    const res = await fetch(`${BASE}/api/packs`, { next: { revalidate: 600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     return (await res.json()).packs || []
   } catch {

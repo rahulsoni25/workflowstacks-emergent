@@ -19,7 +19,7 @@ function audienceColor(a) {
 
 async function getPersonas() {
   try {
-    const res = await fetch(`${BASE}/api/personas`, { next: { revalidate: 600 } })
+    const res = await fetch(`${BASE}/api/personas`, { next: { revalidate: 600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     return (await res.json()).personas || []
   } catch {

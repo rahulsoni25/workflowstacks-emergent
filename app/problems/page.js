@@ -5,7 +5,7 @@ export const revalidate = 120
 
 async function getProblems() {
   try {
-    const res = await fetch(`${BASE}/api/problems`, { next: { revalidate: 120 } })
+    const res = await fetch(`${BASE}/api/problems`, { next: { revalidate: 120 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     return (await res.json()).problems || []
   } catch {

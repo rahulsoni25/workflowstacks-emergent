@@ -5,7 +5,7 @@ export const revalidate = 300
 
 async function getJson(path) {
   try {
-    const res = await fetch(`${BASE}${path}`, { next: { revalidate: 300 } })
+    const res = await fetch(`${BASE}${path}`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     return await res.json()
   } catch {

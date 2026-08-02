@@ -4,7 +4,13 @@ import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalo
 import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 
-const client = new MongoClient(process.env.MONGO_URL);
+// Explicit timeouts so a slow/unreachable Atlas connection fails fast with a
+// clear error instead of hanging the serverless function (and, at build
+// time, hanging Next.js static generation) indefinitely.
+const client = new MongoClient(process.env.MONGO_URL, {
+  serverSelectionTimeoutMS: 8000,
+  connectTimeoutMS: 8000,
+});
 let db;
 
 async function connectDB() {

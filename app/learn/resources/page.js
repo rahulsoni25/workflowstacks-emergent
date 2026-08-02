@@ -19,7 +19,7 @@ const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergen
 
 async function getResources() {
   try {
-    const res = await fetch(`${BASE}/api/skills?type=resource`, { next: { revalidate: 3600 } })
+    const res = await fetch(`${BASE}/api/skills?type=resource`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     const data = await res.json()
     return (data.skills || []).sort((a, b) => (b.github_stars || 0) - (a.github_stars || 0))

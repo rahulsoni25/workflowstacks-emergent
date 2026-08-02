@@ -6,7 +6,7 @@ export const revalidate = 60
 
 async function getStack(slug) {
   try {
-    const res = await fetch(`${BASE}/api/stacks/${slug}`, { next: { revalidate: 60 } })
+    const res = await fetch(`${BASE}/api/stacks/${slug}`, { next: { revalidate: 60 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     const data = await res.json()
     return data.stack ? { stack: data.stack, skills: data.skills || [] } : null

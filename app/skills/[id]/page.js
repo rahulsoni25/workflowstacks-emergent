@@ -12,7 +12,7 @@ const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergen
 // Sibling skills in the same category, for the "Related skills" cross-link module.
 async function getRelated(skill) {
   try {
-    const res = await fetch(`${BASE}/api/skills?category=${encodeURIComponent(skill.category)}`, { next: { revalidate: 3600 } })
+    const res = await fetch(`${BASE}/api/skills?category=${encodeURIComponent(skill.category)}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     const data = await res.json()
     return (data.skills || [])
@@ -28,7 +28,7 @@ async function getSkill(id) {
   try {
     // Short cache window — slugs and rewrites land throughout the day, so 5 min
     // keeps the per-skill page in sync without hammering the API on every view.
-    const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 300 } })
+    const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     const data = await res.json()
     return data.skill || null
