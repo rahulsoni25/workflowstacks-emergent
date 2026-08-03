@@ -50,7 +50,6 @@ const NAV_GROUPS = [
       { href: '/learn/skills', label: 'What Are Skills' },
       { href: '/learn/agents', label: 'What Are Agents' },
       { href: '/learn/mcp', label: 'What Is MCP' },
-      { href: '/learn/creators', label: 'For Creators' },
       { href: '/learn/security', label: 'Security' },
     ],
   },
@@ -125,6 +124,9 @@ export default function SiteHeader() {
             <Link href="/pricing" className="text-sm text-slate-300 hover:text-white px-3 py-2 rounded-md hover:bg-white/5 transition-colors">
               Pricing
             </Link>
+            <Link href="/learn/creators" className="text-sm text-slate-300 hover:text-white px-3 py-2 rounded-md hover:bg-white/5 transition-colors">
+              Creators
+            </Link>
             <div className="w-px h-6 bg-slate-700 mx-2" />
             <Link href="/builder">
               <Button size="sm" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20">
@@ -157,6 +159,9 @@ export default function SiteHeader() {
             </Link>
             <Link href="/pricing" onClick={() => setMobileOpen(false)} className="block text-sm text-slate-200 font-semibold mb-6">
               Pricing
+            </Link>
+            <Link href="/learn/creators" onClick={() => setMobileOpen(false)} className="block text-sm text-slate-200 font-semibold mb-6">
+              Creators
             </Link>
             {NAV_GROUPS.map((group) => (
               <div key={group.label} className="mb-6">

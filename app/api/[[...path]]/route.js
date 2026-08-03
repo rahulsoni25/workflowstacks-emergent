@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalog-gates';
 import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
+import { screenSubmission } from '../../../lib/content-safety';
 
 // Explicit timeouts so a slow/unreachable Atlas connection fails fast with a
 // clear error instead of hanging the serverless function (and, at build
@@ -2415,15 +2416,18 @@ export async function POST(request) {
 
     // Upload skill
     if (path === '/upload') {
+      const rl = rateLimit(request, 5, 60_000); if (rl) return rl;
       const body = await request.json();
 
       // Basic validation
       if (!body.name || !body.description) {
         return Response.json({ success: false, error: 'Name and description are required' }, { status: 400 });
       }
+      const tl = tooLong(body, { email: 254, name: 120, description: 500, creator: 100, category: 60, source_url: 300, default: 2000 });
+      if (tl) return Response.json({ success: false, error: tl }, { status: 400 });
 
       const name = String(body.name).slice(0, 120);
-      const creator = body.creator || 'Anonymous';
+      const creator = String(body.creator || 'Anonymous').slice(0, 100);
       const slug = await uniqueSlug(database, name, creator);
       const skill = {
         id: uuidv4(),
@@ -2447,6 +2451,30 @@ export async function POST(request) {
       // Only set github_url when provided — avoids empty-string collisions on the
       // unique sparse index (which would reject a 2nd URL-less submission).
       if (body.github_url) skill.github_url = body.github_url;
+
+      // Content-safety screen (prompt injection / XSS / obfuscated payloads / LLM
+      // fallback). A flagged skill is stored blocked — never published — but the
+      // submitter still sees the normal "in review" message, no signal leaked.
+      const safety = await screenSubmission({
+        name: skill.name, description: skill.description, creator: skill.creator,
+        category: skill.category, source_url: skill.source_url, github_url: skill.github_url || '',
+      });
+      if (safety.flagged) {
+        skill.rewrite_status = 'blocked';
+        skill.flagged = true;
+        skill.flag_reasons = safety.reasons;
+        skill.flag_method = safety.method;
+        await database.collection('skills').insertOne(skill);
+        await sendSecurityAlert(
+          'Blocked skill upload',
+          `Name: ${skill.name}\nCreator: ${skill.creator}\nReasons: ${safety.reasons.join(', ')}\nMethod: ${safety.method}\nSkill id: ${skill.id}`
+        );
+        return Response.json({
+          success: true,
+          skill,
+          message: 'Submitted! Your skill is in review and will appear once approved.'
+        });
+      }
 
       await database.collection('skills').insertOne(skill);
 
@@ -2602,6 +2630,27 @@ export async function POST(request) {
         status: 'pending',
         created_at: new Date(),
       };
+
+      // Content-safety screen (prompt injection / XSS / obfuscated payloads / LLM
+      // fallback). Blocked applications are stored (not lost, admin can review)
+      // but kept out of the normal pending queue — the applicant sees the same
+      // success response either way so a scripted attacker gets no signal.
+      const safety = await screenSubmission({
+        name: application.name, github: application.github, twitter: application.twitter,
+        bio: application.bio, what_you_want_to_list: application.what_you_want_to_list,
+      });
+      if (safety.flagged) {
+        application.status = 'blocked';
+        application.flagged = true;
+        application.flag_reasons = safety.reasons;
+        application.flag_method = safety.method;
+        await database.collection('creator_applications').insertOne(application);
+        await sendSecurityAlert(
+          'Blocked creator application',
+          `Email: ${email}\nReasons: ${safety.reasons.join(', ')}\nMethod: ${safety.method}\nApplication id: ${application.id}`
+        );
+        return Response.json({ ok: true, message: 'Application received! We review every application and reply within a few days.' });
+      }
 
       await database.collection('creator_applications').insertOne(application);
       return Response.json({ ok: true, message: 'Application received! We review every application and reply within a few days.' });
