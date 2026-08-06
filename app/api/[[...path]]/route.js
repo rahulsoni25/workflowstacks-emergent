@@ -24,6 +24,12 @@ async function connectDB() {
         { github_url: 1 },
         { unique: true, sparse: true }
       );
+      // Covers the /api/skills default query (published + category filter,
+      // sorted by stars) so it's an index scan instead of a full collection
+      // scan + in-memory sort on every homepage/library load.
+      await db.collection('skills').createIndex(
+        { published: 1, category: 1, github_stars: -1 }
+      );
     } catch (e) {
       console.log('Index note:', e.message);
     }
@@ -654,10 +660,17 @@ export async function GET(request) {
         ];
       }
 
-      const skills = await database.collection('skills')
+      // `limit` is already part of the contract other pages assume (builder,
+      // sitemap) — implement it so callers that only need a page of results
+      // stop paying for a full-collection fetch+sort+serialize every time.
+      const limitParam = parseInt(searchParams.get('limit'), 10);
+      const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 2000) : 0;
+
+      let cursor = database.collection('skills')
         .find(query)
-        .sort({ github_stars: -1 })
-        .toArray();
+        .sort({ github_stars: -1 });
+      if (limit) cursor = cursor.limit(limit);
+      const skills = await cursor.toArray();
 
       return Response.json({ skills: applyFallback(skills) });
     }

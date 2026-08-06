@@ -29,8 +29,10 @@ const faqJsonLd = {
 }
 
 export default async function HomePage() {
+  // Homepage only ever renders a 24-card featured grid — ask the API for
+  // exactly that instead of pulling the entire catalog to throw most of it away.
   const [skillsData, statsData, personasData, playbooksData, newSkillsData] = await Promise.all([
-    getJson('/api/skills'), getJson('/api/stats'), getJson('/api/personas'), getJson('/api/playbooks'),
+    getJson('/api/skills?limit=24'), getJson('/api/stats'), getJson('/api/personas'), getJson('/api/playbooks'),
     getJson('/api/skills?new=true'),
   ])
   const allSkills = skillsData?.skills || []
@@ -62,15 +64,18 @@ export default async function HomePage() {
 
   // Single source of truth: every headline count is the real number of published,
   // browsable items — never rounded up past what a visitor can actually see.
-  const totalSkills = allSkills.length || statsData?.totalSkills || 0
+  // /api/skills is now capped to 24 for this page, so its length is no longer
+  // a valid stand-in for the catalog total — /api/stats (a countDocuments(),
+  // not a full fetch) is the real source; allSkills.length is only the last-resort.
+  const totalSkills = statsData?.totalSkills || allSkills.length || 0
   const personaCount = (personasData?.personas || []).length || 4
   const playbookCount = (playbooksData?.playbooks || []).length || 4
   const stats = { ...(statsData || {}), totalSkills, personaCount, playbookCount }
 
-  // Server-render a featured grid (not all 182) to keep the landing HTML light /
-  // fast; the full catalog stays fully crawlable at /skills + in the sitemap. The
-  // client re-fetches the matching set when the visitor searches or filters.
-  const featured = skills.slice(0, 24)
+  // Server-render a featured grid to keep the landing HTML light/fast; the full
+  // catalog stays fully crawlable at /skills + in the sitemap. The client
+  // re-fetches the matching set when the visitor searches or filters.
+  const featured = skills
 
   return (
     <>

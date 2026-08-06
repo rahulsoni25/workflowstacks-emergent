@@ -48,34 +48,47 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
   const [email, setEmail] = useState('')
   const [emailSubmitted, setEmailSubmitted] = useState(false)
   const filtersReady = useRef(false)
+  const abortRef = useRef(null)
   const { favs, toggle } = useFavorites()
 
   // Re-fetch when filters change. Skip the very first run when the server already
   // seeded the grid (so crawlers + first paint get real content, no refetch flash).
+  // Debounced so fast typing in the search box doesn't fire a request per
+  // keystroke — each one used to hit /api/search, which can call out to the
+  // GitHub API and write to Mongo before responding.
   useEffect(() => {
     if (!filtersReady.current) {
       filtersReady.current = true
       if (initialSkills.length) return
     }
-    loadSkills()
+    const t = setTimeout(() => loadSkills(), 350)
+    return () => clearTimeout(t)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, search])
 
   const loadSkills = async () => {
+    // Cancel any still-in-flight request from a previous keystroke/filter so
+    // a slow stale response can't land after a newer one and clobber the UI.
+    if (abortRef.current) abortRef.current.abort()
+    const controller = new AbortController()
+    abortRef.current = controller
+
     setLoading(true)
     try {
       let res
       if (search && search.trim()) {
         // Use the smart search endpoint — it logs queries + auto-discovers from GitHub
-        res = await fetch(`/api/search?q=${encodeURIComponent(search.trim())}`)
+        res = await fetch(`/api/search?q=${encodeURIComponent(search.trim())}`, { signal: controller.signal })
       } else {
         const params = new URLSearchParams()
         if (category !== 'all') params.append('category', category)
-        res = await fetch(`/api/skills?${params}`)
+        params.append('limit', '60')
+        res = await fetch(`/api/skills?${params}`, { signal: controller.signal })
       }
       const data = await res.json()
       setSkills(data.skills || [])
     } catch (e) {
+      if (e.name === 'AbortError') return
       console.error('Error loading skills:', e)
       setSkills([])
     }
