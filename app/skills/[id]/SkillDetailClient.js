@@ -321,7 +321,7 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                     </div>
                     <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50">
                       <div className="text-2xl font-bold text-white">{sourceSpec.sizeKB >= 1024 ? (sourceSpec.sizeKB / 1024).toFixed(1) + 'M' : sourceSpec.sizeKB + 'K'}</div>
-                      <div className="text-xs text-slate-400">repo size</div>
+                      <div className="text-xs text-slate-400">source size</div>
                     </div>
                     <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50">
                       <div className="text-2xl font-bold text-white truncate">{sourceSpec.license || '—'}</div>

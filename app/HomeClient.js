@@ -386,7 +386,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              { icon: Star, t: `We read & score ${skillsFloor}+ repos`, d: 'Only trending, high-star tools — across ads, analytics, research, SEO, outreach, and ecommerce — that clear an 8/10 quality gate, with live GitHub stats. You skip hours of wading through dead repos.' },
+              { icon: Star, t: `We read & score ${skillsFloor}+ tools`, d: 'Only trending, high-star tools — across ads, analytics, research, SEO, outreach, and ecommerce — that clear an 8/10 quality gate, with live GitHub stats. You skip hours of wading through dead, half-abandoned projects.' },
               { icon: Code2, t: 'Every tool gets a usage guide', d: 'An AI-written install command, quick-start steps, and the one real gotcha — so you\'re productive in minutes, not after reading a README.' },
               { icon: Zap, t: 'One click = a working agent', d: 'The Builder merges the skills you pick into a single paste-ready blueprint for Claude, ChatGPT, or Gemini. That\'s the thing GitHub can\'t do for you.' },
             ].map((c, i) => {

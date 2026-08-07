@@ -110,6 +110,41 @@ export default function BundleSalesClient({ bundle }) {
           </CardContent>
         </Card>
 
+        {bundle.preview && (
+          <Card className="bg-slate-900/60 border-slate-700/50 mb-8">
+            <CardContent className="py-6">
+              <h2 className="text-white font-bold mb-1">Sample output</h2>
+              <p className="text-slate-500 text-xs mb-4">{bundle.preview.note}</p>
+              <div className="overflow-x-auto -mx-2 px-2">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-700/50">
+                      {bundle.preview.columns.map((col) => (
+                        <th key={col} className="text-left font-medium text-slate-400 py-2 pr-4 whitespace-nowrap">{col}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bundle.preview.rows.map((row, i) => (
+                      <tr key={i} className="border-b border-slate-800/60 last:border-0">
+                        {row.map((cell, j) => {
+                          const isBlurred = bundle.preview.blurredColumns.includes(bundle.preview.columns[j])
+                          return (
+                            <td key={j} className="py-2.5 pr-4 text-slate-300 whitespace-nowrap">
+                              <span className={isBlurred ? 'blur-[5px] select-none' : ''}>{cell}</span>
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-slate-500 text-xs mt-4">Unlock the full spreadsheet — including contact details — with your own search after purchase.</p>
+            </CardContent>
+          </Card>
+        )}
+
         <div className="flex items-center justify-between gap-4 p-5 bg-slate-900/60 border border-[#C6F24E]/25 rounded-lg">
           <div>
             <span className="text-3xl font-extrabold text-white">${bundle.price_usd}</span>
