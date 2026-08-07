@@ -140,7 +140,7 @@ export default function BundleSalesClient({ bundle }) {
                   </tbody>
                 </table>
               </div>
-              <p className="text-slate-500 text-xs mt-4">Unlock the full spreadsheet — including contact details — with your own search after purchase.</p>
+              <p className="text-slate-500 text-xs mt-4">{bundle.preview.unlockNote || 'Unlock the full data after purchase — run it yourself, as often as you like.'}</p>
             </CardContent>
           </Card>
         )}
@@ -164,7 +164,7 @@ export default function BundleSalesClient({ bundle }) {
               <Wrench className="w-5 h-5 text-teal-300 mt-0.5" />
               <div>
                 <h2 className="text-white font-semibold text-sm mb-1">Don’t want to touch the setup?</h2>
-                <p className="text-slate-400 text-sm">Buy it, and we’ll set it up in your tools — keys, connections, tested — within a few days.</p>
+                <p className="text-slate-400 text-sm">Buy it, and we’ll set it up in your tools — keys, connections, tested — within 7 days.</p>
               </div>
             </div>
             <Link href={`/build-for-me?goal=${encodeURIComponent('Set up the ' + bundle.title + ' tool for me')}`}>
