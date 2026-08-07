@@ -114,7 +114,7 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                   )}
                   {score !== null && (
                     <span className="flex items-center gap-1.5 text-sm bg-teal-500/10 border border-teal-500/30 rounded-full px-3 py-1 text-teal-300">
-                      <CheckCircle2 className="w-4 h-4" />Quality {score}/10
+                      <CheckCircle2 className="w-4 h-4" />Health Score {score}/10
                     </span>
                   )}
                   {skill.last_updated && (

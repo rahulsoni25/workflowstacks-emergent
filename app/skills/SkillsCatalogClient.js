@@ -181,7 +181,7 @@ export default function SkillsCatalogClient({ skills = [] }) {
                     )}
                     {skill.language && <span className="text-slate-500">{skill.language}</span>}
                     {typeof skill.rewrite_score === 'number' && (
-                      <span className="ml-auto flex items-center gap-1 text-teal-300">
+                      <span className="ml-auto flex items-center gap-1 text-teal-300" title="Health Score">
                         <Check className="w-3.5 h-3.5" />{skill.rewrite_score}/10
                       </span>
                     )}

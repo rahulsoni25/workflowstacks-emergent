@@ -198,7 +198,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               Stack the skills.{' '}<span style={{ color: '#C6F24E' }}>Ship the agent.</span>
             </p>
             <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-              <strong className="text-white">For non-technical founders.</strong> Install a working AI agent in 3 clicks — no code, no API keys. Pre-built playbooks cover paid ads, SEO, outreach, market research, and ecommerce ops. <span className="text-slate-400">(Marketing agencies and ecommerce teams use it too.)</span>
+              <strong className="text-white">For non-technical founders and agencies.</strong> Install a working AI agent in 3 clicks — no code, no API keys. Founders get pre-built playbooks for paid ads, SEO, outreach, and ecommerce ops. Agencies get the full catalog to build and resell at scale.
             </p>
 
             {/* Goal Input — the new front door. User types their goal, we recommend the exact stack. */}
@@ -247,14 +247,24 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
               </div>
             </form>
 
-            {/* Secondary CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
-              <Link href="/builder" className="text-slate-400 hover:text-white text-sm underline underline-offset-4">
-                Or build manually from the catalog
-              </Link>
-              <span className="text-slate-600 hidden sm:inline">·</span>
-              <Link href="/playbooks" className="text-slate-400 hover:text-white text-sm underline underline-offset-4">
-                Browse playbooks
+            {/* Secondary CTAs — two tracks: Founders (speed to revenue) and Agencies (scale) */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 mb-12 text-sm">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-600 font-mono text-[10px] tracking-wider uppercase">Founders</span>
+                <Link href="/playbooks" className="text-slate-400 hover:text-white underline underline-offset-4">
+                  Browse Playbooks
+                </Link>
+              </div>
+              <span className="text-slate-700 hidden sm:inline">·</span>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-600 font-mono text-[10px] tracking-wider uppercase">Agencies</span>
+                <Link href="/skills" className="text-slate-400 hover:text-white underline underline-offset-4">
+                  View Skill Catalog
+                </Link>
+              </div>
+              <span className="text-slate-700 hidden sm:inline">·</span>
+              <Link href="/builder" className="text-slate-500 hover:text-white underline underline-offset-4">
+                Or build manually
               </Link>
             </div>
 
@@ -272,7 +282,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             >
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-rose-400">8/10</div>
-                <div className="text-sm text-slate-400 mt-1">avg quality score</div>
+                <div className="text-sm text-slate-400 mt-1">avg health score</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-white">{skillsFloor}+</div>
@@ -591,7 +601,7 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
             Real tools. <span className="text-gradient-neptune">Real numbers.</span> No fluff.
           </h2>
           <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-12">
-            Every listing is a genuine, trending open-source project — with live GitHub stats, an AI-written usage guide, and a quality score. We don't run fake reviews or inflated metrics.
+            Every listing is a genuine, trending open-source project — with live GitHub stats, an AI-written usage guide, and a health score. We don't run fake reviews or inflated metrics.
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
