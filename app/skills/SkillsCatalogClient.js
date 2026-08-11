@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { Search, Star, Github, ArrowLeft, ChevronRight, Check } from 'lucide-react'
+import { Search, Star, Github, ArrowLeft, ChevronRight, Check, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -36,51 +36,87 @@ function categoryColor(cat) {
   return map[cat] || 'bg-slate-500/15 text-slate-300 border-slate-500/30'
 }
 
-const ts = (v) => (v ? new Date(v).getTime() : 0)
-const daysAgo = (v) => (v ? (Date.now() - ts(v)) / 86400000 : 1e9)
-
 // All rankings use REAL, verifiable signals (no fabricated downloads/ratings).
+// Sorting itself now happens server-side (see /api/skills) — this table is
+// just labels/hints for the UI.
 const SORTS = [
-  { key: 'trending', label: '🔥 Trending', hint: 'Popular + recently active', cmp: (a, b) => (b.popularity_score || 0) - (a.popularity_score || 0) || (b.github_stars || 0) - (a.github_stars || 0) },
-  { key: 'popular', label: '⭐ Most Starred', hint: 'Highest GitHub stars', cmp: (a, b) => (b.github_stars || 0) - (a.github_stars || 0) },
-  { key: 'newest', label: '🆕 Newest', hint: 'Recently added here', cmp: (a, b) => ts(b.added_at || b.created_at) - ts(a.added_at || a.created_at) },
-  { key: 'updated', label: '♻️ Recently Updated', hint: 'Freshest, actively maintained', cmp: (a, b) => ts(b.last_updated) - ts(a.last_updated) },
-  { key: 'quality', label: '✅ Top Quality', hint: 'Our AI quality-gate score', cmp: (a, b) => (b.rewrite_score || 0) - (a.rewrite_score || 0) || (b.github_stars || 0) - (a.github_stars || 0) },
+  { key: 'trending', label: '🔥 Trending', hint: 'Popular + recently active' },
+  { key: 'popular', label: '⭐ Most Starred', hint: 'Highest GitHub stars' },
+  { key: 'newest', label: '🆕 Newest', hint: 'Recently added here' },
+  { key: 'updated', label: '♻️ Recently Updated', hint: 'Freshest, actively maintained' },
+  { key: 'quality', label: '✅ Top Quality', hint: 'Our AI quality-gate score' },
   // Novel: surfaces genuinely useful tools before they go mainstream
-  { key: 'gems', label: '💎 Hidden Gems', hint: 'High quality, still under the radar', cmp: (a, b) => gemScore(b) - gemScore(a) },
+  { key: 'gems', label: '💎 Hidden Gems', hint: 'High quality, still under the radar' },
 ]
 
-// Gem score rewards quality + freshness, dampened by fame (favors under-the-radar picks)
-function gemScore(s) {
-  const stars = s.github_stars || 0
-  const quality = s.rewrite_score || 7
-  const freshness = Math.max(0, 30 - daysAgo(s.last_updated)) / 30 // 0..1, last ~30d
-  const fameDamp = stars > 15000 ? 0 : 1 - stars / 15000 // big repos lose gem points
-  return quality * 2 + freshness * 5 + fameDamp * 5
+function buildQuery({ category, sort, search, offset, pageSize }) {
+  const params = new URLSearchParams({ sort, limit: String(pageSize), offset: String(offset) })
+  if (category && category !== 'all') params.set('category', category)
+  if (search.trim()) params.set('search', search.trim())
+  return params.toString()
 }
 
-// Receives the full published list (server-rendered) and filters client-side.
-export default function SkillsCatalogClient({ skills = [] }) {
+// Receives the first page (server-rendered) and fetches subsequent
+// pages/filters from the API — the catalog is too large (2,000+ skills) to
+// ship in one response and filter client-side.
+export default function SkillsCatalogClient({ initialSkills = [], initialTotal = 0, initialHasMore = false, pageSize = 48 }) {
   const [category, setCategory] = useState('all')
-  const [search, setSearch] = useState('')
   const [sort, setSort] = useState(() => {
     if (typeof window === 'undefined') return 'trending'
     const p = new URLSearchParams(window.location.search).get('sort')
     return SORTS.some((s) => s.key === p) ? p : 'trending'
   })
+  const [searchInput, setSearchInput] = useState('')
+  const [search, setSearch] = useState('')
+  const [skills, setSkills] = useState(initialSkills)
+  const [total, setTotal] = useState(initialTotal)
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [loading, setLoading] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    const cmp = (SORTS.find((s) => s.key === sort) || SORTS[0]).cmp
-    return skills
-      .filter((s) => {
-        if (category !== 'all' && s.category !== category) return false
-        if (!q) return true
-        const hay = `${s.title_human || ''} ${s.name || ''} ${s.description_human || s.description || ''}`.toLowerCase()
-        return hay.includes(q)
+  const requestId = useRef(0)
+  const isFirstRun = useRef(true)
+
+  // Debounce free-text search so we're not hitting the API on every keystroke.
+  useEffect(() => {
+    const t = setTimeout(() => setSearch(searchInput), 400)
+    return () => clearTimeout(t)
+  }, [searchInput])
+
+  // Re-fetch page 1 whenever category/sort/search changes. Skips the very
+  // first render since the server already gave us that data.
+  useEffect(() => {
+    if (isFirstRun.current) { isFirstRun.current = false; return }
+    const id = ++requestId.current
+    setLoading(true)
+    fetch(`/api/skills?${buildQuery({ category, sort, search, offset: 0, pageSize })}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (id !== requestId.current) return // a newer request superseded this one
+        setSkills(data.skills || [])
+        setTotal(data.total || 0)
+        setHasMore(!!data.hasMore)
       })
-      .sort(cmp)
-  }, [skills, category, search, sort])
+      .catch(() => {
+        if (id !== requestId.current) return
+        setSkills([]); setTotal(0); setHasMore(false)
+      })
+      .finally(() => { if (id === requestId.current) setLoading(false) })
+  }, [category, sort, search, pageSize])
+
+  async function loadMore() {
+    setLoadingMore(true)
+    try {
+      const res = await fetch(`/api/skills?${buildQuery({ category, sort, search, offset: skills.length, pageSize })}`)
+      const data = await res.json()
+      setSkills((prev) => [...prev, ...(data.skills || [])])
+      setHasMore(!!data.hasMore)
+    } catch {
+      // leave current list as-is; user can retry the button
+    } finally {
+      setLoadingMore(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-neptune">
@@ -91,7 +127,7 @@ export default function SkillsCatalogClient({ skills = [] }) {
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
-          <span className="text-slate-400 text-sm">{filtered.length} skills</span>
+          <span className="text-slate-400 text-sm">{total.toLocaleString()} skills</span>
         </div>
       </header>
 
@@ -104,8 +140,8 @@ export default function SkillsCatalogClient({ skills = [] }) {
         <div className="max-w-xl mx-auto mb-8 relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
           <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search skills..."
             className="pl-10 bg-slate-900/60 border-slate-700 text-white"
           />
@@ -150,54 +186,74 @@ export default function SkillsCatalogClient({ skills = [] }) {
           ))}
         </div>
 
-        {filtered.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-6 h-6 text-teal-400 animate-spin" />
+          </div>
+        ) : skills.length === 0 ? (
           <p className="text-center text-slate-400 py-20">No skills match your search.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filtered.map((skill) => (
-              <Card key={skill.id} className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl hover:border-teal-500/40 transition-all duration-300 group h-full flex flex-col">
-                <CardHeader className="flex-1">
-                  <Badge className={`${categoryColor(skill.category)} border text-xs w-fit mb-2`}>{skill.category}</Badge>
-                  <CardTitle className="text-white text-lg group-hover:text-teal-300 transition-colors">
-                    {skill.title_human || skill.name}
-                  </CardTitle>
-                  <CardDescription className="text-slate-400 line-clamp-2">
-                    {skill.description_human || skill.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pb-2">
-                  <div className="flex items-center gap-4 text-sm text-slate-400">
-                    {skill.github_stars > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                        {skill.github_stars.toLocaleString()}
-                      </span>
-                    )}
-                    {skill.github_forks > 0 && (
-                      <span className="flex items-center gap-1">
-                        <Github className="w-3.5 h-3.5" />
-                        {skill.github_forks.toLocaleString()} forks
-                      </span>
-                    )}
-                    {skill.language && <span className="text-slate-500">{skill.language}</span>}
-                    {typeof skill.rewrite_score === 'number' && (
-                      <span className="ml-auto flex items-center gap-1 text-teal-300" title="Health Score">
-                        <Check className="w-3.5 h-3.5" />{skill.rewrite_score}/10
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Link href={`/skills/${skill.slug || skill.id}`} className="w-full">
-                    <Button className="w-full bg-slate-800 hover:bg-teal-500/20 text-slate-200 hover:text-teal-300 border border-slate-700 hover:border-teal-500/40 transition-all" variant="outline">
-                      View Details
-                      <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
-                    </Button>
-                  </Link>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {skills.map((skill) => (
+                <Card key={skill.id} className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl hover:border-teal-500/40 transition-all duration-300 group h-full flex flex-col">
+                  <CardHeader className="flex-1">
+                    <Badge className={`${categoryColor(skill.category)} border text-xs w-fit mb-2`}>{skill.category}</Badge>
+                    <CardTitle className="text-white text-lg group-hover:text-teal-300 transition-colors">
+                      {skill.title_human || skill.name}
+                    </CardTitle>
+                    <CardDescription className="text-slate-400 line-clamp-2">
+                      {skill.description_human || skill.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <div className="flex items-center gap-4 text-sm text-slate-400">
+                      {skill.github_stars > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          {skill.github_stars.toLocaleString()}
+                        </span>
+                      )}
+                      {skill.github_forks > 0 && (
+                        <span className="flex items-center gap-1">
+                          <Github className="w-3.5 h-3.5" />
+                          {skill.github_forks.toLocaleString()} forks
+                        </span>
+                      )}
+                      {skill.language && <span className="text-slate-500">{skill.language}</span>}
+                      {typeof skill.rewrite_score === 'number' && (
+                        <span className="ml-auto flex items-center gap-1 text-teal-300" title="Health Score">
+                          <Check className="w-3.5 h-3.5" />{skill.rewrite_score}/10
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Link href={`/skills/${skill.slug || skill.id}`} className="w-full">
+                      <Button className="w-full bg-slate-800 hover:bg-teal-500/20 text-slate-200 hover:text-teal-300 border border-slate-700 hover:border-teal-500/40 transition-all" variant="outline">
+                        View Details
+                        <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
+                      </Button>
+                    </Link>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+
+            {hasMore && (
+              <div className="flex justify-center mt-10">
+                <Button
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  variant="outline"
+                  className="border-slate-700 text-slate-300 hover:text-teal-300 hover:border-teal-500/40"
+                >
+                  {loadingMore ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  {loadingMore ? 'Loading…' : `Load more (${(total - skills.length).toLocaleString()} left)`}
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

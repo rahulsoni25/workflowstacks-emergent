@@ -14,28 +14,24 @@ export const metadata = {
 // not hammer the DB on every page view.
 export const revalidate = 300
 
-const ts = (v) => (v ? new Date(v).getTime() : 0)
-const daysAgo = (v) => (v ? (Date.now() - ts(v)) / 86400000 : 1e9)
-function gemScore(s) {
-  const stars = s.github_stars || 0
-  const quality = s.rewrite_score || 7
-  const freshness = Math.max(0, 30 - daysAgo(s.last_updated)) / 30
-  const fameDamp = stars > 15000 ? 0 : 1 - stars / 15000
-  return quality * 2 + freshness * 5 + fameDamp * 5
-}
-
 const SECTIONS = [
-  { key: 'trending', label: '🔥 Trending', hint: 'Popular and recently active', cmp: (a, b) => (b.popularity_score || 0) - (a.popularity_score || 0) || (b.github_stars || 0) - (a.github_stars || 0) },
-  { key: 'newest', label: '🆕 Newest', hint: 'Just added to the marketplace', cmp: (a, b) => ts(b.added_at || b.created_at) - ts(a.added_at || a.created_at) },
-  { key: 'updated', label: '♻️ Recently Updated', hint: 'Freshest, actively maintained', cmp: (a, b) => ts(b.last_updated) - ts(a.last_updated) },
-  { key: 'quality', label: '✅ Top Quality', hint: 'Highest AI quality-gate score', cmp: (a, b) => (b.rewrite_score || 0) - (a.rewrite_score || 0) || (b.github_stars || 0) - (a.github_stars || 0) },
-  { key: 'popular', label: '⭐ Most Starred', hint: 'Most GitHub stars', cmp: (a, b) => (b.github_stars || 0) - (a.github_stars || 0) },
-  { key: 'gems', label: '💎 Hidden Gems', hint: 'High quality, still under the radar', cmp: (a, b) => gemScore(b) - gemScore(a) },
+  { key: 'trending', label: '🔥 Trending', hint: 'Popular and recently active' },
+  { key: 'newest', label: '🆕 Newest', hint: 'Just added to the marketplace' },
+  { key: 'updated', label: '♻️ Recently Updated', hint: 'Freshest, actively maintained' },
+  { key: 'quality', label: '✅ Top Quality', hint: 'Highest AI quality-gate score' },
+  { key: 'popular', label: '⭐ Most Starred', hint: 'Most GitHub stars' },
+  { key: 'gems', label: '💎 Hidden Gems', hint: 'High quality, still under the radar' },
 ]
 
-async function getSkills() {
+// One small, sorted fetch per section instead of pulling the whole catalog
+// (2,000+ skills) and sorting six ways in memory — that used to take 90s+
+// and blow past the fetch timeout, silently rendering every section empty.
+async function getSection(sortKey) {
   try {
-    const res = await fetch(`${BASE}/api/skills`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/skills?sort=${sortKey}&limit=8`, {
+      next: { revalidate: 300 },
+      signal: AbortSignal.timeout(10_000),
+    })
     if (!res.ok) return []
     const d = await res.json()
     return d.skills || []
@@ -70,7 +66,7 @@ function MiniCard({ skill }) {
 }
 
 export default async function DiscoverPage() {
-  const skills = await getSkills()
+  const sections = await Promise.all(SECTIONS.map((sec) => getSection(sec.key)))
 
   return (
     <div className="min-h-screen bg-neptune">
@@ -94,9 +90,9 @@ export default async function DiscoverPage() {
         </p>
 
         <div className="space-y-14">
-          {SECTIONS.map((sec) => {
-            const top = [...skills].sort(sec.cmp).slice(0, 8)
-            if (top.length === 0) return null
+          {SECTIONS.map((sec, i) => {
+            const top = sections[i]
+            if (!top || top.length === 0) return null
             return (
               <section key={sec.key}>
                 <div className="flex items-end justify-between mb-5">

@@ -12,12 +12,11 @@ const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergen
 // Sibling skills in the same category, for the "Related skills" cross-link module.
 async function getRelated(skill) {
   try {
-    const res = await fetch(`${BASE}/api/skills?category=${encodeURIComponent(skill.category)}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/skills?category=${encodeURIComponent(skill.category)}&sort=popular&limit=7`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     const data = await res.json()
     return (data.skills || [])
       .filter((s) => s.id !== skill.id)
-      .sort((a, b) => (b.github_stars || 0) - (a.github_stars || 0))
       .slice(0, 6)
   } catch {
     return []

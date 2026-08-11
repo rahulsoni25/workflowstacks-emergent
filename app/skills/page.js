@@ -18,18 +18,29 @@ export const metadata = {
 // to not hammer the DB on every page view.
 export const revalidate = 300
 
+// One page's worth for the default SSR load. The catalog now has 2,000+
+// published skills — fetching them all in one request (the old behavior)
+// took 90s+ to sort/transfer and blew past the fetch timeout below,
+// silently rendering the page as empty. The client re-fetches this same
+// endpoint (with category/sort/search/offset) as the user interacts.
+export const PAGE_SIZE = 48
+
 async function getSkills() {
   try {
-    const res = await fetch(`${BASE}/api/skills`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return []
+    const res = await fetch(`${BASE}/api/skills?sort=trending&limit=${PAGE_SIZE}`, {
+      next: { revalidate: 300 },
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) return { skills: [], total: 0, hasMore: false }
     const data = await res.json()
-    return data.skills || []
+    return { skills: data.skills || [], total: data.total || 0, hasMore: !!data.hasMore }
   } catch {
-    return []
+    return { skills: [], total: 0, hasMore: false }
   }
 }
 
-// Heavy fields the catalog grid never renders — strip them from the SSR payload.
+// Heavy fields the catalog grid never renders — the API already strips these
+// from list responses, but keep the belt-and-braces trim for any leftovers.
 const HEAVY = ['readme_preview', 'use_guide', 'description_original', 'name_original', 'rewritten_at']
 function trim(s) {
   const out = {}
@@ -38,15 +49,15 @@ function trim(s) {
 }
 
 export default async function SkillsPage() {
-  const raw = await getSkills()
+  const { skills: raw, total, hasMore } = await getSkills()
   const skills = raw.map(trim)
   const itemList = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: 'AI Skills & Tools catalog',
     description: 'Free, trending open-source AI skills, MCP servers, and agent tools for founders.',
-    numberOfItems: skills.length,
-    itemListElement: skills.slice(0, 100).map((s, i) => ({
+    numberOfItems: total,
+    itemListElement: skills.map((s, i) => ({
       '@type': 'ListItem',
       position: i + 1,
       url: `${BASE}/skills/${s.slug || s.id}`,
@@ -56,7 +67,7 @@ export default async function SkillsPage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
-      <SkillsCatalogClient skills={skills} />
+      <SkillsCatalogClient initialSkills={skills} initialTotal={total} initialHasMore={hasMore} pageSize={PAGE_SIZE} />
     </>
   )
 }

@@ -401,8 +401,11 @@ function prettyDesc(raw) {
 // Fields only the single-skill detail view needs — excluded from list/catalog
 // queries (they're large free-text blobs and were being fetched+serialized
 // for every skill on every /skills page load, then discarded client-side).
+// NOTE: use_guide is deliberately kept — app/sitemap.js's quality gate reads
+// it (guideRichness()) from these same list responses; it's a small
+// structured object, not a free-text blob like the ones excluded here.
 const LIST_PROJECTION = {
-  readme_preview: 0, use_guide: 0, description_original: 0, name_original: 0, rewritten_at: 0,
+  readme_preview: 0, description_original: 0, name_original: 0, rewritten_at: 0,
 };
 
 // Apply to a skills array — adds title_human/description_human ONLY if missing.
@@ -675,6 +678,13 @@ export async function GET(request) {
           { description: { $regex: searchSafe, $options: 'i' } }
         ];
       }
+      // Optional server-side pre-filter — lets a caller like the sitemap
+      // (which only wants the small slice passing its quality gate) avoid
+      // fetching+discarding thousands of docs just to find a few hundred.
+      const minScore = parseFloat(searchParams.get('minScore'));
+      if (Number.isFinite(minScore)) query.rewrite_score = { $gte: minScore };
+      const minStars = parseInt(searchParams.get('minStars'), 10);
+      if (Number.isFinite(minStars)) query.github_stars = { $gte: minStars };
 
       // `limit` is already part of the contract other pages assume (builder,
       // sitemap) — implement it so callers that only need a page of results
@@ -683,17 +693,68 @@ export async function GET(request) {
       // continued daily growth silently reintroducing a slow unbounded scan+sort.
       const limitParam = parseInt(searchParams.get('limit'), 10);
       const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 2000) : 3000;
+      const offsetParam = parseInt(searchParams.get('offset'), 10);
+      const offset = Number.isFinite(offsetParam) && offsetParam > 0 ? offsetParam : 0;
 
+      const col = database.collection('skills');
       // Callers of the list endpoint (catalog grid, builder, sitemap) never
       // read these — they're only needed by the single-skill detail fetch —
       // so drop them here to cut payload size and serialization time.
-      const skills = await database.collection('skills')
-        .find(query, { projection: LIST_PROJECTION })
-        .sort({ github_stars: -1 })
-        .limit(limit)
-        .toArray();
+      const sortKey = searchParams.get('sort');
 
-      return Response.json({ skills: applyFallback(skills) });
+      let skills, total;
+      if (sortKey === 'gems') {
+        // "Hidden gems" is a computed score (quality + freshness - fame), not
+        // a stored field, so it needs an aggregation instead of a plain sort.
+        const pipeline = [
+          { $match: query },
+          { $addFields: {
+              _rewriteScore: { $ifNull: ['$rewrite_score', 7] },
+              _stars: { $ifNull: ['$github_stars', 0] },
+              _daysAgo: {
+                $cond: [
+                  { $ifNull: ['$last_updated', false] },
+                  { $divide: [{ $subtract: ['$$NOW', '$last_updated'] }, 86400000] },
+                  1e9,
+                ],
+              },
+          }},
+          { $addFields: {
+              _freshness: { $max: [0, { $divide: [{ $subtract: [30, '$_daysAgo'] }, 30] }] },
+              _fameDamp: { $cond: [{ $gt: ['$_stars', 15000] }, 0, { $subtract: [1, { $divide: ['$_stars', 15000] }] }] },
+          }},
+          { $addFields: {
+              _gemScore: { $add: [
+                { $multiply: ['$_rewriteScore', 2] },
+                { $multiply: ['$_freshness', 5] },
+                { $multiply: ['$_fameDamp', 5] },
+              ]},
+          }},
+          { $sort: { _gemScore: -1 } },
+          { $skip: offset },
+          { $limit: limit },
+          { $project: { ...LIST_PROJECTION, _rewriteScore: 0, _stars: 0, _daysAgo: 0, _freshness: 0, _fameDamp: 0, _gemScore: 0 } },
+        ];
+        [skills, total] = await Promise.all([
+          col.aggregate(pipeline).toArray(),
+          col.countDocuments(query),
+        ]);
+      } else {
+        const SORT_SPECS = {
+          trending: { popularity_score: -1, github_stars: -1 },
+          popular: { github_stars: -1 },
+          newest: { added_at: -1, created_at: -1 },
+          updated: { last_updated: -1 },
+          quality: { rewrite_score: -1, github_stars: -1 },
+        };
+        const sortSpec = SORT_SPECS[sortKey] || SORT_SPECS.trending;
+        [skills, total] = await Promise.all([
+          col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).skip(offset).limit(limit).toArray(),
+          col.countDocuments(query),
+        ]);
+      }
+
+      return Response.json({ skills: applyFallback(skills), total, hasMore: offset + skills.length < total });
     }
 
     // Get skill by slug or ID

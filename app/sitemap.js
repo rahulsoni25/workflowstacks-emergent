@@ -112,9 +112,16 @@ export default async function sitemap() {
   // static-routes-only fallback below than block the whole deploy.
   let skillEntries = []
   try {
+    // Pre-filter server-side to (roughly) the gate's score/star thresholds —
+    // fetching the full catalog (2,000+ docs) just to keep the ~300 that
+    // pass was slow enough to blow the timeout below and silently fall back
+    // to static-only. guideRichness still needs a JS check (it reads a
+    // structured sub-object the DB filter can't easily express), so this is
+    // a coarse pre-filter, not a full replacement of passesSkillGate.
+    const gateParams = `minScore=${SKILL_SITEMAP_GATE.minRewriteScore}&minStars=${SKILL_SITEMAP_GATE.minStars}`
     const [toolsRes, resourcesRes] = await Promise.all([
-      fetch(`${BASE}/api/skills?limit=2000`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(15_000) }),
-      fetch(`${BASE}/api/skills?type=resource&limit=2000`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(15_000) }),
+      fetch(`${BASE}/api/skills?${gateParams}&limit=2000`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(15_000) }),
+      fetch(`${BASE}/api/skills?type=resource&${gateParams}&limit=2000`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(15_000) }),
     ])
     const docs = []
     if (toolsRes.ok) docs.push(...((await toolsRes.json()).skills || []))
