@@ -124,6 +124,8 @@ const schemaExpectations = [
   ['template', 'BreadcrumbList', 'low'],
   ['bundle', 'Product', 'medium'],
   ['bundle', 'BreadcrumbList', 'low'],
+  ['mcp', 'SoftwareApplication', 'medium'],
+  ['mcp', 'BreadcrumbList', 'low'],
 ]
 for (const [t, schema, sev] of schemaExpectations) {
   const res = typeHas(t, schema)
@@ -178,6 +180,13 @@ console.log(out)
 if (process.env.GITHUB_STEP_SUMMARY) {
   const { appendFileSync } = await import('node:fs')
   appendFileSync(process.env.GITHUB_STEP_SUMMARY, out + '\n')
+}
+if (process.env.GITHUB_ACTIONS) {
+  // GITHUB_STEP_SUMMARY is a fresh file per step, so a later step (the
+  // issue-creation step) can't read what this step wrote to it. Persist the
+  // report to a plain workspace file instead, which IS shared across steps.
+  const { writeFileSync } = await import('node:fs')
+  writeFileSync('seo-report.md', out + '\n')
 }
 if (process.env.GITHUB_OUTPUT) {
   const { appendFileSync } = await import('node:fs')

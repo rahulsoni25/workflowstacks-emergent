@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, KeyRound, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { getMcpServer, claudeConfigBlock, MCP_SERVERS } from '@/lib/mcp-servers'
+import { softwareApplicationSchema, breadcrumbSchema } from '@/lib/schema'
 import CopyConfig from './CopyConfig'
 
 export function generateStaticParams() {
@@ -14,7 +15,7 @@ export function generateMetadata({ params }) {
   const s = getMcpServer(params.slug)
   if (!s) return {}
   return {
-    title: `Add ${s.name} to Claude Desktop — MCP Config | WorkflowStacks`,
+    title: `${s.name} for Claude Desktop | WorkflowStacks`,
     description: `${s.blurb} Copy-paste the config into Claude Desktop and connect ${s.name} in under a minute.`,
     alternates: { canonical: `/mcp/${s.slug}` },
   }
@@ -32,8 +33,28 @@ export default function McpServerPage({ params }) {
   if (!server) notFound()
   const block = claudeConfigBlock(server)
 
+  // SoftwareApplication is what tells search + AI answer engines this is a
+  // real, installable tool rather than a plain content page — these MCP
+  // pages are the site's most differentiated, least-covered content, so
+  // they're the ones that most need the machine-readable signal.
+  const app = softwareApplicationSchema({
+    name: `${server.name} MCP Server`,
+    description: `${server.blurb} Verified Claude Desktop config, ${server.needs_key ? 'requires an API key' : 'no API key needed'}.`,
+    url: `/mcp/${server.slug}`,
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'Claude Desktop (macOS, Windows, Linux)',
+    priceUsd: 0,
+  })
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'MCP Servers', path: '/mcp' },
+    { name: server.name, path: `/mcp/${server.slug}` },
+  ])
+
   return (
     <div className="min-h-screen bg-neptune">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(app) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/mcp">
