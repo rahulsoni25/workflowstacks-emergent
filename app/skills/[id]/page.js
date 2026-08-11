@@ -25,9 +25,13 @@ async function getRelated(skill) {
 
 async function getSkill(id) {
   try {
-    // Short cache window — slugs and rewrites land throughout the day, so 5 min
-    // keeps the per-skill page in sync without hammering the API on every view.
-    const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(10_000) })
+    // Content only actually changes once/day (06:00 UTC refresh-content.yml cron),
+    // so a 5 min window bought no real freshness — it just forced this page to
+    // regenerate on almost every crawler/bot visit, which was the direct cause of
+    // a 0% edge-cache-hit rate and blew past the Vercel Hobby Fast Origin
+    // Transfer / Fluid Active CPU limits (2026-08-11). 1h keeps pages reasonably
+    // fresh while cutting regeneration frequency ~12x.
+    const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     const data = await res.json()
     return data.skill || null
