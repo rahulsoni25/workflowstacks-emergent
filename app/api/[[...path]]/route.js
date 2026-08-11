@@ -711,10 +711,16 @@ export async function GET(request) {
           { $addFields: {
               _rewriteScore: { $ifNull: ['$rewrite_score', 7] },
               _stars: { $ifNull: ['$github_stars', 0] },
+              // last_updated is a Date on most docs but a plain ISO string on
+              // some older/backfilled ones — $subtract can't mix the two, so
+              // normalize first (onError/onNull covers missing + unparsable).
+              _lastUpdatedDate: { $convert: { input: '$last_updated', to: 'date', onError: null, onNull: null } },
+          }},
+          { $addFields: {
               _daysAgo: {
                 $cond: [
-                  { $ifNull: ['$last_updated', false] },
-                  { $divide: [{ $subtract: ['$$NOW', '$last_updated'] }, 86400000] },
+                  { $ifNull: ['$_lastUpdatedDate', false] },
+                  { $divide: [{ $subtract: ['$$NOW', '$_lastUpdatedDate'] }, 86400000] },
                   1e9,
                 ],
               },
@@ -733,7 +739,7 @@ export async function GET(request) {
           { $sort: { _gemScore: -1 } },
           { $skip: offset },
           { $limit: limit },
-          { $project: { ...LIST_PROJECTION, _rewriteScore: 0, _stars: 0, _daysAgo: 0, _freshness: 0, _fameDamp: 0, _gemScore: 0 } },
+          { $project: { ...LIST_PROJECTION, _rewriteScore: 0, _stars: 0, _lastUpdatedDate: 0, _daysAgo: 0, _freshness: 0, _fameDamp: 0, _gemScore: 0 } },
         ];
         [skills, total] = await Promise.all([
           col.aggregate(pipeline).toArray(),
