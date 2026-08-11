@@ -30,6 +30,15 @@ async function connectDB() {
       await db.collection('skills').createIndex(
         { published: 1, category: 1, github_stars: -1 }
       );
+      // The category-less case (browsing "all" categories, the default
+      // /skills load) can't use the compound index above for the sort —
+      // without this, that query fell back to an in-memory sort over the
+      // full published set, which took ~90s once the catalog passed ~2k
+      // docs and blew past the SSR fetch timeout (page silently rendered
+      // as empty).
+      await db.collection('skills').createIndex(
+        { published: 1, github_stars: -1 }
+      );
     } catch (e) {
       console.log('Index note:', e.message);
     }
@@ -389,6 +398,13 @@ function prettyDesc(raw) {
   s = s.charAt(0).toUpperCase() + s.slice(1);
   return s.length > 200 ? s.slice(0, 197) + '…' : s;
 }
+// Fields only the single-skill detail view needs — excluded from list/catalog
+// queries (they're large free-text blobs and were being fetched+serialized
+// for every skill on every /skills page load, then discarded client-side).
+const LIST_PROJECTION = {
+  readme_preview: 0, use_guide: 0, description_original: 0, name_original: 0, rewritten_at: 0,
+};
+
 // Apply to a skills array — adds title_human/description_human ONLY if missing.
 function applyFallback(skills) {
   return (skills || []).map((s) => ({
@@ -663,14 +679,19 @@ export async function GET(request) {
       // `limit` is already part of the contract other pages assume (builder,
       // sitemap) — implement it so callers that only need a page of results
       // stop paying for a full-collection fetch+sort+serialize every time.
+      // Default cap (no `limit` given) protects against the collection's
+      // continued daily growth silently reintroducing a slow unbounded scan+sort.
       const limitParam = parseInt(searchParams.get('limit'), 10);
-      const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 2000) : 0;
+      const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 2000) : 3000;
 
-      let cursor = database.collection('skills')
-        .find(query)
-        .sort({ github_stars: -1 });
-      if (limit) cursor = cursor.limit(limit);
-      const skills = await cursor.toArray();
+      // Callers of the list endpoint (catalog grid, builder, sitemap) never
+      // read these — they're only needed by the single-skill detail fetch —
+      // so drop them here to cut payload size and serialization time.
+      const skills = await database.collection('skills')
+        .find(query, { projection: LIST_PROJECTION })
+        .sort({ github_stars: -1 })
+        .limit(limit)
+        .toArray();
 
       return Response.json({ skills: applyFallback(skills) });
     }
