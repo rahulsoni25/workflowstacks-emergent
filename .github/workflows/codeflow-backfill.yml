@@ -1,0 +1,42 @@
+name: Codeflow backfill
+
+# Manual lever to fill `codeflow` on skill pages faster than the daily job.
+# Each call handles ~15 repos (GitHub tree + Groq flow) inside Vercel's 60s
+# ceiling; `rounds` controls how many calls to make back-to-back.
+
+on:
+  workflow_dispatch:
+    inputs:
+      rounds:
+        description: 'Number of /api/codeflow calls (15 repos each)'
+        required: false
+        default: '10'
+      llm:
+        description: 'Generate the plain-English flow (true/false)'
+        required: false
+        default: 'true'
+      force:
+        description: 'Recompute even where codeflow already exists (true/false)'
+        required: false
+        default: 'false'
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Backfill codeflow
+        run: |
+          rounds="${{ github.event.inputs.rounds || '10' }}"
+          for i in $(seq 1 "$rounds"); do
+            echo "== round $i/$rounds"
+            out=$(curl -s --max-time 90 -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/codeflow?limit=15&llm=${{ github.event.inputs.llm || 'true' }}&force=${{ github.event.inputs.force || 'false' }}") || true
+            echo "$out" | head -c 1500; echo
+            processed=$(echo "$out" | sed -n 's/.*"processed":\([0-9]*\).*/\1/p')
+            if [ -z "$processed" ] || [ "$processed" = "0" ]; then echo "nothing left to process — stopping"; break; fi
+            sleep 3
+          done
