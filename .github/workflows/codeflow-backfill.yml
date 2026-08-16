@@ -19,6 +19,10 @@ on:
         description: 'Recompute even where codeflow already exists (true/false)'
         required: false
         default: 'false'
+      cleanup:
+        description: 'Maintenance op to run first (e.g. docs-flows) or empty'
+        required: false
+        default: ''
 
 env:
   BASE_URL: https://workflowstacks.com
@@ -28,6 +32,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      - name: Maintenance (optional)
+        if: ${{ github.event.inputs.cleanup != '' }}
+        run: |
+          curl -s --max-time 60 -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/codeflow?cleanup=${{ github.event.inputs.cleanup }}"; echo
+
       - name: Backfill codeflow
         run: |
           rounds="${{ github.event.inputs.rounds || '10' }}"
