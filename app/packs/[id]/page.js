@@ -7,6 +7,10 @@ import Link from 'next/link'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 export const revalidate = 600
+// Without generateStaticParams the segment is rendered on every request (no
+// edge cache) despite `revalidate` — same fix as app/skills/[id]/page.js.
+export const dynamicParams = true
+export function generateStaticParams() { return [] }
 
 function categoryColor(cat) {
   const colors = {

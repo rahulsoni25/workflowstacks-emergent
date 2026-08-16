@@ -301,7 +301,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
             </Card>
 
             {/* Codeflow — "How it works": size verdict, setup effort, flow, reading order */}
-            {codeflow && <CodeflowCard codeflow={codeflow} />}
+            {codeflow && <CodeflowCard codeflow={codeflow} name={skill.title_human || skill.name} />}
 
             {/* Legacy read-the-source spec sheet — only when Codeflow unavailable */}
             {!codeflow && sourceSpec && (

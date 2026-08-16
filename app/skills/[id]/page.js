@@ -1,6 +1,6 @@
 import { notFound, permanentRedirect } from 'next/navigation'
 import SkillDetailClient from './SkillDetailClient'
-import { buildCodeflow, CODEFLOW_VERSION } from '@/lib/codeflow'
+import { buildCodeflow, summarize } from '@/lib/codeflow'
 
 // Note: invalid skill IDs render the not-found UI with HTTP 200 (a Next.js 14
 // App Router limitation — notFound() doesn't emit a 404 status under ISR, and
@@ -9,6 +9,15 @@ import { buildCodeflow, CODEFLOW_VERSION } from '@/lib/codeflow'
 // phantom URLs — the practical SEO impact is nil. Keeping ISR for fast pages.
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+
+// ISR. Without generateStaticParams a dynamic segment is server-rendered on
+// EVERY request (verified live 2026-08-17: Cache-Control private/no-store,
+// X-Vercel-Cache MISS on repeat GETs) — the 2026-08-11 CPU/transfer overage
+// assumed ISR was in effect; it wasn't. An empty param list + revalidate makes
+// each slug render on first hit, then serve from the edge cache for an hour.
+export const revalidate = 3600
+export const dynamicParams = true
+export function generateStaticParams() { return [] }
 
 // Sibling skills in the same category, for the "Related skills" cross-link module.
 async function getRelated(skill) {
@@ -97,10 +106,24 @@ async function getSourceSpec(githubUrl) {
 // /api/codeflow (daily Action). Fall back to a live deterministic build so
 // every page has it before the backfill finishes. GitHub responses cached 24h.
 async function getCodeflow(skill) {
+  const name = skill.title_human || skill.name
   const stored = skill.codeflow
-  if (stored && typeof stored === 'object' && stored.version === CODEFLOW_VERSION) return stored
+  // Accept any stored version that has real data (older versions are
+  // refreshed by the daily job — never trigger 2,000 live rebuilds on a bump).
+  if (stored && typeof stored === 'object' && stored.size?.files > 0 && stored.version >= 1) {
+    return { ...stored, summary: summarize(stored, name) || stored.summary || null }
+  }
   if (!skill.github_url) return null
-  return buildCodeflow(skill.github_url, { category: skill.category, fetchOpts: { next: { revalidate: 86400 } } })
+  // The job already tried and failed (dead/private/empty repo) → don't retry
+  // on every render. Long tail (<50★) waits for the job too: no traffic, and
+  // it protects the GitHub budget for pages people actually open.
+  if (skill.codeflow_at && !stored) return null
+  if ((skill.github_stars || 0) < 50) return null
+  // Live build (page not yet backfilled). Trees over ~2MB can't enter Next's
+  // data cache, so very large repos (>60MB) wait for the stored version too.
+  const cf = await buildCodeflow(skill.github_url, { category: skill.category, installHint: skill.use_guide?.install, maxSizeKB: 60_000, fetchOpts: { next: { revalidate: 86400 } } })
+  if (!cf) return null
+  return { ...cf, summary: summarize(cf, name) }
 }
 
 // Trim to a clean snippet. Prefer ending on a complete sentence; otherwise cut on
@@ -158,6 +181,9 @@ export default async function SkillDetailPage({ params }) {
     ...(skill.github_url ? { url: skill.github_url } : {}),
     ...(skill.creator ? { author: { '@type': 'Person', name: skill.creator } } : {}),
     ...(codeflow?.languages?.length ? { programmingLanguage: codeflow.languages.map((l) => l.name) } : {}),
+    ...(codeflow?.repo?.html_url ? { codeRepository: codeflow.repo.html_url } : {}),
+    ...(codeflow?.repo?.pushed_at ? { dateModified: codeflow.repo.pushed_at } : {}),
+    ...(codeflow?.runtime?.length ? { softwareRequirements: codeflow.runtime.join(', ') } : {}),
     ...(codeflow?.signals?.license && /^[A-Za-z0-9.+-]+$/.test(codeflow.signals.license) && codeflow.signals.license !== 'Other'
       ? { license: `https://spdx.org/licenses/${codeflow.signals.license}.html` } : {}),
   }

@@ -12,9 +12,11 @@ const TIER_TONE = {
   docs: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
   tiny: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
   small: 'text-teal-300 border-teal-500/30 bg-teal-500/10',
-  medium: 'text-amber-300 border-amber-500/30 bg-amber-500/10',
-  large: 'text-orange-300 border-orange-500/30 bg-orange-500/10',
-  huge: 'text-rose-300 border-rose-500/30 bg-rose-500/10',
+  guide: 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
+  // Big ≠ bad: neutral tones for size, warm tones reserved for setup effort.
+  medium: 'text-sky-300 border-sky-500/30 bg-sky-500/10',
+  large: 'text-violet-300 border-violet-500/30 bg-violet-500/10',
+  huge: 'text-violet-300 border-violet-500/30 bg-violet-500/10',
 }
 const SETUP_TONE = {
   'no-code': 'text-emerald-300 border-emerald-500/30 bg-emerald-500/10',
@@ -39,30 +41,37 @@ function Signal({ ok, label, warn }) {
   )
 }
 
-export default function CodeflowCard({ codeflow: cf }) {
+export default function CodeflowCard({ codeflow: cf, name }) {
   const [open, setOpen] = useState(false)
   if (!cf || !cf.size) return null
+  const isDocs = cf.size.tier === 'docs' || cf.size.tier === 'guide'
 
   const tierTone = TIER_TONE[cf.size.tier] || TIER_TONE.medium
   const setupTone = SETUP_TONE[cf.setup?.level] || SETUP_TONE.light
   const pushed = cf.repo?.pushed_at ? new Date(cf.repo.pushed_at) : null
-  const daysSincePush = pushed ? Math.round((Date.now() - pushed.getTime()) / 86400000) : null
+  // Measured against compute time, not Date.now(): identical on server and
+  // client → no hydration mismatch, and honest about when we looked.
+  const asOf = cf.computed_at ? new Date(cf.computed_at) : null
+  const daysSincePush = pushed && asOf ? Math.max(0, Math.round((asOf.getTime() - pushed.getTime()) / 86400000)) : null
   // No "flow" for reading material (curated lists, guides) — nothing runs there.
-  const flow = cf.size.tier === 'docs' ? null : cf.flow
+  const flow = isDocs ? null : cf.flow
+  const summary = cf.summary
 
   return (
     <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl" id="codeflow">
       <CardHeader>
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-white flex items-center gap-2">
-            <Eye className="w-5 h-5 text-teal-400" />How it works
+            <Eye className="w-5 h-5 text-teal-400" />How {name || cf.repo?.name || 'it'} works
             <Badge className="bg-teal-500/10 text-teal-300 border-teal-500/30 border text-[10px] uppercase tracking-wider ml-1">Codeflow</Badge>
           </CardTitle>
           <Badge className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 border text-xs">Free to inspect</Badge>
         </div>
-        <p className="text-slate-400 text-sm mt-1">
-          How big the code is, how hard it is to run, and where to start reading — read from the real repository, not marketing copy.
-        </p>
+        {summary ? (
+          <p className="text-slate-200 text-sm mt-2 leading-relaxed">{summary}</p>
+        ) : (
+          <p className="text-slate-400 text-sm mt-1">How big the code is, how hard it is to run, and where to start reading — read from the real repository.</p>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Verdict tiles — the three answers a non-coder needs */}
@@ -71,10 +80,11 @@ export default function CodeflowCard({ codeflow: cf }) {
             <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider opacity-80 mb-1"><Gauge className="w-3.5 h-3.5" />Size</div>
             <div className="text-lg font-semibold text-white leading-tight">{cf.size.label}</div>
             <div className="text-sm mt-1 opacity-90">
-              {cf.size.tier === 'docs'
-                ? `${cf.size.doc_files} document${cf.size.doc_files === 1 ? '' : 's'} · ${cf.size.files} files`
+              {isDocs
+                ? `${cf.size.doc_files} document${cf.size.doc_files === 1 ? '' : 's'}${cf.size.code_files ? ` · ${cf.size.code_files} small script${cf.size.code_files === 1 ? '' : 's'}` : ''}`
                 : `${cf.size.loc_human} lines · ${cf.size.code_files} code files`}
               {cf.size.read_time ? ` · ${cf.size.read_time}` : ''}
+              {cf.truncated ? ' · partial scan' : ''}
             </div>
           </div>
           <div className={`rounded-lg p-4 border ${setupTone}`}>
@@ -84,7 +94,12 @@ export default function CodeflowCard({ codeflow: cf }) {
           </div>
           <div className="rounded-lg p-4 border border-slate-700/50 bg-slate-800/40">
             <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-slate-400 mb-1"><Layers className="w-3.5 h-3.5" />Runs on</div>
-            {cf.setup?.level === 'no-code' ? (
+            {isDocs && !/skill|plugin|prompt|no code/i.test(cf.setup?.label || '') ? (
+              <>
+                <div className="text-lg font-semibold text-white leading-tight">Nowhere — you read it</div>
+                <div className="text-sm mt-1 text-slate-300">A reading resource, not a program.</div>
+              </>
+            ) : cf.setup?.level === 'no-code' ? (
               <>
                 <div className="text-lg font-semibold text-white leading-tight">Inside your AI tool</div>
                 <div className="text-sm mt-1 text-slate-300">
@@ -187,8 +202,8 @@ export default function CodeflowCard({ codeflow: cf }) {
               {cf.folders.map((f) => (
                 <div key={f.path} className="flex items-center gap-3 px-3 py-2 text-sm">
                   <Folder className="w-4 h-4 text-amber-400 flex-shrink-0" />
-                  <a href={dirUrl(cf, f.path)} target="_blank" rel="noopener noreferrer" className="font-mono text-amber-200 hover:text-amber-100 w-40 truncate flex-shrink-0">{f.path}/</a>
-                  <span className="text-slate-300 flex-1 truncate">{f.purpose || 'Module'}</span>
+                  <a href={dirUrl(cf, f.path)} target="_blank" rel="noopener noreferrer" className="font-mono text-amber-200 hover:text-amber-100 max-w-[45%] md:w-48 truncate flex-shrink-0">{f.path}/</a>
+                  <span className="text-slate-300 flex-1 truncate">{f.purpose || 'Folder'}</span>
                   <span className="text-slate-500 text-xs flex-shrink-0">{f.files} files</span>
                 </div>
               ))}
@@ -199,9 +214,10 @@ export default function CodeflowCard({ codeflow: cf }) {
         {/* Trust signals */}
         <div className="flex flex-wrap gap-2">
           <Signal ok={cf.signals?.readme} label="README" />
-          <Signal ok={cf.signals?.tests} label={cf.signals?.tests ? 'Has tests' : 'No tests found'} />
-          <Signal ok={cf.signals?.docs} label={cf.signals?.docs ? 'Documented' : 'Thin docs'} />
-          <Signal ok={cf.signals?.ci} label={cf.signals?.ci ? 'CI checks' : 'No CI'} />
+          {/* Negative engineering chips are noise on reading material / prompt packs */}
+          {((!isDocs && cf.setup?.level !== 'no-code') || cf.signals?.tests) && <Signal ok={cf.signals?.tests} label={cf.signals?.tests ? 'Has tests' : 'No tests found'} />}
+          {(!isDocs || cf.signals?.docs) && <Signal ok={cf.signals?.docs} label={cf.signals?.docs ? 'Documented' : 'Thin docs'} />}
+          {((!isDocs && cf.setup?.level !== 'no-code') || cf.signals?.ci) && <Signal ok={cf.signals?.ci} label={cf.signals?.ci ? 'CI checks' : 'No CI'} />}
           {cf.signals?.docker && <Signal ok label="Docker ready" />}
           {cf.signals?.examples && <Signal ok label="Examples included" />}
           <Signal ok={!!cf.signals?.license} label={cf.signals?.license ? `${cf.signals.license} license` : 'No license'} warn={!cf.signals?.license} />

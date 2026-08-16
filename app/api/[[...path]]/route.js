@@ -406,6 +406,7 @@ function prettyDesc(raw) {
 // structured object, not a free-text blob like the ones excluded here.
 const LIST_PROJECTION = {
   readme_preview: 0, description_original: 0, name_original: 0, rewritten_at: 0,
+  codeflow: 0, // detail-page only (several KB per skill)
 };
 
 // Apply to a skills array — adds title_human/description_human ONLY if missing.

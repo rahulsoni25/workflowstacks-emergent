@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'crypto'
 import { getDb } from '@/lib/mongo'
 
 export const runtime = 'nodejs'
@@ -36,9 +37,9 @@ const COOLDOWN_DAYS = 45
 function requireAdmin(request) {
   const secret = process.env.ADMIN_SECRET
   if (!secret) return Response.json({ error: 'ADMIN_SECRET not configured' }, { status: 500 })
-  const url = new URL(request.url)
-  const provided = request.headers.get('x-admin-secret') || url.searchParams.get('secret')
-  if (provided !== secret) return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  // Header only — a ?secret= query param would land in request logs.
+  const provided = request.headers.get('x-admin-secret') || ''
+  if (provided.length !== secret.length || !timingSafeEqual(Buffer.from(provided), Buffer.from(secret))) return Response.json({ error: 'Unauthorized' }, { status: 401 })
   return null
 }
 
