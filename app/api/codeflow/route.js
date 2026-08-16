@@ -88,19 +88,29 @@ export async function GET(request) {
 
   const db = await getDb()
   const col = db.collection('skills')
+
+  // One-off maintenance: drop LLM flows generated for docs-only repos (lists,
+  // guides) before the reading-material skip existed.
+  if (searchParams.get('cleanup') === 'docs-flows') {
+    const r = await col.updateMany({ 'codeflow.size.tier': 'docs', 'codeflow.flow': { $type: 'object' } }, { $set: { 'codeflow.flow': null } })
+    return Response.json({ ok: true, cleanup: 'docs-flows', modified: r.modifiedCount })
+  }
+
   let targets
   if (slug) {
     const one = await col.findOne({ $or: [{ slug }, { id: slug }] })
     targets = one ? [one] : []
   } else {
     const q = { github_url: { $regex: /github\.com/i }, published: { $ne: false } }
-    if (!force) q.$or = [{ codeflow: { $exists: false } }, { codeflow: null }, { codeflow_at: { $lt: staleBefore } }]
+    // Never computed, or computed (incl. dead-repo nulls) longer than maxAgeDays ago.
+    // Rate-limited repos are NOT written at all, so they come back next run.
+    if (!force) q.$or = [{ codeflow_at: { $exists: false } }, { codeflow_at: { $lt: staleBefore } }]
     // Star-sorted so the pages that matter most (sitemap-gated ≥1000★) fill first.
     targets = await col.find(q).sort({ github_stars: -1 }).limit(limit).toArray()
   }
 
   const results = []
-  let ok = 0, failed = 0, flows = 0, stoppedEarly = false
+  let ok = 0, failed = 0, flows = 0, stoppedEarly = false, rateLimited = false
   const started = Date.now()
   const TIME_BUDGET_MS = 48_000 // stay under Vercel's 60s function ceiling
   for (const s of targets) {
@@ -109,6 +119,13 @@ export async function GET(request) {
     if (!parsed) { failed++; continue }
     try {
       const facts = await fetchRepoFacts(parsed.owner, parsed.repo, { cache: 'no-store' })
+      if (facts?.rateLimited) {
+        // GitHub rate limit: write nothing, stop the batch — retrying only burns
+        // the remaining budget. Fix = set GITHUB_TOKEN (5,000 req/h vs 60).
+        rateLimited = true
+        results.push({ slug: s.slug || s.id, ok: false, error: facts.error, rate_limited: true })
+        break
+      }
       if (!facts || facts.error || !facts.meta) {
         // Mark checked so a dead repo doesn't get retried every run.
         if (!dry) await col.updateOne({ _id: s._id }, { $set: { codeflow: null, codeflow_at: new Date(), codeflow_error: facts?.error || 'fetch failed' } })
@@ -118,12 +135,17 @@ export async function GET(request) {
       }
       const cf = analyzeRepo({ ...facts, category: s.category })
       let provider = null
-      if (useLLM) {
+      // A "flow" only makes sense for something that runs. Skip curated lists,
+      // guides, roadmaps, books, docs-only repos — the LLM produces filler there.
+      const isReadingMaterial = cf.size.tier === 'docs' || /\b(awesome|list|guide|book|roadmap|curated|collection|interview|cheat ?sheet|handbook|resources|tutorials?|course|knowledge)\b/i.test(`${s.name} ${s.title_human || ''} ${s.description || ''}`.slice(0, 300))
+      if (useLLM && !isReadingMaterial) {
         const readme = await fetchReadme(parsed.owner, parsed.repo)
-        const gen = await generateFlow({ name: s.title_human || s.name, category: s.category, readme, cf })
-        cf.flow = gen.flow
-        provider = gen.provider
-        if (gen.flow) flows++
+        if (readme && readme.length >= 400) {
+          const gen = await generateFlow({ name: s.title_human || s.name, category: s.category, readme, cf })
+          cf.flow = gen.flow
+          provider = gen.provider
+          if (gen.flow) flows++
+        }
       }
       if (!dry) await col.updateOne({ _id: s._id }, { $set: { codeflow: cf, codeflow_at: new Date(), codeflow_provider: provider }, $unset: { codeflow_error: '' } })
       ok++
@@ -137,5 +159,10 @@ export async function GET(request) {
 
   const total = await col.countDocuments({ codeflow: { $type: 'object' } })
   const withFlow = await col.countDocuments({ 'codeflow.flow': { $type: 'object' } })
-  return Response.json({ ok: true, dry, processed: ok + failed, requested: targets.length, stopped_early: stoppedEarly, stored: dry ? 0 : ok, failed, flows_generated: flows, totals: { with_codeflow: total, with_flow: withFlow }, results })
+  return Response.json({
+    ok: true, dry, processed: ok + failed, requested: targets.length, stopped_early: stoppedEarly,
+    rate_limited: rateLimited, github_token_set: !!process.env.GITHUB_TOKEN,
+    stored: dry ? 0 : ok, failed, flows_generated: flows,
+    totals: { with_codeflow: total, with_flow: withFlow }, results,
+  })
 }

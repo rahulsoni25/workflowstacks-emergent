@@ -36,7 +36,10 @@ jobs:
             out=$(curl -s --max-time 90 -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
               "$BASE_URL/api/codeflow?limit=15&llm=${{ github.event.inputs.llm || 'true' }}&force=${{ github.event.inputs.force || 'false' }}") || true
             echo "$out" | head -c 1500; echo
-            processed=$(echo "$out" | sed -n 's/.*"processed":\([0-9]*\).*/\1/p')
-            if [ -z "$processed" ] || [ "$processed" = "0" ]; then echo "nothing left to process — stopping"; break; fi
+            if echo "$out" | grep -q '"rate_limited":true'; then echo "GitHub rate-limited — set GITHUB_TOKEN in Vercel; stopping"; break; fi
+            stored=$(echo "$out" | sed -n 's/.*"stored":\([0-9]*\).*/\1/p')
+            requested=$(echo "$out" | sed -n 's/.*"requested":\([0-9]*\).*/\1/p')
+            if [ -z "$requested" ] || [ "$requested" = "0" ]; then echo "nothing left to process — stopping"; break; fi
+            if [ "${stored:-0}" = "0" ]; then echo "no progress this round — stopping"; break; fi
             sleep 3
           done

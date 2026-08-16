@@ -47,7 +47,8 @@ export default function CodeflowCard({ codeflow: cf }) {
   const setupTone = SETUP_TONE[cf.setup?.level] || SETUP_TONE.light
   const pushed = cf.repo?.pushed_at ? new Date(cf.repo.pushed_at) : null
   const daysSincePush = pushed ? Math.round((Date.now() - pushed.getTime()) / 86400000) : null
-  const flow = cf.flow
+  // No "flow" for reading material (curated lists, guides) — nothing runs there.
+  const flow = cf.size.tier === 'docs' ? null : cf.flow
 
   return (
     <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl" id="codeflow">

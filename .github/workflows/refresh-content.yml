@@ -72,9 +72,11 @@ jobs:
         # the sitemap-gated pages fill first. Refreshes entries older than 30 days.
         run: |
           for i in 1 2 3 4; do
-            curl -sf --max-time 90 -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
-              "$BASE_URL/api/codeflow?limit=15" | tee /tmp/codeflow-$i.json || true
-            echo
+            out=$(curl -s --max-time 90 -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/codeflow?limit=15") || true
+            echo "$out" | head -c 800; echo
+            if echo "$out" | grep -q '"rate_limited":true'; then echo "GitHub rate-limited — stopping"; break; fi
+            if ! echo "$out" | grep -q '"stored":[1-9]'; then echo "no progress — stopping"; break; fi
           done
 
       - name: Cleanup — strip legacy fabricated metrics, purge test data
