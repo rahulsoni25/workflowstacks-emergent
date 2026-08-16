@@ -1,5 +1,6 @@
 import { notFound, permanentRedirect } from 'next/navigation'
 import SkillDetailClient from './SkillDetailClient'
+import { buildCodeflow, CODEFLOW_VERSION } from '@/lib/codeflow'
 
 // Note: invalid skill IDs render the not-found UI with HTTP 200 (a Next.js 14
 // App Router limitation — notFound() doesn't emit a 404 status under ISR, and
@@ -92,6 +93,16 @@ async function getSourceSpec(githubUrl) {
   }
 }
 
+// Codeflow ("How it works"): prefer the stored, LLM-enriched version written by
+// /api/codeflow (daily Action). Fall back to a live deterministic build so
+// every page has it before the backfill finishes. GitHub responses cached 24h.
+async function getCodeflow(skill) {
+  const stored = skill.codeflow
+  if (stored && typeof stored === 'object' && stored.version === CODEFLOW_VERSION) return stored
+  if (!skill.github_url) return null
+  return buildCodeflow(skill.github_url, { category: skill.category, fetchOpts: { next: { revalidate: 86400 } } })
+}
+
 // Trim to a clean snippet. Prefer ending on a complete sentence; otherwise cut on
 // a word boundary and append … — never mid-word or on a dangling preposition.
 function clip(text, max = 160) {
@@ -131,7 +142,9 @@ export default async function SkillDetailPage({ params }) {
   if (skill.slug && params.id !== skill.slug && /^[0-9a-f-]{36}$/i.test(params.id)) {
     permanentRedirect(`/skills/${skill.slug}`)
   }
-  const [sourceSpec, related] = await Promise.all([getSourceSpec(skill.github_url), getRelated(skill)])
+  const [codeflow, related] = await Promise.all([getCodeflow(skill), getRelated(skill)])
+  // Legacy spec sheet only when Codeflow could not be built (rate-limit etc.)
+  const sourceSpec = codeflow ? null : await getSourceSpec(skill.github_url)
 
   // Structured data for rich results
   const jsonLd = {
@@ -144,6 +157,9 @@ export default async function SkillDetailPage({ params }) {
     offers: { '@type': 'Offer', price: skill.price || 0, priceCurrency: 'USD' },
     ...(skill.github_url ? { url: skill.github_url } : {}),
     ...(skill.creator ? { author: { '@type': 'Person', name: skill.creator } } : {}),
+    ...(codeflow?.languages?.length ? { programmingLanguage: codeflow.languages.map((l) => l.name) } : {}),
+    ...(codeflow?.signals?.license && /^[A-Za-z0-9.+-]+$/.test(codeflow.signals.license) && codeflow.signals.license !== 'Other'
+      ? { license: `https://spdx.org/licenses/${codeflow.signals.license}.html` } : {}),
   }
 
   const breadcrumb = {
@@ -166,7 +182,7 @@ export default async function SkillDetailPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
-      <SkillDetailClient skill={skill} sourceSpec={sourceSpec} related={related} />
+      <SkillDetailClient skill={skill} sourceSpec={sourceSpec} codeflow={codeflow} related={related} />
     </>
   )
 }

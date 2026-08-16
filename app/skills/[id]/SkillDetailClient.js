@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import CodeflowCard from './CodeflowCard'
 
 function getCategoryColor(cat) {
   const colors = {
@@ -20,7 +21,7 @@ function getCategoryColor(cat) {
   return colors[cat] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
 }
 
-export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
+export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [] }) {
   const [copied, setCopied] = useState(false)
   const [reacted, setReacted] = useState(false)
   const [reactionCount, setReactionCount] = useState(skill.reactions_up || 0)
@@ -99,12 +100,12 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                 <div className="flex flex-wrap items-center gap-3">
                   {skill.github_stars > 0 && (
                     <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-200">
-                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />{skill.github_stars.toLocaleString()} stars
+                      <Star className="w-4 h-4 fill-amber-400 text-amber-400" />{skill.github_stars.toLocaleString('en-US')} stars
                     </span>
                   )}
                   {skill.github_forks > 0 && (
                     <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-200">
-                      <Github className="w-4 h-4" />{skill.github_forks.toLocaleString()} forks
+                      <Github className="w-4 h-4" />{skill.github_forks.toLocaleString('en-US')} forks
                     </span>
                   )}
                   {skill.language && (
@@ -119,7 +120,7 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                   )}
                   {skill.last_updated && (
                     <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-300">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />Updated {new Date(skill.last_updated).toLocaleDateString()}
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />Updated {new Date(skill.last_updated).toLocaleDateString('en-US')}
                     </span>
                   )}
                   <span className="flex items-center gap-1.5 text-sm text-emerald-300">100% free · open source</span>
@@ -299,8 +300,11 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
               </CardContent>
             </Card>
 
-            {/* Read-the-source spec sheet — fully inspectable & free (vs rivals' pay-to-inspect) */}
-            {sourceSpec && (
+            {/* Codeflow — "How it works": size verdict, setup effort, flow, reading order */}
+            {codeflow && <CodeflowCard codeflow={codeflow} />}
+
+            {/* Legacy read-the-source spec sheet — only when Codeflow unavailable */}
+            {!codeflow && sourceSpec && (
               <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
                 <CardHeader>
                   <div className="flex items-center justify-between flex-wrap gap-2">
@@ -394,7 +398,7 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                 <div className="flex items-start gap-3"><User className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Creator</div><div className="text-white font-medium">{skill.creator}</div></div></div>
                 {skill.language && <div className="flex items-start gap-3"><Code2 className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Language</div><div className="text-white font-medium">{skill.language}</div></div></div>}
                 <div className="flex items-start gap-3"><Package className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Category</div><div className="text-white font-medium">{skill.category}</div></div></div>
-                {skill.created_at && <div className="flex items-start gap-3"><Calendar className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Published</div><div className="text-white font-medium">{new Date(skill.created_at).toLocaleDateString()}</div></div></div>}
+                {skill.created_at && <div className="flex items-start gap-3"><Calendar className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Published</div><div className="text-white font-medium">{new Date(skill.created_at).toLocaleDateString('en-US')}</div></div></div>}
                 <div className="mt-4 p-3 bg-teal-500/5 border border-teal-500/15 rounded-lg">
                   <p className="text-slate-400 text-xs">Are you the creator of this tool? <Link href="/submit" className="text-teal-300 hover:text-teal-200">Claim your listing →</Link> and earn 85% of every sale.</p>
                 </div>
@@ -413,7 +417,7 @@ export default function SkillDetailClient({ skill, sourceSpec, related = [] }) {
                   <div className="h-full rounded-xl border border-slate-700/50 bg-slate-900/60 p-4 hover:border-teal-500/40 transition-all">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs text-slate-500">{r.category}</span>
-                      {r.github_stars > 0 && <span className="text-xs text-amber-400">★ {r.github_stars.toLocaleString()}</span>}
+                      {r.github_stars > 0 && <span className="text-xs text-amber-400">★ {r.github_stars.toLocaleString('en-US')}</span>}
                     </div>
                     <div className="text-white font-semibold group-hover:text-teal-300 transition-colors line-clamp-1">{r.title_human || r.name}</div>
                     <div className="text-slate-400 text-sm mt-1 line-clamp-2">{r.description_human || r.description}</div>
