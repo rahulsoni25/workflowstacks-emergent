@@ -13,7 +13,9 @@ import { postsCollection, topicQueueCollection, keywordsCollection, slugify, cou
 import { assembleBody } from '@/lib/blog/markdown'
 import { runSeoChecks, SEO_PASS_MARK } from '@/lib/blog/seo-check'
 import { callLLM, callJson, providersAvailable } from '@/lib/blog/llm'
-import { SCOUT_SYSTEM, KEYWORD_SYSTEM, BRIEF_SYSTEM, WRITE_SYSTEM, EDIT_SYSTEM, JUDGE_SYSTEM, CLAIM_FIX_SYSTEM } from '@/lib/blog/prompts'
+import { SCOUT_SYSTEM, KEYWORD_SYSTEM, BRIEF_SYSTEM, WRITE_SYSTEM, EDIT_SYSTEM, JUDGE_SYSTEM, CLAIM_FIX_SYSTEM, HUMANIZE_SYSTEM } from '@/lib/blog/prompts'
+import { styleCheck, overlapWithCorpus, OVERLAP_LIMIT } from '@/lib/blog/style-check'
+import { serpSearch, rankFor } from '@/lib/blog/serp'
 import { suggestLinks, linkUniverse } from '@/lib/blog/links'
 import { getDb } from '@/lib/mongo'
 
@@ -49,14 +51,15 @@ async function nextFreeSlot(col) {
 
 async function scout() {
   const db = await getDb()
-  const posts = await (await postsCollection()).find({}, { projection: { title: 1, 'seo.primary': 1, topic: 1 } }).limit(300).toArray()
+  const posts = await (await postsCollection()).find({}, { projection: { title: 1, 'seo.primary': 1, topic: 1, rank: 1 } }).limit(300).toArray()
   const searches = await db.collection('search_queries').find({}, { projection: { q: 1, query: 1, count: 1 } }).sort({ count: -1 }).limit(40).toArray().catch(() => [])
   const problems = await db.collection('problems').find({}, { projection: { title: 1, description: 1, votes: 1 } }).sort({ votes: -1 }).limit(20).toArray().catch(() => [])
   const rising = await db.collection('skills').find({ published: { $ne: false } }, { projection: { title_human: 1, title: 1, slug: 1, stars: 1, category: 1 } }).sort({ last_updated: -1 }).limit(40).toArray().catch(() => [])
   const assets = linkUniverse().filter((l) => ['template', 'bundle', 'mcp', 'outcome'].includes(l.kind))
 
   const user = JSON.stringify({
-    existing_posts: posts.map((p) => ({ title: p.title, primary: p.seo?.primary })),
+    existing_posts: posts.map((p) => ({ title: p.title, primary: p.seo?.primary, rank: p.rank?.position ?? null })),
+    ranking_guidance: 'existing_posts rank = our current SERP position for that primary keyword (null = not top-20). Posts ranking 6-30 are refresh/expand candidates; keywords where we rank 1-5 are OFF LIMITS for new posts (cannibalization); clusters with repeated nulls after weeks deserve fewer new topics.',
     site_searches: searches.map((s) => s.q || s.query).filter(Boolean).slice(0, 40),
     problems: problems.map((p) => p.title).slice(0, 20),
     recently_updated_repos: rising.map((r) => r.title_human || r.title).slice(0, 40),
@@ -82,19 +85,37 @@ async function start() {
   const topic = await queue.find({ status: 'open' }).sort({ score: -1 }).limit(1).next()
   if (!topic) return { error: 'topic_queue empty — run action=scout first' }
 
-  // Keyword step: imported volume rows if present, else the LLM's judgement.
+  // Keyword step: imported volume rows if present, plus a LIVE SERP snapshot
+  // so the strategist sees who actually ranks today, and our current rank so
+  // it never cannibalizes a page that already ranks top-5.
   const kwCol = await keywordsCollection()
   const kwRows = await kwCol.find({ $text: { $search: topic.topic } }).limit(20).toArray().catch(() => [])
+  const serp = await serpSearch(topic.topic, { count: 10 })
+  const ourRank = await rankFor(topic.topic)
   const { data: kw } = await callJson({
     system: KEYWORD_SYSTEM,
-    user: JSON.stringify({ topic: topic.topic, angle: topic.angle, cluster: topic.cluster, imported_volume_rows: kwRows.map((r) => ({ keyword: r.keyword, volume: r.volume, difficulty: r.difficulty })) }),
-    tier: 'cheap', maxTokens: 1200, tag: 'keywords',
+    user: JSON.stringify({
+      topic: topic.topic, angle: topic.angle, cluster: topic.cluster,
+      imported_volume_rows: kwRows.map((r) => ({ keyword: r.keyword, volume: r.volume, difficulty: r.difficulty, last_position: r.last_position })),
+      serp_snapshot: { engine: serp.engine, results: serp.results.map((r) => ({ position: r.position, title: r.title, host: (() => { try { return new URL(r.url).hostname } catch { return '' } })(), snippet: r.snippet.slice(0, 160) })) },
+      rank_data: { our_position_for_topic: ourRank.position, engine: ourRank.engine },
+      today: new Date().toISOString().slice(0, 10),
+    }),
+    tier: 'cheap', maxTokens: 1400, tag: 'keywords',
   })
+  // Snapshot the chosen primary's SERP too (differs from the raw topic query).
+  const primarySerp = kw.primary && kw.primary !== topic.topic ? await serpSearch(kw.primary, { count: 10 }) : serp
 
   const links = suggestLinks({ persona: topic.persona, keywords: [kw.primary, ...(kw.secondary || [])], limit: 12 })
   const { data: brief } = await callJson({
     system: BRIEF_SYSTEM,
-    user: JSON.stringify({ topic: topic.topic, angle: topic.angle, persona: topic.persona, anchor_asset: topic.anchor_asset, keywords: kw, allowed_internal_links: links.map((l) => ({ path: l.path, label: l.label })) }),
+    user: JSON.stringify({
+      topic: topic.topic, angle: topic.angle, persona: topic.persona, anchor_asset: topic.anchor_asset, keywords: kw,
+      allowed_internal_links: links.map((l) => ({ path: l.path, label: l.label })),
+      serp_snapshot: primarySerp.results.slice(0, 8).map((r) => ({ position: r.position, title: r.title, snippet: r.snippet.slice(0, 160) })),
+      today: new Date().toISOString().slice(0, 10),
+      freshness_note: 'The article must read as current: reference what tools/docs say NOW with month-year dating, and must NOT restate what the serp_snapshot pages already say — different angle, own data.',
+    }),
     tier: 'strong', maxTokens: 3000, tag: 'brief',
   })
 
@@ -117,6 +138,7 @@ async function start() {
         seo: { primary: kw.primary, secondary: kw.secondary || [], questions: kw.questions || [], intent: kw.intent, format: kw.format, volume: kw.volume ?? null, volume_band: kw.volume_band, volume_source: kw.volume_source || 'estimate', difficulty: kw.difficulty },
         anchor_asset: topic.anchor_asset || null,
         brief,
+        serp_snapshot: primarySerp.results.slice(0, 8).map((r) => ({ position: r.position, title: r.title, url: r.url, snippet: r.snippet.slice(0, 200) })),
         sections: (brief.outline || []).map((o) => ({ h2: o.h2, md: '', goal: o.goal, must_include: o.must_include, target_words: o.target_words || 380 })),
         faq: brief.faq || [],
         key_takeaways: brief.key_takeaways || [],
@@ -136,7 +158,7 @@ async function start() {
 
 async function advance() {
   const col = await postsCollection()
-  const post = await col.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'judged'] } }).sort({ updated_at: 1 }).limit(1).next()
+  const post = await col.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'styled', 'judged'] } }).sort({ updated_at: 1 }).limit(1).next()
   if (!post) return { idle: true, note: 'no in-flight post — action=start begins one' }
   const now = new Date()
 
@@ -191,11 +213,58 @@ async function advance() {
     return { slug: post.slug, step: 'seo edit', score: updated.seo_report.score }
   }
 
-  // 3. Judge (different model family), claim fixes, gate.
+  // 2b. Humanize: deterministic style linter + corpus-duplication check, then
+  // one bounded LLM pass that fixes ONLY the linter findings. A post that
+  // still fails after the pass is held — machine-flavored writing never ships.
   if (post.status === 'edited') {
+    const body_md = post.body_md || assembleBody(post)
+    let style = styleCheck({ ...post, body_md })
+    const others = await col.find({ slug: { $ne: post.slug }, body_md: { $exists: true } }, { projection: { slug: 1, body_md: 1 } }).limit(100).toArray()
+    const overlap = overlapWithCorpus({ ...post, body_md }, others)
+    let sections = post.sections
+    let changes = []
+    if (!style.pass || overlap.max > OVERLAP_LIMIT) {
+      const { data: fix } = await callJson({
+        system: HUMANIZE_SYSTEM,
+        user: JSON.stringify({
+          findings: style.findings,
+          duplication: overlap.max > OVERLAP_LIMIT ? `${(overlap.max * 100).toFixed(1)}% 8-gram overlap with sibling post ${overlap.worst} — rewrite the overlapping passages in this article's own words` : null,
+          sections: post.sections.map((s, i) => ({ index: i, h2: s.h2, md: s.md })),
+        }),
+        tier: 'strong', maxTokens: 4000, tag: `humanize:${post.slug}`,
+      }).catch(() => ({ data: null }))
+      if (fix?.sections) {
+        sections = [...post.sections]
+        for (const s of fix.sections) if (sections[s.index]) sections[s.index] = { ...sections[s.index], md: s.md }
+        changes = fix.changes || []
+      }
+    }
+    const newBody = assembleBody({ ...post, sections })
+    style = styleCheck({ ...post, sections, body_md: newBody })
+    const overlap2 = overlapWithCorpus({ ...post, body_md: newBody }, others)
+    const clean = style.pass && overlap2.max <= OVERLAP_LIMIT
+    await col.updateOne({ slug: post.slug }, {
+      $set: {
+        sections, body_md: newBody, word_count: countWords(newBody),
+        style_report: { ...style, overlap: overlap2, changes, at: now },
+        status: clean ? 'styled' : 'held',
+        updated_at: now,
+      },
+    })
+    return { slug: post.slug, step: 'humanize', style_score: style.score, overlap: +(overlap2.max * 100).toFixed(1), status: clean ? 'styled' : 'held' }
+  }
+
+  // 3. Judge (different model family), claim fixes, gate.
+  if (post.status === 'styled') {
     const { data: judge } = await callJson({
       system: JUDGE_SYSTEM,
-      user: JSON.stringify({ persona: post.persona, primary_keyword: post.seo?.primary, article: { title: post.title, answer: post.answer, sections: post.sections.map((s, i) => ({ index: i, h2: s.h2, md: s.md })) }, sources: post.sources }),
+      user: JSON.stringify({
+        persona: post.persona, primary_keyword: post.seo?.primary,
+        article: { title: post.title, answer: post.answer, sections: post.sections.map((s, i) => ({ index: i, h2: s.h2, md: s.md })) },
+        sources: post.sources,
+        competing_serp_results: post.serp_snapshot || [],
+        originality_instruction: 'Score originality low if this article could be reconstructed from the competing_serp_results titles/snippets alone — it must contain observations those pages cannot have.',
+      }),
       tier: 'judge', maxTokens: 2500, tag: `judge:${post.slug}`,
     })
     const bad = (judge.claims || []).filter((c) => c.status !== 'verified')
@@ -233,6 +302,36 @@ async function advance() {
   return { slug: post.slug, note: `no handler for status ${post.status}` }
 }
 
+// Rank tracking: check where each published post's primary keyword ranks
+// (Brave/DDG proxy; GSC stays the Google ground truth). Batched and rotated —
+// the least-recently-checked posts first, ≤8 per run to stay polite. Results
+// land on the post (rank + rank_history) and in the keywords collection,
+// which the scout and keyword strategist both read.
+async function rankCheck(limit = 8) {
+  const col = await postsCollection()
+  const posts = await col.find(
+    { status: 'published', 'seo.primary': { $exists: true, $ne: '' } },
+    { projection: { slug: 1, 'seo.primary': 1, rank: 1 } }
+  ).sort({ 'rank.checked_at': 1 }).limit(limit).toArray()
+  const kwCol = await keywordsCollection()
+  const out = []
+  for (const p of posts) {
+    const r = await rankFor(p.seo.primary)
+    await col.updateOne({ slug: p.slug }, {
+      $set: { rank: { keyword: p.seo.primary, engine: r.engine, position: r.position, url: r.url, checked_at: r.checked_at, error: r.error || null } },
+      $push: { rank_history: { $each: [{ engine: r.engine, position: r.position, at: r.checked_at }], $slice: -60 } },
+    })
+    await kwCol.updateOne(
+      { keyword: p.seo.primary },
+      { $set: { last_position: r.position, last_engine: r.engine, last_checked: r.checked_at, ranking_url: r.url, post_slug: p.slug }, $setOnInsert: { keyword: p.seo.primary, source: 'rank-check' } },
+      { upsert: true }
+    )
+    out.push({ slug: p.slug, keyword: p.seo.primary, engine: r.engine, position: r.position ?? 'not in top 20' })
+    await new Promise((res) => setTimeout(res, 1200)) // politeness gap between SERP hits
+  }
+  return { checked: out.length, results: out }
+}
+
 export async function POST(request) {
   const denied = requireAdmin(request)
   if (denied) return denied
@@ -240,6 +339,7 @@ export async function POST(request) {
   const action = url.searchParams.get('action') || 'advance'
   try {
     if (action === 'scout') return Response.json(await scout())
+    if (action === 'rank') return Response.json(await rankCheck(Math.min(parseInt(url.searchParams.get('limit') || '8', 10), 15)))
     if (action === 'start') return Response.json(await start())
     if (action === 'advance') return Response.json(await advance())
     if (action === 'status') {

@@ -21,6 +21,12 @@ jobs:
   blog:
     runs-on: ubuntu-latest
     steps:
+      - name: Rank check (feeds the scout real SERP positions)
+        run: |
+          curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/blog/pipeline?action=rank&limit=8" | tee /tmp/rank.json || echo "rank check unavailable (SERP source rate-limited) — continuing"
+          echo
+
       - name: Scout topics
         run: |
           curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
@@ -35,7 +41,7 @@ jobs:
 
       - name: Advance until done (sections → edit → judge → schedule)
         run: |
-          for i in $(seq 1 18); do
+          for i in $(seq 1 22); do
             R=$(curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
               "$BASE_URL/api/blog/pipeline?action=advance") || break
             echo "step $i: $R"

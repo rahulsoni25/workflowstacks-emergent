@@ -12,7 +12,7 @@ const BTN2 = 'rounded-lg border border-[#323A3C] px-3 py-1.5 text-[12.5px] text-
 const INPUT = 'w-full rounded-lg border border-[#262B2D] bg-[#0A0C0D] px-3 py-2 text-[13.5px] text-[#ECEFEA] focus:border-[#C6F24E] focus:outline-none'
 
 const STATUS_COLOR = {
-  published: 'text-[#6FD79A]', judged: 'text-[#C6F24E]', held: 'text-[#F27C74]',
+  published: 'text-[#6FD79A]', judged: 'text-[#C6F24E]', styled: 'text-[#C6F24E]', held: 'text-[#F27C74]',
   drafted: 'text-[#F0B35C]', drafting: 'text-[#F0B35C]', edited: 'text-[#F0B35C]',
   briefed: 'text-[#8AB0F0]', archived: 'text-[#6E7772]',
 }
@@ -106,6 +106,7 @@ export default function BlogAdmin() {
           <h1 className="text-xl font-bold text-[#ECEFEA]">Blog <span className="text-[#6E7772]">· {posts.length} posts</span></h1>
           <div className="flex flex-wrap gap-2">
             <Link href="/admin" className={BTN2}>← Admin</Link>
+            <button disabled={!!busy} onClick={() => pipeline('rank')} className={BTN2}>{busy === 'rank' ? '…' : 'Check rankings'}</button>
             <button disabled={!!busy} onClick={() => pipeline('scout')} className={BTN2}>{busy === 'scout' ? '…' : 'Scout topics'}</button>
             <button disabled={!!busy} onClick={() => pipeline('start')} className={BTN2}>{busy === 'start' ? '…' : 'Start next post'}</button>
             <button disabled={!!busy} onClick={() => pipeline('advance')} className={BTN}>{busy === 'advance' ? '…' : 'Advance pipeline'}</button>
@@ -128,7 +129,7 @@ export default function BlogAdmin() {
                   <div className="min-w-0">
                     <div className="truncate text-[13.5px] font-medium text-[#ECEFEA]">{p.title}</div>
                     <div className="mt-0.5 text-[11.5px] text-[#6E7772]">
-                      /{p.slug} · {p.word_count || 0}w · SEO {p.seo_report?.score ?? '—'} · judge {p.judge?.score ?? '—'}
+                      /{p.slug} · {p.word_count || 0}w · SEO {p.seo_report?.score ?? '—'} · style {p.style_report?.score ?? '—'} · judge {p.judge?.score ?? '—'} · rank {p.rank ? (p.rank.position ?? '>20') : '—'}
                       {p.published_at ? ` · ${new Date(p.published_at).toISOString().slice(0, 10)}` : ''}
                     </div>
                   </div>
@@ -166,7 +167,17 @@ export default function BlogAdmin() {
 
               {sel.seo_report && (
                 <div className="mt-4 rounded-lg border border-[#262B2D] bg-[#0A0C0D] p-3">
-                  <div className="text-[12px] font-semibold text-[#ECEFEA]">SEO {sel.seo_report.score}/100 {sel.judge ? `· Judge ${sel.judge.score}/10` : ''}</div>
+                  <div className="text-[12px] font-semibold text-[#ECEFEA]">
+                    SEO {sel.seo_report.score}/100
+                    {sel.style_report ? ` · Style ${sel.style_report.score}/100` : ''}
+                    {sel.judge ? ` · Judge ${sel.judge.score}/10` : ''}
+                    {sel.rank ? ` · Rank ${sel.rank.position ?? '>20'} (${sel.rank.engine})` : ''}
+                  </div>
+                  {sel.style_report?.findings?.length > 0 && (
+                    <ul className="mt-1.5 space-y-0.5 text-[11.5px] text-[#F27C74]">
+                      {sel.style_report.findings.map((f, i) => (<li key={i}>✗ {f.id}: {f.detail}</li>))}
+                    </ul>
+                  )}
                   {sel.seo_report.failed?.length > 0 && (
                     <ul className="mt-1.5 space-y-0.5 text-[11.5px] text-[#F0B35C]">
                       {sel.seo_report.failed.map((f) => (<li key={f.id}>✗ {f.id}: {f.detail}</li>))}
