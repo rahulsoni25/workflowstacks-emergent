@@ -1,0 +1,38 @@
+name: Blog pipeline debug
+
+# Manual utility: run one pipeline action and print the HTTP status + full
+# body (the daily workflow's `curl -sf` swallows error bodies). Also used to
+# operate the pipeline by hand from the Actions tab.
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'pipeline action (scout|start|advance|rank|status)'
+        default: 'status'
+      loops:
+        description: 'how many times to call it (advance loops)'
+        default: '1'
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call pipeline
+        run: |
+          for i in $(seq 1 ${{ inputs.loops }}); do
+            CODE=$(curl -s -o /tmp/body.json -w "%{http_code}" -X POST \
+              -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/blog/pipeline?action=${{ inputs.action }}")
+            echo "--- call $i: HTTP $CODE"
+            cat /tmp/body.json; echo
+            echo "### call $i — HTTP $CODE" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat /tmp/body.json >> $GITHUB_STEP_SUMMARY
+            echo '' >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            grep -q '"step":"scheduled"\|"idle":true\|"status":"held"' /tmp/body.json && break
+            sleep 10
+          done
