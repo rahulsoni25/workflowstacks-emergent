@@ -1,0 +1,67 @@
+name: Daily blog pipeline
+
+# One judged article a day: scout topics, start the best one, then advance the
+# state machine step by step (each call is one small Vercel function run).
+# The pipeline itself enforces the 1-post/day cap and the judge gate (>=8),
+# and BLOG_AUTOPUBLISH=false in Vercel env parks posts at "judged" for manual
+# approval in /admin/blog.
+on:
+  schedule:
+    - cron: '30 5 * * *' # 05:30 UTC daily — before the 06:00 content refresh
+  workflow_dispatch: {}
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  blog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Scout topics
+        run: |
+          curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/blog/pipeline?action=scout" | tee /tmp/scout.json
+          echo
+
+      - name: Start the best open topic
+        run: |
+          curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/blog/pipeline?action=start" | tee /tmp/start.json
+          echo
+
+      - name: Advance until done (sections → edit → judge → schedule)
+        run: |
+          for i in $(seq 1 18); do
+            R=$(curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/blog/pipeline?action=advance") || break
+            echo "step $i: $R"
+            echo "$R" | jq -e '.idle == true' >/dev/null && break
+            echo "$R" | jq -e '.step == "scheduled"' >/dev/null && break
+            echo "$R" | jq -e '.status == "held"' >/dev/null && { echo "HELD"; break; }
+            sleep 15
+          done
+
+      - name: Status summary
+        run: |
+          curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/blog/pipeline?action=status" | tee /tmp/status.json
+          echo "### Blog pipeline" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/start.json /tmp/status.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Open issue if a post was held by the judge
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `blog: daily pipeline failed ${new Date().toISOString().slice(0,10)}`,
+              body: 'The daily blog pipeline run failed or a post was held by the judge. Check the Actions log and /admin/blog.',
+            })

@@ -71,6 +71,7 @@ const STATIC_ROUTES = [
   ...Object.keys(MCP_SERVERS).map((slug) => `/mcp/${slug}`),
   '/commands',
   ...Object.keys(SLASH_COMMANDS).map((slug) => `/commands/${slug}`),
+  '/blog',
   '/learn', '/learn/how-it-works', '/learn/agents', '/learn/skills',
   '/learn/mcp', '/learn/creators', '/learn/security', '/learn/resources',
   '/about', '/docs', '/help', '/enterprise', '/founder-launch', '/pricing',
@@ -84,7 +85,7 @@ const STATIC_ROUTES = [
 // derivative skill pages a higher priority than hand-built templates.
 function priorityFor(path) {
   if (path === '') return 1
-  if (path.startsWith('/templates') || path.startsWith('/automate')) return 0.9
+  if (path.startsWith('/templates') || path.startsWith('/automate') || path === '/blog') return 0.9
   if (path.startsWith('/tools') || path.startsWith('/bundles') || path.startsWith('/mcp') || path.startsWith('/kits') || path.startsWith('/commands')) return 0.8
   if (path === '/skills' || path === '/pricing' || path.startsWith('/learn')) return 0.7
   return 0.5
@@ -136,5 +137,20 @@ export default async function sitemap() {
     // Sitemap still valid with just static routes if the API is unreachable
   }
 
-  return [...staticEntries, ...skillEntries]
+  // Published blog posts — original content, priority just under templates.
+  let blogEntries = []
+  try {
+    const { allPublishedForSitemap } = await import('@/lib/blog/store')
+    const posts = await allPublishedForSitemap()
+    blogEntries = posts.map((p) => ({
+      url: `${BASE}/blog/${p.slug}`,
+      lastModified: p.refreshed_at ? new Date(p.refreshed_at) : new Date(p.published_at),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    }))
+  } catch (e) {
+    // Sitemap still valid without blog entries if Mongo is unreachable.
+  }
+
+  return [...staticEntries, ...blogEntries, ...skillEntries]
 }

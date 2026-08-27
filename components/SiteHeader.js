@@ -46,6 +46,7 @@ const NAV_GROUPS = [
   {
     label: 'Learn',
     items: [
+      { href: '/blog', label: 'Journal', note: 'Tested guides, published daily' },
       { href: '/learn/how-it-works', label: 'How It Works' },
       { href: '/learn/skills', label: 'What Are Skills' },
       { href: '/learn/agents', label: 'What Are Agents' },

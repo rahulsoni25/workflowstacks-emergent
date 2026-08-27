@@ -162,3 +162,29 @@ body {
   }
   .btn-lime:hover { background: #A6D62E; }
 }
+
+/* ── Blog article typography (rendered HTML from lib/blog/markdown) ── */
+.blog-prose { color: #C9CFC9; font-size: 16.5px; line-height: 1.75; }
+.blog-prose > * + * { margin-top: 1em; }
+.blog-prose h2 { color: #ECEFEA; font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; margin-top: 2.2em; scroll-margin-top: 90px; }
+.blog-prose h3 { color: #ECEFEA; font-size: 19px; font-weight: 600; margin-top: 1.6em; scroll-margin-top: 90px; }
+.blog-prose h2 .anchor, .blog-prose h3 .anchor { opacity: 0; margin-right: 6px; color: #C6F24E; text-decoration: none; font-weight: 500; }
+.blog-prose h2:hover .anchor, .blog-prose h3:hover .anchor { opacity: 1; }
+.blog-prose a { color: #C6F24E; text-decoration: none; border-bottom: 1px solid rgba(198,242,78,0.35); }
+.blog-prose a:hover { border-bottom-color: #C6F24E; }
+.blog-prose strong { color: #ECEFEA; }
+.blog-prose ul, .blog-prose ol { padding-left: 1.4em; }
+.blog-prose li { margin: 0.35em 0; }
+.blog-prose li::marker { color: #6E7772; }
+.blog-prose blockquote { border-left: 3px solid #C6F24E; padding-left: 1em; color: #A3ABA6; font-style: normal; }
+.blog-prose code { font-family: var(--font-mono-jb), 'JetBrains Mono', ui-monospace, monospace; font-size: 0.86em; background: #161A1B; border: 1px solid #262B2D; border-radius: 5px; padding: 1px 6px; color: #ECEFEA; }
+.blog-prose .codewrap { margin: 1.2em 0; }
+.blog-prose pre { background: #050607; border: 1px solid #262B2D; border-radius: 10px; padding: 16px 18px; overflow-x: auto; font-size: 13px; line-height: 1.55; }
+.blog-prose pre code { background: none; border: 0; padding: 0; color: #ECEFEA; }
+.blog-prose .tablewrap { overflow-x: auto; margin: 1.2em 0; border: 1px solid #262B2D; border-radius: 10px; background: #101314; }
+.blog-prose table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+.blog-prose th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: #8A938D; background: #161A1B; padding: 9px 12px; border-bottom: 1px solid #262B2D; }
+.blog-prose td { padding: 9px 12px; border-bottom: 1px solid #1c2123; vertical-align: top; }
+.blog-prose tr:last-child td { border-bottom: 0; }
+.blog-prose img { max-width: 100%; height: auto; border-radius: 10px; }
+.blog-prose hr { border: 0; border-top: 1px solid #262B2D; margin: 2.2em 0; }

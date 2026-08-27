@@ -26,6 +26,12 @@ export async function GET() {
   const kits = Object.values(KITS)
   const commands = Object.values(SLASH_COMMANDS)
 
+  let blogPosts = []
+  try {
+    const { allPublishedForSitemap } = await import('@/lib/blog/store')
+    blogPosts = (await allPublishedForSitemap()).slice(0, 20)
+  } catch (e) { blogPosts = [] }
+
   const body = `# WorkflowStacks
 
 > A marketplace of working AI automations for founders, agencies, ecommerce and sales teams. Download real, importable n8n workflows and Claude Desktop MCP configurations — not prompts or reading lists. Free templates, premium tools, and a done-for-you build service.
@@ -49,6 +55,12 @@ ${bundles.map((b) => `- [${b.title}](${SITE_URL}/bundles/${b.slug}) — ${b.tagl
 Hand-verified configuration blocks for connecting MCP servers to Claude Desktop.
 
 ${mcp.map((m) => `- [${m.title || m.name}](${SITE_URL}/mcp/${m.slug})`).join('\n')}
+
+## Journal — tested guides (${blogPosts.length} recent)
+
+Hands-on articles, each checked against the actual workflow files and repos it covers.
+
+${blogPosts.map((p) => `- [${p.title}](${SITE_URL}/blog/${p.slug}) — ${p.excerpt || ''}`).join('\n')}
 
 ## Automation guides by outcome
 

@@ -19,6 +19,7 @@ const footerLinks = {
   browse: {
     title: 'Browse',
     links: [
+      { label: 'Journal', href: '/blog' },
       { label: 'All Skills', href: '/skills' },
       { label: 'Discover', href: '/discover' },
       { label: 'Personas', href: '/personas' },
