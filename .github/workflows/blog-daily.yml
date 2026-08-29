@@ -48,7 +48,7 @@ jobs:
             echo "$R" | jq -e '.idle == true' >/dev/null && break
             echo "$R" | jq -e '.step == "scheduled"' >/dev/null && break
             echo "$R" | jq -e '.status == "held"' >/dev/null && { echo "HELD"; break; }
-            sleep 15
+            sleep 45
           done
 
       - name: Status summary

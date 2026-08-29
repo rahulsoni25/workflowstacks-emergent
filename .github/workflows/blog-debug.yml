@@ -34,5 +34,5 @@ jobs:
             echo '' >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             grep -q '"step":"scheduled"\|"idle":true\|"status":"held"' /tmp/body.json && break
-            sleep 10
+            sleep 30
           done
