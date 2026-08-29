@@ -24,6 +24,46 @@ export const maxDuration = 60
 
 const JUDGE_GATE = 8
 
+// Groq's free tier rejects large requests outright (413) — it can't fit a
+// full 2,500-word article in one call. When a full-payload call fails that
+// way, retry with each section trimmed to its first N words: claims and
+// style live in prose, so a compact pass still catches what matters. Funded
+// OpenRouter runs never need this path.
+function compactSections(sections, words = 200) {
+  return sections.map((s, i) => ({ index: i, h2: s.h2, md: (s.md || '').split(/\s+/).slice(0, words).join(' ') }))
+}
+
+async function callJsonCompact(opts, sectionsFull, buildUser) {
+  try {
+    return await callJson({ ...opts, user: buildUser(sectionsFull.map((s, i) => ({ index: i, h2: s.h2, md: s.md }))) })
+  } catch (e) {
+    if (!/413|too large|payload/i.test(e.message)) throw e
+    return await callJson({ ...opts, maxTokens: Math.min(opts.maxTokens, 2000), user: buildUser(compactSections(sectionsFull)) })
+  }
+}
+
+// For calls that RETURN rewritten section text, truncated input would come
+// back as truncated replacements — so on 413 we split the sections in half
+// (full text preserved) and merge the two results instead.
+async function callJsonSplit(opts, sectionsFull, buildUser) {
+  const indexed = sectionsFull.map((s, i) => ({ index: i, h2: s.h2, md: s.md }))
+  try {
+    return await callJson({ ...opts, user: buildUser(indexed) })
+  } catch (e) {
+    if (!/413|too large|payload/i.test(e.message)) throw e
+    const mid = Math.ceil(indexed.length / 2)
+    const halves = [indexed.slice(0, mid), indexed.slice(mid)]
+    const merged = { data: { sections: [], changes: [] } }
+    for (const half of halves) {
+      const r = await callJson({ ...opts, user: buildUser(half) })
+      merged.data.sections.push(...(r.data.sections || []))
+      merged.data.changes.push(...(r.data.changes || []))
+      for (const k of Object.keys(r.data)) if (!['sections', 'changes'].includes(k) && !(k in merged.data)) merged.data[k] = r.data[k]
+    }
+    return merged
+  }
+}
+
 function requireAdmin(request) {
   const secret = process.env.ADMIN_SECRET
   const provided = request.headers.get('x-admin-secret')
@@ -187,11 +227,11 @@ async function advance() {
     const report = runSeoChecks({ ...post, body_md })
     let updated = { body_md, seo_report: report }
     if (report.score < SEO_PASS_MARK && report.failed.length) {
-      const { data: fix } = await callJson({
-        system: EDIT_SYSTEM,
-        user: JSON.stringify({ post: { title: post.title, meta_description: post.meta_description, answer: post.answer, slug: post.slug, seo: post.seo, sections: post.sections.map((s, i) => ({ index: i, h2: s.h2, md: s.md })) }, failed_checks: report.failed }),
-        tier: 'strong', maxTokens: 3000, tag: `edit:${post.slug}`,
-      }).catch(() => ({ data: null }))
+      const { data: fix } = await callJsonSplit(
+        { system: EDIT_SYSTEM, tier: 'strong', maxTokens: 3000, tag: `edit:${post.slug}` },
+        post.sections,
+        (sections) => JSON.stringify({ post: { title: post.title, meta_description: post.meta_description, answer: post.answer, slug: post.slug, seo: post.seo, sections }, failed_checks: report.failed })
+      ).catch(() => ({ data: null }))
       if (fix) {
         const sections = [...post.sections]
         for (const s of fix.sections || []) if (sections[s.index]) sections[s.index] = { ...sections[s.index], md: s.md }
@@ -224,15 +264,15 @@ async function advance() {
     let sections = post.sections
     let changes = []
     if (!style.pass || overlap.max > OVERLAP_LIMIT) {
-      const { data: fix } = await callJson({
-        system: HUMANIZE_SYSTEM,
-        user: JSON.stringify({
+      const { data: fix } = await callJsonSplit(
+        { system: HUMANIZE_SYSTEM, tier: 'strong', maxTokens: 4000, tag: `humanize:${post.slug}` },
+        post.sections,
+        (sections) => JSON.stringify({
           findings: style.findings,
           duplication: overlap.max > OVERLAP_LIMIT ? `${(overlap.max * 100).toFixed(1)}% 8-gram overlap with sibling post ${overlap.worst} — rewrite the overlapping passages in this article's own words` : null,
-          sections: post.sections.map((s, i) => ({ index: i, h2: s.h2, md: s.md })),
-        }),
-        tier: 'strong', maxTokens: 4000, tag: `humanize:${post.slug}`,
-      }).catch(() => ({ data: null }))
+          sections,
+        })
+      ).catch(() => ({ data: null }))
       if (fix?.sections) {
         sections = [...post.sections]
         for (const s of fix.sections) if (sections[s.index]) sections[s.index] = { ...sections[s.index], md: s.md }
@@ -256,25 +296,25 @@ async function advance() {
 
   // 3. Judge (different model family), claim fixes, gate.
   if (post.status === 'styled') {
-    const { data: judge } = await callJson({
-      system: JUDGE_SYSTEM,
-      user: JSON.stringify({
+    const { data: judge } = await callJsonCompact(
+      { system: JUDGE_SYSTEM, tier: 'judge', maxTokens: 2500, tag: `judge:${post.slug}` },
+      post.sections,
+      (sections) => JSON.stringify({
         persona: post.persona, primary_keyword: post.seo?.primary,
-        article: { title: post.title, answer: post.answer, sections: post.sections.map((s, i) => ({ index: i, h2: s.h2, md: s.md })) },
+        article: { title: post.title, answer: post.answer, sections },
         sources: post.sources,
-        competing_serp_results: post.serp_snapshot || [],
+        competing_serp_results: (post.serp_snapshot || []).slice(0, 5),
         originality_instruction: 'Score originality low if this article could be reconstructed from the competing_serp_results titles/snippets alone — it must contain observations those pages cannot have.',
-      }),
-      tier: 'judge', maxTokens: 2500, tag: `judge:${post.slug}`,
-    })
+      })
+    )
     const bad = (judge.claims || []).filter((c) => c.status !== 'verified')
     let sections = post.sections
     if (bad.length) {
-      const { data: fixed } = await callJson({
-        system: CLAIM_FIX_SYSTEM,
-        user: JSON.stringify({ claims: bad, sections: post.sections.map((s, i) => ({ index: i, h2: s.h2, md: s.md })) }),
-        tier: 'strong', maxTokens: 3500, tag: `claimfix:${post.slug}`,
-      }).catch(() => ({ data: null }))
+      const { data: fixed } = await callJsonSplit(
+        { system: CLAIM_FIX_SYSTEM, tier: 'strong', maxTokens: 3500, tag: `claimfix:${post.slug}` },
+        post.sections,
+        (sections) => JSON.stringify({ claims: bad, sections })
+      ).catch(() => ({ data: null }))
       if (fixed?.sections) {
         sections = [...post.sections]
         for (const s of fixed.sections) if (sections[s.index]) sections[s.index] = { ...sections[s.index], md: s.md }
