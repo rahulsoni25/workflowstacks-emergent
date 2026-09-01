@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
-export const revalidate = 600
+export const revalidate = 86400
 // Without generateStaticParams the segment is rendered on every request (no
 // edge cache) despite `revalidate` — same fix as app/skills/[id]/page.js.
 export const dynamicParams = true
@@ -26,7 +26,7 @@ function categoryColor(cat) {
 
 async function getPack(id) {
   try {
-    const res = await fetch(`${BASE}/api/packs/${id}`, { next: { revalidate: 600 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/packs/${id}`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     const data = await res.json()
     return data.pack ? { pack: data.pack, skills: data.skills || [] } : null

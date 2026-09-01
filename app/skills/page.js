@@ -16,7 +16,7 @@ export const metadata = {
 
 // 5 min — short enough that AI rewrite landings show up fast, long enough
 // to not hammer the DB on every page view.
-export const revalidate = 300
+export const revalidate = 1800
 
 // One page's worth for the default SSR load. The catalog now has 2,000+
 // published skills — fetching them all in one request (the old behavior)
@@ -28,7 +28,7 @@ export const PAGE_SIZE = 48
 async function getSkills() {
   try {
     const res = await fetch(`${BASE}/api/skills?sort=trending&limit=${PAGE_SIZE}`, {
-      next: { revalidate: 300 },
+      next: { revalidate: 1800 },
       signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) return { skills: [], total: 0, hasMore: false }

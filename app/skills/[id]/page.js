@@ -15,14 +15,14 @@ const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergen
 // X-Vercel-Cache MISS on repeat GETs) — the 2026-08-11 CPU/transfer overage
 // assumed ISR was in effect; it wasn't. An empty param list + revalidate makes
 // each slug render on first hit, then serve from the edge cache for an hour.
-export const revalidate = 3600
+export const revalidate = 86400
 export const dynamicParams = true
 export function generateStaticParams() { return [] }
 
 // Sibling skills in the same category, for the "Related skills" cross-link module.
 async function getRelated(skill) {
   try {
-    const res = await fetch(`${BASE}/api/skills?category=${encodeURIComponent(skill.category)}&sort=popular&limit=7`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/skills?category=${encodeURIComponent(skill.category)}&sort=popular&limit=7`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     const data = await res.json()
     return (data.skills || [])
@@ -41,7 +41,7 @@ async function getSkill(id) {
     // a 0% edge-cache-hit rate and blew past the Vercel Hobby Fast Origin
     // Transfer / Fluid Active CPU limits (2026-08-11). 1h keeps pages reasonably
     // fresh while cutting regeneration frequency ~12x.
-    const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     const data = await res.json()
     return data.skill || null

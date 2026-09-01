@@ -2,11 +2,11 @@ import { notFound } from 'next/navigation'
 import StackDetailClient from './StackDetailClient'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
-export const revalidate = 60
+export const revalidate = 3600
 
 async function getStack(slug) {
   try {
-    const res = await fetch(`${BASE}/api/stacks/${slug}`, { next: { revalidate: 60 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/stacks/${slug}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     const data = await res.json()
     return data.stack ? { stack: data.stack, skills: data.skills || [] } : null

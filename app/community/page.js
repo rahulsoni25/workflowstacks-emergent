@@ -13,11 +13,11 @@ export const metadata = {
   alternates: { canonical: '/community' },
 }
 
-export const revalidate = 120
+export const revalidate = 1800
 
 async function getJson(path) {
   try {
-    const res = await fetch(`${BASE}${path}`, { next: { revalidate: 120 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}${path}`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     return await res.json()
   } catch {

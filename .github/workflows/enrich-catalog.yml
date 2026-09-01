@@ -7,9 +7,10 @@ name: Enrich Catalog
 
 on:
   schedule:
-    # GitHub Actions cron — every 15 min. Note: GH can delay by up to ~10 min
-    # during peak hours, so effective cadence may be 15-25 min. Fine for our use.
-    - cron: '*/15 * * * *'
+    # Daily. Was every 15 min during the initial backfill push — that cadence
+    # burned ~96 Vercel function runs/day (Fluid CPU + origin transfer) for a
+    # job that is idempotent and mostly a no-op once coverage is reached.
+    - cron: '17 5 * * *'
   workflow_dispatch: {}  # allow manual trigger from the Actions tab
 
 jobs:

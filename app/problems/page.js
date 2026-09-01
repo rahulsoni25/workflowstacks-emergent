@@ -1,11 +1,11 @@
 import ProblemsClient from './ProblemsClient'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
-export const revalidate = 120
+export const revalidate = 1800
 
 async function getProblems() {
   try {
-    const res = await fetch(`${BASE}/api/problems`, { next: { revalidate: 120 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/problems`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     return (await res.json()).problems || []
   } catch {
