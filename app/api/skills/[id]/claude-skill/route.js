@@ -1,0 +1,49 @@
+// GET /api/skills/:id/claude-skill        → compiled SKILL.md (text/markdown)
+// GET /api/skills/:id/claude-skill?format=zip → installable skill package
+// GET /api/skills/:id/claude-skill?format=prompt → compact starter prompt (text)
+//
+// This is the install surface behind the "Use with Claude" panel: Claude Code
+// curls the markdown straight into ~/.claude/skills/<slug>/SKILL.md, the
+// Claude apps take the zip via Settings → Capabilities → Skills, and deep
+// links / the MCP connector use the prompt and markdown forms.
+
+import { loadSkill, compileSkillMd, buildSkillZip, starterPrompt } from '@/lib/claude-skill'
+
+export const dynamic = 'force-dynamic'
+
+export async function GET(request, { params }) {
+  const skill = await loadSkill(params.id)
+  if (!skill) {
+    return Response.json({ error: 'Skill not found' }, { status: 404 })
+  }
+
+  const format = new URL(request.url).searchParams.get('format') || 'md'
+
+  if (format === 'zip') {
+    const { filename, buffer } = buildSkillZip(skill)
+    return new Response(buffer, {
+      headers: {
+        'Content-Type': 'application/zip',
+        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Cache-Control': 'public, max-age=0, s-maxage=3600',
+      },
+    })
+  }
+
+  if (format === 'prompt') {
+    return new Response(starterPrompt(skill), {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Cache-Control': 'public, max-age=0, s-maxage=3600',
+      },
+    })
+  }
+
+  const { markdown } = compileSkillMd(skill)
+  return new Response(markdown, {
+    headers: {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Cache-Control': 'public, max-age=0, s-maxage=3600',
+    },
+  })
+}
