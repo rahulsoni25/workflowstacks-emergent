@@ -7,7 +7,7 @@
 // Claude apps take the zip via Settings → Capabilities → Skills, and deep
 // links / the MCP connector use the prompt and markdown forms.
 
-import { loadSkill, compileSkillMd, buildSkillZip, starterPrompt } from '@/lib/claude-skill'
+import { loadSkill, compileSkillMd, buildSkillZip, starterPrompt, setupPrompt } from '@/lib/claude-skill'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,8 +30,10 @@ export async function GET(request, { params }) {
     })
   }
 
-  if (format === 'prompt') {
-    return new Response(starterPrompt(skill), {
+  // 'prompt' = act as the skill in a chat; 'setup' = clone the repo and get
+  // the underlying tool running (for agentic editors: Cursor, Antigravity…).
+  if (format === 'prompt' || format === 'setup') {
+    return new Response(format === 'setup' ? setupPrompt(skill) : starterPrompt(skill), {
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
         'Cache-Control': 'public, max-age=0, s-maxage=3600',

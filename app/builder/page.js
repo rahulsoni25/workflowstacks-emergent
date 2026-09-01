@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { getUserId, getHandle, setHandle as saveHandle } from '@/lib/identity'
+import LaunchInTools from '@/components/LaunchInTools'
 
 export default function BuilderPage() {
   const searchParams = useSearchParams()
@@ -1166,6 +1167,13 @@ export default function BuilderPage() {
                   </div>
                   <p className="text-xs text-slate-500 mt-2">Opens a new chat with your prompt prefilled. We also copy it to your clipboard, so for longer agents just paste (Ctrl/⌘+V).</p>
                 </div>
+
+                {/* Agentic editors — same one-click hand-off, prompt goes straight to the editor's agent */}
+                <LaunchInTools
+                  getPrompt={async () => agentBlueprint?.agentBlueprint || ''}
+                  label="Or open in your AI editor"
+                  gridClass="grid-cols-2 sm:grid-cols-4"
+                />
 
                 {/* Done-for-You — captures interest until Stripe is set up */}
                 <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5">

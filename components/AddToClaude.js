@@ -11,6 +11,7 @@ import { Download, Copy, CheckCircle2, Terminal, Sparkles, ChevronDown, Plug } f
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import LaunchInTools from '@/components/LaunchInTools'
 
 export default function AddToClaude({ skill }) {
   const slug = skill.slug || skill.id
@@ -24,6 +25,7 @@ export default function AddToClaude({ skill }) {
   // localhost/preview hosts — in production they're the same string).
   const [base, setBase] = useState('https://workflowstacks.com')
   useEffect(() => { setBase(window.location.origin) }, [])
+  const [setupText, setSetupText] = useState('')
 
   const codeCmd = `mkdir -p ~/.claude/skills/${slug} && curl -fsSL ${base}${apiPath} -o ~/.claude/skills/${slug}/SKILL.md`
   const mcpCmd = `claude mcp add --transport http workflowstacks ${base}/api/mcp`
@@ -64,6 +66,20 @@ export default function AddToClaude({ skill }) {
     } catch {}
   }
 
+  // "Clone the repo and build it" prompt for agentic editors, fetched once.
+  const fetchSetup = async () => {
+    if (setupText) return setupText
+    const res = await fetch(`${apiPath}?format=setup`)
+    if (!res.ok) throw new Error('setup prompt unavailable')
+    const text = await res.text()
+    setSetupText(text)
+    return text
+  }
+
+  const cursorMcpLink = `cursor://anysphere.cursor-deeplink/mcp/install?name=workflowstacks&config=${encodeURIComponent(
+    typeof btoa === 'function' ? btoa(JSON.stringify({ url: `${base}/api/mcp` })) : ''
+  )}`
+
   return (
     <Card className="bg-slate-900/60 border-teal-500/30 backdrop-blur-xl shadow-lg shadow-teal-500/5">
       <CardHeader className="pb-3">
@@ -73,7 +89,7 @@ export default function AddToClaude({ skill }) {
           </CardTitle>
           <Badge className="bg-teal-500/15 text-teal-300 border-teal-500/30 border text-xs">New</Badge>
         </div>
-        <p className="text-slate-400 text-sm mt-1">Skip the builder — put this skill straight into your Claude.</p>
+        <p className="text-slate-400 text-sm mt-1">Skip the builder — one click puts this in Claude, Cursor, Antigravity and more.</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* 1 — Permanent install in the Claude apps */}
@@ -128,7 +144,10 @@ export default function AddToClaude({ skill }) {
           </div>
         </div>
 
-        {/* 4 — MCP connector for power users */}
+        {/* 4 — Agentic editors: one click clones the repo / hands the agent the build prompt */}
+        <LaunchInTools getPrompt={fetchSetup} repoUrl={skill.github_url || ''} className="border-t border-slate-700/50 pt-4" />
+
+        {/* 5 — MCP connector for power users */}
         <div className="border-t border-slate-700/50 pt-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5 text-sm text-slate-300 font-medium"><Plug className="w-4 h-4 text-teal-400" />Connect the whole catalog (MCP)</div>
@@ -139,7 +158,14 @@ export default function AddToClaude({ skill }) {
           <div className="bg-slate-950/60 rounded-lg p-2.5 border border-slate-800 overflow-x-auto">
             <code className="text-teal-300 font-mono text-xs whitespace-nowrap">{mcpCmd}</code>
           </div>
-          <p className="text-xs text-slate-500 mt-1.5">Adds a WorkflowStacks connector to Claude Code: search and load any skill here by chatting.</p>
+          <div className="flex items-center justify-between mt-1.5 gap-2">
+            <p className="text-xs text-slate-500">Adds a WorkflowStacks connector to Claude Code: search and load any skill here by chatting.</p>
+            <a href={cursorMcpLink} className="flex-shrink-0">
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-slate-400 hover:text-teal-300 border border-slate-700">
+                Add to Cursor
+              </Button>
+            </a>
+          </div>
         </div>
       </CardContent>
     </Card>
