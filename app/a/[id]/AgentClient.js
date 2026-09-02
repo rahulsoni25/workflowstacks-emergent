@@ -7,6 +7,7 @@ import { ArrowLeft, Zap, Copy, CheckCircle2, Share2, User, Repeat, Star, Sparkle
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import LaunchInTools from '@/components/LaunchInTools'
 
 export default function AgentClient({ agent, skills }) {
   const router = useRouter()
@@ -118,6 +119,16 @@ export default function AgentClient({ agent, skills }) {
             <Zap className="w-4 h-4 mr-2" />Remix the skills — free
           </Button>
         </div>
+
+        {/* Agentic editors — one click hands the blueprint to the editor's agent */}
+        {!locked && agent.agentBlueprint && (
+          <LaunchInTools
+            getPrompt={async () => agent.agentBlueprint || ''}
+            label="Or open in your AI editor"
+            gridClass="grid-cols-2 sm:grid-cols-4"
+            className="mb-8"
+          />
+        )}
 
         <Card className="bg-slate-900/60 border-slate-700/50 mb-6">
           <CardHeader><CardTitle className="text-white">Skills in this agent ({skills.length})</CardTitle></CardHeader>
