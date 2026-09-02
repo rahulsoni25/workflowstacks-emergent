@@ -13,6 +13,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { getUserId, getHandle, setHandle as saveHandle } from '@/lib/identity'
 import LaunchInTools from '@/components/LaunchInTools'
+import Disclosure from '@/components/Disclosure'
 
 export default function BuilderPage() {
   const searchParams = useSearchParams()
@@ -1123,37 +1124,14 @@ export default function BuilderPage() {
                   <CardTitle className="text-white">Your Agent Blueprint is Ready!</CardTitle>
                 </div>
                 <CardDescription className="text-slate-400">
-                  Copy and paste this into Claude, ChatGPT, Gemini, or your favorite AI tool
+                  One click runs it in Claude, ChatGPT, Gemini, or your AI editor — no copy-paste needed
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
-                  <Label className="text-white font-semibold">Agent Goal</Label>
-                  <p className="text-slate-300 mt-1">{agentBlueprint.goal}</p>
-                </div>
-                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
-                  <Label className="text-white font-semibold">Skills Used ({agentBlueprint.skillIds.length})</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {agentBlueprint.skills?.map((skill) => (
-                      <Badge key={skill.id} className={getCategoryColor(skill.category)}>{skill.name}</Badge>
-                    ))}
-                  </div>
-                </div>
+                {/* Actions first — a newbie's next step is RUN, not reading a
+                    wall of prompt text; the full blueprint folds away below. */}
                 <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <Label className="text-white font-semibold">Complete Agent Prompt</Label>
-                    <Button onClick={handleCopy} variant="outline" size="sm" className="border-slate-600 text-slate-200 hover:bg-teal-500/10">
-                      {copied ? <><CheckCircle2 className="w-4 h-4 mr-2" />Copied!</> : <><Copy className="w-4 h-4 mr-2" />Copy</>}
-                    </Button>
-                  </div>
-                  <div className="bg-slate-950 rounded-lg p-4 border border-slate-700/50 max-h-[400px] overflow-y-auto">
-                    <pre className="text-slate-300 whitespace-pre-wrap font-mono text-sm">{agentBlueprint.agentBlueprint}</pre>
-                  </div>
-                </div>
-
-                {/* One-click launch — opens the chat with the prompt prefilled (clipboard fallback) */}
-                <div>
-                  <Label className="text-white font-semibold">Run it now — one click</Label>
+                  <Label className="text-white font-semibold">Run it now</Label>
                   <div className="flex flex-col sm:flex-row gap-2 mt-2">
                     <Button onClick={() => launchIn('claude')} className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20">
                       <Sparkles className="w-4 h-4 mr-2" />Open in Claude<ExternalLink className="w-3.5 h-3.5 ml-2 opacity-80" />
@@ -1165,15 +1143,40 @@ export default function BuilderPage() {
                       Open in Gemini<ExternalLink className="w-3.5 h-3.5 ml-2 opacity-70" />
                     </Button>
                   </div>
-                  <p className="text-xs text-slate-500 mt-2">Opens a new chat with your prompt prefilled. We also copy it to your clipboard, so for longer agents just paste (Ctrl/⌘+V).</p>
+                  <p className="text-xs text-slate-500 mt-2">Opens a new chat with your agent prefilled — it's also copied to your clipboard, so if it didn't fit just paste (Ctrl/⌘+V).</p>
                 </div>
 
-                {/* Agentic editors — same one-click hand-off, prompt goes straight to the editor's agent */}
                 <LaunchInTools
                   getPrompt={async () => agentBlueprint?.agentBlueprint || ''}
                   label="Or open in your AI editor"
                   gridClass="grid-cols-2 sm:grid-cols-4"
                 />
+
+                {/* Compact recap — goal and skills at a glance */}
+                <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 space-y-3">
+                  <div>
+                    <Label className="text-white font-semibold">Agent Goal</Label>
+                    <p className="text-slate-300 mt-1">{agentBlueprint.goal}</p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-slate-400 text-sm">Skills ({agentBlueprint.skillIds.length}):</span>
+                    {agentBlueprint.skills?.map((skill) => (
+                      <Badge key={skill.id} className={getCategoryColor(skill.category)}>{skill.name}</Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Raw blueprint is reference material — folded by default */}
+                <Disclosure title="See the full agent prompt (what powers your agent)">
+                  <div className="flex justify-end">
+                    <Button onClick={handleCopy} variant="outline" size="sm" className="border-slate-600 text-slate-200 hover:bg-teal-500/10">
+                      {copied ? <><CheckCircle2 className="w-4 h-4 mr-2" />Copied!</> : <><Copy className="w-4 h-4 mr-2" />Copy</>}
+                    </Button>
+                  </div>
+                  <div className="bg-slate-950 rounded-lg p-4 border border-slate-700/50 max-h-[400px] overflow-y-auto">
+                    <pre className="text-slate-300 whitespace-pre-wrap font-mono text-sm">{agentBlueprint.agentBlueprint}</pre>
+                  </div>
+                </Disclosure>
 
                 {/* Done-for-You — captures interest until Stripe is set up */}
                 <div className="bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-xl p-5">
@@ -1246,19 +1249,6 @@ export default function BuilderPage() {
                   </div>
                 </div>
 
-                <div className="bg-teal-500/10 border border-teal-500/20 rounded-lg p-4">
-                  <div className="flex items-start gap-3">
-                    <Sparkles className="w-5 h-5 text-teal-400 mt-0.5" />
-                    <div>
-                      <h4 className="text-teal-300 font-semibold mb-1">How to Use</h4>
-                      <p className="text-slate-300 text-sm">
-                        1. Click <strong className="text-white">Open in Claude</strong> above (or Copy the prompt)<br />
-                        2. Your prompt is prefilled in a new chat — or paste it if it didn't fit<br />
-                        3. Start chatting with your custom AI agent!
-                      </p>
-                    </div>
-                  </div>
-                </div>
                 {agentBlueprint?.isPublic ? (
                   <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-teal-300 font-semibold mb-2">🎉 Live in the community!</div>

@@ -12,9 +12,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import LaunchInTools from '@/components/LaunchInTools'
+import { installReadiness } from '@/lib/install-readiness'
 
-export default function AddToClaude({ skill }) {
+export default function AddToClaude({ skill, codeflow = null }) {
   const slug = skill.slug || skill.id
+  const readiness = installReadiness(skill, codeflow)
   const apiPath = `/api/skills/${slug}/claude-skill`
   const [copied, setCopied] = useState('') // which action is showing "copied"
   const [showSteps, setShowSteps] = useState(false)
@@ -90,6 +92,12 @@ export default function AddToClaude({ skill }) {
           <Badge className="bg-teal-500/15 text-teal-300 border-teal-500/30 border text-xs">New</Badge>
         </div>
         <p className="text-slate-400 text-sm mt-1">Skip the builder — one click puts this in Claude, Cursor, Antigravity and more.</p>
+        {/* Readiness: set expectations BEFORE the click — what stands between
+            "installed" and "working product" for this particular repo. */}
+        <div className="mt-2">
+          <span className={`inline-flex items-center gap-1 text-xs font-medium border rounded-full px-2.5 py-1 ${readiness.tone}`}>{readiness.label}</span>
+          <p className="text-xs text-slate-500 mt-1.5">{readiness.detail}</p>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* 1 — Permanent install in the Claude apps */}

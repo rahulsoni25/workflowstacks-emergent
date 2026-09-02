@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye, Terminal, AlertTriangle, ChevronDown } from 'lucide-react'
+import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye, Terminal, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import CodeflowCard from './CodeflowCard'
 import AddToClaude from '@/components/AddToClaude'
+import Disclosure from '@/components/Disclosure'
 
 function getCategoryColor(cat) {
   const colors = {
@@ -20,24 +21,6 @@ function getCategoryColor(cat) {
     'ai-agent': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
   }
   return colors[cat] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
-}
-
-// Progressive disclosure: newbies get a short page (what it is, one example,
-// how to install), and every deeper section folds away behind one of these.
-function Disclosure({ title, children, defaultOpen = false }) {
-  const [open, setOpen] = useState(defaultOpen)
-  return (
-    <div className="border border-slate-700/50 rounded-lg bg-slate-800/20">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 text-left text-slate-200 text-sm font-medium hover:text-teal-300 transition-colors"
-      >
-        <span>{title}</span>
-        <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-      {open && <div className="px-4 pb-4 space-y-4">{children}</div>}
-    </div>
-  )
 }
 
 export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [] }) {
@@ -333,7 +316,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
             {/* On phones the sidebar stacks below everything, which buried the
                 install panel; render it here right after the hero instead. */}
             <div className="lg:hidden">
-              <AddToClaude skill={skill} />
+              <AddToClaude skill={skill} codeflow={codeflow} />
             </div>
 
             {/* Codeflow — "How it works": size verdict, setup effort, flow, reading order */}
@@ -406,7 +389,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-6">
             <div className="hidden lg:block">
-              <AddToClaude skill={skill} />
+              <AddToClaude skill={skill} codeflow={codeflow} />
             </div>
 
             <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
