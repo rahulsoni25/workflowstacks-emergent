@@ -25,6 +25,7 @@ const footerLinks = {
       { label: 'Personas', href: '/personas' },
       { label: 'Starter Packs', href: '/packs' },
       { label: 'Playbooks', href: '/playbooks' },
+      { label: 'My Library', href: '/library' },
     ]
   },
   community: {

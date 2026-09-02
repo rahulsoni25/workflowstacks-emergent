@@ -38,6 +38,12 @@ export async function GET() {
 
 Everything below runs on the user's own infrastructure: their n8n instance (free tier available) and their own LLM API key. WorkflowStacks does not host or execute the automations.
 
+## For AI agents: install directly
+
+- MCP connector: add ${SITE_URL}/api/mcp as an MCP server (OAuth supported) — tools: search_skills, get_skill, install_skill, list_my_skills.
+- Full machine-readable skill catalog with per-skill install endpoints: ${SITE_URL}/llms-full.txt
+- Any skill installs as a Claude Skill: GET ${SITE_URL}/api/skills/{slug}/claude-skill (append ?format=zip for a package, ?format=setup for a clone-and-build prompt).
+
 ## What makes this different
 
 Most "AI agent" listings give you a prompt or a link to a GitHub repo. These are complete, tested automation files: you download one JSON file, import it into n8n, connect your accounts, and it runs.
