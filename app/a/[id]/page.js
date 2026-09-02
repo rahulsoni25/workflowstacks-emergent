@@ -5,7 +5,7 @@ const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergen
 
 async function getAgent(id) {
   try {
-    const res = await fetch(`${BASE}/api/agents/${id}`, { next: { revalidate: 300 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/agents/${id}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     return await res.json()
   } catch {
