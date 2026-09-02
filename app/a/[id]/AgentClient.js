@@ -124,7 +124,7 @@ export default function AgentClient({ agent, skills }) {
         {!locked && agent.agentBlueprint && (
           <LaunchInTools
             getPrompt={async () => agent.agentBlueprint || ''}
-            label="Or open in your AI editor"
+            label="Or open in your AI app"
             gridClass="grid-cols-2 sm:grid-cols-4"
             className="mb-8"
           />

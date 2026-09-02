@@ -18,10 +18,21 @@ import { trackInstall } from '@/lib/track-install'
 
 // trackId: skill id/slug for install telemetry; omitted on surfaces without a
 // single skill (builder blueprints).
-export default function LaunchInTools({ getPrompt, repoUrl = '', label = 'Open in another AI editor', className = '', gridClass = 'grid-cols-2', trackId = '' }) {
+export default function LaunchInTools({ getPrompt, repoUrl = '', label = 'Open in another AI app', className = '', gridClass = 'grid-cols-2', trackId = '' }) {
   const [hint, setHint] = useState('')
 
   const tools = [
+    // Claude Desktop's documented deep links open a new Code or Cowork
+    // session with the composer prefilled (~14k char cap; our prompts are
+    // well under it).
+    {
+      name: 'Claude Code',
+      link: (prompt) => `claude://code/new?q=${encodeURIComponent(prompt)}`,
+    },
+    {
+      name: 'Claude Cowork',
+      link: (prompt) => `claude://cowork/new?q=${encodeURIComponent(prompt)}`,
+    },
     {
       name: 'Cursor',
       link: (prompt) => `cursor://anysphere.cursor-deeplink/prompt?text=${encodeURIComponent(prompt)}`,
@@ -67,7 +78,7 @@ export default function LaunchInTools({ getPrompt, repoUrl = '', label = 'Open i
       <p className="text-xs text-slate-500 mt-2">
         {hint
           ? `The prompt is copied to your clipboard — if ${hint} didn't open, paste it into its agent chat.`
-          : `Opens the editor${repoUrl ? ' with this repo' : ''} and copies the prompt for its agent — no copy-paste needed.`}
+          : `Opens the app${repoUrl ? ' with this repo' : ''} with the prompt ready to go — no copy-paste needed.`}
       </p>
     </div>
   )
