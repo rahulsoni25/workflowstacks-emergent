@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import LaunchInTools from '@/components/LaunchInTools'
 import { installReadiness } from '@/lib/install-readiness'
+import { trackInstall } from '@/lib/track-install'
 
 export default function AddToClaude({ skill, codeflow = null }) {
   const slug = skill.slug || skill.id
@@ -49,6 +50,7 @@ export default function AddToClaude({ skill, codeflow = null }) {
   // Deep link into the Claude app with the starter prompt prefilled; if the
   // app isn't installed nothing happens, so surface the copy-paste fallback.
   const openInClaude = async () => {
+    trackInstall(slug, 'try-claude')
     setOpeningClaude(true)
     try {
       const prompt = await fetchPrompt()
@@ -62,6 +64,7 @@ export default function AddToClaude({ skill, codeflow = null }) {
   }
 
   const copyPrompt = async () => {
+    trackInstall(slug, 'copy-prompt')
     try {
       const prompt = await fetchPrompt()
       await copy('prompt', prompt)
@@ -95,14 +98,21 @@ export default function AddToClaude({ skill, codeflow = null }) {
         {/* Readiness: set expectations BEFORE the click — what stands between
             "installed" and "working product" for this particular repo. */}
         <div className="mt-2">
-          <span className={`inline-flex items-center gap-1 text-xs font-medium border rounded-full px-2.5 py-1 ${readiness.tone}`}>{readiness.label}</span>
+          <div className="flex flex-wrap gap-1.5">
+            <span className={`inline-flex items-center gap-1 text-xs font-medium border rounded-full px-2.5 py-1 ${readiness.tone}`}>{readiness.label}</span>
+            {readiness.verified && (
+              <span className="inline-flex items-center gap-1 text-xs font-medium border rounded-full px-2.5 py-1 bg-emerald-500/15 text-emerald-300 border-emerald-500/30">
+                ✓ Install verified{readiness.verified.at ? ` ${new Date(readiness.verified.at).toLocaleDateString('en-US')}` : ''}
+              </span>
+            )}
+          </div>
           <p className="text-xs text-slate-500 mt-1.5">{readiness.detail}</p>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* 1 — Permanent install in the Claude apps */}
         <div>
-          <a href={`${apiPath}?format=zip`} download className="block">
+          <a href={`${apiPath}?format=zip`} download className="block" onClick={() => trackInstall(slug, 'zip')}>
             <Button className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
               <Download className="w-4 h-4 mr-2" />Add to Claude — download skill
             </Button>
@@ -143,7 +153,7 @@ export default function AddToClaude({ skill, codeflow = null }) {
         <div className="border-t border-slate-700/50 pt-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5 text-sm text-slate-300 font-medium"><Terminal className="w-4 h-4 text-teal-400" />Claude Code</div>
-            <Button onClick={() => copy('code', codeCmd)} variant="ghost" size="sm" className="h-7 px-2 text-slate-400 hover:text-teal-300">
+            <Button onClick={() => { trackInstall(slug, 'claude-code'); copy('code', codeCmd) }} variant="ghost" size="sm" className="h-7 px-2 text-slate-400 hover:text-teal-300">
               {copied === 'code' ? <><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Copied</> : <><Copy className="w-3.5 h-3.5 mr-1" />Copy</>}
             </Button>
           </div>
@@ -153,13 +163,13 @@ export default function AddToClaude({ skill, codeflow = null }) {
         </div>
 
         {/* 4 — Agentic editors: one click clones the repo / hands the agent the build prompt */}
-        <LaunchInTools getPrompt={fetchSetup} repoUrl={skill.github_url || ''} className="border-t border-slate-700/50 pt-4" />
+        <LaunchInTools getPrompt={fetchSetup} repoUrl={skill.github_url || ''} className="border-t border-slate-700/50 pt-4" trackId={slug} />
 
         {/* 5 — MCP connector for power users */}
         <div className="border-t border-slate-700/50 pt-4">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5 text-sm text-slate-300 font-medium"><Plug className="w-4 h-4 text-teal-400" />Connect the whole catalog (MCP)</div>
-            <Button onClick={() => copy('mcp', mcpCmd)} variant="ghost" size="sm" className="h-7 px-2 text-slate-400 hover:text-teal-300">
+            <Button onClick={() => { trackInstall(slug, 'mcp-copy'); copy('mcp', mcpCmd) }} variant="ghost" size="sm" className="h-7 px-2 text-slate-400 hover:text-teal-300">
               {copied === 'mcp' ? <><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Copied</> : <><Copy className="w-3.5 h-3.5 mr-1" />Copy</>}
             </Button>
           </div>
@@ -168,7 +178,7 @@ export default function AddToClaude({ skill, codeflow = null }) {
           </div>
           <div className="flex items-center justify-between mt-1.5 gap-2">
             <p className="text-xs text-slate-500">Adds a WorkflowStacks connector to Claude Code: search and load any skill here by chatting.</p>
-            <a href={cursorMcpLink} className="flex-shrink-0">
+            <a href={cursorMcpLink} className="flex-shrink-0" onClick={() => trackInstall(slug, 'cursor-mcp')}>
               <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-slate-400 hover:text-teal-300 border border-slate-700">
                 Add to Cursor
               </Button>

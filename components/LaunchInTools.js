@@ -14,8 +14,11 @@
 import { useState } from 'react'
 import { MousePointerClick } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { trackInstall } from '@/lib/track-install'
 
-export default function LaunchInTools({ getPrompt, repoUrl = '', label = 'Open in another AI editor', className = '', gridClass = 'grid-cols-2' }) {
+// trackId: skill id/slug for install telemetry; omitted on surfaces without a
+// single skill (builder blueprints).
+export default function LaunchInTools({ getPrompt, repoUrl = '', label = 'Open in another AI editor', className = '', gridClass = 'grid-cols-2', trackId = '' }) {
   const [hint, setHint] = useState('')
 
   const tools = [
@@ -38,6 +41,7 @@ export default function LaunchInTools({ getPrompt, repoUrl = '', label = 'Open i
   ]
 
   const launch = async (tool) => {
+    if (trackId) trackInstall(trackId, `editor-${tool.name.toLowerCase().replace(/\s+/g, '-')}`)
     let prompt = ''
     try {
       prompt = (await getPrompt()) || ''
