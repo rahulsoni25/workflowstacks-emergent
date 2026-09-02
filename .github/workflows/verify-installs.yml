@@ -1,0 +1,36 @@
+# Weekly verified-install run: actually installs the top skills' documented
+# packages in this throwaway runner and reports pass/fail to the site, which
+# then shows a "✓ Install verified" badge. Only strictly allowlisted
+# single-package pip/npm installs are executed (see lib/safe-install.js).
+name: verify-installs
+
+on:
+  schedule:
+    - cron: '0 7 * * 1' # Mondays 07:00 UTC
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Max skills to verify'
+        default: '10'
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run install verification
+        env:
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          VERIFY_LIMIT: ${{ github.event.inputs.limit || '10' }}
+        run: node scripts/verify-installs.mjs

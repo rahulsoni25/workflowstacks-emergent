@@ -11,6 +11,7 @@
 // SSE), which the spec explicitly allows for simple servers.
 
 import { loadSkill, searchSkills, compileSkillMd, skillSlug, SITE } from '@/lib/claude-skill'
+import { getAccessToken } from '@/lib/oauth-store'
 
 export const dynamic = 'force-dynamic'
 
@@ -111,6 +112,25 @@ async function callTool(id, name, args = {}) {
 }
 
 export async function POST(request) {
+  // Dual-mode auth: a Bearer token, when presented, must be valid (this is
+  // what claude.ai sends after the OAuth flow — see /oauth/authorize). With
+  // no Authorization header the catalog tools still work anonymously, which
+  // keeps existing `claude mcp add` / Cursor setups functional.
+  const auth = request.headers.get('authorization') || ''
+  if (auth.toLowerCase().startsWith('bearer ')) {
+    const grant = await getAccessToken(auth.slice(7).trim()).catch(() => null)
+    if (!grant) {
+      const base = new URL(request.url).origin
+      return new Response(JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32001, message: 'Invalid or expired token' } }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'WWW-Authenticate': `Bearer error="invalid_token", resource_metadata="${base}/.well-known/oauth-protected-resource"`,
+        },
+      })
+    }
+  }
+
   let msg
   try {
     msg = await request.json()
