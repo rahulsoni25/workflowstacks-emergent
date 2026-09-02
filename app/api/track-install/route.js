@@ -17,6 +17,8 @@ const CHANNELS = new Set([
   'claude-code',
   'mcp-copy',
   'cursor-mcp',
+  'editor-claude-code',
+  'editor-claude-cowork',
   'editor-cursor',
   'editor-antigravity',
   'editor-vs-code',

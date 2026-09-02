@@ -1148,7 +1148,7 @@ export default function BuilderPage() {
 
                 <LaunchInTools
                   getPrompt={async () => agentBlueprint?.agentBlueprint || ''}
-                  label="Or open in your AI editor"
+                  label="Or open in your AI app"
                   gridClass="grid-cols-2 sm:grid-cols-4"
                 />
 
