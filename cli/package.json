@@ -1,0 +1,19 @@
+{
+  "name": "workflowstacks",
+  "version": "0.1.0",
+  "description": "Install WorkflowStacks skills into Claude Code from the terminal: npx workflowstacks add <slug>",
+  "bin": {
+    "workflowstacks": "./index.js"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "homepage": "https://workflowstacks.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rahulsoni25/workflowstacks-emergent"
+  },
+  "keywords": ["claude", "claude-code", "skills", "ai", "mcp"]
+}

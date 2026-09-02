@@ -32,6 +32,13 @@ export default function McpServerPage({ params }) {
   const server = getMcpServer(params.slug)
   if (!server) notFound()
   const block = claudeConfigBlock(server)
+  // One-click installs derived from the same verified config: Cursor's
+  // documented MCP-install deeplink (base64 of the server config), and the
+  // claude mcp add-json one-liner for Claude Code.
+  const cursorDeeplink = `cursor://anysphere.cursor-deeplink/mcp/install?name=${encodeURIComponent(server.slug)}&config=${encodeURIComponent(
+    Buffer.from(JSON.stringify(server.config)).toString('base64')
+  )}`
+  const claudeAddJson = `claude mcp add-json ${server.slug} '${JSON.stringify(server.config)}'`
 
   // SoftwareApplication is what tells search + AI answer engines this is a
   // real, installable tool rather than a plain content page — these MCP
@@ -82,7 +89,21 @@ export default function McpServerPage({ params }) {
           </a>
         </div>
 
-        <h2 className="text-white font-bold text-lg mb-3">Your config</h2>
+        <h2 className="text-white font-bold text-lg mb-3">One-click installs</h2>
+        <div className="space-y-3 mb-2">
+          <a href={cursorDeeplink} className="block">
+            <Button className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white">
+              Add to Cursor — one click
+            </Button>
+          </a>
+          <CopyConfig code={claudeAddJson} />
+          <p className="text-sm text-slate-400">
+            The Cursor button installs it instantly; the command does the same for Claude Code.
+            {server.needs_key ? ' Fill in the placeholder API key afterwards.' : ''}
+          </p>
+        </div>
+
+        <h2 className="text-white font-bold text-lg mt-8 mb-3">Claude Desktop config (manual)</h2>
         <CopyConfig code={block} />
         {server.note && (
           <p className="text-sm text-slate-400 mt-3 flex items-start gap-2">

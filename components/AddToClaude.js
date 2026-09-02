@@ -29,6 +29,16 @@ export default function AddToClaude({ skill, codeflow = null }) {
   const [base, setBase] = useState('https://workflowstacks.com')
   useEffect(() => { setBase(window.location.origin) }, [])
   const [setupText, setSetupText] = useState('')
+  const [saved, setSaved] = useState(false)
+
+  const saveToLibrary = async () => {
+    setSaved(true)
+    fetch('/api/library', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skillId: slug }),
+    }).catch(() => {})
+  }
 
   const codeCmd = `mkdir -p ~/.claude/skills/${slug} && curl -fsSL ${base}${apiPath} -o ~/.claude/skills/${slug}/SKILL.md`
   const mcpCmd = `claude mcp add --transport http workflowstacks ${base}/api/mcp`
@@ -107,6 +117,13 @@ export default function AddToClaude({ skill, codeflow = null }) {
             )}
           </div>
           <p className="text-xs text-slate-500 mt-1.5">{readiness.detail}</p>
+          <button
+            onClick={saveToLibrary}
+            disabled={saved}
+            className={`mt-2 text-xs transition-colors ${saved ? 'text-teal-300 cursor-default' : 'text-slate-400 hover:text-teal-300'}`}
+          >
+            {saved ? '✓ Saved to My Library — Claude can recall it via the connector' : '＋ Save to My Library'}
+          </button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

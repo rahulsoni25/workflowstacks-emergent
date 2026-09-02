@@ -1,0 +1,11 @@
+{
+  "name": "workflowstacks",
+  "version": "1.0.0",
+  "description": "Search, load, and collect open-source AI skills from the WorkflowStacks catalog without leaving Claude Code.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://workflowstacks.com",
+  "keywords": ["skills", "marketplace", "mcp", "agents"]
+}

@@ -12,6 +12,7 @@
 
 import { loadSkill, searchSkills, compileSkillMd, skillSlug, SITE } from '@/lib/claude-skill'
 import { getAccessToken } from '@/lib/oauth-store'
+import { addToLibrary, removeFromLibrary, listLibrary } from '@/lib/library'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,7 +20,8 @@ const PROTOCOL_VERSIONS = ['2025-06-18', '2025-03-26', '2024-11-05']
 const SERVER_INFO = { name: 'workflowstacks', title: 'WorkflowStacks', version: '1.0.0' }
 const INSTRUCTIONS =
   'WorkflowStacks is a free marketplace of open-source AI skills, MCP servers, and agents from GitHub. ' +
-  'Use search_skills to find tools for a task, then get_skill to load a skill\'s full instructions into the conversation and follow them.'
+  'Use search_skills to find tools for a task, then get_skill to load a skill\'s full instructions into the conversation and follow them. ' +
+  'On connected (OAuth) sessions, install_skill saves a skill to the user\'s personal library and list_my_skills recalls it — load the library at the start of a task to know which skills the user already relies on.'
 
 const TOOLS = [
   {
@@ -40,6 +42,34 @@ const TOOLS = [
       },
       required: ['query'],
     },
+  },
+  {
+    name: 'install_skill',
+    title: 'Save a skill to the user\'s library',
+    description:
+      'Save a WorkflowStacks skill (by slug or id) to the user\'s personal library so it can be recalled in any future conversation with list_my_skills. Requires a connected (OAuth) session.',
+    inputSchema: {
+      type: 'object',
+      properties: { skill: { type: 'string', description: 'The skill slug (preferred) or id' } },
+      required: ['skill'],
+    },
+  },
+  {
+    name: 'uninstall_skill',
+    title: 'Remove a skill from the user\'s library',
+    description: 'Remove a previously saved skill (by slug or id) from the user\'s personal library. Requires a connected (OAuth) session.',
+    inputSchema: {
+      type: 'object',
+      properties: { skill: { type: 'string', description: 'The skill slug or id to remove' } },
+      required: ['skill'],
+    },
+  },
+  {
+    name: 'list_my_skills',
+    title: 'List the user\'s skill library',
+    description:
+      'List the skills the user has saved to their WorkflowStacks library (from this connector or the website). Use get_skill on any of them to load its instructions. Requires a connected (OAuth) session.',
+    inputSchema: { type: 'object', properties: {} },
   },
   {
     name: 'get_skill',
@@ -81,7 +111,31 @@ function installBlock(skill) {
   ].join('\n')
 }
 
-async function callTool(id, name, args = {}) {
+const CONNECT_HINT =
+  'This tool needs a connected session. Add WorkflowStacks as a custom connector (claude.ai → Settings → Connectors) and approve the connection, then try again.'
+
+async function callTool(id, name, args = {}, libraryId = null) {
+  if (name === 'install_skill' || name === 'uninstall_skill' || name === 'list_my_skills') {
+    if (!libraryId) return textResult(id, CONNECT_HINT, true)
+    if (name === 'list_my_skills') {
+      const items = await listLibrary(libraryId)
+      if (!items.length) return textResult(id, 'The library is empty. Save skills with install_skill, or from any skill page on WorkflowStacks.')
+      const lines = items.map((s) => `- ${s.name} (slug: ${s.slug})${s.category ? ` [${s.category}]` : ''}`)
+      return textResult(id, `Skills in the user's library:\n\n${lines.join('\n')}\n\nUse get_skill with a slug to load one.`)
+    }
+    if (name === 'uninstall_skill') {
+      const removed = await removeFromLibrary(libraryId, String(args.skill || ''))
+      return textResult(id, removed ? `Removed "${args.skill}" from the library.` : `"${args.skill}" was not in the library.`, !removed)
+    }
+    const skill = await loadSkill(String(args.skill || ''))
+    if (!skill) return textResult(id, `No skill found for "${args.skill}". Use search_skills to find the right slug.`, true)
+    await addToLibrary(libraryId, skill)
+    return textResult(
+      id,
+      `Saved "${skill.title_human || skill.name}" to the user's library — recall it any time with list_my_skills, and load it with get_skill (slug: ${skillSlug(skill)}).`
+    )
+  }
+
   if (name === 'search_skills') {
     const results = await searchSkills({
       query: String(args.query || ''),
@@ -117,8 +171,10 @@ export async function POST(request) {
   // no Authorization header the catalog tools still work anonymously, which
   // keeps existing `claude mcp add` / Cursor setups functional.
   const auth = request.headers.get('authorization') || ''
+  let libraryId = null
   if (auth.toLowerCase().startsWith('bearer ')) {
     const grant = await getAccessToken(auth.slice(7).trim()).catch(() => null)
+    if (grant) libraryId = grant.library_id || null
     if (!grant) {
       const base = new URL(request.url).origin
       return new Response(JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32001, message: 'Invalid or expired token' } }), {
@@ -164,7 +220,7 @@ export async function POST(request) {
       return rpcResult(id, { tools: TOOLS })
     case 'tools/call': {
       try {
-        return await callTool(id, params?.name, params?.arguments)
+        return await callTool(id, params?.name, params?.arguments, libraryId)
       } catch (e) {
         return textResult(id, `Tool failed: ${e?.message || 'unknown error'}`, true)
       }

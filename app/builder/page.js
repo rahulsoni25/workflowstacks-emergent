@@ -1152,6 +1152,15 @@ export default function BuilderPage() {
                   gridClass="grid-cols-2 sm:grid-cols-4"
                 />
 
+                {/* Permanent install: the generated agent as a Claude Skill package */}
+                {agentBlueprint?.id && (
+                  <a href={`/api/agents/${agentBlueprint.id}/claude-skill?format=zip`} download className="block">
+                    <Button variant="outline" className="w-full border-teal-500/30 text-teal-300 hover:bg-teal-500/10">
+                      Download as Claude Skill (.zip) — upload once in Claude Settings, use forever
+                    </Button>
+                  </a>
+                )}
+
                 {/* Compact recap — goal and skills at a glance */}
                 <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 space-y-3">
                   <div>
