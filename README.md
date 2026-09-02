@@ -1,7 +1,9 @@
 <!-- deploy trigger -->
 # WorkflowStacks 🎯
 
-> **Discover AI Skills from GitHub** - A marketplace for Claude Skills, Gemini Extensions, and MCP Servers automatically sourced from the best GitHub repositories.
+> **The install-native AI skills marketplace.** Every listing installs with one click into Claude, Claude Code, Claude Cowork, Cursor, Antigravity, VS Code, or Windsurf — as a Claude Skill package, a deep link, a CLI one-liner, or through the WorkflowStacks MCP connector (`/api/mcp`, OAuth 2.1) with a personal cross-conversation skill library. Repo-analyzed readiness badges, CI-verified installs, install telemetry, and an agent-readable catalog (`/llms-full.txt`) included.
+>
+> Quick starts: `claude mcp add --transport http workflowstacks https://workflowstacks.com/api/mcp` · `/plugin marketplace add rahulsoni25/workflowstacks-emergent` · `npx workflowstacks add <slug>` (CLI in `cli/`).
 
 ![WorkflowStacks](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)
 ![MongoDB](https://img.shields.io/badge/MongoDB-6.6-green?style=for-the-badge&logo=mongodb)

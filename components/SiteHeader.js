@@ -31,6 +31,7 @@ const NAV_GROUPS = [
       { href: '/discover', label: 'Discover', note: "What's trending" },
       { href: '/personas', label: 'Personas', note: 'Role-in-a-box agents' },
       { href: '/packs', label: 'Starter Packs', note: 'Skill bundles' },
+      { href: '/library', label: 'My Library', note: 'Your saved skills — synced with Claude' },
       { href: '/playbooks', label: 'Playbooks', note: 'Solve one problem' },
     ],
   },
