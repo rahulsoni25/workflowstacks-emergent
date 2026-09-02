@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye, Terminal, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye, Terminal, AlertTriangle, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -20,6 +20,24 @@ function getCategoryColor(cat) {
     'ai-agent': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
   }
   return colors[cat] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+}
+
+// Progressive disclosure: newbies get a short page (what it is, one example,
+// how to install), and every deeper section folds away behind one of these.
+function Disclosure({ title, children, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <div className="border border-slate-700/50 rounded-lg bg-slate-800/20">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left text-slate-200 text-sm font-medium hover:text-teal-300 transition-colors"
+      >
+        <span>{title}</span>
+        <ChevronDown className={`w-4 h-4 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && <div className="px-4 pb-4 space-y-4">{children}</div>}
+    </div>
+  )
 }
 
 export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [] }) {
@@ -129,77 +147,83 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
 
                 <Separator className="bg-slate-700/50" />
 
-                {/* Plain-English explainer — LLM-generated, works for novice AND professional */}
+                {/* Plain-English explainer — a newbie sees three things (what it
+                    is, one real example, where it runs); the rest folds away. */}
                 {skill.explainer && (
-                  <div className="space-y-4 bg-slate-800/30 border border-slate-700/50 rounded-lg p-5">
-                    <div>
-                      <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">What it is</div>
-                      <p className="text-slate-100 text-base leading-relaxed">{skill.explainer.what_it_is}</p>
-                    </div>
-                    {skill.explainer.what_you_can_make && (
+                  <div className="space-y-4">
+                    <div className="bg-slate-800/30 border border-slate-700/50 rounded-lg p-5 space-y-4">
                       <div>
-                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">What you can make with it</div>
-                        <p className="text-slate-200">{skill.explainer.what_you_can_make}</p>
+                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">What it is</div>
+                        <p className="text-slate-100 text-base leading-relaxed">{skill.explainer.what_it_is}</p>
                       </div>
-                    )}
-                    {skill.explainer.how_it_helps && (
-                      <div>
-                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">How it helps</div>
-                        <p className="text-slate-200">{skill.explainer.how_it_helps}</p>
-                      </div>
-                    )}
-                    {skill.explainer.use_case_example && (
-                      <div className="p-4 bg-teal-500/5 border border-teal-500/30 rounded-md">
-                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">Real use case example</div>
-                        <p className="text-slate-100 italic">"{skill.explainer.use_case_example}"</p>
-                      </div>
-                    )}
-                    {(skill.explainer.for_novice || skill.explainer.for_pro) && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {skill.explainer.for_novice && (
-                          <div className="p-3 bg-emerald-500/5 border border-emerald-500/30 rounded-md">
-                            <div className="text-emerald-300 font-semibold uppercase tracking-wide text-xs mb-1">If you're new</div>
-                            <p className="text-slate-200 text-sm">{skill.explainer.for_novice}</p>
-                          </div>
-                        )}
-                        {skill.explainer.for_pro && (
-                          <div className="p-3 bg-violet-500/5 border border-violet-500/30 rounded-md">
-                            <div className="text-violet-300 font-semibold uppercase tracking-wide text-xs mb-1">If you're senior</div>
-                            <p className="text-slate-200 text-sm">{skill.explainer.for_pro}</p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                    {skill.explainer.common_confusions && (
-                      <div className="p-3 bg-amber-500/5 border border-amber-500/30 rounded-md">
-                        <div className="text-amber-300 font-semibold uppercase tracking-wide text-xs mb-1">Common confusion cleared up</div>
-                        <p className="text-slate-200 text-sm">{skill.explainer.common_confusions}</p>
-                      </div>
-                    )}
-                    {Array.isArray(skill.explainer.best_with_tools) && skill.explainer.best_with_tools.length > 0 && (
-                      <div className="p-4 bg-cyan-500/5 border border-cyan-500/30 rounded-md">
-                        <div className="text-cyan-300 font-semibold uppercase tracking-wide text-xs mb-2">Best inside these AI tools</div>
-                        <div className="flex flex-wrap gap-2">
+                      {skill.explainer.use_case_example && (
+                        <div className="p-4 bg-teal-500/5 border border-teal-500/30 rounded-md">
+                          <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">Real use case example</div>
+                          <p className="text-slate-100 italic">"{skill.explainer.use_case_example}"</p>
+                        </div>
+                      )}
+                      {Array.isArray(skill.explainer.best_with_tools) && skill.explainer.best_with_tools.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-cyan-300 font-semibold uppercase tracking-wide text-xs">Best inside</span>
                           {skill.explainer.best_with_tools.map((t, i) => (
                             <span key={i} className="px-3 py-1 bg-cyan-500/15 border border-cyan-500/40 rounded text-cyan-100 text-sm font-medium">{t}</span>
                           ))}
                         </div>
-                      </div>
-                    )}
-                    {Array.isArray(skill.explainer.works_well_with) && skill.explainer.works_well_with.length > 0 && (
-                      <div>
-                        <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">Pairs with</div>
-                        <div className="flex flex-wrap gap-2">
-                          {skill.explainer.works_well_with.map((w, i) => (
-                            <span key={i} className="px-2.5 py-1 bg-slate-700/40 border border-slate-700 rounded text-slate-200 text-sm">{w}</span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    {skill.explainer.why_its_here && (
-                      <div className="text-slate-400 text-xs pt-2 border-t border-slate-700/40">
-                        <span className="text-slate-300 font-medium">Why we list it on WorkflowStacks:</span> {skill.explainer.why_its_here}
-                      </div>
+                      )}
+                    </div>
+
+                    {(skill.explainer.what_you_can_make || skill.explainer.how_it_helps || skill.explainer.for_novice || skill.explainer.for_pro || skill.explainer.common_confusions || skill.explainer.works_well_with?.length > 0 || skill.explainer.why_its_here) && (
+                      <Disclosure title="More about this tool — who it's for, what you can build">
+                        {skill.explainer.what_you_can_make && (
+                          <div>
+                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">What you can make with it</div>
+                            <p className="text-slate-200">{skill.explainer.what_you_can_make}</p>
+                          </div>
+                        )}
+                        {skill.explainer.how_it_helps && (
+                          <div>
+                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">How it helps</div>
+                            <p className="text-slate-200">{skill.explainer.how_it_helps}</p>
+                          </div>
+                        )}
+                        {(skill.explainer.for_novice || skill.explainer.for_pro) && (
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            {skill.explainer.for_novice && (
+                              <div className="p-3 bg-emerald-500/5 border border-emerald-500/30 rounded-md">
+                                <div className="text-emerald-300 font-semibold uppercase tracking-wide text-xs mb-1">If you're new</div>
+                                <p className="text-slate-200 text-sm">{skill.explainer.for_novice}</p>
+                              </div>
+                            )}
+                            {skill.explainer.for_pro && (
+                              <div className="p-3 bg-violet-500/5 border border-violet-500/30 rounded-md">
+                                <div className="text-violet-300 font-semibold uppercase tracking-wide text-xs mb-1">If you're senior</div>
+                                <p className="text-slate-200 text-sm">{skill.explainer.for_pro}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        {skill.explainer.common_confusions && (
+                          <div className="p-3 bg-amber-500/5 border border-amber-500/30 rounded-md">
+                            <div className="text-amber-300 font-semibold uppercase tracking-wide text-xs mb-1">Common confusion cleared up</div>
+                            <p className="text-slate-200 text-sm">{skill.explainer.common_confusions}</p>
+                          </div>
+                        )}
+                        {Array.isArray(skill.explainer.works_well_with) && skill.explainer.works_well_with.length > 0 && (
+                          <div>
+                            <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">Pairs with</div>
+                            <div className="flex flex-wrap gap-2">
+                              {skill.explainer.works_well_with.map((w, i) => (
+                                <span key={i} className="px-2.5 py-1 bg-slate-700/40 border border-slate-700 rounded text-slate-200 text-sm">{w}</span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {skill.explainer.why_its_here && (
+                          <div className="text-slate-400 text-xs pt-2 border-t border-slate-700/40">
+                            <span className="text-slate-300 font-medium">Why we list it on WorkflowStacks:</span> {skill.explainer.why_its_here}
+                          </div>
+                        )}
+                      </Disclosure>
                     )}
                   </div>
                 )}
@@ -207,18 +231,11 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                 {/* How to use it — the on-page deliverable (Smithery/Claw Mart-grade) */}
                 {guide ? (
                   <div className="space-y-6">
-                    {guide.whatItDoes && (
+                    {/* Skip when the explainer above already answered "what is it" */}
+                    {guide.whatItDoes && !skill.explainer?.what_it_is && (
                       <div className="bg-slate-800/40 rounded-lg p-4 border border-slate-700/50">
                         <div className="flex items-center gap-2 text-teal-300 font-semibold mb-1"><Lightbulb className="w-4 h-4" />What it does</div>
                         <p className="text-slate-200">{guide.whatItDoes}</p>
-                      </div>
-                    )}
-                    {guide.install && (
-                      <div>
-                        <div className="flex items-center gap-2 text-white font-semibold mb-2"><Terminal className="w-4 h-4 text-teal-400" />Install / run</div>
-                        <div className="bg-slate-950/60 rounded-lg p-3 border border-slate-800">
-                          <code className="text-teal-300 font-mono text-sm break-all">{guide.install}</code>
-                        </div>
                       </div>
                     )}
                     {guide.whenToUse?.length > 0 && (
@@ -231,18 +248,31 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                         </ul>
                       </div>
                     )}
-                    {guide.quickStart?.length > 0 && (
-                      <div>
-                        <div className="flex items-center gap-2 text-white font-semibold mb-3"><PlayCircle className="w-4 h-4 text-teal-400" />Quick start</div>
-                        <ol className="space-y-2">
-                          {guide.quickStart.map((s, i) => (
-                            <li key={i} className="flex items-start gap-3 text-slate-300">
-                              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-500/15 text-teal-300 text-sm flex items-center justify-center font-semibold">{i + 1}</span>
-                              <span className="pt-0.5">{s}</span>
-                            </li>
-                          ))}
-                        </ol>
-                      </div>
+                    {/* Manual path folds away — the "Use with Claude" panel is the primary install */}
+                    {(guide.install || guide.quickStart?.length > 0) && (
+                      <Disclosure title="Prefer to set it up yourself? Manual steps">
+                        {guide.install && (
+                          <div>
+                            <div className="flex items-center gap-2 text-white font-semibold mb-2"><Terminal className="w-4 h-4 text-teal-400" />Install / run</div>
+                            <div className="bg-slate-950/60 rounded-lg p-3 border border-slate-800">
+                              <code className="text-teal-300 font-mono text-sm break-all">{guide.install}</code>
+                            </div>
+                          </div>
+                        )}
+                        {guide.quickStart?.length > 0 && (
+                          <div>
+                            <div className="flex items-center gap-2 text-white font-semibold mb-3"><PlayCircle className="w-4 h-4 text-teal-400" />Quick start</div>
+                            <ol className="space-y-2">
+                              {guide.quickStart.map((s, i) => (
+                                <li key={i} className="flex items-start gap-3 text-slate-300">
+                                  <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-500/15 text-teal-300 text-sm flex items-center justify-center font-semibold">{i + 1}</span>
+                                  <span className="pt-0.5">{s}</span>
+                                </li>
+                              ))}
+                            </ol>
+                          </div>
+                        )}
+                      </Disclosure>
                     )}
                     {guide.examplePrompt && (
                       <div>
@@ -289,17 +319,22 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                   </div>
                 )}
                 {skill.github_topics?.length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-3">Topics</h3>
+                  <Disclosure title={`Topics (${skill.github_topics.length})`}>
                     <div className="flex flex-wrap gap-2">
                       {skill.github_topics.map((topic, idx) => (
                         <Badge key={idx} variant="outline" className="border-slate-600 text-slate-300">{topic}</Badge>
                       ))}
                     </div>
-                  </div>
+                  </Disclosure>
                 )}
               </CardContent>
             </Card>
+
+            {/* On phones the sidebar stacks below everything, which buried the
+                install panel; render it here right after the hero instead. */}
+            <div className="lg:hidden">
+              <AddToClaude skill={skill} />
+            </div>
 
             {/* Codeflow — "How it works": size verdict, setup effort, flow, reading order */}
             {codeflow && <CodeflowCard codeflow={codeflow} name={skill.title_human || skill.name} />}
@@ -370,7 +405,9 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-6">
-            <AddToClaude skill={skill} />
+            <div className="hidden lg:block">
+              <AddToClaude skill={skill} />
+            </div>
 
             <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
               <CardHeader><CardTitle className="text-white">Quick Actions</CardTitle></CardHeader>
