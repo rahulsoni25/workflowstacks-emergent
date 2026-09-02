@@ -113,6 +113,11 @@ export default function AgentClient({ agent, skills }) {
               <Button onClick={copyBlueprint} variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5" size="lg">
                 {copied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-teal-400" />Copied</> : <><Copy className="w-4 h-4 mr-2" />Copy blueprint</>}
               </Button>
+              <a href={`/api/agents/${agent.id}/claude-skill?format=zip`} download>
+                <Button variant="outline" className="border-teal-500/30 text-teal-300 hover:bg-teal-500/10" size="lg">
+                  Download as Claude Skill (.zip)
+                </Button>
+              </a>
             </>
           )}
           <Button onClick={remix} variant={locked ? 'outline' : 'default'} className={locked ? 'border-teal-500/40 text-teal-300 hover:bg-teal-500/10' : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20'} size="lg">

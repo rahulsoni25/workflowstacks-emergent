@@ -97,6 +97,10 @@ export default function SlashCommandPage({ params }) {
           </Card>
         )}
 
+        <h2 className="text-white font-bold text-lg mb-3">Install with one command</h2>
+        <CopyCommand code={`mkdir -p .claude/commands && curl -fsSL https://workflowstacks.com/api/commands/${cmd.slug} -o .claude/commands/${cmd.slug}.md`} />
+        <p className="text-sm text-slate-400 mt-3 mb-8">Run it in your project folder — the command appears in Claude Code's / menu immediately. Prefer to inspect first? The full file is below.</p>
+
         <h2 className="text-white font-bold text-lg mb-3">The command file</h2>
         <CopyCommand code={cmd.content} />
         {cmd.note && (

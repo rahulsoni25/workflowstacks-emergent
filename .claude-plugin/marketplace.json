@@ -1,0 +1,14 @@
+{
+  "name": "workflowstacks",
+  "owner": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "plugins": [
+    {
+      "name": "workflowstacks",
+      "source": "./plugins/workflowstacks",
+      "description": "The WorkflowStacks catalog inside Claude Code: search 2,000+ open-source AI skills, load any skill's instructions mid-conversation, and keep a personal skill library — via the WorkflowStacks MCP connector."
+    }
+  ]
+}

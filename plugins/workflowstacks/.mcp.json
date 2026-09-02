@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "workflowstacks": {
+      "type": "http",
+      "url": "https://workflowstacks.com/api/mcp"
+    }
+  }
+}

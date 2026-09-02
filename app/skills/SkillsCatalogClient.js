@@ -221,6 +221,17 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                         </span>
                       )}
                       {skill.language && <span className="text-slate-500">{skill.language}</span>}
+                      {/* Social proof from our own funnel: real install clicks + CI-verified installs */}
+                      {skill.installs > 0 && (
+                        <span className="flex items-center gap-1 text-cyan-300" title="Installs via WorkflowStacks">
+                          ⬇ {skill.installs.toLocaleString()}
+                        </span>
+                      )}
+                      {skill.verified_install?.ok && (
+                        <span className="flex items-center gap-1 text-emerald-300" title="Install verified in CI by WorkflowStacks">
+                          <Check className="w-3.5 h-3.5" />verified
+                        </span>
+                      )}
                       {typeof skill.rewrite_score === 'number' && (
                         <span className="ml-auto flex items-center gap-1 text-teal-300" title="Health Score">
                           <Check className="w-3.5 h-3.5" />{skill.rewrite_score}/10
