@@ -316,7 +316,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
             {/* On phones the sidebar stacks below everything, which buried the
                 install panel; render it here right after the hero instead. */}
             <div className="lg:hidden">
-              <AddToClaude skill={skill} />
+              <AddToClaude skill={skill} codeflow={codeflow} />
             </div>
 
             {/* Codeflow — "How it works": size verdict, setup effort, flow, reading order */}
@@ -389,7 +389,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-6">
             <div className="hidden lg:block">
-              <AddToClaude skill={skill} />
+              <AddToClaude skill={skill} codeflow={codeflow} />
             </div>
 
             <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
