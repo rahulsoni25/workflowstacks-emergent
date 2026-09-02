@@ -23,6 +23,40 @@ const CHANNELS = new Set([
   'editor-windsurf',
 ])
 
+// GET (admin-secret) → conversion stats: events by channel and top skills,
+// last 30 days. This is how the telemetry answers "which install path wins".
+export async function GET(request) {
+  const secret = process.env.ADMIN_SECRET
+  if (!secret || request.headers.get('x-admin-secret') !== secret) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+  const since = new Date(Date.now() - 30 * 24 * 3600 * 1000)
+  if (!process.env.MONGO_URL) {
+    return Response.json({ since, total: 0, by_channel: [], top_skills: [] })
+  }
+  const db = await getDb()
+  const [byChannel, topSkills, total] = await Promise.all([
+    db.collection('install_events').aggregate([
+      { $match: { created_at: { $gte: since } } },
+      { $group: { _id: '$channel', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+    ]).toArray(),
+    db.collection('install_events').aggregate([
+      { $match: { created_at: { $gte: since } } },
+      { $group: { _id: '$skill_id', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 25 },
+    ]).toArray(),
+    db.collection('install_events').countDocuments({ created_at: { $gte: since } }),
+  ])
+  return Response.json({
+    since,
+    total,
+    by_channel: byChannel.map((r) => ({ channel: r._id, count: r.count })),
+    top_skills: topSkills.map((r) => ({ skill: r._id, count: r.count })),
+  })
+}
+
 export async function POST(request) {
   let body
   try {
