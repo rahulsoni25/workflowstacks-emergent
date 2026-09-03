@@ -3,8 +3,7 @@ import { ArrowLeft, Linkedin, MapPin, Star, Globe, UserPlus } from 'lucide-react
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 export const metadata = {
   title: 'Featured Members — Global AI Builder Network | WorkflowStacks',

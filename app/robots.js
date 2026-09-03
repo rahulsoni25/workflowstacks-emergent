@@ -1,5 +1,5 @@
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 
+import { SITE_URL as BASE } from '@/lib/site-url'
 export default function robots() {
   return {
     rules: [

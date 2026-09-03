@@ -1,6 +1,7 @@
 import './globals.css'
 import SiteHeader from '@/components/SiteHeader'
 import Footer from '@/components/Footer'
+import { SITE_URL } from '@/lib/site-url'
 import { Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 
 const grotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400','500','600','700'], variable: '--font-grotesk', display: 'swap' })
@@ -13,7 +14,7 @@ export const metadata = {
   authors: [{ name: 'WorkflowStacks' }],
   creator: 'WorkflowStacks',
   publisher: 'WorkflowStacks',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'),
+  metadataBase: new URL(SITE_URL),
   openGraph: {
     title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, ChatGPT & Gemini',
     description: 'Install open-source AI skills and build custom AI agents for paid ads, performance reporting, SEO, outreach, and ecommerce — without coding.',
@@ -49,12 +50,12 @@ export default function RootLayout({ children }) {
     '@type': 'WebSite',
     name: 'WorkflowStacks',
     description: 'AI Skills & Agent Marketplace for OpenClaw, Claude, Gemini, and MCP Tools — by WorkflowStacks',
-    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com',
+    url: SITE_URL,
     potentialAction: {
       '@type': 'SearchAction',
       target: {
         '@type': 'EntryPoint',
-        urlTemplate: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'}/?search={search_term_string}`,
+        urlTemplate: `${SITE_URL}/?search={search_term_string}`,
       },
       'query-input': 'required name=search_term_string',
     },
@@ -65,8 +66,8 @@ export default function RootLayout({ children }) {
     '@type': 'Organization',
     name: 'WorkflowStacks',
     description: 'A free marketplace for open-source AI skills, an agent builder, and group-buy tool deals for founders.',
-    url: process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com',
-    logo: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'}/icon.svg`,
+    url: SITE_URL,
+    logo: `${SITE_URL}/icon.svg`,
     sameAs: ['https://github.com/rahulsoni25/workflowstacks-emergent'],
   }
 

@@ -1,5 +1,6 @@
 import { MongoClient } from 'mongodb'
 import { randomUUID } from 'crypto'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 const client = new MongoClient(process.env.MONGO_URL)
 let db
@@ -12,8 +13,6 @@ function requireAdmin(request) {
   if (!secret || request.headers.get('x-admin-secret') !== secret) return Response.json({ error: 'Unauthorized' }, { status: 401 })
   return null
 }
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'
 
 // Admin/cron: email people who downloaded a template ≥2 days ago (and haven't
 // been asked) a one-click "did it work?" — the only programmatic way to

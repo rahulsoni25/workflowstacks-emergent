@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowLeft, BookOpen, Star, GitFork } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 // Learning resources shelf — the famous mega-repos (awesome-lists, courses,
 // books) that are genuinely useful but aren't AI skills. They used to top the
@@ -14,8 +15,6 @@ export const metadata = {
     'The most-starred learning resources on GitHub — curated lists, courses, and books for founders building with AI. Separated from our skills library so tools stay tools.',
   alternates: { canonical: '/learn/resources' },
 }
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 
 async function getResources() {
   try {

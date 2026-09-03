@@ -5,7 +5,7 @@
 // Strategy each run: enrich up to 5 unenriched skills, then refill best_with_tools
 // on up to 5 legacy-prompt skills. Stays well under the 60s Vercel timeout.
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.workflowstacks.com'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 export async function GET(request) {
   const cronSecret = process.env.CRON_SECRET

@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, Star, Github } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 export const metadata = {
   title: 'Discover AI Skills — Trending, Newest, Top Quality | WorkflowStacks',

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import StackDetailClient from './StackDetailClient'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 export const revalidate = 3600
 
 async function getStack(slug) {

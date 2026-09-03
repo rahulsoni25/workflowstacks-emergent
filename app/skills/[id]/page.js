@@ -1,14 +1,13 @@
 import { notFound, permanentRedirect } from 'next/navigation'
 import SkillDetailClient from './SkillDetailClient'
 import { buildCodeflow, summarize } from '@/lib/codeflow'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 // Note: invalid skill IDs render the not-found UI with HTTP 200 (a Next.js 14
 // App Router limitation — notFound() doesn't emit a 404 status under ISR, and
 // force-dynamic doesn't change it while tripling TTFB on valid pages). The
 // not-found page emits <meta robots noindex>, so crawlers won't index these
 // phantom URLs — the practical SEO impact is nil. Keeping ISR for fast pages.
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 
 // ISR. Without generateStaticParams a dynamic segment is server-rendered on
 // EVERY request (verified live 2026-08-17: Cache-Control private/no-store,
