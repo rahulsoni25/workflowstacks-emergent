@@ -35,7 +35,7 @@ import {
 const SORTS = [
   { key: 'trending', label: 'Trending' },
   { key: 'popular', label: 'Most stars' },
-  { key: 'quality', label: 'Highest health' },
+  { key: 'quality', label: 'Best guides' },
   { key: 'newest', label: 'Newest' },
   { key: 'updated', label: 'Recently updated' },
   { key: 'gems', label: 'Hidden gems' },
@@ -256,7 +256,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
     const topHealth = byHealth[0]
     const out = []
     if (mostStarred) out.push({ s: mostStarred, kicker: 'MOST STARRED', lime: true })
-    if (topHealth) out.push({ s: topHealth, kicker: 'TOP HEALTH SCORE', lime: false })
+    if (topHealth) out.push({ s: topHealth, kicker: 'BEST GUIDE', lime: false })
     return out
   }, [skills, noFilters])
 
@@ -533,7 +533,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
             <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-[#262B2D] bg-[#262B2D] sm:grid-cols-4">
               <StatCell value={`★ ${fmt(sel.github_stars)}`} label="stars" />
               <StatCell value={`⑂ ${fmt(sel.github_forks)}`} label="forks" />
-              <StatCell value={healthScore(sel) !== null ? String(healthScore(sel)) : '—'} label="health /10" accent={healthScore(sel) !== null} />
+              <StatCell value={healthScore(sel) !== null ? String(healthScore(sel)) : '—'} label="guide quality /10" accent={healthScore(sel) !== null} />
               <StatCell value={sel.installs > 0 ? fmt(sel.installs) : '—'} label="installs here" />
             </div>
 

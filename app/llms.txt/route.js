@@ -34,9 +34,9 @@ export async function GET() {
 
   const body = `# WorkflowStacks
 
-> A marketplace of working AI automations for founders, agencies, ecommerce and sales teams. Download real, importable n8n workflows and Claude Desktop MCP configurations — not prompts or reading lists. Free templates, premium tools, and a done-for-you build service.
+> An open marketplace of AI skills and automations for founders, agencies, ecommerce and sales teams: a quality-gated catalog of open-source AI agents, Claude skills and MCP servers that install into Claude, ChatGPT or Gemini as a compiled prompt or a Claude Skill package — plus free importable n8n workflow templates, Claude Desktop MCP configurations, premium tools, and a done-for-you build service.
 
-Everything below runs on the user's own infrastructure: their n8n instance (free tier available) and their own LLM API key. WorkflowStacks does not host or execute the automations.
+WorkflowStacks does not host or execute anything. Catalog skills run inside the user's own AI assistant; n8n templates run on the user's own n8n instance (free tier available) with their own LLM API key.
 
 ## For AI agents: install directly
 
@@ -46,7 +46,7 @@ Everything below runs on the user's own infrastructure: their n8n instance (free
 
 ## What makes this different
 
-Most "AI agent" listings give you a prompt or a link to a GitHub repo. These are complete, tested automation files: you download one JSON file, import it into n8n, connect your accounts, and it runs.
+Every catalog listing is a real open-source repository that cleared an 8/10 quality gate, with a plain-English usage guide and a one-click install (compiled prompt, Claude Skill package, or the MCP connector). The n8n templates are complete, tested workflow files: download one JSON file, import it into n8n, connect your accounts, and it runs.
 
 ## Free n8n workflow templates (${templates.length})
 

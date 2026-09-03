@@ -46,7 +46,7 @@ function MiniCard({ skill }) {
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-slate-500">{skill.category}</span>
           {typeof skill.rewrite_score === 'number' && (
-            <span className="text-xs text-teal-300" title="Health Score">{skill.rewrite_score}/10</span>
+            <span className="text-xs text-teal-300" title="Guide quality — how clear and useful our listing is, not repo health">{skill.rewrite_score}/10</span>
           )}
         </div>
         <h3 className="text-white font-semibold leading-snug group-hover:text-teal-300 transition-colors line-clamp-2">

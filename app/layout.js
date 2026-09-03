@@ -8,15 +8,15 @@ const grotesk = Space_Grotesk({ subsets: ['latin'], weight: ['400','500','600','
 const mono = JetBrains_Mono({ subsets: ['latin'], weight: ['400','500','600','700'], variable: '--font-mono-jb', display: 'swap' })
 
 export const metadata = {
-  title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, ChatGPT & Gemini',
-  description: 'Install open-source AI skills, agent personas, and ready-to-use playbooks for Claude, Gemini, and MCP. Build custom AI agents for paid ads, performance reporting, SEO, market research, outreach, and ecommerce — without writing code.',
+  title: 'WorkflowStacks — Open-Source AI Skills & Agents',
+  description: 'Install quality-gated open-source AI skills, agents and MCP servers into Claude, ChatGPT or Gemini — no code. Free catalog, templates, done-for-you builds.',
   keywords: 'WorkflowStacks, AI skills marketplace, Claude skills, Gemini extensions, MCP servers, AI agents, no-code AI, paid ads automation, Meta ads AI, Google ads AI, TikTok ads AI, performance marketing AI, performance reporting AI, marketing dashboards, attribution AI, market research AI, competitor intelligence AI, SEO automation, AEO, GEO, ecommerce AI, AI for founders, AI for agencies',
   authors: [{ name: 'WorkflowStacks' }],
   creator: 'WorkflowStacks',
   publisher: 'WorkflowStacks',
   metadataBase: new URL(SITE_URL),
   openGraph: {
-    title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, ChatGPT & Gemini',
+    title: 'WorkflowStacks — Open-Source AI Skills & Agents',
     description: 'Install open-source AI skills and build custom AI agents for paid ads, performance reporting, SEO, outreach, and ecommerce — without coding.',
     type: 'website',
     locale: 'en_US',
@@ -25,7 +25,7 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'WorkflowStacks — AI Skills & No-Code Agents for Claude, ChatGPT & Gemini',
+    title: 'WorkflowStacks — Open-Source AI Skills & Agents',
     description: 'Install open-source AI skills and build custom AI agents for paid ads, performance reporting, SEO, outreach, and ecommerce — without coding.',
   },
   robots: {

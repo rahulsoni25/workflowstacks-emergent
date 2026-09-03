@@ -258,7 +258,7 @@ export default function SubmitClient({ publishedCount = 0 }) {
                     </div>
                     <Mono className={`text-xs ${allPass ? 'text-[#8B928D]' : 'text-[#E8B36A]'}`}>
                       {allPass
-                        ? 'Clears every automated gate. Full review still checks README quality and runtime safety before the health score is assigned.'
+                        ? 'Clears every automated gate. Full review still checks README quality and runtime safety before the guide-quality score is assigned.'
                         : `Not yet: ${failing.map((c) => `${c.label.toLowerCase()} (${c.detail})`).join('; ')}. You can still submit; we'll tell you what to fix.`}
                     </Mono>
                     {check.listed && (
@@ -402,7 +402,7 @@ export default function SubmitClient({ publishedCount = 0 }) {
                 </div>
                 <label className="flex cursor-pointer items-start gap-2.5 text-[13.5px] leading-[1.45] text-[#8B928D]">
                   <input type="checkbox" checked={agreed} onChange={() => setAgreed((v) => !v)} className="mt-0.5 h-4 w-4 shrink-0 accent-[#C6F24E]" />
-                  I own this repo or have the right to list it. Listings must clear an 8/10 health score; we re-check stats daily and delist abandoned repos.
+                  I own this repo or have the right to list it. Listings must clear an 8/10 guide-quality score; we re-check stats daily and delist abandoned repos.
                 </label>
               </div>
 
@@ -426,7 +426,7 @@ export default function SubmitClient({ publishedCount = 0 }) {
               <Mono className="text-[13px] text-[#C6F24E]">✓ SUBMITTED · IN REVIEW{sent.id ? ` · REF ${sent.id.slice(0, 8).toUpperCase()}` : ''}</Mono>
               <h2 className="m-0 text-[30px] font-bold leading-[1.05] tracking-[-0.03em]">{name} is in the queue.</h2>
               <p className="m-0 text-base leading-[1.55] text-[#8B928D]">
-                We&apos;ll run the full health check on <Mono className="text-[#ECEFEA]">github.com/{normalizedRepo}</Mono> and email <span className="text-[#ECEFEA]">{email}</span> either way, usually within a few days. If it clears 8/10 it goes live with one-click install.
+                We&apos;ll run the full health check on <Mono className="text-[#ECEFEA]">github.com/{normalizedRepo}</Mono> and email <span className="text-[#ECEFEA]">{email}</span> either way, usually within a few days. If its guide clears 8/10 it goes live with one-click install.
               </p>
               <div className="t-mono grid grid-cols-1 gap-px overflow-hidden rounded-[10px] border border-[#262B2D] bg-[#262B2D] text-xs sm:grid-cols-3">
                 <div className="flex flex-col gap-1 bg-[#0A0C0D] p-3.5">

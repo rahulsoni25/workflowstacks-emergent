@@ -1,6 +1,7 @@
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalog-gates';
+import { tokenize as tokenizeSearch } from '../../../lib/search-tokens';
 import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 import { screenSubmission } from '../../../lib/content-safety';
@@ -677,11 +678,28 @@ export async function GET(request) {
         query.is_premium = { $ne: true };
       }
       if (search) {
-        const searchSafe = escapeRegex(search);
-        query.$or = [
-          { name: { $regex: searchSafe, $options: 'i' } },
-          { description: { $regex: searchSafe, $options: 'i' } }
-        ];
+        // Per-token matching across the fields a visitor actually thinks in.
+        // Previously the ENTIRE phrase was one regex over name/description, so
+        // any ordinary multi-word query ("scrape websites") returned nothing
+        // while its single tokens ("scraper") matched — the marketplace search
+        // box, the MCP connector and the builder all hit this path. OR across
+        // tokens and fields guarantees recall; the existing trending/stars
+        // sort keeps the best matches on top (same shape as /api/search-skills).
+        const tokens = tokenizeSearch(search);
+        const fields = ['name', 'title_human', 'description', 'description_human', 'category', 'github_topics'];
+        if (tokens.length) {
+          query.$or = tokens.flatMap((t) => {
+            const re = escapeRegex(t);
+            return fields.map((f) => ({ [f]: { $regex: re, $options: 'i' } }));
+          });
+        } else {
+          // Short/noise-only queries ("ai", "go") keep the old whole-phrase match.
+          const searchSafe = escapeRegex(search);
+          query.$or = [
+            { name: { $regex: searchSafe, $options: 'i' } },
+            { description: { $regex: searchSafe, $options: 'i' } }
+          ];
+        }
       }
       // Optional server-side pre-filter — lets a caller like the sitemap
       // (which only wants the small slice passing its quality gate) avoid

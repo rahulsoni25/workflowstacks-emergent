@@ -177,7 +177,12 @@ export default async function SkillDetailPage({ params }) {
     applicationCategory: 'DeveloperApplication',
     operatingSystem: 'Any',
     offers: { '@type': 'Offer', price: skill.price || 0, priceCurrency: 'USD' },
-    ...(skill.github_url ? { url: skill.github_url } : {}),
+    // The entity URL is OUR canonical page; the upstream repo is sameAs
+    // (codeRepository below when known). Pointing url at GitHub told search
+    // engines the canonical home of this software was a third-party site.
+    url: `${BASE}/skills/${skill.slug || skill.id}`,
+    image: `${BASE}/opengraph-image`,
+    ...(skill.github_url ? { sameAs: [skill.github_url] } : {}),
     ...(skill.creator ? { author: { '@type': 'Person', name: skill.creator } } : {}),
     ...(codeflow?.languages?.length ? { programmingLanguage: codeflow.languages.map((l) => l.name) } : {}),
     ...(codeflow?.repo?.html_url ? { codeRepository: codeflow.repo.html_url } : {}),

@@ -4,7 +4,7 @@
 //
 // Step 1: the visitor describes the job in plain English.
 // Step 2: we search the real catalog (/api/search-skills) and show the best
-//         match with live GitHub numbers, the health score and the closest
+//         match with live GitHub numbers, the guide-quality score and the closest
 //         alternatives — or an honest "nothing clears the gate yet" state.
 // Step 3: pick Claude / ChatGPT / Gemini, how to deliver it, and install: the
 //         blueprint is the skill's compiled starter prompt from
@@ -54,7 +54,7 @@ const OPTION_DEFS = [
   ['ask', 'Ask before acting'],
 ]
 
-const PHASES = ['Reading your description', 'Searching the scored catalog', 'Ranking by health, stars and fit']
+const PHASES = ['Reading your description', 'Searching the scored catalog', 'Ranking by guide quality, stars and fit']
 
 // ---------------------------------------------------------------------------
 // Small presentational pieces
@@ -485,7 +485,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
               {found && (
                 <div className="flex flex-col gap-3.5">
                   <Mono className="text-[13px] text-[#8B928D]">
-                    Best match · {matchTokens.length ? `matched "${matchTokens.slice(0, 4).join('", "')}"` : 'closest by popularity and health'}
+                    Best match · {matchTokens.length ? `matched "${matchTokens.slice(0, 4).join('", "')}"` : 'closest by popularity and guide quality'}
                   </Mono>
 
                   <article className="flex flex-col gap-5 rounded-2xl border border-[#C6F24E] bg-[#101314] p-5 shadow-[0_0_0_1px_rgba(198,242,78,0.15),0_24px_60px_-30px_rgba(198,242,78,0.25)] sm:p-7">
@@ -513,7 +513,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                     <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-[#262B2D] bg-[#262B2D] sm:grid-cols-4">
                       <StatCell value={`★ ${fmt(agent.github_stars)}`} label="GitHub stars" />
                       <StatCell value={`⑂ ${fmt(agent.github_forks)}`} label="forks" />
-                      <StatCell value={health !== null ? `${health}/10` : '—'} label="health score" />
+                      <StatCell value={health !== null ? `${health}/10` : '—'} label="guide quality" />
                       <StatCell value={isPaid(agent) ? `$${Number(agent.price)}` : 'Free'} label={isPaid(agent) ? 'one-time' : 'open-source'} />
                     </div>
 
@@ -620,7 +620,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
 
               <div className="t-mono flex flex-wrap gap-5 text-xs text-[#8B928D]">
                 <span className="whitespace-nowrap">
-                  <span className="text-[#C6F24E]">✓</span> One paste, no API keys
+                  <span className="text-[#C6F24E]">✓</span> One paste, nothing to install
                 </span>
                 <span className="whitespace-nowrap">
                   <span className="text-[#C6F24E]">✓</span> Compiled from the source repo
@@ -834,7 +834,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
             <Mono className="text-[13px] text-[#4E7A00]">HOW INSTALL WORKS</Mono>
             <h2 className="m-0 text-[34px] font-bold leading-none tracking-[-0.04em] sm:text-[40px]">Under a minute from question to working agent.</h2>
             <p className="m-0 text-[17px] leading-normal text-[#4B5468]">
-              No API keys, no servers, no code. An agent is a blueprint: the right open-source repo compiled into one instruction set your AI already understands.
+              Nothing to install and no code — some tools need their own API key, and each listing says so up front. An agent is a blueprint: the right open-source repo compiled into one instruction set your AI already understands.
             </p>
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -852,12 +852,12 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
             <div className="flex flex-col gap-3.5 rounded-[14px] border border-[#E3E6EC] bg-white p-5">
               <div className="t-mono flex min-h-[96px] flex-col justify-center gap-1.5 rounded-lg border border-[#C6F24E] bg-[#0A0C0D] p-3 text-[11px] text-[#8B928D]">
                 <span className="font-sans text-[13px] font-bold text-[#ECEFEA]">Best match</span>
-                <span>★ stars · ⑂ forks · ● health · Free</span>
+                <span>★ stars · ⑂ forks · ● guide quality · Free</span>
               </div>
               <Mono className="text-xs text-[#5A615D]">02</Mono>
               <h3 className="m-0 text-xl tracking-[-0.02em]">Review the match</h3>
               <p className="m-0 text-[15px] leading-normal text-[#4B5468]">
-                Health score, live stars and forks, an example use case, the source repo. Swap to an alternative in one click.
+                Guide-quality score, live stars and forks, an example use case, the source repo. Swap to an alternative in one click.
               </p>
             </div>
             <div className="flex flex-col gap-3.5 rounded-[14px] border border-[#E3E6EC] bg-white p-5">
