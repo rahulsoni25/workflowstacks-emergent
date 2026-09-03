@@ -1,4 +1,5 @@
 import HomeClient from './HomeClient'
+import { homeFaqs } from '@/lib/home-faqs'
 
 const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 export const revalidate = 1800
@@ -14,73 +15,68 @@ async function getJson(path) {
 }
 
 // FAQPage schema for AEO — scoped to the homepage only (not the global layout),
-// so other routes can carry their own page-specific structured data.
+// so other routes can carry their own page-specific structured data. Built from
+// the same list the visible accordion renders (lib/home-faqs.js).
 const faqJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
-  mainEntity: [
-    { '@type': 'Question', name: "Isn't this just GitHub with extra steps?", acceptedAnswer: { '@type': 'Answer', text: 'The opposite — we remove the steps. We read 180+ tools, score them at 8/10+, write each one\'s usage guide (install command, quick-start, real gotcha), and let you merge the ones you pick into one paste-ready agent. You skip hours of evaluating projects and wiring prompts yourself. The tools stay free and open-source; we delete the work around them.' } },
-    { '@type': 'Question', name: "If it's free, what's the catch?", acceptedAnswer: { '@type': 'Answer', text: 'No catch. The catalog is free forever and every skill\'s source is readable line-by-line before you use it. We earn from group-buy savings on paid AI tools, done-for-you agent setups, and creator tools — never by locking the free catalog behind a paywall.' } },
-    { '@type': 'Question', name: 'Will it actually work in my AI tool?', acceptedAnswer: { '@type': 'Answer', text: 'Yes. The Builder outputs a system prompt / custom instruction that runs as-is in ChatGPT, Claude, or Gemini — paste it in and go. No API keys, no install, no code.' } },
-    { '@type': 'Question', name: 'Do I need to know how to code?', acceptedAnswer: { '@type': 'Answer', text: 'No. WorkflowStacks is built for non-technical founders and marketers. You browse by outcome, pick the skills you want, and the Agent Builder generates a ready-to-paste blueprint for you.' } },
-    { '@type': 'Question', name: 'How are skills chosen?', acceptedAnswer: { '@type': 'Answer', text: 'They are ingested from GitHub by trending and star count, then quality-gated — only listings that score 8/10 or higher are published. Every card shows live GitHub stars and forks, refreshed daily.' } },
-    { '@type': 'Question', name: 'What are Playbooks and Personas?', acceptedAnswer: { '@type': 'Answer', text: 'Playbooks are step-by-step guides that combine AI skills to solve one specific problem. Personas are pre-configured AI agent roles for specific audiences (Founders, Agencies, Ecommerce). Both open in the Builder in one click.' } },
-  ],
+  mainEntity: homeFaqs().map((f) => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
 }
 
-export default async function HomePage() {
-  // Homepage only ever renders a 24-card featured grid — ask the API for
-  // exactly that instead of pulling the entire catalog to throw most of it away.
-  const [skillsData, statsData, personasData, playbooksData, newSkillsData] = await Promise.all([
-    getJson('/api/skills?limit=24'), getJson('/api/stats'), getJson('/api/personas'), getJson('/api/playbooks'),
-    getJson('/api/skills?new=true'),
-  ])
-  const allSkills = skillsData?.skills || []
-  // Trim each card to only the fields the home grid renders, so we don't inline
-  // heavy unused fields (readme_preview, use_guide, *_original) ×182 into the SSR
-  // payload twice. Keeps all cards (content/SEO) while cutting parse/hydration cost.
-  const skills = allSkills.map((s) => ({
+// Only the fields the trending cards render — keeps the SSR payload light and
+// never inlines heavy enrichment blobs into the homepage HTML.
+function trimSkill(s) {
+  return {
     id: s.id,
+    slug: s.slug,
     name: s.name,
     title_human: s.title_human,
     description: s.description,
     description_human: s.description_human,
     category: s.category,
+    language: s.language,
+    creator: s.creator,
+    owner: s.owner,
+    github_url: s.github_url,
     github_stars: s.github_stars,
     github_forks: s.github_forks,
-    language: s.language,
+    github_topics: Array.isArray(s.github_topics) ? s.github_topics.slice(0, 6) : undefined,
+    rewrite_score: s.rewrite_score,
+    installs: s.installs,
     is_premium: s.is_premium,
     price: s.price,
-  }))
-  const newSkills = (newSkillsData?.skills || []).map((s) => ({
-    id: s.id,
-    name: s.name,
-    title_human: s.title_human,
-    description_human: s.description_human,
-    category: s.category,
-    github_stars: s.github_stars,
-    language: s.language,
-  }))
+    explainer: s.explainer
+      ? {
+          use_case_example: s.explainer.use_case_example,
+          what_it_is: s.explainer.what_it_is,
+          how_it_helps: s.explainer.how_it_helps,
+        }
+      : undefined,
+  }
+}
 
-  // Single source of truth: every headline count is the real number of published,
-  // browsable items — never rounded up past what a visitor can actually see.
-  // /api/skills is now capped to 24 for this page, so its length is no longer
-  // a valid stand-in for the catalog total — /api/stats (a countDocuments(),
-  // not a full fetch) is the real source; allSkills.length is only the last-resort.
-  const totalSkills = statsData?.totalSkills || allSkills.length || 0
-  const personaCount = (personasData?.personas || []).length || 4
-  const playbookCount = (playbooksData?.playbooks || []).length || 4
-  const stats = { ...(statsData || {}), totalSkills, personaCount, playbookCount }
+export default async function HomePage() {
+  // The homepage renders a six-card "Trending this week" rail, so ask the API
+  // for exactly that instead of pulling the catalog to throw most of it away.
+  const [skillsData, statsData] = await Promise.all([getJson('/api/skills?sort=trending&limit=6'), getJson('/api/stats')])
+  const featured = (skillsData?.skills || []).map(trimSkill)
 
-  // Server-render a featured grid to keep the landing HTML light/fast; the full
-  // catalog stays fully crawlable at /skills + in the sitemap. The client
-  // re-fetches the matching set when the visitor searches or filters.
-  const featured = skills
+  // Single source of truth for the headline count: the real number of
+  // published, browsable listings from /api/stats (a countDocuments(), not a
+  // full fetch). HomeClient floors it to the nearest 10 so "N+" is always true.
+  const stats = {
+    totalSkills: statsData?.totalSkills || 0,
+    publishedSkills: statsData?.publishedSkills || statsData?.totalSkills || 0,
+  }
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <HomeClient initialSkills={featured} initialStats={stats} initialNewSkills={newSkills} />
+      <HomeClient initialSkills={featured} initialStats={stats} />
     </>
   )
 }

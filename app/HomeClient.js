@@ -1,942 +1,1021 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { Search, Star, Download, Github, Sparkles, Zap, Code2, Brain, ArrowRight, Shield, Clock, TrendingUp, Users, ChevronRight, Check, Mail, Play, Target, Layers, Bot } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+// Homepage — the "describe → match → install" front door.
+//
+// Step 1: the visitor describes the job in plain English.
+// Step 2: we search the real catalog (/api/search-skills) and show the best
+//         match with live GitHub numbers, the health score and the closest
+//         alternatives — or an honest "nothing clears the gate yet" state.
+// Step 3: pick Claude / ChatGPT / Gemini, how to deliver it, and install: the
+//         blueprint is the skill's compiled starter prompt from
+//         /api/skills/:slug/claude-skill?format=prompt, the same text the
+//         detail page and the MCP connector hand out.
+//
+// Every number on this page is a real field from the catalog (github_stars,
+// github_forks, rewrite_score, installs) or the live published count from
+// /api/stats. Nothing is invented client-side.
+
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { trackInstall } from '@/lib/track-install'
+import { homeFaqs } from '@/lib/home-faqs'
 
-const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6 }
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const TYPEWRITER_PROMPTS = [
+  'Send me a weekly report of my Meta and Google ad spend with what changed',
+  'Find 50 dentists in Austin with verified emails',
+  'Email me when a competitor changes their pricing page',
+  'Draft replies to every 1–3 star review the day it lands',
+]
+
+const SUGGESTIONS = ['weekly client ad report', 'find leads in my city', 'watch competitor pricing', 'rank in AI search']
+
+const TARGETS = [
+  { name: 'Claude', dot: '#D97757', hint: 'system prompt / project', url: 'https://claude.ai/new', channel: 'try-claude' },
+  { name: 'ChatGPT', dot: '#10A37F', hint: 'custom GPT / instructions', url: 'https://chatgpt.com/', channel: 'open-chatgpt' },
+  { name: 'Gemini', dot: '#4E8CFF', hint: 'gem / instructions', url: 'https://gemini.google.com/app', channel: 'open-gemini' },
+]
+
+const OPTION_DEFS = [
+  ['guide', 'Usage guide'],
+  ['gotchas', 'Gotchas'],
+  ['ask', 'Ask before acting'],
+]
+
+const PHASES = ['Reading your description', 'Searching the scored catalog', 'Ranking by health, stars and fit']
+
+// Browsers cap query strings; the builder uses the same threshold.
+const URL_PROMPT_LIMIT = 6000
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+function fmt(n) {
+  const v = Number(n) || 0
+  if (v >= 1_000_000) return (v / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M'
+  if (v >= 1000) return (v / 1000).toFixed(1).replace(/\.0$/, '') + 'k'
+  return String(v)
 }
 
-const staggerContainer = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
+function skillTitle(s) {
+  return s?.title_human || s?.name || 'Untitled skill'
 }
 
-function useFavorites() {
-  const [favs, setFavs] = useState([])
+function skillDesc(s) {
+  return s?.description_human || s?.description || ''
+}
+
+function skillKey(s) {
+  return s?.slug || s?.id || ''
+}
+
+function skillCreator(s) {
+  const c = s?.creator || s?.owner
+  if (c) return String(c).replace(/^@/, '')
+  const m = String(s?.github_url || '').match(/github\.com\/([^/]+)\//)
+  return m ? m[1] : ''
+}
+
+// The plain-English example use case our enrichment pass wrote for the skill,
+// or the snippet the search matched on — never a fabricated "sample output".
+function skillUseCase(s) {
+  return s?.matched?.snippet || s?.explainer?.use_case_example || s?.explainer?.what_you_can_make || ''
+}
+
+function healthScore(s) {
+  return typeof s?.rewrite_score === 'number' ? s.rewrite_score : null
+}
+
+// Local fallback when the compiled prompt can't be fetched (offline preview,
+// API hiccup). Built only from fields we already have on the skill object.
+function fallbackPrompt(skill, origin) {
+  const key = skillKey(skill)
+  const lines = [
+    `Load the following skill for this conversation and follow its instructions whenever they apply. Full version: ${origin}/skills/${key}`,
+    '',
+    `# ${skillTitle(skill)}`,
+    '',
+  ]
+  const desc = skillDesc(skill)
+  if (desc) lines.push(desc, '')
+  if (skill.explainer?.what_it_is) lines.push(`What it is: ${skill.explainer.what_it_is}`)
+  if (skill.explainer?.how_it_helps) lines.push(`How it helps: ${skill.explainer.how_it_helps}`)
+  if (skill.explainer?.use_case_example) lines.push(`Example use: ${skill.explainer.use_case_example}`)
+  if (skill.github_url) lines.push('', `Source repository: ${skill.github_url}`)
+  lines.push('', 'To start: introduce this skill in 2-3 sentences — what you can now help me do and 2-3 example requests I could make — then ask what I want to tackle first.')
+  return lines.join('\n')
+}
+
+// ---------------------------------------------------------------------------
+// Small presentational pieces
+// ---------------------------------------------------------------------------
+
+function Mono({ className = '', children, ...rest }) {
+  return (
+    <span className={`t-mono ${className}`} {...rest}>
+      {children}
+    </span>
+  )
+}
+
+function StepBar({ step, canGoInstall, onGo }) {
+  const defs = [
+    [1, 'Describe'],
+    [2, 'Match'],
+    [3, 'Install'],
+  ]
+  return (
+    <div className="t-mono flex items-center text-xs tracking-wider">
+      {defs.map(([n, label], i) => {
+        const active = n === step
+        const past = n < step
+        const can = past || (n === 3 && step === 2 && canGoInstall)
+        const color = active ? 'text-[#ECEFEA]' : past ? 'text-[#C6F24E]' : 'text-[#5A615D]'
+        return (
+          <div key={n} className="flex items-center">
+            <button
+              type="button"
+              onClick={() => can && onGo(n)}
+              disabled={!can}
+              className={`flex items-center gap-2 bg-transparent border-0 p-0 ${color} ${can ? 'cursor-pointer' : 'cursor-default'}`}
+            >
+              <span
+                className={`inline-flex h-[22px] w-[22px] items-center justify-center rounded-full border font-medium ${
+                  active
+                    ? 'bg-[#C6F24E] text-[#0A0C0D] border-[#C6F24E]'
+                    : past
+                    ? 'bg-transparent text-[#C6F24E] border-[#C6F24E]'
+                    : 'bg-transparent text-[#5A615D] border-[#323A3C]'
+                }`}
+              >
+                {n}
+              </span>
+              {label}
+            </button>
+            {i < 2 && <span className={`mx-3.5 h-px w-8 sm:w-12 ${past ? 'bg-[#C6F24E]' : 'bg-[#323A3C]'}`} />}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function CategoryChip({ children }) {
+  return <Mono className="border border-[#323A3C] px-2 py-[3px] rounded text-xs whitespace-nowrap">{children}</Mono>
+}
+
+function StatCell({ value, label }) {
+  return (
+    <div className="bg-[#0A0C0D] px-3.5 py-3 flex flex-col gap-0.5 t-mono min-w-0">
+      <span className="text-lg font-medium truncate">{value}</span>
+      <span className="text-[11px] text-[#5A615D]">{label}</span>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
+
+export default function HomeClient({ initialSkills = [], initialStats = null }) {
+  // ----- flow state -----
+  const [step, setStep] = useState(1)
+  const [query, setQuery] = useState('')
+  const [placeholder, setPlaceholder] = useState('')
+  const [searching, setSearching] = useState(false)
+  const [phase, setPhase] = useState(0)
+  const [results, setResults] = useState([])
+  const [matchTokens, setMatchTokens] = useState([])
+  const [agent, setAgent] = useState(null)
+  const [target, setTarget] = useState('Claude')
+  const [delivery, setDelivery] = useState('Copy')
+  const [opts, setOpts] = useState({ guide: true, gotchas: true, ask: false })
+  const [done, setDone] = useState(false)
+  const [preview, setPreview] = useState(false)
+  const [faqOpen, setFaqOpen] = useState(0)
+  const [origin, setOrigin] = useState('https://workflowstacks.com')
+
+  // Compiled starter prompts, keyed by slug — fetched once per skill.
+  const [prompts, setPrompts] = useState({})
+  const [promptLoading, setPromptLoading] = useState(false)
+
+  const timersRef = useRef([])
+  const searchSeq = useRef(0)
+  const textareaRef = useRef(null)
+
   useEffect(() => {
-    try { setFavs(JSON.parse(localStorage.getItem('ws_favs') || '[]')) } catch {}
+    setOrigin(window.location.origin)
   }, [])
-  const toggle = (id) => {
-    setFavs(prev => {
-      const next = prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
-      try { localStorage.setItem('ws_favs', JSON.stringify(next)) } catch {}
-      return next
-    })
-  }
-  return { favs, toggle }
-}
 
-const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills = [] }) => {
-  const [skills, setSkills] = useState(initialSkills)
-  const [loading, setLoading] = useState(false)
-  const [category, setCategory] = useState('all')
-  const [search, setSearch] = useState('')
-  const [stats, setStats] = useState(initialStats)
-  const [email, setEmail] = useState('')
-  const [emailSubmitted, setEmailSubmitted] = useState(false)
-  const filtersReady = useRef(false)
-  const abortRef = useRef(null)
-  const { favs, toggle } = useFavorites()
+  // ----- headline count: real published listings, floored to the nearest 10 so "+" is always true -----
+  const publishedCount = Number(initialStats?.publishedSkills || initialStats?.totalSkills) || 0
+  const countFloor = publishedCount >= 10 ? Math.floor(publishedCount / 10) * 10 : 0
+  const countLabel = countFloor ? `${countFloor.toLocaleString()}+` : ''
 
-  // Re-fetch when filters change. Skip the very first run when the server already
-  // seeded the grid (so crawlers + first paint get real content, no refetch flash).
-  // Debounced so fast typing in the search box doesn't fire a request per
-  // keystroke — each one used to hit /api/search, which can call out to the
-  // GitHub API and write to Mongo before responding.
+  // ----- typewriter placeholder (only while the box is empty on step 1) -----
   useEffect(() => {
-    if (!filtersReady.current) {
-      filtersReady.current = true
-      if (initialSkills.length) return
+    if (step !== 1 || query) return undefined
+    const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    if (reduce) {
+      setPlaceholder(TYPEWRITER_PROMPTS[0])
+      return undefined
     }
-    const t = setTimeout(() => loadSkills(), 350)
-    return () => clearTimeout(t)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, search])
-
-  const loadSkills = async () => {
-    // Cancel any still-in-flight request from a previous keystroke/filter so
-    // a slow stale response can't land after a newer one and clobber the UI.
-    if (abortRef.current) abortRef.current.abort()
-    const controller = new AbortController()
-    abortRef.current = controller
-
-    setLoading(true)
-    try {
-      let res
-      if (search && search.trim()) {
-        // Use the smart search endpoint — it logs queries + auto-discovers from GitHub
-        res = await fetch(`/api/search?q=${encodeURIComponent(search.trim())}`, { signal: controller.signal })
+    const tw = { i: 0, c: 0, dir: 1, hold: 0 }
+    const id = setInterval(() => {
+      const full = TYPEWRITER_PROMPTS[tw.i]
+      if (tw.dir > 0) {
+        tw.c += 1
+        if (tw.c >= full.length) {
+          tw.dir = 0
+          tw.hold = 42 // ≈1.6s at 38ms
+        }
+      } else if (tw.dir === 0) {
+        tw.hold -= 1
+        if (tw.hold <= 0) tw.dir = -1
       } else {
-        const params = new URLSearchParams()
-        if (category !== 'all') params.append('category', category)
-        params.append('limit', '60')
-        res = await fetch(`/api/skills?${params}`, { signal: controller.signal })
+        tw.c -= 3
+        if (tw.c <= 0) {
+          tw.c = 0
+          tw.dir = 1
+          tw.i = (tw.i + 1) % TYPEWRITER_PROMPTS.length
+        }
       }
-      const data = await res.json()
-      setSkills(data.skills || [])
-    } catch (e) {
-      if (e.name === 'AbortError') return
-      console.error('Error loading skills:', e)
-      setSkills([])
-    }
-    setLoading(false)
+      setPlaceholder(full.slice(0, Math.max(0, tw.c)) + (tw.dir === 0 ? '' : '|'))
+    }, 38)
+    return () => clearInterval(id)
+  }, [step, query])
+
+  const clearTimers = () => {
+    timersRef.current.forEach(clearTimeout)
+    timersRef.current = []
+  }
+  useEffect(() => () => clearTimers(), [])
+
+  // ----- search -----
+  const submit = useCallback(
+    async (raw) => {
+      const q = String(raw ?? query).trim()
+      if (!q) {
+        textareaRef.current?.focus()
+        return
+      }
+      const seq = ++searchSeq.current
+      clearTimers()
+      setStep(2)
+      setSearching(true)
+      setPhase(0)
+      setResults([])
+      setAgent(null)
+      setDone(false)
+      timersRef.current.push(setTimeout(() => setPhase(1), 450))
+      timersRef.current.push(setTimeout(() => setPhase(2), 900))
+
+      const minWait = new Promise((r) => setTimeout(r, 1300))
+      let data = null
+      try {
+        const res = await fetch('/api/search-skills', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: q, limit: 6 }),
+        })
+        data = await res.json()
+      } catch {
+        data = null
+      }
+      await minWait
+      if (seq !== searchSeq.current) return // a newer search superseded this one
+      const list = Array.isArray(data?.results) ? data.results : []
+      setResults(list)
+      setMatchTokens(Array.isArray(data?.tokens) ? data.tokens : [])
+      setAgent(list[0] || null)
+      setSearching(false)
+    },
+    [query]
+  )
+
+  const reset = () => {
+    clearTimers()
+    searchSeq.current += 1
+    setStep(1)
+    setQuery('')
+    setResults([])
+    setAgent(null)
+    setDone(false)
+    setSearching(false)
   }
 
-  const handleEmailSubmit = async (e) => {
-    e.preventDefault()
-    if (!email.trim()) return
-    try {
-      const res = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() })
+  const editQuery = () => {
+    clearTimers()
+    searchSeq.current += 1
+    setStep(1)
+    setResults([])
+    setAgent(null)
+    setDone(false)
+    setSearching(false)
+  }
+
+  const chooseAgent = (s) => {
+    setAgent(s)
+    setDone(false)
+  }
+
+  const installFeatured = (s) => {
+    setAgent(s)
+    setResults([s])
+    setMatchTokens([])
+    setQuery(skillTitle(s))
+    setStep(3)
+    setDone(false)
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // ----- blueprint -----
+  const agentKey = skillKey(agent)
+  useEffect(() => {
+    if (step !== 3 || !agent || !agentKey || prompts[agentKey]) return
+    let cancelled = false
+    setPromptLoading(true)
+    fetch(`/api/skills/${encodeURIComponent(agentKey)}/claude-skill?format=prompt`)
+      .then((r) => (r.ok ? r.text() : Promise.reject(new Error('prompt unavailable'))))
+      .catch(() => fallbackPrompt(agent, origin))
+      .then((text) => {
+        if (cancelled) return
+        setPrompts((p) => ({ ...p, [agentKey]: text }))
       })
-      if (res.ok) {
-        setEmailSubmitted(true)
-        setEmail('')
-      } else {
-        alert('Please enter a valid email address.')
+      .finally(() => {
+        if (!cancelled) setPromptLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [step, agent, agentKey, prompts, origin])
+
+  const blueprint = useMemo(() => {
+    if (!agent) return ''
+    const base = prompts[agentKey] || ''
+    if (!base) return ''
+    let t = `# ${skillTitle(agent)} — agent blueprint for ${target}\n\n${base}`
+    const extras = []
+    if (opts.guide) extras.push("Usage guide: read the skill's install command and quick-start above before the first run, and tell me if anything needs to be set up on my side.")
+    if (opts.gotchas) extras.push('Known gotchas: verify rate limits and auth scopes for each connected tool before relying on it.')
+    if (opts.ask) extras.push('Always ask for confirmation before taking any external action (sending, posting, buying, deleting).')
+    if (extras.length) t += '\n\n' + extras.join('\n')
+    return t
+  }, [agent, agentKey, prompts, target, opts])
+
+  const blueprintLines = blueprint ? blueprint.split('\n').length : 0
+  const targetDef = TARGETS.find((t) => t.name === target) || TARGETS[0]
+
+  const installLabel =
+    delivery === 'Copy' ? 'Install · copy blueprint' : delivery === 'Download' ? 'Install · download blueprint.md' : `Install · open in ${target}`
+  const doneMsg =
+    delivery === 'Copy' ? 'Blueprint copied to clipboard' : delivery === 'Download' ? 'blueprint.md downloaded' : `${target} opened in a new tab, blueprint copied`
+
+  const doInstall = async () => {
+    if (!agent || !blueprint) return
+    const key = agentKey
+    if (delivery === 'Download') {
+      trackInstall(key, 'download-md')
+      const blob = new Blob([blueprint], { type: 'text/markdown' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${skillTitle(agent).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'agent'}-blueprint.md`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+    } else {
+      trackInstall(key, delivery === 'Open' ? targetDef.channel : 'copy-prompt')
+      try {
+        await navigator.clipboard?.writeText(blueprint)
+      } catch {}
+      if (delivery === 'Open') {
+        const q = encodeURIComponent(blueprint)
+        let href = targetDef.url
+        if (q.length <= URL_PROMPT_LIMIT) {
+          if (target === 'Claude') href = `https://claude.ai/new?q=${q}`
+          if (target === 'ChatGPT') href = `https://chatgpt.com/?q=${q}`
+        }
+        window.open(href, '_blank', 'noopener,noreferrer')
       }
-    } catch (err) {
-      alert('Something went wrong — please try again.')
     }
+    setDone(true)
   }
 
-  const getCategoryColor = (cat) => {
-    const colors = {
-      'claude-skill': 'bg-violet-500/10 text-violet-400 border-violet-500/20',
-      'gemini-extension': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-      'mcp-server': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-      'prompt': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-      'anthropic-claude': 'bg-pink-500/10 text-pink-400 border-pink-500/20',
-      'ai-prompt': 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-      'ai-agent': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
-      'ai-tool': 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
-    }
-    return colors[cat] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
-  }
-
-  const getCategoryIcon = (cat) => {
-    if (cat === 'claude-skill' || cat === 'anthropic-claude') return <Brain className="w-4 h-4" />
-    if (cat === 'gemini-extension') return <Sparkles className="w-4 h-4" />
-    if (cat === 'mcp-server') return <Code2 className="w-4 h-4" />
-    return <Zap className="w-4 h-4" />
-  }
-
-  // Honest floor for "X+" claims: round DOWN to the nearest 10 so the "+" is always
-  // true (we always have at least this many), never rounding up past the real count.
-  const skillsFloor = Math.floor((Number(stats?.totalSkills) || 100) / 10) * 10
+  // ----- derived for render -----
+  const alts = results.slice(1, 3)
+  const found = !searching && !!agent
+  const noMatch = !searching && !agent && step === 2
+  const useCase = skillUseCase(agent)
+  const health = healthScore(agent)
+  const faqs = homeFaqs()
+  const featured = initialSkills.slice(0, 6)
 
   return (
-    <div className="min-h-screen bg-neptune">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-28 px-4">
-        {/* Background Effects */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#C6F24E]/5 rounded-full blur-3xl animate-pulse-slow"></div>
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#C6F24E]/5 rounded-full blur-3xl animate-pulse-slow" style={{ animationDelay: '2s' }}></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-[#C6F24E]/5 rounded-full blur-3xl"></div>
-        </div>
+    <div className="min-h-screen bg-[#0A0C0D] text-[#ECEFEA]">
+      {/* ------------------------------------------------------------------ */}
+      {/* HERO — describe / match / install                                    */}
+      {/* ------------------------------------------------------------------ */}
+      <div className="relative">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-50"
+          style={{
+            backgroundImage: 'linear-gradient(#262B2D 1px,transparent 1px),linear-gradient(90deg,#262B2D 1px,transparent 1px)',
+            backgroundSize: '48px 48px',
+            maskImage: 'radial-gradient(ellipse 70% 60% at 50% 0%,#000 30%,transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 0%,#000 30%,transparent 100%)',
+          }}
+        />
+        <header id="top" className="relative mx-auto flex max-w-[860px] flex-col items-center gap-5 px-5 pb-24 pt-11 sm:px-10">
+          <StepBar step={step} canGoInstall={!!agent} onGo={(n) => { setStep(n); setDone(false) }} />
 
-        <div className="container mx-auto relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="text-center max-w-5xl mx-auto"
-          >
-            {/* Trust Badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-[#101314] border border-[#262B2D] rounded-full px-4 py-1.5 mb-6"
-            >
-              <span className="w-2 h-2 rounded-full animate-pulse" style={{background:'#C6F24E', boxShadow:'0 0 0 4px rgba(198,242,78,0.18)'}}></span>
-              <span className="text-slate-200 font-mono text-xs tracking-wider uppercase">Live marketplace — {skillsFloor}+ AI skills indexed</span>
-            </motion.div>
-
-            {/* Product Hunt badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.25 }}
-              className="mb-6"
-            >
-              <a
-                href="https://www.producthunt.com/products/build-sell-ai-agents-get-paid?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-build-sell-ai-agents-get-paid"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block"
+          {/* ---------- STEP 1 ---------- */}
+          {step === 1 && (
+            <div className="anim-rise mt-7 flex w-full flex-col items-center gap-[22px]">
+              <h1 className="m-0 text-center font-bold tracking-[-0.04em] text-[clamp(44px,6.2vw,76px)] leading-[0.98] [text-wrap:balance]">
+                What should your AI agent do?
+              </h1>
+              <p className="m-0 max-w-[560px] text-center text-lg leading-[1.45] text-[#8B928D] [text-wrap:pretty]">
+                Describe the job. We match it against{' '}
+                <span className="text-[#ECEFEA]">{countLabel ? `${countLabel} scored open-source repos` : 'our scored open-source catalog'}</span>, wire the
+                best one into a blueprint, and install it in Claude, ChatGPT or Gemini. No code.
+              </p>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  submit()
+                }}
+                className="flex w-full flex-col items-stretch gap-2.5 rounded-2xl border border-[#323A3C] bg-[#101314] p-2 pl-2 shadow-[0_0_0_6px_rgba(198,242,78,0.04)] transition-[border-color,box-shadow] duration-150 focus-within:border-[#C6F24E] focus-within:shadow-[0_0_0_6px_rgba(198,242,78,0.12)] sm:flex-row sm:items-end sm:pl-5"
               >
-                <img
-                  src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1208788&theme=dark&t=1785496270323"
-                  alt="Build & Sell AI Agents, Get Paid - Build AI agents from 1,500+ Skills — or Sell Your Own | Product Hunt"
-                  width="250"
-                  height="54"
+                <textarea
+                  ref={textareaRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      submit()
+                    }
+                  }}
+                  rows={2}
+                  placeholder={placeholder || 'e.g. Send me a weekly report of my Meta and Google ad spend with what changed'}
+                  aria-label="Describe what your AI agent should do"
+                  className="flex-1 resize-none border-0 bg-transparent px-3 py-3 text-lg leading-[1.45] text-[#ECEFEA] outline-none placeholder:text-[#5A615D] sm:px-0"
                 />
-              </a>
-            </motion.div>
-
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold text-white mb-4 leading-[0.92] tracking-tight">
-              <span className="wm">workflow<span className="s" style={{ color: '#C6F24E' }}>stacks</span></span>
-            </h1>
-            <p className="text-2xl md:text-3xl font-semibold text-white mb-6 tracking-tight">
-              Stack the skills.{' '}<span style={{ color: '#C6F24E' }}>Ship the agent.</span>
-            </p>
-            <p className="text-lg md:text-xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
-              <strong className="text-white">For non-technical founders and agencies.</strong> Install a working AI agent in 3 clicks — no code, no API keys. Founders get pre-built playbooks for paid ads, SEO, outreach, and ecommerce ops. Agencies get the full catalog to build and resell at scale.
-            </p>
-
-            {/* Goal Input — the new front door. User types their goal, we recommend the exact stack. */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                const fd = new FormData(e.currentTarget)
-                const g = (fd.get('goal') || '').toString().trim()
-                if (g) window.location.href = `/builder?goal=${encodeURIComponent(g)}`
-              }}
-              className="max-w-2xl mx-auto mb-8"
-            >
-              <div className="bg-[#101314]/80 backdrop-blur-sm border border-[#262B2D] rounded-xl p-2 flex flex-col sm:flex-row items-stretch gap-2 shadow-2xl shadow-black/40">
-                <input
-                  name="goal"
-                  type="text"
-                  placeholder="What do you want to build? e.g., a social media manager that posts daily…"
-                  className="flex-1 bg-transparent text-white placeholder:text-slate-500 outline-none px-4 py-3 text-base"
-                  aria-label="Your goal"
-                />
-                <Button
+                <button
                   type="submit"
-                  size="lg"
-                  className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] px-6 text-base shadow-lg shadow-lime-500/20 rounded-lg font-semibold whitespace-nowrap"
+                  className="whitespace-nowrap rounded-[10px] border-0 bg-[#C6F24E] px-5 py-3.5 text-[15px] font-bold text-[#0A0C0D] transition-[transform,background] duration-150 hover:bg-[#A6D62E] active:scale-[.97]"
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Recommend my stack →
-                </Button>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-3 text-xs">
-                <span className="text-slate-500">Try:</span>
-                {[
-                  'a chatbot for my docs',
-                  'transcribe meetings and summarize',
-                  'social media auto-poster',
-                  'a research agent for market analysis',
-                ].map(s => (
-                  <a
+                  Find my agent →
+                </button>
+              </form>
+              <div className="t-mono flex flex-wrap justify-center gap-2 text-[13px]">
+                {SUGGESTIONS.map((s) => (
+                  <button
                     key={s}
-                    href={`/builder?goal=${encodeURIComponent(s)}`}
-                    className="px-2 py-0.5 bg-[#101314] hover:bg-[#1a1d1f] border border-[#262B2D] rounded text-slate-300 hover:text-white transition"
+                    type="button"
+                    onClick={() => {
+                      setQuery(s)
+                      submit(s)
+                    }}
+                    className="rounded-full border border-[#323A3C] bg-transparent px-3 py-[7px] text-[#8B928D] transition-colors hover:border-[#C6F24E] hover:text-[#ECEFEA]"
                   >
                     {s}
-                  </a>
+                  </button>
                 ))}
               </div>
-            </form>
-
-            {/* Secondary CTAs — two tracks: Founders (speed to revenue) and Agencies (scale) */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5 mb-12 text-sm">
-              <div className="flex items-center gap-2">
-                <span className="text-slate-600 font-mono text-[10px] tracking-wider uppercase">Founders</span>
-                <Link href="/playbooks" className="text-slate-400 hover:text-white underline underline-offset-4">
-                  Browse Playbooks
-                </Link>
-              </div>
-              <span className="text-slate-700 hidden sm:inline">·</span>
-              <div className="flex items-center gap-2">
-                <span className="text-slate-600 font-mono text-[10px] tracking-wider uppercase">Agencies</span>
-                <Link href="/skills" className="text-slate-400 hover:text-white underline underline-offset-4">
-                  View Skill Catalog
-                </Link>
-              </div>
-              <span className="text-slate-700 hidden sm:inline">·</span>
-              <Link href="/builder" className="text-slate-500 hover:text-white underline underline-offset-4">
-                Or build manually
-              </Link>
             </div>
+          )}
 
-            <p className="text-slate-400 text-sm md:text-base max-w-2xl mx-auto mb-12">
-              Everything's <strong className="text-[#C6F24E]">100% free</strong> — real, trending open-source tools, AI-packaged into ready-to-use skills, playbooks, and agents.
-              Others charge $5–49 per config. Don't <em>buy</em> a static setup — <strong className="text-white">build exactly the agent you need</strong>, in one click.
-            </p>
-
-            {/* Trust Stats */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-wrap justify-center gap-8 md:gap-12"
-            >
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-rose-400">8/10</div>
-                <div className="text-sm text-slate-400 mt-1">avg health score</div>
+          {/* ---------- STEP 2 ---------- */}
+          {step === 2 && (
+            <div className="anim-rise mt-6 flex w-full flex-col gap-5">
+              <div className="flex flex-wrap items-baseline gap-3 text-[17px] leading-[1.45]">
+                <Mono className="whitespace-nowrap text-xs text-[#5A615D]">YOU ASKED</Mono>
+                <span className="font-medium">“{query}”</span>
+                <button type="button" onClick={editQuery} className="ml-auto whitespace-nowrap border-0 bg-transparent text-xs text-[#5A615D] underline hover:text-[#ECEFEA]">
+                  edit
+                </button>
               </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-white">{skillsFloor}+</div>
-                <div className="text-[#8B928D] font-mono text-xs tracking-wider uppercase mt-1">real AI skills indexed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-[#C6F24E]">Live</div>
-                <div className="text-[#8B928D] font-mono text-xs tracking-wider uppercase mt-1">GitHub stars &amp; forks</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-[#C6F24E]">Daily</div>
-                <div className="text-[#8B928D] font-mono text-xs tracking-wider uppercase mt-1">refreshed from GitHub</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-[#C6F24E]">Free</div>
-                <div className="text-[#8B928D] font-mono text-xs tracking-wider uppercase mt-1">no paywall, ever</div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
 
-      {/* Try it now — surface the real, testable tools + templates up front */}
-      <section className="py-20 px-4 border-t border-[#262B2D]">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-10">
-            <p className="eyebrow mb-4 justify-center">// TRY IT NOW</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              Working tools you can <span className="text-gradient-neptune">grab and run today</span>
-            </h2>
-            <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Real automations — not prompts. Download a free template, or buy a done-in-minutes premium tool. Set it up yourself or let us do it.
-            </p>
-          </div>
-
-          {/* Premium tools */}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-[#C6F24E]">Premium tools · buy once</h3>
-            <Link href="/tools" className="text-sm text-slate-400 hover:text-white">All tools →</Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-            {[
-              { title: 'Lead Finder', price: '$39', desc: 'City + business type → a spreadsheet of real leads.', href: '/bundles/lead-finder' },
-              { title: 'Competitor Watch', price: '$29', desc: 'Emailed the moment a rival changes price or pitch.', href: '/bundles/competitor-watch' },
-              { title: 'Rank Tracker', price: '$29', desc: 'A weekly email of where you rank on Google.', href: '/bundles/rank-tracker' },
-              { title: 'Review Watchdog', price: '$29', desc: 'Catch every bad review the day it lands.', href: '/bundles/review-watchdog' },
-            ].map((t) => (
-              <Link key={t.href} href={t.href}>
-                <Card className="bg-[#101314] border border-[#262B2D] hover:border-[#C6F24E]/40 transition-all h-full">
-                  <CardContent className="py-5">
-                    <div className="flex items-baseline justify-between mb-1.5">
-                      <h4 className="text-white font-bold">{t.title}</h4>
-                      <span className="text-[#C6F24E] font-extrabold text-sm">{t.price}</span>
-                    </div>
-                    <p className="text-slate-400 text-sm leading-relaxed">{t.desc}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-
-          {/* Free templates */}
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-teal-300">Free templates · 11 and counting</h3>
-            <Link href="/templates" className="text-sm text-slate-400 hover:text-white">All templates →</Link>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              { title: 'AI Product Descriptions', persona: '🛍️ Ecommerce', href: '/templates/ai-product-descriptions' },
-              { title: 'Cold Email Personalizer', persona: '📣 Sales', href: '/templates/cold-email-personalizer' },
-              { title: 'Inbox Reply Triage', persona: '🚀 Founder', href: '/templates/inbox-reply-triage' },
-              { title: 'Weekly Client Report', persona: '📈 Agency', href: '/templates/weekly-client-report' },
-              { title: 'ICP Fit Checker', persona: '📣 Sales', href: '/templates/icp-fit-checker' },
-              { title: 'Meeting Summary Email', persona: '🚀 Founder', href: '/templates/meeting-summary-email' },
-            ].map((t) => (
-              <Link key={t.href} href={t.href}>
-                <Card className="bg-[#101314] border border-[#262B2D] hover:border-teal-500/40 transition-all h-full">
-                  <CardContent className="py-4 flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] text-slate-500 mb-0.5">{t.persona}</p>
-                      <h4 className="text-white font-semibold text-sm">{t.title}</h4>
-                    </div>
-                    <Download className="w-4 h-4 text-teal-400/70 shrink-0" />
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <Link href="/tools">
-              <Button size="lg" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold">
-                Browse all tools &amp; templates <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* The wedge — answer "isn't this just GitHub with extra steps?" out loud */}
-      <section className="py-20 px-4 border-t border-[#262B2D]">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <p className="eyebrow mb-4 justify-center">// THE WEDGE</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              "Isn't this just GitHub with <span className="text-gradient-neptune">extra steps?</span>"
-            </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              The opposite — we <strong className="text-white">remove</strong> the steps. The tools are free and open-source on GitHub. The hours of digging, judging, and prompt-wiring are what we delete.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { icon: Star, t: `We read & score ${skillsFloor}+ tools`, d: 'Only trending, high-star tools — across ads, analytics, research, SEO, outreach, and ecommerce — that clear an 8/10 quality gate, with live GitHub stats. You skip hours of wading through dead, half-abandoned projects.' },
-              { icon: Code2, t: 'Every tool gets a usage guide', d: 'An AI-written install command, quick-start steps, and the one real gotcha — so you\'re productive in minutes, not after reading a README.' },
-              { icon: Zap, t: 'One click = a working agent', d: 'The Builder merges the skills you pick into a single paste-ready blueprint for Claude, ChatGPT, or Gemini. That\'s the thing GitHub can\'t do for you.' },
-            ].map((c, i) => {
-              const Icon = c.icon
-              return (
-                <div key={i} className="bg-[#101314] border border-[#262B2D] rounded-2xl p-6">
-                  <div className="w-11 h-11 rounded-xl bg-[#0A0C0D] border border-[#C6F24E]/30 flex items-center justify-center mb-4">
-                    <Icon className="w-5 h-5 text-[#C6F24E]" />
-                  </div>
-                  <h3 className="text-white font-semibold text-lg mb-2">{c.t}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{c.d}</p>
-                </div>
-              )
-            })}
-          </div>
-          <div className="text-center mt-8">
-            <Link href="/builder">
-              <Button size="lg" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20">
-                <Zap className="w-4 h-4 mr-2" />Build an agent from real tools — free
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 3-Step How It Works */}
-      <section className="py-20 px-4 border-t border-[#262B2D]">
-        <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="text-center mb-14"
-          >
-            <motion.p variants={fadeInUp} className="eyebrow mb-4 justify-center">// HOW IT WORKS</motion.p>
-            <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
-              From Idea to AI Agent in <span className="text-gradient-neptune">3 Simple Steps</span>
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-slate-400 text-lg max-w-2xl mx-auto">
-              No coding, no setup, no API keys. Just pick, combine, and paste.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              { step: '01', title: 'Pick Your Outcome', desc: 'Choose a playbook, persona, or browse skills by what you want to achieve — "rank in AI search", "automate reviews", etc.', icon: Target, color: 'teal' },
-              { step: '02', title: 'Combine into an Agent', desc: 'Our Agent Builder merges your selected skills into one powerful prompt blueprint. Customize the goal in plain English.', icon: Layers, color: 'cyan' },
-              { step: '03', title: 'Paste & Deploy', desc: 'Copy your agent blueprint and paste it into ChatGPT, Claude, or Gemini. Your custom AI agent is live instantly.', icon: Bot, color: 'emerald' },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
-              >
-                <Card className="bg-[#101314] border border-[#262B2D] hover:border-[#C6F24E]/30 transition-all duration-300 h-full group">
-                  <CardHeader>
-                    <div className="flex items-center gap-4 mb-3">
-                      <div className={`w-12 h-12 rounded-xl bg-${item.color}-500/10 border border-${item.color}-500/20 flex items-center justify-center group-hover:bg-${item.color}-500/20 transition-colors`}>
-                        <item.icon className={`w-6 h-6 text-${item.color}-400`} />
+              {searching && (
+                <div className="t-mono flex flex-col gap-2.5 py-1 text-[13px]" aria-live="polite">
+                  {PHASES.map((text, i) => {
+                    const cls = i < phase ? 'text-[#5A615D]' : i === phase ? 'text-[#ECEFEA]' : 'text-[#323A3C]'
+                    const dot = i < phase ? 'bg-[#5A615D]' : i === phase ? 'bg-[#C6F24E] anim-blink' : 'bg-[#323A3C]'
+                    return (
+                      <div key={text} className={`flex items-center gap-2.5 ${cls}`}>
+                        <span className={`h-2 w-2 rounded-full ${dot}`} />
+                        {text}
                       </div>
-                      <span className="text-5xl font-black text-slate-800">{item.step}</span>
+                    )
+                  })}
+                </div>
+              )}
+
+              {noMatch && (
+                <div className="flex flex-col items-start gap-3 rounded-[14px] border border-dashed border-[#323A3C] p-6 sm:p-8">
+                  <Mono className="text-[13px] text-[#8B928D]">Nothing in the catalog matches that description closely enough yet.</Mono>
+                  <p className="m-0 leading-normal text-[#8B928D]">
+                    Three options: let the Builder recommend a multi-skill stack for this goal, have us build it for you from proven skills (from $500, live in 7 days), or
+                    browse the closest categories in the marketplace.
+                  </p>
+                  <div className="flex flex-wrap gap-2.5">
+                    <Link href={`/builder?goal=${encodeURIComponent(query)}`} className="rounded-lg bg-[#C6F24E] px-4 py-2.5 text-sm font-bold text-[#0A0C0D] hover:bg-[#A6D62E]">
+                      Recommend a stack
+                    </Link>
+                    <Link href="/build-for-me" className="rounded-lg border border-[#323A3C] px-4 py-2.5 text-sm font-semibold hover:border-[#C6F24E]">
+                      Get it built
+                    </Link>
+                    <Link href="/skills" className="rounded-lg border border-[#323A3C] px-4 py-2.5 text-sm font-semibold hover:border-[#C6F24E]">
+                      Browse marketplace
+                    </Link>
+                    <button type="button" onClick={reset} className="border-0 bg-transparent text-[13px] text-[#5A615D] underline hover:text-[#ECEFEA]">
+                      Try another description
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {found && (
+                <div className="flex flex-col gap-3.5">
+                  <Mono className="text-[13px] text-[#8B928D]">
+                    Best match · {matchTokens.length ? `matched "${matchTokens.slice(0, 4).join('", "')}"` : 'closest by popularity and health'}
+                  </Mono>
+
+                  <article className="flex flex-col gap-5 rounded-2xl border border-[#C6F24E] bg-[#101314] p-5 shadow-[0_0_0_1px_rgba(198,242,78,0.15),0_24px_60px_-30px_rgba(198,242,78,0.25)] sm:p-7">
+                    <div className="t-mono flex flex-wrap items-center justify-between gap-2.5 text-xs text-[#8B928D]">
+                      <span className="flex gap-1.5">
+                        <span className="rounded bg-[#C6F24E] px-2 py-[3px] text-[#0A0C0D]">{agent.category || 'skill'}</span>
+                        {agent.language && <CategoryChip>{agent.language}</CategoryChip>}
+                      </span>
+                      <span className="whitespace-nowrap">
+                        {skillCreator(agent) ? `by ${skillCreator(agent)}` : 'open-source'}
+                        {health !== null && (
+                          <>
+                            {' · '}
+                            <span className="text-[#C6F24E]">● {health}/10</span>
+                          </>
+                        )}
+                      </span>
                     </div>
-                    <CardTitle className="text-white text-xl">{item.title}</CardTitle>
-                    <CardDescription className="text-slate-400 text-base leading-relaxed">
-                      {item.desc}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* Who It's For — Shopper-Ready CTA Cards */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto max-w-6xl">
-          <motion.div
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="text-center mb-14"
-          >
-            <motion.p variants={fadeInUp} className="eyebrow mb-4 justify-center">// BUILT FOR</motion.p>
-            <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Built for <span className="text-gradient-neptune">Your Role</span>
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-slate-400 text-lg">
-              Pre-configured AI agent bundles for every team
-            </motion.p>
-          </motion.div>
+                    <div className="flex flex-col gap-2">
+                      <h2 className="m-0 text-[26px] font-bold tracking-[-0.03em] sm:text-[30px]">{skillTitle(agent)}</h2>
+                      <p className="m-0 text-base leading-normal text-[#8B928D]">{skillDesc(agent)}</p>
+                    </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                emoji: '🚀', title: 'Founders', subtitle: 'Launch & Validate Faster',
-                desc: 'Stop duct-taping prompts. Build the exact AI agent that validates your offer and gets your first users — free, no code.',
-                cta: 'See Founder Agents', href: '/personas', gradient: 'from-teal-500/20 to-cyan-500/20', border: 'border-teal-500/30', hoverBorder: 'hover:border-teal-400',
-                benefits: ['Idea validation + market research', 'Auto-generate landing pages', 'AI-powered outreach + ads']
-              },
-              {
-                emoji: '📈', title: 'Agencies', subtitle: 'Scale Client Results 10x',
-                desc: 'Spin up client-ready agents for Meta + Google ads automation, performance reporting, SEO/AEO/GEO, and weekly client dashboards — without hiring. One blueprint, paste into any model, bill the outcome.',
-                cta: 'See Agency Agents', href: '/personas', gradient: 'from-cyan-500/20 to-blue-500/20', border: 'border-cyan-500/30', hoverBorder: 'hover:border-cyan-400',
-                benefits: ['Meta + Google ads automation', 'Performance dashboards + attribution', 'AI Overview + GEO content']
-              },
-              {
-                emoji: '🛍️', title: 'Ecommerce', subtitle: 'Automate Store Operations',
-                desc: 'Put store ops on autopilot — reviews, product copy, inventory — with agents built from proven open-source tools, not random prompts.',
-                cta: 'See Ecommerce Agents', href: '/personas', gradient: 'from-emerald-500/20 to-teal-500/20', border: 'border-emerald-500/30', hoverBorder: 'hover:border-emerald-400',
-                benefits: ['Auto-respond to reviews', 'Smart inventory sync', 'AI product descriptions']
-              },
-            ].map((card, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.12 }}
-              >
-                <Link href={card.href}>
-                  <Card className="bg-[#101314] border border-[#262B2D] hover:border-[#C6F24E]/40 transition-all duration-300 cursor-pointer group h-full">
-                    <CardHeader>
-                      <div className="text-4xl mb-2">{card.emoji}</div>
-                      <CardTitle className="text-white text-2xl">{card.title}</CardTitle>
-                      <p className="text-[#C6F24E] text-sm font-medium">{card.subtitle}</p>
-                      <CardDescription className="text-slate-300 text-base mt-2">
-                        {card.desc}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <ul className="space-y-2">
-                        {card.benefits.map((b, j) => (
-                          <li key={j} className="flex items-center gap-2 text-sm text-slate-300">
-                            <Check className="w-4 h-4 text-[#C6F24E] flex-shrink-0" />
-                            {b}
-                          </li>
+                    <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-[#262B2D] bg-[#262B2D] sm:grid-cols-4">
+                      <StatCell value={`★ ${fmt(agent.github_stars)}`} label="GitHub stars" />
+                      <StatCell value={`⑂ ${fmt(agent.github_forks)}`} label="forks" />
+                      <StatCell value={health !== null ? `${health}/10` : '—'} label="health score" />
+                      <StatCell value={agent.is_premium && agent.price ? `$${agent.price}` : 'Free'} label={agent.is_premium && agent.price ? 'one-time' : 'open-source'} />
+                    </div>
+
+                    {useCase && (
+                      <div className="flex flex-col gap-1.5">
+                        <Mono className="text-[11px] tracking-wider text-[#5A615D]">EXAMPLE USE CASE</Mono>
+                        <div className="t-mono flex min-w-0 items-center gap-2.5 rounded-lg border border-[#262B2D] border-l-[3px] border-l-[#C6F24E] bg-[#0A0C0D] px-3.5 py-2.5 text-[12.5px] leading-normal text-[#ECEFEA]">
+                          <span className="min-w-0 [overflow-wrap:anywhere]">{useCase}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="t-mono flex flex-wrap items-center gap-1.5 text-xs text-[#5A615D]">
+                      {Array.isArray(agent.github_topics) && agent.github_topics.length > 0 && (
+                        <>
+                          <span>Topics:</span>
+                          {agent.github_topics.slice(0, 4).map((t) => (
+                            <span key={t} className="rounded border border-[#262B2D] bg-[#0A0C0D] px-2 py-[3px]">
+                              {t}
+                            </span>
+                          ))}
+                        </>
+                      )}
+                      <span className="flex-1" />
+                      <span>
+                        Works with
+                        {TARGETS.map((t) => (
+                          <span key={t.name} className="ml-1 rounded-[3px] border border-[#323A3C] px-1.5 py-0.5">
+                            {t.name}
+                          </span>
                         ))}
-                      </ul>
-                      <Button className="w-full bg-white/5 hover:bg-white/10 text-white border border-[#323A3C] group-hover:border-[#C6F24E]/50 mt-4">
-                        {card.cta}
-                        <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+                      </span>
+                    </div>
 
-      {/* New This Week strip */}
-      {initialNewSkills.length > 0 && (
-        <section className="py-16 px-4 border-t border-[#262B2D]">
-          <div className="container mx-auto max-w-6xl">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold text-white">New this week</h2>
-                <span className="flex items-center gap-1.5 text-xs text-slate-400">
-                  <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-                  Updated daily from GitHub
+                    <div className="flex flex-col gap-2.5 pt-1.5 sm:flex-row">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setStep(3)
+                          setDone(false)
+                        }}
+                        className="flex-1 rounded-[10px] border-0 bg-[#C6F24E] p-4 text-base font-bold text-[#0A0C0D] hover:bg-[#A6D62E] active:scale-[.98]"
+                      >
+                        Install this agent →
+                      </button>
+                      <Link
+                        href={`/skills/${skillKey(agent)}`}
+                        className="whitespace-nowrap rounded-[10px] border border-[#323A3C] px-5 py-4 text-center text-[15px] font-semibold hover:border-[#C6F24E]"
+                      >
+                        Full report ↗
+                      </Link>
+                    </div>
+                  </article>
+
+                  {alts.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <Mono className="text-xs text-[#5A615D]">ALSO CLOSE</Mono>
+                      <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                        {alts.map((a) => (
+                          <button
+                            key={skillKey(a)}
+                            type="button"
+                            onClick={() => chooseAgent(a)}
+                            className="flex flex-col items-start gap-1.5 rounded-xl border border-[#262B2D] bg-[#101314] px-[18px] py-4 text-left text-[#ECEFEA] hover:border-[#C6F24E]"
+                          >
+                            <span className="text-base font-bold">{skillTitle(a)}</span>
+                            <Mono className="text-xs text-[#5A615D]">
+                              {a.category || 'skill'} · ★ {fmt(a.github_stars)}
+                              {healthScore(a) !== null ? ` · ● ${healthScore(a)}` : ''}
+                            </Mono>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <button type="button" onClick={reset} className="self-center border-0 bg-transparent text-[13px] text-[#5A615D] underline hover:text-[#ECEFEA]">
+                    Describe something else
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ---------- STEP 3 ---------- */}
+          {step === 3 && agent && (
+            <div className="anim-rise mt-6 flex w-full flex-col gap-[22px]">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col gap-1">
+                  <Mono className="text-xs text-[#C6F24E]">INSTALLING</Mono>
+                  <h2 className="m-0 text-[22px] font-bold tracking-[-0.03em] sm:text-[26px]">{skillTitle(agent)}</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep(2)
+                    setDone(false)
+                  }}
+                  className="whitespace-nowrap rounded-md border border-[#323A3C] bg-transparent px-3 py-2 text-[13px] text-[#8B928D] hover:border-[#C6F24E] hover:text-[#ECEFEA]"
+                >
+                  ← Change agent
+                </button>
+              </div>
+
+              <div className="t-mono flex flex-wrap gap-5 text-xs text-[#8B928D]">
+                <span className="whitespace-nowrap">
+                  <span className="text-[#C6F24E]">✓</span> One paste, no API keys
+                </span>
+                <span className="whitespace-nowrap">
+                  <span className="text-[#C6F24E]">✓</span> Compiled from the source repo
+                </span>
+                <span className="whitespace-nowrap">
+                  <span className="text-[#C6F24E]">✓</span> Yours to edit and keep
                 </span>
               </div>
-              <Link href="/skills" className="text-sm text-[#C6F24E] hover:text-[#A6D62E] transition-colors whitespace-nowrap">
-                Browse all {stats?.totalSkills || skillsFloor}+ skills →
-              </Link>
-            </div>
-            <div className="flex gap-4 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-slate-700">
-              {initialNewSkills.slice(0, 8).map((skill) => (
-                <Link key={skill.id} href={`/skills/${skill.slug || skill.id}`} className="flex-shrink-0 w-64 bg-[#101314] border border-[#262B2D] rounded-xl p-4 hover:border-[#C6F24E]/40 transition-all duration-200 group">
-                  <div className="flex items-center justify-between mb-2">
-                    <Badge className={`${getCategoryColor(skill.category)} border text-xs`}>
-                      {skill.category}
-                    </Badge>
-                    {skill.github_stars > 0 && (
-                      <span className="flex items-center gap-1 text-xs text-amber-400">
-                        <Star className="w-3 h-3 fill-amber-400" />
-                        {skill.github_stars.toLocaleString()}
-                      </span>
-                    )}
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="flex flex-col gap-3 rounded-[14px] border border-[#262B2D] bg-[#101314] p-5">
+                  <Mono className="text-xs text-[#5A615D]">RUN IN</Mono>
+                  <div className="flex flex-col gap-2">
+                    {TARGETS.map((t) => {
+                      const on = t.name === target
+                      return (
+                        <button
+                          key={t.name}
+                          type="button"
+                          onClick={() => {
+                            setTarget(t.name)
+                            setDone(false)
+                          }}
+                          className={`flex items-center justify-between rounded-lg border px-3.5 py-3 font-semibold ${
+                            on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-[#ECEFEA] hover:border-[#C6F24E]'
+                          }`}
+                        >
+                          <span className="flex items-center gap-2.5">
+                            <span className="h-2.5 w-2.5 rounded-sm" style={{ background: t.dot }} />
+                            {t.name}
+                          </span>
+                          <Mono className="text-[11px] opacity-70">{t.hint}</Mono>
+                        </button>
+                      )
+                    })}
                   </div>
-                  <p className="text-white text-sm font-semibold leading-snug mb-3 line-clamp-2 group-hover:text-[#C6F24E] transition-colors">
-                    {skill.title_human || skill.name}
+                </div>
+
+                <div className="flex flex-col gap-4">
+                  <div className="flex flex-col gap-3 rounded-[14px] border border-[#262B2D] bg-[#101314] p-5">
+                    <Mono className="text-xs text-[#5A615D]">DELIVER AS</Mono>
+                    <div className="flex gap-1.5">
+                      {[
+                        ['Copy', 'Copy'],
+                        ['Download', 'Download .md'],
+                        ['Open', `Open in ${target}`],
+                      ].map(([key, label]) => {
+                        const on = key === delivery
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => {
+                              setDelivery(key)
+                              setDone(false)
+                            }}
+                            className={`flex-1 whitespace-nowrap rounded-lg border px-1.5 py-2.5 text-[13px] font-semibold ${
+                              on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-[#8B928D] hover:border-[#C6F24E]'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2.5 rounded-[14px] border border-[#262B2D] bg-[#101314] p-5">
+                    <Mono className="text-xs text-[#5A615D]">INCLUDE</Mono>
+                    <div className="flex flex-wrap gap-1.5">
+                      {OPTION_DEFS.map(([k, label]) => {
+                        const on = !!opts[k]
+                        return (
+                          <button
+                            key={k}
+                            type="button"
+                            aria-pressed={on}
+                            onClick={() => {
+                              setOpts((o) => ({ ...o, [k]: !o[k] }))
+                              setDone(false)
+                            }}
+                            className={`whitespace-nowrap rounded-full border px-3 py-[7px] text-[13px] font-semibold ${
+                              on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-[#8B928D] hover:border-[#C6F24E]'
+                            }`}
+                          >
+                            {label}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setPreview((p) => !p)}
+                  className="t-mono flex items-center gap-2 self-start border-0 bg-transparent p-0 text-xs text-[#5A615D] hover:text-[#ECEFEA]"
+                >
+                  <span>{preview ? '▾' : '▸'}</span>
+                  BLUEPRINT · FORMATTED FOR {target.toUpperCase()} · {promptLoading && !blueprint ? 'COMPILING…' : `${blueprintLines} LINES`}
+                </button>
+                {preview && (
+                  <pre className="t-mono m-0 max-h-[220px] overflow-auto whitespace-pre-wrap rounded-xl border border-[#262B2D] bg-[#101314] p-[18px] text-[12.5px] leading-[1.55] text-[#8B928D]">
+                    {blueprint || 'Compiling the blueprint from the source repository…'}
+                  </pre>
+                )}
+              </div>
+
+              {!done ? (
+                <button
+                  type="button"
+                  onClick={doInstall}
+                  disabled={!blueprint}
+                  className="rounded-[10px] border-0 bg-[#C6F24E] p-[18px] text-[17px] font-bold text-[#0A0C0D] hover:bg-[#A6D62E] disabled:cursor-wait disabled:opacity-60"
+                >
+                  {blueprint ? installLabel : 'Compiling blueprint…'}
+                </button>
+              ) : (
+                <div className="flex flex-col gap-3.5 rounded-[14px] border border-[#C6F24E] bg-[#101314] p-6">
+                  <Mono className="text-[13px] text-[#C6F24E]">✓ {doneMsg}</Mono>
+                  <p className="m-0 text-base leading-normal text-[#8B928D]">
+                    Paste it as a system prompt or custom instruction in {target} and the agent is live. Want the full report on this repo, or the rest of the catalog?
                   </p>
-                  <span className="text-xs text-[#C6F24E]">View →</span>
-                </Link>
-              ))}
+                  <div className="flex flex-wrap gap-2.5">
+                    <a
+                      href={targetDef.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="whitespace-nowrap rounded-lg bg-[#ECEFEA] px-[18px] py-3 text-sm font-bold text-[#0A0C0D] hover:bg-[#C6F24E]"
+                    >
+                      Open {target} ↗
+                    </a>
+                    <Link href={`/skills/${agentKey}`} className="whitespace-nowrap rounded-lg border border-[#323A3C] px-[18px] py-3 text-sm font-semibold hover:border-[#C6F24E]">
+                      Full report
+                    </Link>
+                    <Link href="/skills" className="whitespace-nowrap rounded-lg border border-[#323A3C] px-[18px] py-3 text-sm font-semibold hover:border-[#C6F24E]">
+                      Explore the marketplace
+                    </Link>
+                    <a href="#how" className="whitespace-nowrap rounded-lg border border-[#323A3C] px-[18px] py-3 text-sm font-semibold hover:border-[#C6F24E]">
+                      See how it works ↓
+                    </a>
+                  </div>
+                </div>
+              )}
             </div>
+          )}
+        </header>
+      </div>
+
+      <div id="more" className="border-t border-[#262B2D]" />
+
+      {/* ------------------------------------------------------------------ */}
+      {/* TRENDING                                                            */}
+      {/* ------------------------------------------------------------------ */}
+      {featured.length > 0 && (
+        <section id="agents" className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-10">
+          <div className="mb-7 flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="m-0 text-[28px] font-bold tracking-[-0.03em] sm:text-[32px]">Trending this week</h2>
+            <Link href="/skills" className="t-mono text-sm text-[#8B928D] hover:text-[#C6F24E]">
+              {countLabel ? `All ${countLabel} in the marketplace →` : 'Browse the marketplace →'}
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {featured.map((s) => {
+              const h = healthScore(s)
+              return (
+                <article
+                  key={skillKey(s)}
+                  className="flex min-w-0 flex-col gap-[18px] rounded-[14px] border border-[#262B2D] bg-[#101314] p-[26px] transition-[transform,border-color] duration-200 hover:-translate-y-[3px] hover:border-[#C6F24E]"
+                >
+                  <div className="t-mono flex items-center justify-between gap-2 text-xs text-[#8B928D]">
+                    <CategoryChip>{s.category || 'skill'}</CategoryChip>
+                    {h !== null && <span className="whitespace-nowrap text-[#C6F24E]">● {h}/10</span>}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <h3 className="m-0 text-[22px] font-bold tracking-[-0.02em] sm:text-2xl">
+                      <Link href={`/skills/${skillKey(s)}`} className="hover:text-[#C6F24E]">
+                        {skillTitle(s)}
+                      </Link>
+                    </h3>
+                    <p className="m-0 text-[15px] leading-normal text-[#8B928D] line-clamp-3">{skillDesc(s)}</p>
+                  </div>
+                  <div className="mt-auto flex items-center justify-between gap-2.5 border-t border-[#262B2D] pt-[18px]">
+                    <Mono className="min-w-0 truncate text-[13px] text-[#8B928D]">
+                      ★ {fmt(s.github_stars)}
+                      {s.github_forks > 0 ? ` · ⑂ ${fmt(s.github_forks)}` : ''}
+                      {s.installs > 0 ? ` · ${fmt(s.installs)} installs` : ''}
+                    </Mono>
+                    <button
+                      type="button"
+                      onClick={() => installFeatured(s)}
+                      className="whitespace-nowrap rounded-md border-0 bg-[#ECEFEA] px-4 py-2.5 text-sm font-bold text-[#0A0C0D] hover:bg-[#C6F24E]"
+                    >
+                      Install
+                    </button>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         </section>
       )}
 
-      {/* Honest, verifiable trust — no fake reviews */}
-      <section className="py-20 px-4 border-t border-[#262B2D]">
-        <div className="container mx-auto max-w-5xl text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Real tools. <span className="text-gradient-neptune">Real numbers.</span> No fluff.
-          </h2>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-12">
-            Every listing is a genuine, trending open-source project — with live GitHub stats, an AI-written usage guide, and a health score. We don't run fake reviews or inflated metrics.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[
-              { v: `${skillsFloor}+`, l: 'Real OSS tools indexed' },
-              { v: 'Live', l: 'GitHub stars & forks' },
-              { v: '≥8/10', l: 'Quality-gated listings' },
-              { v: '100%', l: 'Free — no paywall' },
-            ].map((s, i) => (
-              <div key={i} className="bg-[#101314] border border-[#262B2D] rounded-xl p-6">
-                <div className="text-3xl font-bold text-gradient-neptune mb-1">{s.v}</div>
-                <div className="text-slate-400 text-sm">{s.l}</div>
+      {/* ------------------------------------------------------------------ */}
+      {/* HOW IT WORKS (light band)                                           */}
+      {/* ------------------------------------------------------------------ */}
+      <section id="how" className="border-y border-[#262B2D] bg-[#F3F3EC] px-5 py-[72px] text-[#0A0C0D] sm:px-10">
+        <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-12 lg:grid-cols-[1fr_2fr]">
+          <div className="flex flex-col gap-4">
+            <Mono className="text-[13px] text-[#4E7A00]">HOW INSTALL WORKS</Mono>
+            <h2 className="m-0 text-[34px] font-bold leading-none tracking-[-0.04em] sm:text-[40px]">Under a minute from question to working agent.</h2>
+            <p className="m-0 text-[17px] leading-normal text-[#4B5468]">
+              No API keys, no servers, no code. An agent is a blueprint: the right open-source repo compiled into one instruction set your AI already understands.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="flex flex-col gap-3.5 rounded-[14px] border border-[#E3E6EC] bg-white p-5">
+              <div className="t-mono flex min-h-[96px] items-center gap-2 rounded-lg bg-[#0A0C0D] p-3 text-[11px] text-[#8B928D]">
+                <span className="flex-1 truncate">weekly client ad report</span>
+                <span className="rounded bg-[#C6F24E] px-2 py-1 font-sans font-bold text-[#0A0C0D]">Find →</span>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing Section — Monetization Ready */}
-      <section id="pricing" className="py-20 px-4">
-        <div className="container mx-auto max-w-5xl">
-          <motion.div
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true }}
-            variants={staggerContainer}
-            className="text-center mb-14"
-          >
-            <motion.p variants={fadeInUp} className="eyebrow mb-4 justify-center">// PRICING</motion.p>
-            <motion.h2 variants={fadeInUp} className="text-3xl md:text-4xl font-bold text-white mb-4">
-              <span className="text-[#C6F24E]">Catalog: free forever.</span> Or we build it for you.
-            </motion.h2>
-            <motion.p variants={fadeInUp} className="text-slate-400 text-lg max-w-2xl mx-auto">
-              <strong className="text-white">Using</strong> the catalog is $0 — forever, no paywall, all source visible. Want the outcome without the setup? We <strong className="text-white">build your agent for you</strong> — working, in your tools, within 7 days.
-            </motion.p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                name: 'Free', price: '$0', period: '/forever', desc: 'Everything you need to ship',
-                features: [`Browse ${skillsFloor}+ real skills — read the source`, 'Build & remix unlimited agents', 'Post problems, join the network', 'Sell your agents — keep 85%'],
-                cta: 'Get Started Free', primary: false, badge: null,
-              },
-              {
-                name: 'Done-For-You', price: 'From $500', period: '/agent', desc: 'We build it. You run it.',
-                features: ['Your exact workflow, built by us', 'Working in YOUR tools within 7 days', 'Built from proven open-source skills', '30 days of tweaks included', 'Pay once — you own everything'],
-                cta: 'Get my agent built', primary: true, badge: 'New', href: '/build-for-me',
-              },
-              {
-                name: 'Agencies & Teams', price: 'Custom', period: '', desc: 'Ongoing automation partner',
-                features: ['Multiple agents, one partner', 'White-label for your clients', 'Custom skill ingestion', 'Priority support'],
-                cta: 'Talk to us', primary: false, badge: null, href: '/build-for-me',
-              },
-            ].map((plan, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.12 }}
-              >
-                <Card className={`relative h-full ${plan.primary ? 'bg-[#0A0C0D] border border-[#C6F24E]/40 glow-teal' : 'bg-[#101314] border border-[#262B2D]'} backdrop-blur-xl`}>
-                  {plan.badge && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <Badge className="bg-[#C6F24E] text-[#0A0C0D] border-0 px-4 py-1 shadow-lg shadow-lime-500/20">
-                        {plan.badge}
-                      </Badge>
-                    </div>
-                  )}
-                  <CardHeader className="text-center pt-8">
-                    <CardTitle className="text-white text-lg">{plan.name}</CardTitle>
-                    <div className="mt-3">
-                      <span className="text-4xl font-extrabold text-white">{plan.price}</span>
-                      <span className="text-slate-400 text-sm">{plan.period}</span>
-                    </div>
-                    <CardDescription className="text-slate-400 mt-2">{plan.desc}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <ul className="space-y-3">
-                      {plan.features.map((f, j) => (
-                        <li key={j} className="flex items-center gap-2.5 text-sm text-slate-300">
-                          <Check className="w-4 h-4 text-[#C6F24E] flex-shrink-0" />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-                    <Link href={plan.href || '/builder'} className="block mt-6">
-                      <Button className={`w-full ${plan.primary ? 'bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20' : 'bg-white/5 hover:bg-white/10 text-white border border-[#323A3C]'}`} size="lg">
-                        {plan.cta}
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Browse Skills Section */}
-      <section className="py-20 px-4 border-t border-[#262B2D]">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Browse the <span className="text-gradient-neptune">Skill Library</span>
-            </h2>
-            <p className="text-slate-400 text-lg">Search by outcome, not category. What do you want your AI to do?</p>
-          </div>
-
-          {/* Search and Filter */}
-          <div className="bg-[#101314] border border-[#262B2D] rounded-2xl p-5 mb-8">
-            <div className="flex flex-col md:flex-row gap-4 mb-5">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                <Input
-                  placeholder="Search: 'automate reviews', 'rank in AI search', 'qualify leads'..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 bg-[#0A0C0D] border-[#262B2D] text-white placeholder:text-slate-500 focus:border-[#C6F24E]/50 focus:ring-[#C6F24E]/20"
-                />
+              <Mono className="text-xs text-[#5A615D]">01</Mono>
+              <h3 className="m-0 text-xl tracking-[-0.02em]">Describe the job</h3>
+              <p className="m-0 text-[15px] leading-normal text-[#4B5468]">
+                Plain English. We match it against {countLabel ? `${countLabel} repos` : 'the repos'} we&apos;ve already scored, every one live on GitHub.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3.5 rounded-[14px] border border-[#E3E6EC] bg-white p-5">
+              <div className="t-mono flex min-h-[96px] flex-col justify-center gap-1.5 rounded-lg border border-[#C6F24E] bg-[#0A0C0D] p-3 text-[11px] text-[#8B928D]">
+                <span className="font-sans text-[13px] font-bold text-[#ECEFEA]">Best match</span>
+                <span>★ stars · ⑂ forks · ● health · Free</span>
               </div>
-              {favs.length > 0 && (
-                <span className="text-xs text-[#C6F24E] bg-[#C6F24E]/10 border border-[#C6F24E]/30 rounded-full px-2 py-0.5 self-center">
-                  {favs.length} saved
+              <Mono className="text-xs text-[#5A615D]">02</Mono>
+              <h3 className="m-0 text-xl tracking-[-0.02em]">Review the match</h3>
+              <p className="m-0 text-[15px] leading-normal text-[#4B5468]">
+                Health score, live stars and forks, an example use case, the source repo. Swap to an alternative in one click.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3.5 rounded-[14px] border border-[#E3E6EC] bg-white p-5">
+              <div className="t-mono flex min-h-[96px] flex-col justify-center gap-[5px] rounded-lg bg-[#0A0C0D] p-3 text-[11px]">
+                <span className="flex justify-between rounded bg-[#ECEFEA] px-2 py-1 font-semibold text-[#0A0C0D]">
+                  <span>Claude</span>
+                  <span>✓</span>
                 </span>
-              )}
+                <span className="rounded border border-[#323A3C] px-2 py-1 text-[#8B928D]">ChatGPT</span>
+                <span className="rounded border border-[#323A3C] px-2 py-1 text-[#8B928D]">Gemini</span>
+              </div>
+              <Mono className="text-xs text-[#4E7A00]">03</Mono>
+              <h3 className="m-0 text-xl tracking-[-0.02em]">Install</h3>
+              <p className="m-0 text-[15px] leading-normal text-[#4B5468]">Pick Claude, ChatGPT or Gemini and how you want it delivered. Paste. Live in under a minute.</p>
             </div>
-            <Tabs value={category} onValueChange={setCategory} className="w-full max-w-full overflow-x-auto">
-              <TabsList className="bg-slate-800/50 border border-slate-700/50 flex-nowrap w-max max-w-none">
-                <TabsTrigger value="all" className="data-[state=active]:bg-[#C6F24E] data-[state=active]:text-[#0A0C0D]">All</TabsTrigger>
-                <TabsTrigger value="ai-agent" className="data-[state=active]:bg-[#C6F24E] data-[state=active]:text-[#0A0C0D]">AI Agents</TabsTrigger>
-                <TabsTrigger value="mcp-server" className="data-[state=active]:bg-[#C6F24E] data-[state=active]:text-[#0A0C0D]">MCP</TabsTrigger>
-                <TabsTrigger value="claude-skill" className="data-[state=active]:bg-[#C6F24E] data-[state=active]:text-[#0A0C0D]">Claude</TabsTrigger>
-                <TabsTrigger value="prompt" className="data-[state=active]:bg-[#C6F24E] data-[state=active]:text-[#0A0C0D]">Prompts</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
-
-          {/* Skills Grid */}
-          {loading ? (
-            <div className="text-center py-20">
-              <div className="inline-block w-14 h-14 border-4 border-[#C6F24E] border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-slate-400 mt-4">Loading skills...</p>
-            </div>
-          ) : skills.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-slate-400 text-xl mb-4">No skills match this filter yet — check back soon.</p>
-              <Link href="/skills">
-                <Button className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold">Browse all skills</Button>
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {skills.map((skill) => (
-                <div key={skill.id}>
-                  <Card className="bg-[#101314] border border-[#262B2D] hover:border-[#C6F24E]/40 transition-all duration-300 group h-full flex flex-col">
-                    <CardHeader className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
-                        <Badge className={`${getCategoryColor(skill.category)} border text-xs`}>
-                          <span className="flex items-center gap-1">
-                            {getCategoryIcon(skill.category)}
-                            {skill.category}
-                          </span>
-                        </Badge>
-                        <div className="flex items-center gap-1">
-                          {skill.is_premium && (
-                            <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 border-0 text-white">
-                              ${skill.price}
-                            </Badge>
-                          )}
-                          <button onClick={() => toggle(skill.id)} className={`ml-auto flex-shrink-0 ${favs.includes(skill.id) ? 'text-rose-400' : 'text-slate-600 hover:text-slate-400'}`}>
-                            ♥
-                          </button>
-                        </div>
-                      </div>
-                      <CardTitle className="text-white text-lg group-hover:text-[#C6F24E] transition-colors">{skill.title_human || skill.name}</CardTitle>
-                      <CardDescription className="text-slate-400 line-clamp-2">
-                        {skill.description_human || skill.description}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="pb-2">
-                      <div className="flex items-center gap-4 text-sm text-slate-400">
-                        {skill.github_stars > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                            {skill.github_stars.toLocaleString()}
-                          </span>
-                        )}
-                        {skill.github_forks > 0 && (
-                          <span className="flex items-center gap-1">
-                            <Github className="w-3.5 h-3.5" />
-                            {skill.github_forks.toLocaleString()} forks
-                          </span>
-                        )}
-                        {skill.language && (
-                          <span className="text-slate-500">{skill.language}</span>
-                        )}
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Link href={`/skills/${skill.slug || skill.id}`} className="w-full">
-                        <Button className="w-full bg-[#0A0C0D] hover:bg-[#C6F24E]/10 text-[#ECEFEA] hover:text-[#C6F24E] border border-[#262B2D] hover:border-[#C6F24E]/40 transition-all" variant="outline">
-                          View Details
-                          <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-0.5 transition-transform" />
-                        </Button>
-                      </Link>
-                    </CardFooter>
-                  </Card>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* The grid is a featured subset — the full catalog lives at /skills */}
-          {skills.length > 0 && (stats?.totalSkills || 0) > skills.length && (
-            <div className="text-center mt-10">
-              <Link href="/skills">
-                <Button size="lg" variant="outline" className="border-[#C6F24E]/40 text-[#C6F24E] hover:bg-[#C6F24E]/10">
-                  Browse all {stats.totalSkills} skills
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* FAQ Section — AEO Rich Snippets */}
-      <section className="py-20 px-4 border-t border-[#262B2D]">
-        <div className="container mx-auto max-w-4xl">
-          <div className="text-center mb-14">
-            <p className="eyebrow mb-4 justify-center">// QUESTIONS</p>
-            <h2 className="text-3xl md:text-4xl font-bold text-white">
-              Frequently Asked <span className="text-gradient-neptune">Questions</span>
-            </h2>
-          </div>
-          <div className="space-y-4">
-            {[
-              { q: 'Isn\'t this just GitHub with extra steps?', a: `The opposite — we remove the steps. We read ${skillsFloor}+ repos, score them at 8/10+, write each tool's usage guide (install command, quick-start, real gotcha), and let you merge the ones you pick into one paste-ready agent. You skip hours of evaluating repos and wiring prompts. The tools stay free and open-source; we delete the work around them.` },
-              { q: 'If it\'s free, what\'s the catch?', a: 'No catch. The catalog is free forever and every skill\'s source is readable line-by-line before you use it. We earn from group-buy savings on paid AI tools, done-for-you agent setups, and creator tools — never by locking the free catalog behind a paywall.' },
-              { q: 'Will it actually work in my AI tool?', a: 'Yes. The Builder outputs a system prompt / custom instruction that runs as-is in ChatGPT, Claude, or Gemini — paste it in and go. No API keys, no install, no code.' },
-              { q: 'Do I need to know how to code?', a: 'No. WorkflowStacks is built for non-technical founders and marketers. You browse by outcome, pick the skills you want, and the Agent Builder generates a ready-to-paste blueprint for you.' },
-              { q: 'How are skills chosen?', a: 'They\'re ingested from GitHub by trending and star count, then quality-gated — only listings that score 8/10 or higher are published. Every card shows live GitHub stars and forks, refreshed daily, so you judge real third-party signal, not invented benchmarks.' },
-              { q: 'What are Playbooks and Personas?', a: 'Playbooks are step-by-step guides that combine AI skills to solve one specific problem (like "Validate a New Offer in 48 Hours"). Personas are pre-configured AI agent roles for specific audiences (Founders, Agencies, Ecommerce). Both open in the Builder in one click.' },
-            ].map((faq, i) => (
-              <details key={i} className="group bg-[#101314] border border-[#262B2D] rounded-xl overflow-hidden">
-                <summary className="flex items-center justify-between p-5 cursor-pointer text-white font-semibold hover:bg-white/5 transition-colors">
-                  {faq.q}
-                  <ChevronRight className="w-5 h-5 text-slate-400 group-open:rotate-90 transition-transform" />
-                </summary>
-                <div className="px-5 pb-5 text-slate-300 leading-relaxed">
-                  {faq.a}
-                </div>
-              </details>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* Email Capture / Newsletter */}
-      <section id="newsletter" className="py-20 px-4 scroll-mt-20">
-        <div className="container mx-auto max-w-3xl">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <Card className="bg-[#101314] border border-[#C6F24E]/30 backdrop-blur-xl">
-              <CardContent className="py-10 px-8 text-center">
-                <p className="eyebrow mb-4 justify-center">// DAILY</p>
-                <div className="w-14 h-14 mx-auto mb-5 bg-[#C6F24E]/15 rounded-2xl flex items-center justify-center">
-                  <Mail className="w-7 h-7 text-[#C6F24E]" />
-                </div>
-                <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                  Get New Skills Every Week
-                </h3>
-                <p className="text-slate-300 mb-6 max-w-lg mx-auto">
-                  Get weekly curated AI skills, agent blueprints, and automation playbooks — straight to your inbox.
-                </p>
-                {emailSubmitted ? (
-                  <div className="flex items-center justify-center gap-2 text-[#C6F24E] font-semibold">
-                    <Check className="w-5 h-5" />
-                    You're in! Check your inbox for a welcome email.
-                  </div>
-                ) : (
-                  <form onSubmit={handleEmailSubmit} className="flex flex-col sm:flex-row items-center gap-3 max-w-md mx-auto">
-                    <Input
-                      type="email"
-                      placeholder="Enter your email..."
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="bg-[#0A0C0D] border-[#262B2D] text-white placeholder:text-slate-500 focus:border-[#C6F24E]/50"
-                    />
-                    <Button type="submit" className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold whitespace-nowrap px-6 shadow-lg shadow-lime-500/20">
-                      Subscribe Free
-                    </Button>
-                  </form>
-                )}
-                <p className="text-xs text-slate-500 mt-3">No spam, ever. Unsubscribe anytime.</p>
-              </CardContent>
-            </Card>
-          </motion.div>
+      {/* ------------------------------------------------------------------ */}
+      {/* DONE-FOR-YOU                                                        */}
+      {/* ------------------------------------------------------------------ */}
+      <section id="dfy" className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-10">
+        <div className="grid grid-cols-1 items-center gap-8 rounded-[18px] bg-[#C6F24E] p-7 text-[#0A0C0D] sm:p-11 lg:grid-cols-[3fr_2fr] lg:gap-12">
+          <div className="flex flex-col gap-4">
+            <Mono className="text-[13px] opacity-80">DONE-FOR-YOU · FROM $500</Mono>
+            <h2 className="m-0 text-[30px] font-bold leading-none tracking-[-0.04em] sm:text-[36px]">Want the outcome without the setup?</h2>
+            <p className="m-0 text-[17px] leading-normal opacity-90 [text-wrap:pretty]">
+              We build your exact workflow from proven skills, working in your tools within 7 days. 30 days of tweaks included. Pay once, own everything.
+            </p>
+          </div>
+          <div className="flex flex-col items-start gap-2.5 lg:justify-self-end">
+            <Link href="/build-for-me" className="rounded-lg bg-[#0A0C0D] px-[26px] py-4 text-base font-bold text-[#ECEFEA] hover:bg-[#ECEFEA] hover:text-[#0A0C0D]">
+              Get my agent built
+            </Link>
+            <Mono className="text-xs opacity-80">Agencies: white-label &amp; multi-agent plans available</Mono>
+          </div>
         </div>
       </section>
 
-      {/* Trust Badges */}
-      <section className="py-12 px-4 border-t border-[#262B2D]">
-        <div className="container mx-auto max-w-4xl">
-          <div className="flex flex-wrap items-center justify-center gap-8 text-[#5A615D]">
-            <div className="flex items-center gap-2 text-[#ECEFEA]">
-              <Github className="w-5 h-5" />
-              <span className="font-mono text-xs tracking-wider uppercase">100% open-source tools</span>
-            </div>
-            <div className="flex items-center gap-2 text-[#ECEFEA]">
-              <Star className="w-5 h-5" />
-              <span className="font-mono text-xs tracking-wider uppercase">Live GitHub stars & forks</span>
-            </div>
-            <div className="flex items-center gap-2 text-[#ECEFEA]">
-              <Check className="w-5 h-5" />
-              <span className="font-mono text-xs tracking-wider uppercase">Quality-gated (≥8/10)</span>
-            </div>
-            <div className="flex items-center gap-2 text-[#ECEFEA]">
-              <TrendingUp className="w-5 h-5" />
-              <span className="font-mono text-xs tracking-wider uppercase">Refreshed daily</span>
-            </div>
-            <div className="flex items-center gap-2 text-[#ECEFEA]">
-              <Check className="w-5 h-5" />
-              <span className="font-mono text-xs tracking-wider uppercase">No fake reviews or metrics</span>
-            </div>
+      {/* ------------------------------------------------------------------ */}
+      {/* FAQ                                                                 */}
+      {/* ------------------------------------------------------------------ */}
+      <section className="mx-auto grid max-w-[1200px] grid-cols-1 gap-8 border-t border-[#262B2D] px-5 py-[72px] sm:px-10 lg:grid-cols-[1fr_2fr] lg:gap-12">
+        <div className="flex flex-col gap-3">
+          <h2 className="m-0 text-[32px] font-bold leading-none tracking-[-0.04em]">Questions</h2>
+          <p className="m-0 text-sm leading-normal text-[#5A615D]">
+            Something else?{' '}
+            <Link href="/help" className="text-[#8B928D] underline hover:text-[#C6F24E]">
+              Ask us
+            </Link>
+            .
+          </p>
+        </div>
+        <div className="flex flex-col">
+          {faqs.map((f, i) => {
+            const open = faqOpen === i
+            return (
+              <div key={f.q} className="flex flex-col border-b border-[#262B2D]">
+                <button
+                  type="button"
+                  aria-expanded={open}
+                  onClick={() => setFaqOpen(open ? -1 : i)}
+                  className="flex items-center justify-between gap-4 border-0 bg-transparent py-[18px] text-left text-lg font-semibold text-[#ECEFEA] hover:text-[#C6F24E]"
+                >
+                  <span>{f.q}</span>
+                  <Mono className="shrink-0 text-lg text-[#5A615D]">{open ? '–' : '+'}</Mono>
+                </button>
+                {open && <p className="anim-rise m-0 mb-[18px] max-w-[640px] text-base leading-[1.55] text-[#8B928D]">{f.a}</p>}
+              </div>
+            )
+          })}
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* CREATORS                                                            */}
+      {/* ------------------------------------------------------------------ */}
+      <section id="creators" className="border-t border-[#262B2D] bg-gradient-to-b from-[#0A0C0D] to-[#07090E] px-5 py-14 sm:px-10">
+        <div className="mx-auto flex max-w-[1200px] flex-col gap-[18px] md:flex-row md:items-center md:justify-between">
+          <div className="flex max-w-[560px] flex-col gap-3">
+            <Mono className="text-xs text-[#5A615D]">FOR CREATORS &amp; MAINTAINERS</Mono>
+            <h2 className="m-0 text-[26px] font-bold tracking-[-0.03em]">Build or sell AI agents from open-source skills.</h2>
+            <p className="m-0 leading-normal text-[#8B928D]">
+              Creators keep 85%. Open-source maintainers: get listed and installed by founders and agencies.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2.5">
+            <Link href="/submit" className="rounded-md bg-[#ECEFEA] px-4 py-2.5 text-sm font-semibold text-[#0A0C0D] hover:bg-[#C6F24E]">
+              Submit a skill
+            </Link>
+            <Link href="/learn/creators" className="rounded-md border border-[#323A3C] px-4 py-2.5 text-sm font-semibold hover:border-[#C6F24E]">
+              Sell your agents
+            </Link>
           </div>
         </div>
       </section>
     </div>
   )
 }
-
-export default HomeClient

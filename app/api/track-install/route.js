@@ -23,6 +23,11 @@ const CHANNELS = new Set([
   'editor-antigravity',
   'editor-vs-code',
   'editor-windsurf',
+  // Homepage install step: open-in-tool for the non-Claude targets and the
+  // blueprint.md download (copy reuses 'copy-prompt', Claude reuses 'try-claude').
+  'open-chatgpt',
+  'open-gemini',
+  'download-md',
 ])
 
 // GET (admin-secret) → conversion stats: events by channel and top skills,
