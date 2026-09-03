@@ -7,7 +7,7 @@
 // Claude apps take the zip via Settings → Capabilities → Skills, and deep
 // links / the MCP connector use the prompt and markdown forms.
 
-import { loadSkill, compileSkillMd, buildSkillZip, starterPrompt, setupPrompt } from '@/lib/claude-skill'
+import { loadSkill, compileSkillMd, buildSkillZip, starterPrompt, setupPrompt, checkSkillSafety } from '@/lib/claude-skill'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,6 +15,19 @@ export async function GET(request, { params }) {
   const skill = await loadSkill(params.id)
   if (!skill) {
     return Response.json({ error: 'Skill not found' }, { status: 404 })
+  }
+
+  // Every compiler below fails safe on its own (never leaks flagged content),
+  // but a real 422 here — instead of a 200 whose body happens to be a refusal
+  // notice — is what lets a caller (the install UI, an MCP client) show a
+  // clear "this was withheld" state rather than silently pasting whatever
+  // text came back.
+  const safety = checkSkillSafety(skill)
+  if (safety.blocked) {
+    return Response.json(
+      { error: 'This listing did not pass automated content-safety review and cannot be installed.', reasons: safety.reasons },
+      { status: 422 }
+    )
   }
 
   const format = new URL(request.url).searchParams.get('format') || 'md'

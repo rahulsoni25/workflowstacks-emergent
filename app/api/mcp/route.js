@@ -10,7 +10,7 @@
 // ping, tools/list, tools/call. Each POST is independent (no sessions, no
 // SSE), which the spec explicitly allows for simple servers.
 
-import { loadSkill, searchSkills, compileSkillMd, skillSlug, SITE } from '@/lib/claude-skill'
+import { loadSkill, searchSkills, compileSkillMd, skillSlug, checkSkillSafety, SITE } from '@/lib/claude-skill'
 import { getAccessToken } from '@/lib/oauth-store'
 import { addToLibrary, removeFromLibrary, listLibrary } from '@/lib/library'
 
@@ -129,6 +129,9 @@ async function callTool(id, name, args = {}, libraryId = null) {
     }
     const skill = await loadSkill(String(args.skill || ''))
     if (!skill) return textResult(id, `No skill found for "${args.skill}". Use search_skills to find the right slug.`, true)
+    if (checkSkillSafety(skill).blocked) {
+      return textResult(id, `"${skill.title_human || skill.name}" did not pass WorkflowStacks' automated content-safety review, so it cannot be installed.`, true)
+    }
     await addToLibrary(libraryId, skill)
     return textResult(
       id,
@@ -158,6 +161,10 @@ async function callTool(id, name, args = {}, libraryId = null) {
   if (name === 'get_skill') {
     const skill = await loadSkill(String(args.skill || ''))
     if (!skill) return textResult(id, `No skill found for "${args.skill}". Use search_skills to find the right slug.`, true)
+    const safety = checkSkillSafety(skill)
+    if (safety.blocked) {
+      return textResult(id, `"${skill.title_human || skill.name}" did not pass WorkflowStacks' automated content-safety review, so it cannot be loaded.`, true)
+    }
     const { markdown } = compileSkillMd(skill)
     return textResult(id, markdown + installBlock(skill))
   }

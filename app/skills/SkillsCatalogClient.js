@@ -17,6 +17,7 @@ import {
   TYPE_CATEGORIES,
   FOR_CATEGORIES,
   categoryLabel,
+  isBlockedPrompt,
   fmt,
   skillTitle,
   skillDesc,
@@ -222,7 +223,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
     }
   }, [sel, selKey, prompts, origin])
 
-  const blueprint = sel && prompts[selKey] ? `# ${skillTitle(sel)} — agent blueprint for ${target}\n\n${prompts[selKey]}` : ''
+  const blueprint = sel && prompts[selKey] ? (isBlockedPrompt(prompts[selKey]) ? prompts[selKey] : `# ${skillTitle(sel)} — agent blueprint for ${target}\n\n${prompts[selKey]}`) : ''
   const targetDef = TARGETS.find((t) => t.name === target) || TARGETS[0]
 
   const copyBlueprint = async () => {

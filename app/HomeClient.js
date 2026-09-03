@@ -32,6 +32,7 @@ import {
   fetchStarterPrompt,
   openTargetUrl,
   categoryLabel,
+  isBlockedPrompt,
 } from '@/lib/skill-display'
 
 // ---------------------------------------------------------------------------
@@ -301,6 +302,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
     if (!agent) return ''
     const base = prompts[agentKey] || ''
     if (!base) return ''
+    if (isBlockedPrompt(base)) return base
     let t = `# ${skillTitle(agent)} — agent blueprint for ${target}\n\n${base}`
     const extras = []
     if (opts.guide) extras.push("Usage guide: read the skill's install command and quick-start above before the first run, and tell me if anything needs to be set up on my side.")
