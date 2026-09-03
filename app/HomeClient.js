@@ -19,6 +19,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { trackInstall } from '@/lib/track-install'
 import { homeFaqs } from '@/lib/home-faqs'
+import {
+  TARGETS,
+  fmt,
+  skillTitle,
+  skillDesc,
+  skillKey,
+  skillCreator,
+  skillUseCase,
+  healthScore,
+  isPaid,
+  fetchStarterPrompt,
+  openTargetUrl,
+  categoryLabel,
+} from '@/lib/skill-display'
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -33,12 +47,6 @@ const TYPEWRITER_PROMPTS = [
 
 const SUGGESTIONS = ['weekly client ad report', 'find leads in my city', 'watch competitor pricing', 'rank in AI search']
 
-const TARGETS = [
-  { name: 'Claude', dot: '#D97757', hint: 'system prompt / project', url: 'https://claude.ai/new', channel: 'try-claude' },
-  { name: 'ChatGPT', dot: '#10A37F', hint: 'custom GPT / instructions', url: 'https://chatgpt.com/', channel: 'open-chatgpt' },
-  { name: 'Gemini', dot: '#4E8CFF', hint: 'gem / instructions', url: 'https://gemini.google.com/app', channel: 'open-gemini' },
-]
-
 const OPTION_DEFS = [
   ['guide', 'Usage guide'],
   ['gotchas', 'Gotchas'],
@@ -46,69 +54,6 @@ const OPTION_DEFS = [
 ]
 
 const PHASES = ['Reading your description', 'Searching the scored catalog', 'Ranking by health, stars and fit']
-
-// Browsers cap query strings; the builder uses the same threshold.
-const URL_PROMPT_LIMIT = 6000
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-function fmt(n) {
-  const v = Number(n) || 0
-  if (v >= 1_000_000) return (v / 1_000_000).toFixed(1).replace(/\.0$/, '') + 'M'
-  if (v >= 1000) return (v / 1000).toFixed(1).replace(/\.0$/, '') + 'k'
-  return String(v)
-}
-
-function skillTitle(s) {
-  return s?.title_human || s?.name || 'Untitled skill'
-}
-
-function skillDesc(s) {
-  return s?.description_human || s?.description || ''
-}
-
-function skillKey(s) {
-  return s?.slug || s?.id || ''
-}
-
-function skillCreator(s) {
-  const c = s?.creator || s?.owner
-  if (c) return String(c).replace(/^@/, '')
-  const m = String(s?.github_url || '').match(/github\.com\/([^/]+)\//)
-  return m ? m[1] : ''
-}
-
-// The plain-English example use case our enrichment pass wrote for the skill,
-// or the snippet the search matched on — never a fabricated "sample output".
-function skillUseCase(s) {
-  return s?.matched?.snippet || s?.explainer?.use_case_example || s?.explainer?.what_you_can_make || ''
-}
-
-function healthScore(s) {
-  return typeof s?.rewrite_score === 'number' ? s.rewrite_score : null
-}
-
-// Local fallback when the compiled prompt can't be fetched (offline preview,
-// API hiccup). Built only from fields we already have on the skill object.
-function fallbackPrompt(skill, origin) {
-  const key = skillKey(skill)
-  const lines = [
-    `Load the following skill for this conversation and follow its instructions whenever they apply. Full version: ${origin}/skills/${key}`,
-    '',
-    `# ${skillTitle(skill)}`,
-    '',
-  ]
-  const desc = skillDesc(skill)
-  if (desc) lines.push(desc, '')
-  if (skill.explainer?.what_it_is) lines.push(`What it is: ${skill.explainer.what_it_is}`)
-  if (skill.explainer?.how_it_helps) lines.push(`How it helps: ${skill.explainer.how_it_helps}`)
-  if (skill.explainer?.use_case_example) lines.push(`Example use: ${skill.explainer.use_case_example}`)
-  if (skill.github_url) lines.push('', `Source repository: ${skill.github_url}`)
-  lines.push('', 'To start: introduce this skill in 2-3 sentences — what you can now help me do and 2-3 example requests I could make — then ask what I want to tackle first.')
-  return lines.join('\n')
-}
 
 // ---------------------------------------------------------------------------
 // Small presentational pieces
@@ -339,9 +284,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
     if (step !== 3 || !agent || !agentKey || prompts[agentKey]) return
     let cancelled = false
     setPromptLoading(true)
-    fetch(`/api/skills/${encodeURIComponent(agentKey)}/claude-skill?format=prompt`)
-      .then((r) => (r.ok ? r.text() : Promise.reject(new Error('prompt unavailable'))))
-      .catch(() => fallbackPrompt(agent, origin))
+    fetchStarterPrompt(agent, origin)
       .then((text) => {
         if (cancelled) return
         setPrompts((p) => ({ ...p, [agentKey]: text }))
@@ -395,13 +338,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
         await navigator.clipboard?.writeText(blueprint)
       } catch {}
       if (delivery === 'Open') {
-        const q = encodeURIComponent(blueprint)
-        let href = targetDef.url
-        if (q.length <= URL_PROMPT_LIMIT) {
-          if (target === 'Claude') href = `https://claude.ai/new?q=${q}`
-          if (target === 'ChatGPT') href = `https://chatgpt.com/?q=${q}`
-        }
-        window.open(href, '_blank', 'noopener,noreferrer')
+        window.open(openTargetUrl(target, blueprint), '_blank', 'noopener,noreferrer')
       }
     }
     setDone(true)
@@ -533,7 +470,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                     <Link href="/build-for-me" className="rounded-lg border border-[#323A3C] px-4 py-2.5 text-sm font-semibold hover:border-[#C6F24E]">
                       Get it built
                     </Link>
-                    <Link href="/skills" className="rounded-lg border border-[#323A3C] px-4 py-2.5 text-sm font-semibold hover:border-[#C6F24E]">
+                    <Link href={`/skills?q=${encodeURIComponent(query)}`} className="rounded-lg border border-[#323A3C] px-4 py-2.5 text-sm font-semibold hover:border-[#C6F24E]">
                       Browse marketplace
                     </Link>
                     <button type="button" onClick={reset} className="border-0 bg-transparent text-[13px] text-[#5A615D] underline hover:text-[#ECEFEA]">
@@ -552,7 +489,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                   <article className="flex flex-col gap-5 rounded-2xl border border-[#C6F24E] bg-[#101314] p-5 shadow-[0_0_0_1px_rgba(198,242,78,0.15),0_24px_60px_-30px_rgba(198,242,78,0.25)] sm:p-7">
                     <div className="t-mono flex flex-wrap items-center justify-between gap-2.5 text-xs text-[#8B928D]">
                       <span className="flex gap-1.5">
-                        <span className="rounded bg-[#C6F24E] px-2 py-[3px] text-[#0A0C0D]">{agent.category || 'skill'}</span>
+                        <span className="rounded bg-[#C6F24E] px-2 py-[3px] text-[#0A0C0D]">{categoryLabel(agent.category)}</span>
                         {agent.language && <CategoryChip>{agent.language}</CategoryChip>}
                       </span>
                       <span className="whitespace-nowrap">
@@ -575,7 +512,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                       <StatCell value={`★ ${fmt(agent.github_stars)}`} label="GitHub stars" />
                       <StatCell value={`⑂ ${fmt(agent.github_forks)}`} label="forks" />
                       <StatCell value={health !== null ? `${health}/10` : '—'} label="health score" />
-                      <StatCell value={agent.is_premium && agent.price ? `$${agent.price}` : 'Free'} label={agent.is_premium && agent.price ? 'one-time' : 'open-source'} />
+                      <StatCell value={isPaid(agent) ? `$${Number(agent.price)}` : 'Free'} label={isPaid(agent) ? 'one-time' : 'open-source'} />
                     </div>
 
                     {useCase && (
@@ -642,7 +579,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                           >
                             <span className="text-base font-bold">{skillTitle(a)}</span>
                             <Mono className="text-xs text-[#5A615D]">
-                              {a.category || 'skill'} · ★ {fmt(a.github_stars)}
+                              {categoryLabel(a.category)} · ★ {fmt(a.github_stars)}
                               {healthScore(a) !== null ? ` · ● ${healthScore(a)}` : ''}
                             </Mono>
                           </button>
@@ -854,7 +791,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                   className="flex min-w-0 flex-col gap-[18px] rounded-[14px] border border-[#262B2D] bg-[#101314] p-[26px] transition-[transform,border-color] duration-200 hover:-translate-y-[3px] hover:border-[#C6F24E]"
                 >
                   <div className="t-mono flex items-center justify-between gap-2 text-xs text-[#8B928D]">
-                    <CategoryChip>{s.category || 'skill'}</CategoryChip>
+                    <CategoryChip>{categoryLabel(s.category)}</CategoryChip>
                     {h !== null && <span className="whitespace-nowrap text-[#C6F24E]">● {h}/10</span>}
                   </div>
                   <div className="flex flex-col gap-2">

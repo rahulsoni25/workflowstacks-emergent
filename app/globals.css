@@ -134,7 +134,9 @@ body {
 @keyframes ws-blink{0%,100%{opacity:1}50%{opacity:.2}}
 .anim-rise{animation:ws-rise .4s ease}
 .anim-blink{animation:ws-blink .8s infinite}
-@media (prefers-reduced-motion: reduce){.anim-rise,.anim-blink{animation:none}}
+@keyframes ws-slidein{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.anim-slidein{animation:ws-slidein .25s ease}
+@media (prefers-reduced-motion: reduce){.anim-rise,.anim-blink,.anim-slidein{animation:none}}
 .wm .s{color:var(--brand-lime)}
 .font-mono-brand{font-family:var(--brand-mono)}
 

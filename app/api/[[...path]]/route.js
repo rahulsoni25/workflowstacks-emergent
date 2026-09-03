@@ -672,6 +672,10 @@ export async function GET(request) {
       if (category && category !== 'all') {
         query.category = category;
       }
+      // ?free=true — marketplace "Free only" toggle: hide paid creator listings.
+      if (searchParams.get('free') === 'true') {
+        query.is_premium = { $ne: true };
+      }
       if (search) {
         const searchSafe = escapeRegex(search);
         query.$or = [
@@ -2525,7 +2529,7 @@ export async function POST(request) {
       if (!body.name || !body.description) {
         return Response.json({ success: false, error: 'Name and description are required' }, { status: 400 });
       }
-      const tl = tooLong(body, { email: 254, name: 120, description: 500, creator: 100, category: 60, source_url: 300, default: 2000 });
+      const tl = tooLong(body, { email: 254, name: 120, description: 500, creator: 100, category: 60, source_url: 300, blueprint: 6000, default: 2000 });
       if (tl) return Response.json({ success: false, error: tl }, { status: 400 });
 
       const name = String(body.name).slice(0, 120);
@@ -2553,6 +2557,18 @@ export async function POST(request) {
       // Only set github_url when provided — avoids empty-string collisions on the
       // unique sparse index (which would reject a 2nd URL-less submission).
       if (body.github_url) skill.github_url = body.github_url;
+      // Submit-a-skill form extras: reviewer contact, declared model support,
+      // and the paid-agent blueprint buyers receive (never published as-is —
+      // it goes through the same review as everything else).
+      const email = String(body.email || '').trim().toLowerCase().slice(0, 254);
+      if (email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) skill.submitter_email = email;
+      const ALLOWED_MODELS = ['Claude', 'ChatGPT', 'Gemini'];
+      if (Array.isArray(body.works_with)) {
+        const works = body.works_with.filter((w) => ALLOWED_MODELS.includes(w));
+        if (works.length) skill.works_with = works;
+      }
+      if (body.blueprint) skill.blueprint = String(body.blueprint).slice(0, 6000);
+      if (body.use_case) skill.use_case = String(body.use_case).slice(0, 60);
 
       // Content-safety screen (prompt injection / XSS / obfuscated payloads / LLM
       // fallback). A flagged skill is stored blocked — never published — but the
