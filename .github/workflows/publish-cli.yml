@@ -1,0 +1,30 @@
+# Publish the workflowstacks CLI (cli/) to npm — no terminal needed:
+# add an NPM_TOKEN repo secret once, then trigger this from the Actions tab.
+# Re-run after bumping cli/package.json's version to ship updates.
+name: publish-cli
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Sanity-check the CLI before publishing
+        run: |
+          node --check cli/index.js
+          node cli/index.js help
+      - name: Publish to npm
+        working-directory: cli
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
