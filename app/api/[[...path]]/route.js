@@ -777,10 +777,40 @@ export async function GET(request) {
           quality: { rewrite_score: -1, github_stars: -1 },
         };
         const sortSpec = SORT_SPECS[sortKey] || SORT_SPECS.trending;
-        [skills, total] = await Promise.all([
-          col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).skip(offset).limit(limit).toArray(),
-          col.countDocuments(query),
-        ]);
+        const searchTokens = search ? tokenizeSearch(search) : [];
+        if (searchTokens.length > 1) {
+          // The OR-across-tokens query buys recall, but sorting the matches
+          // by stars alone let one common token ("automation") drown the one
+          // that carried the intent ("n8n"): a live audit of "n8n automation"
+          // got a trading bot and a Docker updater. Re-rank a bounded window
+          // by how many distinct tokens each doc matches (name/title/slug
+          // count most), then fall back to the requested sort.
+          const window = Math.min(offset + limit + 150, 400);
+          const [candidates, count] = await Promise.all([
+            col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).limit(window).toArray(),
+            col.countDocuments(query),
+          ]);
+          const scored = candidates.map((s, idx) => {
+            const strong = `${s.name || ''} ${s.title_human || ''} ${s.slug || ''}`.toLowerCase();
+            const mid = `${s.category || ''} ${(s.github_topics || []).join(' ')}`.toLowerCase();
+            const weak = `${s.description || ''} ${s.description_human || ''}`.toLowerCase();
+            let matched = 0, weight = 0;
+            for (const t of searchTokens) {
+              const inStrong = strong.includes(t), inMid = mid.includes(t), inWeak = weak.includes(t);
+              if (inStrong || inMid || inWeak) matched++;
+              weight += inStrong ? 3 : inMid ? 2 : inWeak ? 1 : 0;
+            }
+            return { s, matched, weight, idx };
+          });
+          scored.sort((a, b) => b.matched - a.matched || b.weight - a.weight || a.idx - b.idx);
+          skills = scored.slice(offset, offset + limit).map((x) => x.s);
+          total = count;
+        } else {
+          [skills, total] = await Promise.all([
+            col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).skip(offset).limit(limit).toArray(),
+            col.countDocuments(query),
+          ]);
+        }
       }
 
       return Response.json({ skills: applyFallback(skills), total, hasMore: offset + skills.length < total });
