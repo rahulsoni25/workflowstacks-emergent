@@ -217,10 +217,14 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
       setResults([])
       setAgent(null)
       setDone(false)
+      // Phase ticks are progress feedback for a request that is genuinely in
+      // flight — they are NOT a floor on how long the answer is withheld. An
+      // earlier version awaited a 1.3s minimum before showing results, which
+      // manufactured an impression of work the search wasn't doing. If the
+      // API answers in 80ms, the match renders in 80ms.
       timersRef.current.push(setTimeout(() => setPhase(1), 450))
       timersRef.current.push(setTimeout(() => setPhase(2), 900))
 
-      const minWait = new Promise((r) => setTimeout(r, 1300))
       let data = null
       try {
         const res = await fetch('/api/search-skills', {
@@ -232,7 +236,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
       } catch {
         data = null
       }
-      await minWait
+      clearTimers() // stop pending phase ticks; the real answer has arrived
       if (seq !== searchSeq.current) return // a newer search superseded this one
       const list = Array.isArray(data?.results) ? data.results : []
       setResults(list)
