@@ -410,12 +410,32 @@ const LIST_PROJECTION = {
   codeflow: 0, // detail-page only (several KB per skill)
 };
 
+// Older rewritten descriptions froze template filler into prose: a trailing
+// "168k GitHub stars." / "70k+ stars." / "Popular." sentence (a number that
+// goes stale the day it is written — stars are already structured metadata on
+// every card) and a generic "For founders ..." audience line stamped on a
+// Docker updater and a trading bot alike. Scrub both at read time so every
+// surface (site, MCP search_skills, llms.txt) stops repeating them, without a
+// catalog rewrite.
+const STAR_SENTENCE = /(^|\.\s+)(?:[^.]{0,40}?\b(?:backed by|with)\s+)?[\d.,]+k?\+?\s+(?:GitHub\s+)?stars\.?(?=\s|$)/gi;
+const FILLER_SENTENCE = /(^|\.\s+)(?:Popular|For (?:busy )?founders[^.]{0,60})\.(?=\s|$)/gi;
+function scrubBoilerplate(desc) {
+  if (!desc || typeof desc !== 'string') return desc;
+  const out = desc
+    .replace(STAR_SENTENCE, (m, lead) => (lead === '' ? '' : '.'))
+    .replace(FILLER_SENTENCE, (m, lead) => (lead === '' ? '' : '.'))
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\.\s*\./g, '.')
+    .trim();
+  return out || desc;
+}
+
 // Apply to a skills array — adds title_human/description_human ONLY if missing.
 function applyFallback(skills) {
   return (skills || []).map((s) => ({
     ...s,
     title_human: s.title_human || prettyName(s.name),
-    description_human: s.description_human || prettyDesc(s.description),
+    description_human: scrubBoilerplate(s.description_human) || prettyDesc(s.description),
   }));
 }
 
