@@ -1,28 +1,27 @@
 import SkillsCatalogClient from './SkillsCatalogClient'
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 export const metadata = {
-  title: 'Browse AI Skills & Tools for Founders | WorkflowStacks',
-  description: 'Browse 100+ free, trending GitHub AI skills, MCP servers, and agent tools for founders — marketing, sales, SaaS, automation, and more.',
+  title: 'Marketplace — AI Agents, Skills & MCP Servers | WorkflowStacks',
+  description: 'Browse the quality-gated catalog of open-source AI agents, Claude skills, MCP servers and prompts. Live GitHub stats, guide-quality scores, one-click install into Claude, ChatGPT or Gemini.',
   alternates: { canonical: '/skills' },
   openGraph: {
-    title: 'Browse AI Skills & Tools for Founders | WorkflowStacks',
-    description: 'Browse 100+ free, trending GitHub AI skills and agent tools for founders across every niche.',
+    title: 'Marketplace — AI Agents, Skills & MCP Servers | WorkflowStacks',
+    description: 'Quality-gated open-source AI agents, skills and MCP servers with live GitHub stats and one-click install.',
     type: 'website',
     url: '/skills',
   },
 }
 
-// 5 min — short enough that AI rewrite landings show up fast, long enough
+// 30 min — short enough that enrichment landings show up fast, long enough
 // to not hammer the DB on every page view.
 export const revalidate = 1800
 
-// One page's worth for the default SSR load. The catalog now has 2,000+
-// published skills — fetching them all in one request (the old behavior)
-// took 90s+ to sort/transfer and blew past the fetch timeout below,
-// silently rendering the page as empty. The client re-fetches this same
-// endpoint (with category/sort/search/offset) as the user interacts.
+// One page's worth for the default SSR load. The catalog has thousands of
+// published skills — fetching them all in one request took 90s+ and blew
+// past the fetch timeout, silently rendering the page empty. The client
+// re-fetches this same endpoint (with category/sort/search/offset) as the
+// visitor interacts.
 export const PAGE_SIZE = 48
 
 async function getSkills() {
@@ -39,12 +38,20 @@ async function getSkills() {
   }
 }
 
-// Heavy fields the catalog grid never renders — the API already strips these
-// from list responses, but keep the belt-and-braces trim for any leftovers.
-const HEAVY = ['readme_preview', 'use_guide', 'description_original', 'name_original', 'rewritten_at']
+// Heavy fields the marketplace grid never renders — the API already strips
+// these from list responses, but keep the belt-and-braces trim for leftovers.
+const HEAVY = ['readme_preview', 'use_guide', 'description_original', 'name_original', 'rewritten_at', 'codeflow']
 function trim(s) {
   const out = {}
   for (const k in s) if (!HEAVY.includes(k)) out[k] = s[k]
+  if (out.explainer) {
+    out.explainer = {
+      use_case_example: out.explainer.use_case_example,
+      what_you_can_make: out.explainer.what_you_can_make,
+      what_it_is: out.explainer.what_it_is,
+      how_it_helps: out.explainer.how_it_helps,
+    }
+  }
   return out
 }
 
@@ -54,8 +61,8 @@ export default async function SkillsPage() {
   const itemList = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'AI Skills & Tools catalog',
-    description: 'Free, trending open-source AI skills, MCP servers, and agent tools for founders.',
+    name: 'WorkflowStacks Marketplace',
+    description: 'Quality-gated open-source AI agents, skills, MCP servers and prompts.',
     numberOfItems: total,
     itemListElement: skills.map((s, i) => ({
       '@type': 'ListItem',

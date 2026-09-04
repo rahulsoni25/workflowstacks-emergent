@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import AgentClient from './AgentClient'
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 async function getAgent(id) {
   try {

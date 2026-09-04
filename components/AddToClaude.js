@@ -30,6 +30,12 @@ export default function AddToClaude({ skill, codeflow = null }) {
   useEffect(() => { setBase(window.location.origin) }, [])
   const [setupText, setSetupText] = useState('')
   const [saved, setSaved] = useState(false)
+  // Set the moment any install path reports the API's 422 — the listing
+  // failed WorkflowStacks' automated content-safety review. Every compiler
+  // already fails safe server-side (a blocked skill can never yield real
+  // content, in any format), so this is purely about not leaving the user
+  // staring at a silently-failed "Open in Claude" click.
+  const [blocked, setBlocked] = useState(false)
 
   const saveToLibrary = async () => {
     setSaved(true)
@@ -53,6 +59,7 @@ export default function AddToClaude({ skill, codeflow = null }) {
 
   const fetchPrompt = async () => {
     const res = await fetch(`${apiPath}?format=prompt`)
+    if (res.status === 422) setBlocked(true)
     if (!res.ok) throw new Error('prompt unavailable')
     return res.text()
   }
@@ -85,6 +92,7 @@ export default function AddToClaude({ skill, codeflow = null }) {
   const fetchSetup = async () => {
     if (setupText) return setupText
     const res = await fetch(`${apiPath}?format=setup`)
+    if (res.status === 422) setBlocked(true)
     if (!res.ok) throw new Error('setup prompt unavailable')
     const text = await res.text()
     setSetupText(text)
@@ -127,8 +135,13 @@ export default function AddToClaude({ skill, codeflow = null }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {blocked && (
+          <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-200">
+            This listing did not pass WorkflowStacks&apos; automated content-safety review, so nothing here can be installed or pasted into Claude. If you believe this is a mistake, contact support.
+          </div>
+        )}
         {/* 1 — Permanent install in the Claude apps */}
-        <div>
+        <div className={blocked ? 'pointer-events-none opacity-40' : undefined} aria-disabled={blocked}>
           <a href={`${apiPath}?format=zip`} download className="block" onClick={() => trackInstall(slug, 'zip')}>
             <Button className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
               <Download className="w-4 h-4 mr-2" />Add to Claude — download skill
@@ -151,23 +164,23 @@ export default function AddToClaude({ skill, codeflow = null }) {
         </div>
 
         {/* 2 — Zero-install: open Claude with the skill preloaded */}
-        <div className="border-t border-slate-700/50 pt-4">
+        <div className={`border-t border-slate-700/50 pt-4 ${blocked ? 'pointer-events-none opacity-40' : ''}`} aria-disabled={blocked}>
           <div className="text-sm text-slate-300 font-medium mb-2">Try it instantly — no install</div>
           <div className="grid grid-cols-2 gap-2">
-            <Button onClick={openInClaude} disabled={openingClaude} variant="outline" className="border-teal-500/30 text-teal-300 hover:bg-teal-500/10">
+            <Button onClick={openInClaude} disabled={openingClaude || blocked} variant="outline" className="border-teal-500/30 text-teal-300 hover:bg-teal-500/10">
               <Sparkles className="w-4 h-4 mr-1.5" />{openingClaude ? 'Opening…' : 'Open in Claude'}
             </Button>
-            <Button onClick={copyPrompt} variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5">
+            <Button onClick={copyPrompt} disabled={blocked} variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5">
               {copied === 'prompt' ? <><CheckCircle2 className="w-4 h-4 mr-1.5" />Copied</> : <><Copy className="w-4 h-4 mr-1.5" />Copy prompt</>}
             </Button>
           </div>
-          {triedClaude && (
+          {triedClaude && !blocked && (
             <p className="text-xs text-slate-500 mt-2">App didn't open? Use “Copy prompt” and paste it into a new chat at claude.ai.</p>
           )}
         </div>
 
         {/* 3 — Claude Code one-liner */}
-        <div className="border-t border-slate-700/50 pt-4">
+        <div className={`border-t border-slate-700/50 pt-4 ${blocked ? 'pointer-events-none opacity-40' : ''}`} aria-disabled={blocked}>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5 text-sm text-slate-300 font-medium"><Terminal className="w-4 h-4 text-teal-400" />Claude Code</div>
             <Button onClick={() => { trackInstall(slug, 'claude-code'); copy('code', codeCmd) }} variant="ghost" size="sm" className="h-7 px-2 text-slate-400 hover:text-teal-300">
@@ -180,7 +193,9 @@ export default function AddToClaude({ skill, codeflow = null }) {
         </div>
 
         {/* 4 — Agentic editors: one click clones the repo / hands the agent the build prompt */}
-        <LaunchInTools getPrompt={fetchSetup} repoUrl={skill.github_url || ''} className="border-t border-slate-700/50 pt-4" trackId={slug} />
+        <div className={blocked ? 'pointer-events-none opacity-40' : undefined} aria-disabled={blocked}>
+          <LaunchInTools getPrompt={fetchSetup} repoUrl={skill.github_url || ''} className="border-t border-slate-700/50 pt-4" trackId={slug} />
+        </div>
 
         {/* 5 — MCP connector for power users */}
         <div className="border-t border-slate-700/50 pt-4">

@@ -1,8 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, Star, Github } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 export const metadata = {
   title: 'Discover AI Skills — Trending, Newest, Top Quality | WorkflowStacks',
@@ -47,7 +46,7 @@ function MiniCard({ skill }) {
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-slate-500">{skill.category}</span>
           {typeof skill.rewrite_score === 'number' && (
-            <span className="text-xs text-teal-300" title="Health Score">{skill.rewrite_score}/10</span>
+            <span className="text-xs text-teal-300" title="Guide quality — how clear and useful our listing is, not repo health">{skill.rewrite_score}/10</span>
           )}
         </div>
         <h3 className="text-white font-semibold leading-snug group-hover:text-teal-300 transition-colors line-clamp-2">

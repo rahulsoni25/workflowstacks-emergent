@@ -48,12 +48,19 @@ const nextConfig = {
         ],
       },
       {
-        // CORS only on the API, not the whole site
+        // CORS only on the API, not the whole site. The catalog is a public
+        // read API (and /docs promises POST /api/agent-templates), so the
+        // origin stays open unless CORS_ORIGINS narrows it — but nothing
+        // cross-origin needs PUT/DELETE or arbitrary request headers, and a
+        // wildcard origin combined with wildcard methods+headers is the
+        // sloppy part. Our own pages are same-origin and never hit CORS;
+        // server-side consumers (MCP connector, npx CLI, curl) aren't subject
+        // to it at all, so tightening this breaks no supported client.
         source: "/api/(.*)",
         headers: [
           { key: "Access-Control-Allow-Origin", value: process.env.CORS_ORIGINS || "*" },
-          { key: "Access-Control-Allow-Methods", value: "GET, POST, PUT, DELETE, OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "*" },
+          { key: "Access-Control-Allow-Methods", value: "GET, POST, OPTIONS" },
+          { key: "Access-Control-Allow-Headers", value: "Content-Type, Authorization" },
         ],
       },
     ];

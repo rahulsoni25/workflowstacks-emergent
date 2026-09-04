@@ -14,7 +14,7 @@ export default function HowItWorksPage() {
     { step: '01', title: 'Browse or Search', desc: 'Explore our library of 500+ AI skills sourced from GitHub. Filter by category (Claude, Gemini, MCP, Prompts) or search by outcome like "automate reviews" or "rank in AI search".', icon: '🔍' },
     { step: '02', title: 'Pick a Playbook or Build Custom', desc: 'Choose a pre-made Playbook for your use case, or use the Agent Builder to select individual skills and combine them into a custom AI agent.', icon: '🛠️' },
     { step: '03', title: 'Generate Your Agent Blueprint', desc: 'Our engine creates a ready-to-paste prompt that combines all your selected skills into one powerful, coherent agent blueprint.', icon: '✨' },
-    { step: '04', title: 'Deploy Anywhere', desc: 'Copy the blueprint and paste it into ChatGPT, Claude, Gemini, or any AI chat tool. Your custom agent is live instantly — no API keys, no setup.', icon: '🚀' },
+    { step: '04', title: 'Deploy Anywhere', desc: 'Copy the blueprint and paste it into ChatGPT, Claude, Gemini, or any AI chat tool. Your custom agent is live instantly — no install, no code. Some tools need their own API key, shown on the listing.', icon: '🚀' },
   ]
 
   return (

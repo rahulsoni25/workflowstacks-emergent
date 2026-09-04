@@ -4,8 +4,7 @@ import { OUTCOMES } from '../lib/outcomes'
 import { MCP_SERVERS } from '../lib/mcp-servers'
 import { KITS } from '../lib/kits'
 import { SLASH_COMMANDS } from '../lib/commands'
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 // --- Why this file gates skill pages -----------------------------------
 // Google Search Console (2026-07-29) reported 1,450 URLs "Discovered –
@@ -134,7 +133,12 @@ export default async function sitemap() {
       priority: 0.5,
     }))
   } catch (e) {
-    // Sitemap still valid with just static routes if the API is unreachable
+    // Sitemap still valid with just static routes if the API is unreachable —
+    // but say so. This used to fail silently, which is indistinguishable in
+    // production from "no skill passes the gate": a sitemap with zero skill
+    // URLs and nothing in the logs. Now a fallback leaves a trace in Vercel
+    // function logs so it can be noticed and diagnosed.
+    console.error('[sitemap] skill entries unavailable, falling back to static routes only:', e?.message || e)
   }
 
   // Published blog posts — original content, priority just under templates.

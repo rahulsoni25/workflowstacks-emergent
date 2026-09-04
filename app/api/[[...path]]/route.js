@@ -1,6 +1,7 @@
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalog-gates';
+import { tokenize as tokenizeSearch } from '../../../lib/search-tokens';
 import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 import { screenSubmission } from '../../../lib/content-safety';
@@ -672,12 +673,33 @@ export async function GET(request) {
       if (category && category !== 'all') {
         query.category = category;
       }
+      // ?free=true — marketplace "Free only" toggle: hide paid creator listings.
+      if (searchParams.get('free') === 'true') {
+        query.is_premium = { $ne: true };
+      }
       if (search) {
-        const searchSafe = escapeRegex(search);
-        query.$or = [
-          { name: { $regex: searchSafe, $options: 'i' } },
-          { description: { $regex: searchSafe, $options: 'i' } }
-        ];
+        // Per-token matching across the fields a visitor actually thinks in.
+        // Previously the ENTIRE phrase was one regex over name/description, so
+        // any ordinary multi-word query ("scrape websites") returned nothing
+        // while its single tokens ("scraper") matched — the marketplace search
+        // box, the MCP connector and the builder all hit this path. OR across
+        // tokens and fields guarantees recall; the existing trending/stars
+        // sort keeps the best matches on top (same shape as /api/search-skills).
+        const tokens = tokenizeSearch(search);
+        const fields = ['name', 'title_human', 'description', 'description_human', 'category', 'github_topics'];
+        if (tokens.length) {
+          query.$or = tokens.flatMap((t) => {
+            const re = escapeRegex(t);
+            return fields.map((f) => ({ [f]: { $regex: re, $options: 'i' } }));
+          });
+        } else {
+          // Short/noise-only queries ("ai", "go") keep the old whole-phrase match.
+          const searchSafe = escapeRegex(search);
+          query.$or = [
+            { name: { $regex: searchSafe, $options: 'i' } },
+            { description: { $regex: searchSafe, $options: 'i' } }
+          ];
+        }
       }
       // Optional server-side pre-filter — lets a caller like the sitemap
       // (which only wants the small slice passing its quality gate) avoid
@@ -2525,7 +2547,7 @@ export async function POST(request) {
       if (!body.name || !body.description) {
         return Response.json({ success: false, error: 'Name and description are required' }, { status: 400 });
       }
-      const tl = tooLong(body, { email: 254, name: 120, description: 500, creator: 100, category: 60, source_url: 300, default: 2000 });
+      const tl = tooLong(body, { email: 254, name: 120, description: 500, creator: 100, category: 60, source_url: 300, blueprint: 6000, default: 2000 });
       if (tl) return Response.json({ success: false, error: tl }, { status: 400 });
 
       const name = String(body.name).slice(0, 120);
@@ -2553,6 +2575,18 @@ export async function POST(request) {
       // Only set github_url when provided — avoids empty-string collisions on the
       // unique sparse index (which would reject a 2nd URL-less submission).
       if (body.github_url) skill.github_url = body.github_url;
+      // Submit-a-skill form extras: reviewer contact, declared model support,
+      // and the paid-agent blueprint buyers receive (never published as-is —
+      // it goes through the same review as everything else).
+      const email = String(body.email || '').trim().toLowerCase().slice(0, 254);
+      if (email && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) skill.submitter_email = email;
+      const ALLOWED_MODELS = ['Claude', 'ChatGPT', 'Gemini'];
+      if (Array.isArray(body.works_with)) {
+        const works = body.works_with.filter((w) => ALLOWED_MODELS.includes(w));
+        if (works.length) skill.works_with = works;
+      }
+      if (body.blueprint) skill.blueprint = String(body.blueprint).slice(0, 6000);
+      if (body.use_case) skill.use_case = String(body.use_case).slice(0, 60);
 
       // Content-safety screen (prompt injection / XSS / obfuscated payloads / LLM
       // fallback). A flagged skill is stored blocked — never published — but the

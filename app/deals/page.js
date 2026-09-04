@@ -1,6 +1,6 @@
 import DealsClient from './DealsClient'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
 export const revalidate = 1800
 
 async function getJson(path) {

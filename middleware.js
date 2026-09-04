@@ -5,8 +5,7 @@ import { getMcpServer } from '@/lib/mcp-servers'
 import { getSlashCommand } from '@/lib/commands'
 import { getBundle } from '@/lib/bundles'
 import { getKit } from '@/lib/kits'
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 // 36-char UUID with the standard dash positions (8-4-4-4-12).
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
