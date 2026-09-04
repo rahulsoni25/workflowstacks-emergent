@@ -18,6 +18,24 @@ export const revalidate = 86400
 //
 // Every claim here must stay literally true — an answer engine repeating an
 // inflated claim is worse than not being cited at all.
+// The flagship product is the open-source skill catalog, but llms.txt
+// previously described only templates/MCP configs and mentioned the catalog
+// in one line at the very bottom — so an answer engine reading this file
+// could not surface a single skill. Pull the real top listings, same source
+// as llms-full.txt.
+async function topSkills(limit = 40) {
+  try {
+    const res = await fetch(`${SITE_URL}/api/skills?sort=popular&limit=${limit}`, {
+      next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) return []
+    return (await res.json()).skills || []
+  } catch {
+    return []
+  }
+}
+
 export async function GET() {
   const templates = Object.values(TEMPLATES)
   const bundles = Object.values(BUNDLES)
@@ -26,6 +44,7 @@ export async function GET() {
   const kits = Object.values(KITS)
   const commands = Object.values(SLASH_COMMANDS)
 
+  const skills = await topSkills()
   let blogPosts = []
   try {
     const { allPublishedForSitemap } = await import('@/lib/blog/store')
@@ -47,6 +66,16 @@ WorkflowStacks does not host or execute anything. Catalog skills run inside the 
 ## What makes this different
 
 Every catalog listing is a real open-source repository that cleared an 8/10 quality gate, with a plain-English usage guide and a one-click install (compiled prompt, Claude Skill package, or the MCP connector). The n8n templates are complete, tested workflow files: download one JSON file, import it into n8n, connect your accounts, and it runs.
+
+## AI skills catalog${skills.length ? ` (top ${skills.length} of the published catalog)` : ''}
+
+Open-source AI agents, Claude skills and MCP servers, quality-gated at 8/10. Each installs into Claude, ChatGPT or Gemini as a compiled prompt, or into Claude / Claude Code as a Skill package via its skill_md endpoint. Full machine-readable list: ${SITE_URL}/llms-full.txt · Browse: ${SITE_URL}/skills
+${skills.length ? '\n' + skills.map((s) => {
+  const slug = s.slug || s.id
+  const desc = (s.description_human || s.description || '').replace(/\s+/g, ' ').slice(0, 160)
+  const stars = s.github_stars ? ` (${s.github_stars.toLocaleString('en-US')} GitHub stars)` : ''
+  return `- [${s.title_human || s.name}](${SITE_URL}/skills/${slug})${stars} — ${desc}\n  skill_md: ${SITE_URL}/api/skills/${slug}/claude-skill`
+}).join('\n') : ''}
 
 ## Free n8n workflow templates (${templates.length})
 
