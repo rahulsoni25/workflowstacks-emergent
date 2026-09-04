@@ -18,6 +18,24 @@ export const revalidate = 86400
 //
 // Every claim here must stay literally true — an answer engine repeating an
 // inflated claim is worse than not being cited at all.
+// The flagship product is the open-source skill catalog, but llms.txt
+// previously described only templates/MCP configs and mentioned the catalog
+// in one line at the very bottom — so an answer engine reading this file
+// could not surface a single skill. Pull the real top listings, same source
+// as llms-full.txt.
+async function topSkills(limit = 40) {
+  try {
+    const res = await fetch(`${SITE_URL}/api/skills?sort=popular&limit=${limit}`, {
+      next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(10_000),
+    })
+    if (!res.ok) return []
+    return (await res.json()).skills || []
+  } catch {
+    return []
+  }
+}
+
 export async function GET() {
   const templates = Object.values(TEMPLATES)
   const bundles = Object.values(BUNDLES)
@@ -26,6 +44,7 @@ export async function GET() {
   const kits = Object.values(KITS)
   const commands = Object.values(SLASH_COMMANDS)
 
+  const skills = await topSkills()
   let blogPosts = []
   try {
     const { allPublishedForSitemap } = await import('@/lib/blog/store')
@@ -34,9 +53,9 @@ export async function GET() {
 
   const body = `# WorkflowStacks
 
-> A marketplace of working AI automations for founders, agencies, ecommerce and sales teams. Download real, importable n8n workflows and Claude Desktop MCP configurations — not prompts or reading lists. Free templates, premium tools, and a done-for-you build service.
+> An open marketplace of AI skills and automations for founders, agencies, ecommerce and sales teams: a quality-gated catalog of open-source AI agents, Claude skills and MCP servers that install into Claude, ChatGPT or Gemini as a compiled prompt or a Claude Skill package — plus free importable n8n workflow templates, Claude Desktop MCP configurations, premium tools, and a done-for-you build service.
 
-Everything below runs on the user's own infrastructure: their n8n instance (free tier available) and their own LLM API key. WorkflowStacks does not host or execute the automations.
+WorkflowStacks does not host or execute anything. Catalog skills run inside the user's own AI assistant; n8n templates run on the user's own n8n instance (free tier available) with their own LLM API key.
 
 ## For AI agents: install directly
 
@@ -46,7 +65,17 @@ Everything below runs on the user's own infrastructure: their n8n instance (free
 
 ## What makes this different
 
-Most "AI agent" listings give you a prompt or a link to a GitHub repo. These are complete, tested automation files: you download one JSON file, import it into n8n, connect your accounts, and it runs.
+Every catalog listing is a real open-source repository that cleared an 8/10 quality gate, with a plain-English usage guide and a one-click install (compiled prompt, Claude Skill package, or the MCP connector). The n8n templates are complete, tested workflow files: download one JSON file, import it into n8n, connect your accounts, and it runs.
+
+## AI skills catalog${skills.length ? ` (top ${skills.length} of the published catalog)` : ''}
+
+Open-source AI agents, Claude skills and MCP servers, quality-gated at 8/10. Each installs into Claude, ChatGPT or Gemini as a compiled prompt, or into Claude / Claude Code as a Skill package via its skill_md endpoint. Full machine-readable list: ${SITE_URL}/llms-full.txt · Browse: ${SITE_URL}/skills
+${skills.length ? '\n' + skills.map((s) => {
+  const slug = s.slug || s.id
+  const desc = (s.description_human || s.description || '').replace(/\s+/g, ' ').slice(0, 160)
+  const stars = s.github_stars ? ` (${s.github_stars.toLocaleString('en-US')} GitHub stars)` : ''
+  return `- [${s.title_human || s.name}](${SITE_URL}/skills/${slug})${stars} — ${desc}\n  skill_md: ${SITE_URL}/api/skills/${slug}/claude-skill`
+}).join('\n') : ''}
 
 ## Free n8n workflow templates (${templates.length})
 

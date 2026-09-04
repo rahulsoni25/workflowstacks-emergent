@@ -4,8 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Breadcrumb from '@/components/Breadcrumb'
-
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks-emergent.vercel.app'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
 export const metadata = {
   title: 'Community Agents — Build, Share & Remix | WorkflowStacks',

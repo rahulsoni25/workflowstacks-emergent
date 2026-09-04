@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowLeft, Code2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { SITE_URL } from '@/lib/site-url'
 
 export const metadata = {
   title: 'API Documentation | WorkflowStacks',
@@ -39,7 +40,7 @@ export default function DocsPage() {
 
         <Card className="bg-teal-500/10 border-teal-500/30 mb-8">
           <CardContent className="py-4">
-            <p className="text-teal-300 font-medium">Base URL: <code className="bg-slate-800/50 px-2 py-1 rounded text-white font-mono">{process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'}/api</code></p>
+            <p className="text-teal-300 font-medium">Base URL: <code className="bg-slate-800/50 px-2 py-1 rounded text-white font-mono">{SITE_URL}/api</code></p>
           </CardContent>
         </Card>
 

@@ -111,8 +111,10 @@ export async function POST(request) {
   ]
   const projection = {
     id: 1, slug: 1, name: 1, title_human: 1, description: 1, description_human: 1,
-    category: 1, creator: 1, owner: 1, language: 1, github_stars: 1, github_url: 1,
+    category: 1, creator: 1, owner: 1, language: 1, github_stars: 1, github_forks: 1, github_url: 1,
     github_topics: 1, explainer: 1, hidden: 1,
+    // Shown on the homepage match card: health score, real install clicks, price.
+    rewrite_score: 1, installs: 1, is_premium: 1, price: 1,
   }
 
   let candidates = []

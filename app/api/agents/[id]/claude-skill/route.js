@@ -5,7 +5,7 @@
 // directly) so paid-agent blueprint redaction is inherited: if the public
 // API withholds the blueprint, this route refuses too.
 
-import { compileAgentSkillMd, buildAgentSkillZip, SITE } from '@/lib/claude-skill'
+import { compileAgentSkillMd, buildAgentSkillZip, checkAgentSafety, SITE } from '@/lib/claude-skill'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,6 +25,14 @@ export async function GET(request, { params }) {
   if (!agent?.id) return Response.json({ error: 'Agent not found' }, { status: 404 })
   if (!agent.agentBlueprint) {
     return Response.json({ error: 'Blueprint locked — purchase required' }, { status: 403 })
+  }
+
+  const safety = checkAgentSafety(agent)
+  if (safety.blocked) {
+    return Response.json(
+      { error: 'This agent did not pass automated content-safety review and cannot be installed.', reasons: safety.reasons },
+      { status: 422 }
+    )
   }
 
   const format = new URL(request.url).searchParams.get('format') || 'md'
