@@ -263,6 +263,10 @@ const HomeClient = ({ initialSkills = [], initialStats = null, initialNewSkills 
                 </Link>
               </div>
               <span className="text-slate-700 hidden sm:inline">·</span>
+              <Link href="/ask" className="text-slate-400 hover:text-white underline underline-offset-4">
+                Ask a question instead
+              </Link>
+              <span className="text-slate-700 hidden sm:inline">·</span>
               <Link href="/builder" className="text-slate-500 hover:text-white underline underline-offset-4">
                 Or build manually
               </Link>
