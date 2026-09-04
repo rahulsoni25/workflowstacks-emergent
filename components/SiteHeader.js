@@ -28,6 +28,7 @@ const NAV_GROUPS = [
     label: 'Browse',
     items: [
       { href: '/skills', label: 'All Skills', note: 'The open-source catalog' },
+      { href: '/ask', label: 'Ask', note: 'Describe your problem, get real tools' },
       { href: '/discover', label: 'Discover', note: "What's trending" },
       { href: '/personas', label: 'Personas', note: 'Role-in-a-box agents' },
       { href: '/packs', label: 'Starter Packs', note: 'Skill bundles' },
