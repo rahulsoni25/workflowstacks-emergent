@@ -12,45 +12,35 @@ import WsMark from '@/components/WsMark'
 // what a user is trying to DO, not by when each section shipped (the
 // previous nav was homepage-only and predated most of these routes, which
 // is why the site felt like it had pages nobody could find).
+// Three groups, ~5 items each. The header is the short map for a first-time
+// visitor; components/Footer.js keeps the full one (Kits, Commands, Discover,
+// Library, Problems, Community, Members, Creators all remain reachable there).
 const NAV_GROUPS = [
   {
-    label: 'Templates & Tools',
-    items: [
-      { href: '/templates', label: 'Workflow Templates', note: 'Free, working n8n automations' },
-      { href: '/kits', label: 'Finishing Kits', note: 'Captions, LUTs, SFX, music — curated' },
-      { href: '/mcp', label: 'MCP Configs', note: 'Add tools to Claude Desktop' },
-      { href: '/commands', label: 'Slash Commands', note: 'Verified Claude Code commands' },
-      { href: '/tools', label: 'Premium Tools', note: 'Paid, one-time automations' },
-      { href: '/bundles', label: 'Bundles', note: 'Advanced workflow + playbook' },
-    ],
-  },
-  {
-    label: 'Browse',
+    label: 'Catalog',
     items: [
       { href: '/skills', label: 'All Skills', note: 'The open-source catalog' },
-      { href: '/discover', label: 'Discover', note: "What's trending" },
+      { href: '/mcp', label: 'MCP Servers', note: 'Add tools to Claude Desktop' },
+      { href: '/packs', label: 'Starter Packs', note: 'Skill bundles by job' },
       { href: '/personas', label: 'Personas', note: 'Role-in-a-box agents' },
-      { href: '/packs', label: 'Starter Packs', note: 'Skill bundles' },
-      { href: '/library', label: 'My Library', note: 'Your saved skills — synced with Claude' },
-      { href: '/playbooks', label: 'Playbooks', note: 'Solve one problem' },
+      { href: '/playbooks', label: 'Playbooks', note: 'Solve one problem, step by step' },
     ],
   },
   {
-    label: 'Community',
+    label: 'Premium',
     items: [
-      { href: '/problems', label: 'Problems Board', note: 'Vote on what to build next' },
+      { href: '/bundles', label: 'Ready-to-run Packs', note: 'Tested workflow + playbook, one-time' },
+      { href: '/tools', label: 'Premium Tools', note: 'Paid, one-time automations' },
+      { href: '/templates', label: 'Workflow Templates', note: 'Free, working n8n automations' },
       { href: '/deals', label: 'Deals', note: 'Group-buy tool pricing' },
-      { href: '/community', label: 'Community Gallery', note: 'Agents others built' },
-      { href: '/members', label: 'Members', note: 'The network' },
     ],
   },
   {
     label: 'Learn',
     items: [
-      { href: '/blog', label: 'Journal', note: 'Tested guides, published daily' },
+      { href: '/blog', label: 'Journal', note: 'Tested guides' },
       { href: '/learn/how-it-works', label: 'How It Works' },
       { href: '/learn/skills', label: 'What Are Skills' },
-      { href: '/learn/agents', label: 'What Are Agents' },
       { href: '/learn/mcp', label: 'What Is MCP' },
       { href: '/learn/security', label: 'Security' },
     ],
