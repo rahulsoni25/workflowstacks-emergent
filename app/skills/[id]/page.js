@@ -151,8 +151,11 @@ export async function generateMetadata({ params }) {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, type: 'article', url, images: ['/opengraph-image'] },
-    twitter: { card: 'summary_large_image', title, description, images: ['/opengraph-image'] },
+    // No explicit `images`: the sibling opengraph-image.js renders a per-skill
+    // card, and listing the generic site-wide /opengraph-image here overrode
+    // it — every shared skill link showed the same anonymous preview.
+    openGraph: { title, description, type: 'article', url },
+    twitter: { card: 'summary_large_image', title, description },
   }
 }
 

@@ -410,12 +410,32 @@ const LIST_PROJECTION = {
   codeflow: 0, // detail-page only (several KB per skill)
 };
 
+// Older rewritten descriptions froze template filler into prose: a trailing
+// "168k GitHub stars." / "70k+ stars." / "Popular." sentence (a number that
+// goes stale the day it is written — stars are already structured metadata on
+// every card) and a generic "For founders ..." audience line stamped on a
+// Docker updater and a trading bot alike. Scrub both at read time so every
+// surface (site, MCP search_skills, llms.txt) stops repeating them, without a
+// catalog rewrite.
+const STAR_SENTENCE = /(^|\.\s+)(?:[^.]{0,40}?\b(?:backed by|with)\s+)?[\d.,]+k?\+?\s+(?:GitHub\s+)?stars\.?(?=\s|$)/gi;
+const FILLER_SENTENCE = /(^|\.\s+)(?:Popular|For (?:busy )?founders[^.]{0,60})\.(?=\s|$)/gi;
+function scrubBoilerplate(desc) {
+  if (!desc || typeof desc !== 'string') return desc;
+  const out = desc
+    .replace(STAR_SENTENCE, (m, lead) => (lead === '' ? '' : '.'))
+    .replace(FILLER_SENTENCE, (m, lead) => (lead === '' ? '' : '.'))
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\.\s*\./g, '.')
+    .trim();
+  return out || desc;
+}
+
 // Apply to a skills array — adds title_human/description_human ONLY if missing.
 function applyFallback(skills) {
   return (skills || []).map((s) => ({
     ...s,
     title_human: s.title_human || prettyName(s.name),
-    description_human: s.description_human || prettyDesc(s.description),
+    description_human: scrubBoilerplate(s.description_human) || prettyDesc(s.description),
   }));
 }
 
@@ -777,10 +797,40 @@ export async function GET(request) {
           quality: { rewrite_score: -1, github_stars: -1 },
         };
         const sortSpec = SORT_SPECS[sortKey] || SORT_SPECS.trending;
-        [skills, total] = await Promise.all([
-          col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).skip(offset).limit(limit).toArray(),
-          col.countDocuments(query),
-        ]);
+        const searchTokens = search ? tokenizeSearch(search) : [];
+        if (searchTokens.length > 1) {
+          // The OR-across-tokens query buys recall, but sorting the matches
+          // by stars alone let one common token ("automation") drown the one
+          // that carried the intent ("n8n"): a live audit of "n8n automation"
+          // got a trading bot and a Docker updater. Re-rank a bounded window
+          // by how many distinct tokens each doc matches (name/title/slug
+          // count most), then fall back to the requested sort.
+          const window = Math.min(offset + limit + 150, 400);
+          const [candidates, count] = await Promise.all([
+            col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).limit(window).toArray(),
+            col.countDocuments(query),
+          ]);
+          const scored = candidates.map((s, idx) => {
+            const strong = `${s.name || ''} ${s.title_human || ''} ${s.slug || ''}`.toLowerCase();
+            const mid = `${s.category || ''} ${(s.github_topics || []).join(' ')}`.toLowerCase();
+            const weak = `${s.description || ''} ${s.description_human || ''}`.toLowerCase();
+            let matched = 0, weight = 0;
+            for (const t of searchTokens) {
+              const inStrong = strong.includes(t), inMid = mid.includes(t), inWeak = weak.includes(t);
+              if (inStrong || inMid || inWeak) matched++;
+              weight += inStrong ? 3 : inMid ? 2 : inWeak ? 1 : 0;
+            }
+            return { s, matched, weight, idx };
+          });
+          scored.sort((a, b) => b.matched - a.matched || b.weight - a.weight || a.idx - b.idx);
+          skills = scored.slice(offset, offset + limit).map((x) => x.s);
+          total = count;
+        } else {
+          [skills, total] = await Promise.all([
+            col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).skip(offset).limit(limit).toArray(),
+            col.countDocuments(query),
+          ]);
+        }
       }
 
       return Response.json({ skills: applyFallback(skills), total, hasMore: offset + skills.length < total });

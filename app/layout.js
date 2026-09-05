@@ -10,7 +10,6 @@ const mono = JetBrains_Mono({ subsets: ['latin'], weight: ['400','500','600','70
 export const metadata = {
   title: 'WorkflowStacks — Open-Source AI Skills & Agents',
   description: 'Install quality-gated open-source AI skills, agents and MCP servers into Claude, ChatGPT or Gemini — no code. Free catalog, templates, done-for-you builds.',
-  keywords: 'WorkflowStacks, AI skills marketplace, Claude skills, Gemini extensions, MCP servers, AI agents, no-code AI, paid ads automation, Meta ads AI, Google ads AI, TikTok ads AI, performance marketing AI, performance reporting AI, marketing dashboards, attribution AI, market research AI, competitor intelligence AI, SEO automation, AEO, GEO, ecommerce AI, AI for founders, AI for agencies',
   authors: [{ name: 'WorkflowStacks' }],
   creator: 'WorkflowStacks',
   publisher: 'WorkflowStacks',
@@ -38,9 +37,6 @@ export const metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
-  },
-  alternates: {
-    canonical: '/',
   },
 }
 
