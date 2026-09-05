@@ -76,6 +76,16 @@ export async function POST(request) {
   if (!skillId || !CHANNELS.has(channel)) {
     return Response.json({ ok: false }, { status: 400 })
   }
+  // First-touch attribution captured client-side (lib/analytics.js). Whitelist
+  // keys and clamp lengths so the collection never becomes a dumping ground.
+  const attribution = {}
+  if (body?.attribution && typeof body.attribution === 'object') {
+    for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid', 'ref', 'landing', 'referrer', 'first_seen']) {
+      const v = body.attribution[k]
+      if (typeof v === 'string' && v) attribution[k] = v.slice(0, 120)
+    }
+  }
+  const page = typeof body?.page === 'string' ? body.page.slice(0, 200) : ''
   // No DB configured (local dev): accept and drop, never break the client.
   if (!process.env.MONGO_URL) return new Response(null, { status: 202 })
   try {
@@ -84,6 +94,8 @@ export async function POST(request) {
       id: randomUUID(),
       skill_id: skillId,
       channel,
+      ...(page ? { page } : {}),
+      ...(Object.keys(attribution).length ? { attribution } : {}),
       created_at: new Date(),
     })
     // Same counter the catalog already sorts/displays with.

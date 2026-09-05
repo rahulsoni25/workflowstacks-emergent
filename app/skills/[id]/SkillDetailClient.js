@@ -11,6 +11,7 @@ import { motion } from 'framer-motion'
 import CodeflowCard from './CodeflowCard'
 import AddToClaude from '@/components/AddToClaude'
 import Disclosure from '@/components/Disclosure'
+import RelatedBundleCard from '@/components/RelatedBundleCard'
 
 function getCategoryColor(cat) {
   const colors = {
@@ -23,7 +24,7 @@ function getCategoryColor(cat) {
   return colors[cat] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
 }
 
-export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [] }) {
+export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [], bundle = null }) {
   const [copied, setCopied] = useState(false)
   const [reacted, setReacted] = useState(false)
   const [reactionCount, setReactionCount] = useState(skill.reactions_up || 0)
@@ -291,7 +292,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                   </div>
                 ) : (
                   <div>
-                    <h3 className="text-xl font-semibold text-white mb-4">About this skill</h3>
+                    <h2 className="text-xl font-semibold text-white mb-4">About this skill</h2>
                     {skill.readme_preview ? (
                       <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
                         <pre className="text-slate-300 whitespace-pre-wrap font-mono text-sm">{skill.readme_preview}</pre>
@@ -327,7 +328,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
               <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
                 <CardHeader>
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <CardTitle className="text-white flex items-center gap-2"><Eye className="w-5 h-5 text-teal-400" />What's inside — free to inspect</CardTitle>
+                    <h2 className="text-2xl font-semibold leading-none tracking-tight text-white flex items-center gap-2"><Eye className="w-5 h-5 text-teal-400" />What's inside — free to inspect</h2>
                     <Badge className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 border text-xs">No purchase needed</Badge>
                   </div>
                   <p className="text-slate-400 text-sm mt-1">Read the entire source before you build — unlike paid marketplaces that hide it behind a buy button.</p>
@@ -429,6 +430,8 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
             </Card>
           </motion.div>
         </div>
+
+        <RelatedBundleCard bundle={bundle} skill={skill} />
 
         {related.length > 0 && (
           <div className="mt-12 border-t border-slate-700/50 pt-10">

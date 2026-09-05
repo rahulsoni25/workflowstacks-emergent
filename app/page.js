@@ -2,6 +2,14 @@ import HomeClient from './HomeClient'
 import { homeFaqs } from '@/lib/home-faqs'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
+// The root layout no longer sets alternates.canonical — it silently applied
+// '/' to every route that forgot to declare one, so /help, /join and
+// /founder-launch each self-canonicalised to the homepage. The homepage
+// declares its own here instead.
+export const metadata = {
+  alternates: { canonical: '/' },
+}
+
 export const revalidate = 1800
 
 async function getJson(path) {

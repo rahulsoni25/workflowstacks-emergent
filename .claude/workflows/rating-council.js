@@ -9,7 +9,7 @@ export const meta = {
 // pages (~200k tokens/run). This lean version uses 1 Haiku agent and <=3 page
 // fetches (~15-30k tokens, a few cents). Pass args.thorough=true ONLY when you
 // want the heavier multi-agent pass.
-const BASE = (args && args.baseUrl) || 'https://workflowstacks-emergent.vercel.app'
+const BASE = (args && args.baseUrl) || 'https://workflowstacks.com'
 const BASELINE = (args && args.baseline) || {}
 const CB = (args && args.cacheBust) || 'rc'
 const THOROUGH = !!(args && args.thorough)

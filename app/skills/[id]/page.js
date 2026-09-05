@@ -1,5 +1,6 @@
 import { notFound, permanentRedirect } from 'next/navigation'
 import SkillDetailClient from './SkillDetailClient'
+import { relatedBundle } from '@/lib/bundles'
 import { buildCodeflow, summarize } from '@/lib/codeflow'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
@@ -144,15 +145,21 @@ export async function generateMetadata({ params }) {
   // status for unknown skill ids instead of a soft-404 200 (Next 14.2 quirk).
   if (!skill) notFound()
   const name = skill.title_human || skill.name
-  const title = `${name} | WorkflowStacks`
+  // Add the install intent when the result stays within a typical SERP title
+  // width; long tool names fall back to the plain pattern.
+  const withIntent = `${name} for Claude, ChatGPT & Gemini | WorkflowStacks`
+  const title = withIntent.length <= 65 ? withIntent : `${name} | WorkflowStacks`
   const description = clip(skill.description_human || skill.description || '')
   const url = `/skills/${skill.slug || skill.id}`
   return {
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { title, description, type: 'article', url, images: ['/opengraph-image'] },
-    twitter: { card: 'summary_large_image', title, description, images: ['/opengraph-image'] },
+    // No explicit `images`: the sibling opengraph-image.js renders a per-skill
+    // card, and listing the generic site-wide /opengraph-image here overrode
+    // it — every shared skill link showed the same anonymous preview.
+    openGraph: { title, description, type: 'article', url },
+    twitter: { card: 'summary_large_image', title, description },
   }
 }
 
@@ -212,7 +219,7 @@ export default async function SkillDetailPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
-      <SkillDetailClient skill={skill} sourceSpec={sourceSpec} codeflow={codeflow} related={related} />
+      <SkillDetailClient skill={skill} sourceSpec={sourceSpec} codeflow={codeflow} related={related} bundle={relatedBundle(skill)} />
     </>
   )
 }

@@ -7,7 +7,7 @@ export const meta = {
   ],
 }
 
-const BASE = (args && args.baseUrl) || 'https://workflowstacks-emergent.vercel.app'
+const BASE = (args && args.baseUrl) || 'https://workflowstacks.com'
 const CB = (args && args.cb) || 'rp'
 
 const PRIMER =

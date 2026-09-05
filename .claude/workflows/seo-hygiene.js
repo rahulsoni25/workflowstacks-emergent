@@ -4,7 +4,7 @@ export const meta = {
   phases: [{ title: 'Audit', detail: 'single Haiku agent audits SEO/AEO/GEO + proposes fixes' }],
 }
 
-const BASE = (args && args.baseUrl) || 'https://workflowstacks-emergent.vercel.app'
+const BASE = (args && args.baseUrl) || 'https://workflowstacks.com'
 const CB = (args && args.cacheBust) || 'seo'
 
 const SCHEMA = {

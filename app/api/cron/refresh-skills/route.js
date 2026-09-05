@@ -108,6 +108,59 @@ async function scrapeGitHub(topicQueries, opts = {}) {
   return skills;
 }
 
+
+// The search-based scrape above only touches repos that GitHub returns for a
+// "recently updated" topic query, so a listing that never re-surfaces there
+// keeps the star count from the day it was ingested — a live audit found a
+// flagship skill 23% under its real count. Walk the least-recently-synced
+// listings directly (GET /repos/:owner/:repo) within a small time and
+// request budget, oldest sync first, so the whole catalog cycles over time.
+async function refreshStaleStars(database) {
+  const hasToken = !!process.env.GITHUB_TOKEN;
+  const budget = hasToken ? 60 : 15; // unauthenticated GitHub allows 60 req/h
+  const deadline = Date.now() + 20_000;
+  const out = { refreshed: 0, missing: 0, skipped: 0 };
+  const docs = await database.collection('skills')
+    .find({ published: { $ne: false }, github_url: { $regex: '^https://github\\.com/[^/]+/[^/]+/?$' } },
+      { projection: { _id: 1, github_url: 1, stars_synced_at: 1 } })
+    .sort({ stars_synced_at: 1 }) // missing sorts first, then oldest
+    .limit(budget)
+    .toArray();
+
+  for (const doc of docs) {
+    if (Date.now() > deadline) { out.skipped += 1; continue; }
+    const m = String(doc.github_url).match(/^https:\/\/github\.com\/([^/]+)\/([^/]+?)\/?$/);
+    if (!m) { out.skipped += 1; continue; }
+    try {
+      const res = await fetch(`https://api.github.com/repos/${m[1]}/${m[2]}`, {
+        headers: ghHeaders(), signal: AbortSignal.timeout(6_000),
+      });
+      if (res.status === 403 || res.status === 429) { out.rateLimited = true; break; } // stop; next run resumes from the oldest sync
+      if (res.status === 404 || res.status === 451) {
+        // Repo gone or blocked: remember we checked, so the next run moves on.
+        await database.collection('skills').updateOne({ _id: doc._id }, { $set: { stars_synced_at: new Date(), repo_unavailable: true } });
+        out.missing += 1;
+        continue;
+      }
+      if (!res.ok) { out.skipped += 1; continue; }
+      const repo = await res.json();
+      if (typeof repo.stargazers_count !== 'number') { out.skipped += 1; continue; }
+      const $set = {
+        github_stars: repo.stargazers_count,
+        github_forks: repo.forks_count,
+        stars_synced_at: new Date(),
+        repo_unavailable: false,
+      };
+      if (repo.pushed_at) $set.last_updated = new Date(repo.pushed_at);
+      await database.collection('skills').updateOne({ _id: doc._id }, { $set });
+      out.refreshed += 1;
+    } catch {
+      out.skipped += 1;
+    }
+  }
+  return out;
+}
+
 export async function GET(request) {
   // Fail-CLOSED auth. Accepts Vercel Cron's `Authorization: Bearer <CRON_SECRET>`,
   // or x-cron-secret / x-admin-secret. Denies if no secret is configured.
@@ -184,10 +237,14 @@ export async function GET(request) {
 
     console.log(`✅ Refreshed ${scrapedSkills.length}, newly added ${inserted}`);
 
+    const stale = await refreshStaleStars(database);
+    console.log(`⭐ Star refresh: ${stale.refreshed} updated, ${stale.missing} missing upstream, ${stale.skipped} skipped`);
+
     return Response.json({
       success: true,
       scraped: scrapedSkills.length,
       newlyAdded: inserted,
+      starRefresh: stale,
       timestamp: new Date().toISOString()
     });
     
