@@ -20,6 +20,7 @@ const NAV_GROUPS = [
     label: 'Catalog',
     items: [
       { href: '/skills', label: 'All Skills', note: 'The open-source catalog' },
+      { href: '/ask', label: 'Ask', note: 'Describe your problem, get real tools' },
       { href: '/mcp', label: 'MCP Servers', note: 'Add tools to Claude Desktop' },
       { href: '/packs', label: 'Starter Packs', note: 'Skill bundles by job' },
       { href: '/personas', label: 'Personas', note: 'Role-in-a-box agents' },
