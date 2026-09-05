@@ -182,13 +182,27 @@ export async function GET(request) {
     
     // Founder-focused queries spanning every niche — trending & maintained repos
     const topicQueries = [
-      { query: 'topic:mcp-server OR model-context-protocol', category: 'mcp-server', minStars: 30 },
-      { query: 'topic:claude-skill OR claude anthropic tool', category: 'claude-skill', minStars: 20 },
+      { query: 'topic:mcp-server', category: 'mcp-server', minStars: 30 },
+      { query: 'model-context-protocol', category: 'mcp-server', minStars: 30 },
+      { query: 'topic:claude-skill', category: 'claude-skill', minStars: 20 },
+      { query: 'claude anthropic tool', category: 'claude-skill', minStars: 20 },
       { query: 'ai-agent OR autonomous-agent llm', category: 'ai-agent', minStars: 200 },
       { query: 'ai copywriting OR content-generation marketing', category: 'marketing', minStars: 80 },
-      { query: 'seo tools OR topic:seo', category: 'marketing', minStars: 150 },
+      { query: 'topic:seo', category: 'marketing', minStars: 150 },
+      { query: 'seo tools', category: 'marketing', minStars: 150 },
       { query: 'cold-email OR lead-generation OR outreach automation', category: 'sales', minStars: 50 },
       { query: 'open-source crm', category: 'sales', minStars: 200 },
+      // Finance vertical — condensed from /ingest. Quoted phrases and
+      // standalone `topic:` filters: mixing `topic:` into an OR with free text
+      // makes GitHub search return nothing.
+      { query: 'topic:accounting', category: 'finance', minStars: 50 },
+      { query: 'bookkeeping OR invoicing OR "expense tracker"', category: 'finance', minStars: 50 },
+      { query: 'topic:fintech', category: 'fintech', minStars: 100 },
+      { query: '"open banking" OR plaid-api', category: 'fintech', minStars: 10 },
+      { query: 'topic:algorithmic-trading', category: 'trading', minStars: 100 },
+      { query: '"trading bot" OR backtesting', category: 'trading', minStars: 300 },
+      { query: '"fraud detection"', category: 'risk-compliance', minStars: 50 },
+      { query: 'topic:kyc', category: 'risk-compliance', minStars: 5 },
       { query: 'saas boilerplate nextjs OR saas-starter', category: 'saas-starter', minStars: 200 },
       { query: 'workflow-automation OR n8n OR no-code', category: 'automation', minStars: 300 },
       { query: 'open-source product-analytics', category: 'analytics', minStars: 250 },

@@ -862,14 +862,17 @@ export async function GET(request) {
       // Founder-focused queries spanning every niche — trending & maintained repos
       const topicQueries = [
         // --- AI agents, MCP & Claude skills (core marketplace) ---
-        { query: 'topic:mcp-server OR model-context-protocol', category: 'mcp-server', minStars: 30 },
-        { query: 'topic:claude-skill OR claude anthropic tool', category: 'claude-skill', minStars: 20 },
+        { query: 'topic:mcp-server', category: 'mcp-server', minStars: 30 },
+        { query: 'model-context-protocol', category: 'mcp-server', minStars: 30 },
+        { query: 'topic:claude-skill', category: 'claude-skill', minStars: 20 },
+        { query: 'claude anthropic tool', category: 'claude-skill', minStars: 20 },
         { query: 'ai-agent OR autonomous-agent llm', category: 'ai-agent', minStars: 200 },
         { query: 'topic:rag retrieval-augmented-generation', category: 'ai-agent', minStars: 150 },
 
         // --- Marketing & growth ---
         { query: 'ai copywriting OR content-generation marketing', category: 'marketing', minStars: 80 },
-        { query: 'seo tools OR topic:seo', category: 'marketing', minStars: 150 },
+        { query: 'topic:seo', category: 'marketing', minStars: 150 },
+        { query: 'seo tools', category: 'marketing', minStars: 150 },
         { query: 'social-media automation', category: 'marketing', minStars: 100 },
 
         // --- Performance marketing & paid ads (Meta / Google / TikTok) ---
@@ -910,6 +913,45 @@ export async function GET(request) {
         { query: 'cold-email OR lead-generation OR outreach automation', category: 'sales', minStars: 50 },
         { query: 'open-source crm', category: 'sales', minStars: 200 },
 
+        // --- Finance & accounting (the CFO / controller stack) ---
+        // Query shape matters here, and was verified against the live GitHub
+        // search API before landing:
+        //   * `topic:` OR'd with free text returns ZERO results, so every topic
+        //     filter gets its own entry (`personal-finance OR topic:finance`
+        //     returned 0; `topic:personal-finance` alone returns ~50).
+        //   * Multi-word terms are quoted. Unquoted `credit-risk OR
+        //     credit-scoring model` matched 8,405 mostly-unrelated repos
+        //     (top hit was a three.js image converter); `"credit risk" OR
+        //     "credit scoring"` matches 2, both real.
+        { query: 'topic:accounting', category: 'finance', minStars: 50 },
+        { query: 'topic:personal-finance', category: 'finance', minStars: 50 },
+        { query: 'bookkeeping OR invoicing OR "expense tracker"', category: 'finance', minStars: 50 },
+        { query: '"financial modeling" OR "financial analysis"', category: 'finance', minStars: 50 },
+        { query: 'quickbooks-api OR xero-api OR netsuite-api', category: 'finance', minStars: 3 },
+
+        // --- Fintech infrastructure: payments, banking, ledgers ---
+        { query: 'topic:fintech', category: 'fintech', minStars: 100 },
+        { query: 'topic:payments', category: 'fintech', minStars: 200 },
+        { query: '"open banking" OR plaid-api', category: 'fintech', minStars: 10 },
+        { query: '"double-entry" ledger', category: 'fintech', minStars: 30 },
+        { query: 'billing-engine OR "usage-based billing"', category: 'fintech', minStars: 50 },
+
+        // --- Trading, market data & quant research ---
+        { query: 'topic:algorithmic-trading', category: 'trading', minStars: 100 },
+        { query: 'topic:quantitative-finance', category: 'trading', minStars: 100 },
+        { query: '"trading bot" OR backtesting', category: 'trading', minStars: 300 },
+        { query: '"market data" OR yfinance', category: 'trading', minStars: 100 },
+        { query: '"portfolio optimization"', category: 'trading', minStars: 50 },
+
+        // --- Risk, fraud & regulatory compliance ---
+        // Thresholds are low on purpose: compliance OSS is a thin, young slice
+        // (the sanctions/AML query returns 3 repos in total at stars:>10).
+        { query: '"fraud detection"', category: 'risk-compliance', minStars: 50 },
+        { query: 'topic:kyc', category: 'risk-compliance', minStars: 5 },
+        { query: '"anti-money laundering" OR "sanctions screening"', category: 'risk-compliance', minStars: 10 },
+        { query: '"regulatory reporting" OR "compliance automation"', category: 'risk-compliance', minStars: 20 },
+        { query: '"credit risk" OR "credit scoring"', category: 'risk-compliance', minStars: 30 },
+
         // --- Build / ship product (SaaS founders) ---
         { query: 'saas boilerplate nextjs OR saas-starter', category: 'saas-starter', minStars: 200 },
         { query: 'stripe subscription billing saas', category: 'saas-starter', minStars: 80 },
@@ -927,20 +969,37 @@ export async function GET(request) {
         { query: 'awesome startup OR indie-hackers OR founder resources', category: 'founder-resource', minStars: 200 },
 
         // --- Emerging 2026/2027 categories (forward-looking) ---
-        { query: 'computer-use OR browser-use OR topic:computer-use-agent', category: 'computer-use', minStars: 80 },
+        { query: 'topic:computer-use-agent', category: 'computer-use', minStars: 80 },
+        { query: 'computer-use OR browser-use', category: 'computer-use', minStars: 80 },
         { query: 'voice-agent OR realtime-voice OR text-to-speech agent', category: 'voice-ai', minStars: 100 },
-        { query: 'agent-memory OR long-term-memory llm OR topic:memory', category: 'agent-memory', minStars: 80 },
+        { query: 'topic:memory llm', category: 'agent-memory', minStars: 80 },
+        { query: 'agent-memory OR "long-term memory"', category: 'agent-memory', minStars: 80 },
         { query: 'llm-evaluation OR llm-observability OR ai-guardrails', category: 'ai-evals', minStars: 100 },
         { query: 'on-device llm OR local-llm OR edge-ai', category: 'local-ai', minStars: 150 },
         { query: 'multi-agent OR agent-orchestration OR autonomous agents', category: 'multi-agent', minStars: 200 }
       ];
 
       // Read options: /ingest?sort=updated&days=120  (defaults pull NEWEST content)
+      // Optional `?category=finance,fintech` runs only those slices. The full
+      // list is ~65 queries, each of which fetches a README per repo when a
+      // GITHUB_TOKEN is set — enough requests to risk a function timeout, so
+      // a vertical can be pulled on its own instead of re-running everything.
       const { searchParams } = new URL(request.url);
       const sort = searchParams.get('sort') || 'updated';
       const sinceDays = parseInt(searchParams.get('days') || '120', 10);
+      const wanted = (searchParams.get('category') || '')
+        .split(',').map((c) => c.trim()).filter(Boolean);
+      const selected = wanted.length
+        ? topicQueries.filter((q) => wanted.includes(q.category))
+        : topicQueries;
+      if (wanted.length && selected.length === 0) {
+        return Response.json({
+          error: `No ingest queries for category: ${wanted.join(', ')}`,
+          available: [...new Set(topicQueries.map((q) => q.category))].sort(),
+        }, { status: 400 });
+      }
 
-      const scrapedSkills = await scrapeGitHub(topicQueries, { limit: 8, sort, sinceDays });
+      const scrapedSkills = await scrapeGitHub(selected, { limit: 8, sort, sinceDays });
 
       // SAFE UPSERT — refresh metadata for known repos, add new ones, and NEVER
       // overwrite curated fields (title_human/description_human/category) or wipe data.
@@ -991,6 +1050,8 @@ export async function GET(request) {
 
       return Response.json({
         message: 'Ingestion complete — newest GitHub content pulled (safe upsert, rewrites preserved).',
+        categories: [...new Set(selected.map((q) => q.category))],
+        queriesRun: selected.length,
         scraped: scrapedSkills.length,
         newlyAdded: inserted,
         refreshed,
@@ -1067,6 +1128,44 @@ export async function GET(request) {
         if (hasTopic('mcp', 'mcp-server', 'model-context-protocol') || has('model-context-protocol', 'mcp-server', 'mcp server')) return 'mcp-server';
         if (hasTopic('claude', 'anthropic', 'claude-skill') || has('claude skill', 'anthropic claude')) return 'claude-skill';
         if (has('prompt engineering', 'awesome-prompts', 'system-prompt', 'prompt library')) return 'prompt';
+        // --- Finance vertical ---
+        // Checked BEFORE devtools/saas-starter/analytics on purpose: "backtesting"
+        // contains "testing" (devtools), billing repos mention "subscription"
+        // (saas-starter), and every finance tool ships a "dashboard" (analytics).
+        // Every phrase below is multi-word or unambiguous — no bare 'tax'
+        // (matches "syntax"), no bare 'aml' (matches "yaml"), no bare 'trading'
+        // (matches "trading cards"), and 'stripe' is deliberately left to
+        // saas-starter, where the existing boilerplate listings already sit.
+        if (hasTopic('algorithmic-trading', 'quantitative-finance', 'trading-bot', 'quant') ||
+            has('algorithmic trading', 'algorithmic-trading', 'algo-trading', 'trading bot', 'trading-bot',
+                'backtest', 'quantitative finance', 'quantitative-finance', 'quant trading',
+                'market data', 'market-data', 'stock market', 'stock-market', 'yfinance',
+                'portfolio optimization', 'portfolio-optimization', 'order book', 'order-book',
+                'technical indicators', 'options pricing')) return 'trading';
+        if (hasTopic('fraud-detection', 'kyc', 'aml', 'compliance') ||
+            has('fraud detection', 'fraud-detection', 'anti-money-laundering', 'money laundering',
+                'kyc', 'know your customer', 'know-your-customer', 'sanctions screening', 'sanctions-screening',
+                'transaction monitoring', 'transaction-monitoring', 'credit risk', 'credit-risk',
+                'credit scoring', 'credit-scoring', 'regulatory reporting', 'regulatory-reporting',
+                'compliance automation', 'compliance-automation')) return 'risk-compliance';
+        // Known accepted overlap: repos that self-tag both `fintech` and
+        // `personal-finance`/`accounting` (ghostfolio, tigerbeetle) land in
+        // fintech because this rule runs first. Both readings are defensible
+        // and both sit in the finance vertical, so it isn't worth more rules.
+        if (hasTopic('fintech', 'payments', 'ledger', 'open-banking') ||
+            has('general ledger', 'general-ledger', 'ledger database', 'transaction ledger',
+                'open banking', 'open-banking', 'payment gateway', 'payment-gateway', 'payments api',
+                'payments-api', 'banking api', 'banking-api', 'core banking', 'core-banking',
+                'plaid-api', 'iso20022', 'iso-20022', 'billing engine', 'billing-engine',
+                'usage-based billing', 'usage-based-billing')) return 'fintech';
+        if (hasTopic('accounting', 'finance', 'bookkeeping', 'invoicing', 'personal-finance') ||
+            has('accounting', 'bookkeeping', 'double-entry', 'double entry', 'invoicing',
+                'invoice generator', 'invoice-generator',
+                'expense tracker', 'expense-tracker', 'expense management', 'financial modeling',
+                'financial-modeling', 'financial statements', 'financial analysis', 'financial-analysis',
+                'fp&a', 'budgeting app', 'budgeting-app', 'personal finance', 'personal-finance',
+                'quickbooks', 'xero-api', 'netsuite', 'payroll', 'tax calculation', 'tax-calculation',
+                'tax filing')) return 'finance';
         if (has('puppeteer', 'playwright', 'selenium', 'scraper', 'scraping', 'browser-automation', 'testing', 'e2e', 'ansible', 'kubernetes', 'devops', 'home-assistant')) return 'devtools';
         if (has('crm', 'cold-email', 'cold email', 'lead-generation', 'lead generation', 'outreach', 'prospect', 'sales pipeline', 'erpnext')) return 'sales';
         // Performance marketing — Meta / Google / TikTok ads, ad-creative tooling.
@@ -1502,7 +1601,8 @@ export async function GET(request) {
       const category = searchParams.get('category') || '';
       const catMap = {
         Sales: ['sales'], Marketing: ['marketing'], Support: ['support'],
-        Ops: ['automation', 'devtools', 'mcp-server'], Finance: ['analytics'],
+        Ops: ['automation', 'devtools', 'mcp-server'],
+        Finance: ['finance', 'fintech', 'trading', 'risk-compliance', 'analytics'],
         Product: ['ai-agent', 'saas-starter', 'multi-agent'],
       };
       const cats = catMap[category] || [];
@@ -2183,6 +2283,15 @@ export async function POST(request) {
         },
         {
           id: uuidv4(),
+          name: 'Finance Ops Pack',
+          description: 'Close the books faster: accounting, invoicing, and reporting tools that replace spreadsheet chores',
+          audience: 'Finance',
+          useCase: 'Finance Operations',
+          skillIds: pick(['finance', 'fintech', 'analytics'], 4),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
           name: 'Developer Productivity Pack',
           description: 'Supercharge your coding and shipping workflow with AI',
           audience: 'Developer',
@@ -2225,6 +2334,16 @@ export async function POST(request) {
         },
         {
           id: uuidv4(),
+          title: 'Automate the Month-End Close',
+          description: 'Pull transactions, reconcile accounts, and produce a management report without the manual spreadsheet pass',
+          audience: 'Finance',
+          useCase: 'Finance Operations',
+          problem: 'Month-end close eats a week of manual reconciliation and copy-paste reporting',
+          skillIds: pick(['finance', 'analytics', 'automation'], 4),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
           title: 'Ship Your MVP in a Weekend',
           description: 'Use SaaS starters and automation to go from idea to live product fast',
           audience: 'Developer',
@@ -2259,6 +2378,22 @@ export async function POST(request) {
           description: 'Fill the pipeline: lead research, personalized outreach, and follow-ups that book meetings.',
           audience: 'Sales',
           skillIds: pick(['sales'], 4),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          name: 'Fractional CFO',
+          description: 'Run the numbers: bookkeeping, cash-flow forecasting, and board-ready reporting without a finance team.',
+          audience: 'Finance',
+          skillIds: pick(['finance', 'analytics', 'fintech'], 5),
+          created_at: new Date()
+        },
+        {
+          id: uuidv4(),
+          name: 'Risk & Compliance Analyst',
+          description: 'Catch what matters: fraud screening, KYC checks, and regulatory reporting driven by agents instead of checklists.',
+          audience: 'Finance',
+          skillIds: pick(['risk-compliance', 'analytics', 'ai-agent'], 4),
           created_at: new Date()
         },
         {
