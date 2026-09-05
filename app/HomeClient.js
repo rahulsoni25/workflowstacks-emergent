@@ -381,12 +381,15 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
           {/* ---------- STEP 1 ---------- */}
           {step === 1 && (
             <div className="anim-rise mt-7 flex w-full flex-col items-center gap-[22px]">
+              <p className="m-0 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-[#8B928D]">
+                Open-source AI skills, agents &amp; MCP servers · Claude · ChatGPT · Gemini
+              </p>
               <h1 className="m-0 text-center font-bold tracking-[-0.04em] text-[clamp(44px,6.2vw,76px)] leading-[0.98] [text-wrap:balance]">
                 What should your AI agent do?
               </h1>
               <p className="m-0 max-w-[560px] text-center text-lg leading-[1.45] text-[#8B928D] [text-wrap:pretty]">
                 Describe the job. We match it against{' '}
-                <span className="text-[#ECEFEA]">{countLabel ? `${countLabel} scored open-source repos` : 'our scored open-source catalog'}</span>, wire the
+                <span className="text-[#ECEFEA]">{countLabel ? `${countLabel} scored open-source AI skills, agents and MCP servers` : 'our scored catalog of open-source AI skills, agents and MCP servers'}</span>, wire the
                 best one into a blueprint, and install it in Claude, ChatGPT or Gemini. No code.
               </p>
               <form

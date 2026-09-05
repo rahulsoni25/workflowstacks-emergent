@@ -805,7 +805,7 @@ export async function GET(request) {
         };
         const sortSpec = SORT_SPECS[sortKey] || SORT_SPECS.trending;
         const searchTokens = search ? tokenizeSearch(search) : [];
-        if (searchTokens.length > 1) {
+        if (searchTokens.length >= 1) {
           // The OR-across-tokens query buys recall, but sorting the matches
           // by stars alone let one common token ("automation") drown the one
           // that carried the intent ("n8n"): a live audit of "n8n automation"

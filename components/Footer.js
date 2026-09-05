@@ -2,8 +2,9 @@ import Link from 'next/link'
 import { Sparkles } from 'lucide-react'
 import WsMark from '@/components/WsMark'
 
-// Mirrors the groups in components/SiteHeader.js so the footer and the
-// header nav never drift apart the way the old footer had.
+// The footer is the full site map; components/SiteHeader.js carries a
+// deliberately shorter three-group version for first-time visitors. Every
+// destination dropped from the header stays reachable from here.
 const footerLinks = {
   templatesAndTools: {
     title: 'Templates & Tools',
