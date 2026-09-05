@@ -2,6 +2,17 @@ import { getStripe, SITE_URL, PLATFORM_FEE_PCT } from '@/lib/stripe'
 import { getBundle } from '@/lib/bundles'
 import { getDb } from '@/lib/mongo'
 
+// Stripe metadata values must be strings <= 500 chars; keep only the campaign
+// keys we set client-side so a sale can be matched to the ad that produced it.
+function attributionMeta(a) {
+  if (!a || typeof a !== 'object') return {}
+  const out = {}
+  for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid', 'ref', 'landing']) {
+    if (typeof a[k] === 'string' && a[k]) out[k] = a[k].slice(0, 100)
+  }
+  return out
+}
+
 export const runtime = 'nodejs'
 
 // Create a Checkout Session to buy a paid agent (creator gets paid via Connect; platform takes a fee).
@@ -31,7 +42,7 @@ export async function POST(request) {
         customer_creation: 'always',
         success_url: `${SITE_URL}/bundles/${bundle.slug}?purchased=1&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${SITE_URL}/bundles/${bundle.slug}`,
-        metadata: { bundleId: bundle.slug, type: 'bundle' },
+        metadata: { bundleId: bundle.slug, type: 'bundle' , ...attributionMeta(body?.attribution) },
       })
       return Response.json({ url: session.url })
     } catch (e) {

@@ -1,5 +1,6 @@
 import { notFound, permanentRedirect } from 'next/navigation'
 import SkillDetailClient from './SkillDetailClient'
+import { relatedBundle } from '@/lib/bundles'
 import { buildCodeflow, summarize } from '@/lib/codeflow'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
@@ -215,7 +216,7 @@ export default async function SkillDetailPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
-      <SkillDetailClient skill={skill} sourceSpec={sourceSpec} codeflow={codeflow} related={related} />
+      <SkillDetailClient skill={skill} sourceSpec={sourceSpec} codeflow={codeflow} related={related} bundle={relatedBundle(skill)} />
     </>
   )
 }

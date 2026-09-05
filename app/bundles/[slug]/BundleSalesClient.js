@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getUtm, trackEvent } from '@/lib/analytics'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { ArrowLeft, Check, Lock, Loader2, KeyRound, Wrench } from 'lucide-react'
@@ -37,10 +38,12 @@ export default function BundleSalesClient({ bundle }) {
     setState('working')
     setError('')
     try {
+      const attribution = getUtm()
+      trackEvent('checkout_start', { bundle: bundle.slug, value: bundle.price_usd, currency: 'USD', ...(attribution || {}) })
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bundleId: bundle.slug }),
+        body: JSON.stringify({ bundleId: bundle.slug, attribution }),
       })
       const data = await res.json()
       if (!res.ok || !data.url) throw new Error(data.error || 'Checkout unavailable — try again.')

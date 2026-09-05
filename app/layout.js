@@ -1,6 +1,7 @@
 import './globals.css'
 import SiteHeader from '@/components/SiteHeader'
 import Footer from '@/components/Footer'
+import Analytics from '@/components/Analytics'
 import { SITE_URL } from '@/lib/site-url'
 import { Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 
@@ -86,6 +87,7 @@ export default function RootLayout({ children }) {
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <Footer />
+        <Analytics />
       </body>
     </html>
   )
