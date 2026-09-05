@@ -419,11 +419,18 @@ const LIST_PROJECTION = {
 // catalog rewrite.
 const STAR_SENTENCE = /(^|\.\s+)(?:[^.]{0,40}?\b(?:backed by|with)\s+)?[\d.,]+k?\+?\s+(?:GitHub\s+)?stars\.?(?=\s|$)/gi;
 const FILLER_SENTENCE = /(^|\.\s+)(?:Popular|For (?:busy )?founders[^.]{0,60})\.(?=\s|$)/gi;
+// Mid-sentence variants the live catalog actually shows: ", with 191k+ GitHub
+// stars" / ", backed by 31k+ GitHub stars" and "platform for founders, with".
+const STAR_CLAUSE = /,?\s*(?:backed by|with|boasting|and)\s+(?:over\s+)?[\d.,]+k?\+?\s+(?:GitHub\s+)?stars(?=[,.;]|\s|$)/gi;
+const FOUNDER_CLAUSE = /\s+for (?:busy |startup |indie )?founders(?=[,.;]|\s+with\b)/gi;
 function scrubBoilerplate(desc) {
   if (!desc || typeof desc !== 'string') return desc;
   const out = desc
     .replace(STAR_SENTENCE, (m, lead) => (lead === '' ? '' : '.'))
     .replace(FILLER_SENTENCE, (m, lead) => (lead === '' ? '' : '.'))
+    .replace(STAR_CLAUSE, '')
+    .replace(FOUNDER_CLAUSE, '')
+    .replace(/,\s*([.;])/g, '$1')
     .replace(/\s{2,}/g, ' ')
     .replace(/\.\s*\./g, '.')
     .trim();

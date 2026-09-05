@@ -11,6 +11,7 @@ import { motion } from 'framer-motion'
 import CodeflowCard from './CodeflowCard'
 import AddToClaude from '@/components/AddToClaude'
 import Disclosure from '@/components/Disclosure'
+import RelatedBundleCard from '@/components/RelatedBundleCard'
 
 function getCategoryColor(cat) {
   const colors = {
@@ -23,7 +24,7 @@ function getCategoryColor(cat) {
   return colors[cat] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
 }
 
-export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [] }) {
+export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [], bundle = null }) {
   const [copied, setCopied] = useState(false)
   const [reacted, setReacted] = useState(false)
   const [reactionCount, setReactionCount] = useState(skill.reactions_up || 0)
@@ -429,6 +430,8 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
             </Card>
           </motion.div>
         </div>
+
+        <RelatedBundleCard bundle={bundle} skill={skill} />
 
         {related.length > 0 && (
           <div className="mt-12 border-t border-slate-700/50 pt-10">
