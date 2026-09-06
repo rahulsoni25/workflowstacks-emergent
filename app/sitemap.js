@@ -4,6 +4,7 @@ import { OUTCOMES } from '../lib/outcomes'
 import { MCP_SERVERS } from '../lib/mcp-servers'
 import { KITS } from '../lib/kits'
 import { SLASH_COMMANDS } from '../lib/commands'
+import { isAiRelevant, guideRichness } from '../lib/skill-relevance'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
 // --- Why this file gates skill pages -----------------------------------
@@ -32,24 +33,16 @@ const SKILL_SITEMAP_GATE = {
   minGuideRichness: 600, // chars of OUR written guidance; ~1/3 of the catalog falls below this
 }
 
-// use_guide is an OBJECT ({whatItDoes, whenToUse[], install, quickStart,
-// examplePrompt, gotcha}), not a string. `install` is deliberately excluded —
-// it's generic boilerplate ("git clone ...") on most entries, so counting it
-// would inflate thin pages. The remaining fields are what we actually wrote.
-function guideRichness(g) {
-  if (!g || typeof g !== 'object') return 0
-  const text = [g.whatItDoes, g.quickStart, g.examplePrompt, g.gotcha]
-    .filter((x) => typeof x === 'string')
-    .join(' ')
-  const whenToUse = Array.isArray(g.whenToUse) ? g.whenToUse.join(' ') : ''
-  return text.length + whenToUse.length
-}
-
 function passesSkillGate(s) {
   const score = typeof s.rewrite_score === 'number' ? s.rewrite_score : 0
   const stars = typeof s.github_stars === 'number' ? s.github_stars : 0
   return (
     !s.dead_repo &&
+    // Topical relevance, judged from the upstream repo rather than our stored
+    // `category` field — that field is unreliable enough to have filed the
+    // Linux kernel, Flutter and yt-dlp as `ai-agent`, which is how those pages
+    // ended up submitted to Google as top-tier assets. See lib/skill-relevance.
+    isAiRelevant(s) &&
     score >= SKILL_SITEMAP_GATE.minRewriteScore &&
     stars >= SKILL_SITEMAP_GATE.minStars &&
     guideRichness(s.use_guide) >= SKILL_SITEMAP_GATE.minGuideRichness

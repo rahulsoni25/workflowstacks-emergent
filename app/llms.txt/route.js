@@ -5,6 +5,7 @@ import { OUTCOMES } from '@/lib/outcomes'
 import { KITS, kitItemCount } from '@/lib/kits'
 import { SLASH_COMMANDS } from '@/lib/commands'
 import { SITE_URL } from '@/lib/schema'
+import { isAiRelevant, qualityRank } from '@/lib/skill-relevance'
 
 export const revalidate = 86400
 
@@ -25,12 +26,22 @@ export const revalidate = 86400
 // as llms-full.txt.
 async function topSkills(limit = 40) {
   try {
-    const res = await fetch(`${SITE_URL}/api/skills?sort=popular&limit=${limit}`, {
+    // Pull a wide slice and rank it ourselves. `sort=popular` orders by raw
+    // GitHub stars, which handed answer engines the Linux kernel, Vue, Flutter,
+    // yt-dlp and a Windows license-activation toolkit as the top "AI skills for
+    // founders" — roughly half of the old top 40. An engine deciding whether to
+    // cite this site as an authority on AI tooling reads exactly that list, so
+    // it has to be both on-topic and our best work, not merely popular.
+    const res = await fetch(`${SITE_URL}/api/skills?sort=popular&limit=400`, {
       next: { revalidate: 86400 },
       signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) return []
-    return (await res.json()).skills || []
+    const all = (await res.json()).skills || []
+    return all
+      .filter((s) => !s.dead_repo && isAiRelevant(s))
+      .sort((a, b) => qualityRank(b) - qualityRank(a))
+      .slice(0, limit)
   } catch {
     return []
   }
