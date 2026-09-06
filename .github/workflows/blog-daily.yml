@@ -39,9 +39,13 @@ jobs:
             "$BASE_URL/api/blog/pipeline?action=start" | tee /tmp/start.json
           echo
 
-      - name: Advance until done (sections → edit → judge → schedule)
+      - name: Advance until done (sections → edit → judge → revise → schedule)
         run: |
-          for i in $(seq 1 22); do
+          # 30, not 22: a judge score under the gate now sends the article back
+          # for up to two revisions, and each revision costs three more advances
+          # (revise, re-humanize, re-judge). 22 was enough for a straight run
+          # and would have cut a revising article off mid-loop.
+          for i in $(seq 1 30); do
             R=$(curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
               "$BASE_URL/api/blog/pipeline?action=advance") || break
             echo "step $i: $R"

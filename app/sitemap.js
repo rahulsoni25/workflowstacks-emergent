@@ -20,15 +20,41 @@ import { SITE_URL as BASE } from '@/lib/site-url'
 // production method, so volume alone is a liability here.
 //
 // The gate below submits only skill pages carrying our OWN substantive
-// content (a real use_guide), top rewrite quality, and enough upstream
+// content (a real use_guide), high rewrite quality, and enough upstream
 // notability to have genuine search demand.
 //
 // IMPORTANT: this narrows the sitemap only. Every skill page stays live,
 // internally linked, and indexable — removing a URL from a sitemap is a
 // discovery hint, not a deindex request. Already-indexed pages keep their
-// index status. Raise these thresholds' generosity as domain authority grows.
+// index status.
+//
+// --- Why the score threshold moved 9 -> 8 (stage 1 of a staged widening) ---
+// The original gate carried no topical relevance test, so `minRewriteScore: 9`
+// and `minStars: 1000` were doing double duty: filtering for quality AND, by
+// accident, for "is this even an AI tool". They filtered badly at the second
+// job — /skills/linux, /skills/flutter and /skills/youtube-dl all cleared it.
+//
+// Relevance is now enforced explicitly by isAiRelevant(), which frees the
+// score threshold to mean only what it says. Against the live catalog:
+//
+//   score>=9, stars>=1000, guide>=600  ->  143 pages   (previous behaviour)
+//   score>=8, stars>=1000, guide>=600  ->  447 pages   (this commit)
+//   score>=8, stars>=100,  guide>=600  ->  871 pages
+//   score>=8, stars>=0,    guide>=600  ->  952 pages
+//
+// 8 is the publish gate, so every page in the 447 already cleared the quality
+// bar we set for showing it to a human at all, carries 600+ chars of guidance
+// we wrote, and describes a tool notable enough (1k+ stars) for its name to
+// have real query volume. That is a defensible expansion.
+//
+// We deliberately do NOT jump to 871 or 952. Relaxing `minStars` is what
+// reinstates the original failure — a sitemap dominated by pages for tools
+// nobody searches for by name, on a domain with little authority. The next
+// widening should be driven by Search Console coverage data for these 447,
+// not by another guess. Search Console is not currently connected; connecting
+// it is the prerequisite for stage 2.
 const SKILL_SITEMAP_GATE = {
-  minRewriteScore: 9, // top tier; publish gate is 8, so 9 = best ~22% (351/1578)
+  minRewriteScore: 8, // == the publish gate; relevance is handled separately now
   minStars: 1000, // upstream notability => real query volume for the tool name
   minGuideRichness: 600, // chars of OUR written guidance; ~1/3 of the catalog falls below this
 }

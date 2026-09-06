@@ -13,7 +13,7 @@ import { postsCollection, topicQueueCollection, keywordsCollection, slugify, cou
 import { assembleBody } from '@/lib/blog/markdown'
 import { runSeoChecks, SEO_PASS_MARK } from '@/lib/blog/seo-check'
 import { callLLM, callJson, providersAvailable } from '@/lib/blog/llm'
-import { SCOUT_SYSTEM, KEYWORD_SYSTEM, BRIEF_SYSTEM, WRITE_SYSTEM, EDIT_SYSTEM, JUDGE_SYSTEM, CLAIM_FIX_SYSTEM, HUMANIZE_SYSTEM } from '@/lib/blog/prompts'
+import { SCOUT_SYSTEM, KEYWORD_SYSTEM, BRIEF_SYSTEM, WRITE_SYSTEM, EDIT_SYSTEM, JUDGE_SYSTEM, CLAIM_FIX_SYSTEM, HUMANIZE_SYSTEM, REVISE_SYSTEM } from '@/lib/blog/prompts'
 import { styleCheck, overlapWithCorpus, OVERLAP_LIMIT } from '@/lib/blog/style-check'
 import { serpSearch, rankFor } from '@/lib/blog/serp'
 import { suggestLinks, linkUniverse } from '@/lib/blog/links'
@@ -23,6 +23,13 @@ export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
 const JUDGE_GATE = 8
+// The judge already reports which sections it wants rewritten and why; until
+// now that verdict was discarded and anything under the gate was terminal.
+// Three consecutive days of the pipeline running to completion and holding at
+// 6.0-6.5 is what a hard gate with no revision path looks like — the writer
+// never got the note. Bounded so a genuinely weak topic still stops rather
+// than looping on free Groq tokens forever.
+const MAX_REVISIONS = 2
 
 // Groq's free tier rejects large requests outright (413) — it can't fit a
 // full 2,500-word article in one call. When a full-payload call fails that
@@ -321,9 +328,66 @@ async function advance() {
       }
     }
     const body_md = assembleBody({ ...post, sections })
+    const attempt = (post.revisions || 0)
+    const history = [...(post.judge_history || []), { score: judge.score, rubric: judge.rubric, at: now }]
+
+    // Below the gate, but with revisions left: hand the writer the editor's
+    // note and try again. The gate itself never moves — nothing ships under 8.
+    if (judge.score < JUDGE_GATE && attempt < MAX_REVISIONS) {
+      const flagged = Array.isArray(judge.revise_sections)
+        ? judge.revise_sections.filter((i) => Number.isInteger(i) && sections[i])
+        : []
+      // Pass the FULL section array, never a filtered subset: callJsonSplit
+      // re-stamps `index` from array position, so handing it only sections
+      // [2,5] would come back as indexes 0 and 1 and overwrite the wrong two.
+      // Which sections to touch is communicated as data instead.
+      const targets = flagged.length ? flagged : sections.map((_, i) => i)
+      const { data: revised } = await callJsonSplit(
+        { system: REVISE_SYSTEM, tier: 'strong', maxTokens: 4000, tag: `revise:${post.slug}:${attempt + 1}` },
+        sections,
+        (chunk) => JSON.stringify({
+          revise_only_these_indexes: targets,
+          rubric: judge.rubric,
+          rationale: judge.rationale,
+          score: judge.score,
+          gate: JUDGE_GATE,
+          brief: { outline: post.brief?.outline, firsthand_section: post.brief?.firsthand_section, table_spec: post.brief?.table_spec },
+          primary_keyword: post.seo?.primary,
+          persona: post.persona,
+          sources: post.sources,
+          sections: chunk,
+        })
+      ).catch(() => ({ data: null }))
+
+      let next = sections
+      if (revised?.sections?.length) {
+        next = [...sections]
+        for (const r of revised.sections) if (next[r.index]) next[r.index] = { ...next[r.index], md: r.md }
+      }
+      // Back to 'edited' rather than straight to the judge, so the humanizer
+      // re-runs and a revision cannot smuggle machine-writing tells back in.
+      await col.updateOne({ slug: post.slug }, { $set: {
+        sections: next,
+        body_md: assembleBody({ ...post, sections: next }),
+        judge: { ...judge, at: now },
+        judge_history: history,
+        revisions: attempt + 1,
+        status: revised?.sections?.length ? 'edited' : 'held',
+        updated_at: now,
+      } })
+      return {
+        slug: post.slug,
+        step: 'judged',
+        score: judge.score,
+        status: revised?.sections?.length ? 'revising' : 'held',
+        revision: attempt + 1,
+        revised_sections: revised?.sections?.length || 0,
+      }
+    }
+
     const status = judge.score >= JUDGE_GATE ? 'judged' : 'held'
-    await col.updateOne({ slug: post.slug }, { $set: { sections, body_md, judge: { ...judge, at: now }, status, updated_at: now } })
-    return { slug: post.slug, step: 'judged', score: judge.score, status }
+    await col.updateOne({ slug: post.slug }, { $set: { sections, body_md, judge: { ...judge, at: now }, judge_history: history, status, updated_at: now } })
+    return { slug: post.slug, step: 'judged', score: judge.score, status, revisions: attempt }
   }
 
   // 4. Schedule into the next free daily slot. Kill switch honoured.
