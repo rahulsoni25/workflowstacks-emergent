@@ -135,7 +135,27 @@ Create an AI agent blueprint from multiple skills
 MONGO_URL=mongodb://localhost:27017
 DB_NAME=workflowstacks
 NEXT_PUBLIC_BASE_URL=https://your-domain.com
+ADMIN_SECRET=your-admin-secret          # gates /api/gsc, /api/validation-stats, the blog pipeline
+
+# Google Search Console (optional) — see docs/GOOGLE-SEARCH-CONSOLE.md
+GSC_SITE_URL=sc-domain:workflowstacks.com
+GSC_SERVICE_ACCOUNT_JSON=               # base64 of the service-account JSON key
+# ...or OAuth instead of a service account:
+# GSC_OAUTH_CLIENT_ID=
+# GSC_OAUTH_CLIENT_SECRET=
+# GSC_OAUTH_REFRESH_TOKEN=
 ```
+
+## 🔍 Google Search Console
+
+GSC is the ground truth for Google rankings across the blog pipeline and SEO
+tooling. `lib/gsc.js` reads the Search Analytics and URL Inspection APIs with no
+SDK dependency; `/api/gsc` exposes it behind `ADMIN_SECRET`, and
+`/admin/search-console` renders clicks, impressions, CTR, average position, top
+queries and top pages.
+
+Setup, property choice, and the caveats that matter when the numbers leave the
+dashboard: **[docs/GOOGLE-SEARCH-CONSOLE.md](docs/GOOGLE-SEARCH-CONSOLE.md)**.
 
 ## 🌟 GitHub Scraping
 

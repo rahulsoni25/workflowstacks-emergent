@@ -16,6 +16,7 @@ import { callLLM, callJson, providersAvailable } from '@/lib/blog/llm'
 import { SCOUT_SYSTEM, KEYWORD_SYSTEM, BRIEF_SYSTEM, WRITE_SYSTEM, EDIT_SYSTEM, JUDGE_SYSTEM, CLAIM_FIX_SYSTEM, HUMANIZE_SYSTEM } from '@/lib/blog/prompts'
 import { styleCheck, overlapWithCorpus, OVERLAP_LIMIT } from '@/lib/blog/style-check'
 import { serpSearch, rankFor } from '@/lib/blog/serp'
+import { isConfigured as gscConfigured, gscRankFor, gscRanksForKeywords } from '@/lib/gsc'
 import { suggestLinks, linkUniverse } from '@/lib/blog/links'
 import { getDb } from '@/lib/mongo'
 
@@ -98,8 +99,8 @@ async function scout() {
   const assets = linkUniverse().filter((l) => ['template', 'bundle', 'mcp', 'outcome'].includes(l.kind))
 
   const user = JSON.stringify({
-    existing_posts: posts.map((p) => ({ title: p.title, primary: p.seo?.primary, rank: p.rank?.position ?? null })),
-    ranking_guidance: 'existing_posts rank = our current SERP position for that primary keyword (null = not top-20). Posts ranking 6-30 are refresh/expand candidates; keywords where we rank 1-5 are OFF LIMITS for new posts (cannibalization); clusters with repeated nulls after weeks deserve fewer new topics.',
+    existing_posts: posts.map((p) => ({ title: p.title, primary: p.seo?.primary, rank: p.rank?.position ?? null, engine: p.rank?.engine ?? null })),
+    ranking_guidance: 'existing_posts rank = our position for that primary keyword — Google Search Console average position where engine is "gsc" (Google ground truth, impression-weighted, so a decimal), otherwise a Brave/DDG proxy position. null = no GSC impressions recorded or not in the proxy top-20; it does NOT mean the page is unindexed. Posts ranking 6-30 are refresh/expand candidates; keywords where we rank 1-5 are OFF LIMITS for new posts (cannibalization); clusters with repeated nulls after weeks deserve fewer new topics.',
     site_searches: searches.map((s) => s.q || s.query).filter(Boolean).slice(0, 40),
     problems: problems.map((p) => p.title).slice(0, 20),
     recently_updated_repos: rising.map((r) => r.title_human || r.title).slice(0, 40),
@@ -131,14 +132,17 @@ async function start() {
   const kwCol = await keywordsCollection()
   const kwRows = await kwCol.find({ $text: { $search: topic.topic } }).limit(20).toArray().catch(() => [])
   const serp = await serpSearch(topic.topic, { count: 10 })
-  const ourRank = await rankFor(topic.topic)
+  // Our own position: GSC first (Google's own number for this query), proxy
+  // only when GSC has no row for it — a topic we have never ranked for at all.
+  const gscRank = gscConfigured() ? await gscRankFor(topic.topic) : null
+  const ourRank = gscRank && gscRank.position != null ? gscRank : await rankFor(topic.topic)
   const { data: kw } = await callJson({
     system: KEYWORD_SYSTEM,
     user: JSON.stringify({
       topic: topic.topic, angle: topic.angle, cluster: topic.cluster,
       imported_volume_rows: kwRows.map((r) => ({ keyword: r.keyword, volume: r.volume, difficulty: r.difficulty, last_position: r.last_position })),
       serp_snapshot: { engine: serp.engine, results: serp.results.map((r) => ({ position: r.position, title: r.title, host: (() => { try { return new URL(r.url).hostname } catch { return '' } })(), snippet: r.snippet.slice(0, 160) })) },
-      rank_data: { our_position_for_topic: ourRank.position, engine: ourRank.engine },
+      rank_data: { our_position_for_topic: ourRank.position, engine: ourRank.engine, is_gsc_average: ourRank.engine === 'gsc', impressions: ourRank.impressions ?? null },
       today: new Date().toISOString().slice(0, 10),
     }),
     tier: 'cheap', maxTokens: 1400, tag: 'keywords',
@@ -342,11 +346,16 @@ async function advance() {
   return { slug: post.slug, note: `no handler for status ${post.status}` }
 }
 
-// Rank tracking: check where each published post's primary keyword ranks
-// (Brave/DDG proxy; GSC stays the Google ground truth). Batched and rotated —
-// the least-recently-checked posts first, ≤8 per run to stay polite. Results
-// land on the post (rank + rank_history) and in the keywords collection,
-// which the scout and keyword strategist both read.
+// Rank tracking: where does each published post's primary keyword actually
+// rank? Google Search Console is the ground truth when it's connected — it is
+// Google's own average position for the query, not a third-party proxy — and
+// one bulk call covers the whole batch. The Brave/DDG proxy stays as the
+// fallback for keywords GSC has no row for (too new, or below GSC's privacy
+// threshold), so a fresh post still gets a signal.
+//
+// Batched and rotated — the least-recently-checked posts first, <=8 per run to
+// stay polite. Results land on the post (rank + rank_history) and in the
+// keywords collection, which the scout and keyword strategist both read.
 async function rankCheck(limit = 8) {
   const col = await postsCollection()
   const posts = await col.find(
@@ -354,22 +363,63 @@ async function rankCheck(limit = 8) {
     { projection: { slug: 1, 'seo.primary': 1, rank: 1 } }
   ).sort({ 'rank.checked_at': 1 }).limit(limit).toArray()
   const kwCol = await keywordsCollection()
+
+  // One GSC request for every keyword in the batch, when connected.
+  let gscByKeyword = new Map()
+  let gscMeta = null
+  if (gscConfigured() && posts.length) {
+    const res = await gscRanksForKeywords(posts.map((p) => p.seo.primary))
+    gscByKeyword = res.byKeyword
+    gscMeta = res.meta
+  }
+
   const out = []
   for (const p of posts) {
-    const r = await rankFor(p.seo.primary)
+    const g = gscByKeyword.get(String(p.seo.primary).toLowerCase().trim())
+    // Only spend a proxy SERP hit (and its politeness gap) when GSC came back
+    // empty for this keyword — that's the whole point of having ground truth.
+    const r = g || await rankFor(p.seo.primary)
+    if (!g) await new Promise((res) => setTimeout(res, 1200))
+
     await col.updateOne({ slug: p.slug }, {
-      $set: { rank: { keyword: p.seo.primary, engine: r.engine, position: r.position, url: r.url, checked_at: r.checked_at, error: r.error || null } },
+      $set: {
+        rank: {
+          keyword: p.seo.primary,
+          engine: r.engine,
+          position: r.position,
+          url: r.url || null,
+          checked_at: r.checked_at,
+          error: r.error || null,
+          // GSC position is an impression-weighted average, not a live SERP
+          // slot; flag it so nothing downstream reports it as "we are #N today".
+          ...(g ? { source: 'gsc', clicks: g.clicks, impressions: g.impressions, ctr: g.ctr, is_average: true } : { source: 'serp_proxy' }),
+        },
+      },
       $push: { rank_history: { $each: [{ engine: r.engine, position: r.position, at: r.checked_at }], $slice: -60 } },
     })
     await kwCol.updateOne(
       { keyword: p.seo.primary },
-      { $set: { last_position: r.position, last_engine: r.engine, last_checked: r.checked_at, ranking_url: r.url, post_slug: p.slug }, $setOnInsert: { keyword: p.seo.primary, source: 'rank-check' } },
+      {
+        $set: {
+          last_position: r.position, last_engine: r.engine, last_checked: r.checked_at,
+          ranking_url: r.url || null, post_slug: p.slug,
+          ...(g ? { gsc_clicks: g.clicks, gsc_impressions: g.impressions, gsc_ctr: g.ctr } : {}),
+        },
+        $setOnInsert: { keyword: p.seo.primary, source: 'rank-check' },
+      },
       { upsert: true }
     )
-    out.push({ slug: p.slug, keyword: p.seo.primary, engine: r.engine, position: r.position ?? 'not in top 20' })
-    await new Promise((res) => setTimeout(res, 1200)) // politeness gap between SERP hits
+    out.push({
+      slug: p.slug, keyword: p.seo.primary, engine: r.engine,
+      position: r.position ?? (g ? 'no GSC impressions' : 'not in top 20'),
+    })
   }
-  return { checked: out.length, results: out }
+  return {
+    checked: out.length,
+    ground_truth: gscConfigured() ? 'gsc' : 'serp_proxy',
+    gsc: gscMeta ? { property: gscMeta.property, startDate: gscMeta.startDate, endDate: gscMeta.endDate, error: gscMeta.error || null } : null,
+    results: out,
+  }
 }
 
 export async function POST(request) {
