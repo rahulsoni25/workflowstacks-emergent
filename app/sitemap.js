@@ -63,6 +63,7 @@ const STATIC_ROUTES = [
   ...Object.keys(TEMPLATES).map((slug) => `/templates/${slug}`),
   '/tools',
   ...Object.keys(BUNDLES).map((slug) => `/bundles/${slug}`),
+  '/automate',
   ...Object.keys(OUTCOMES).map((slug) => `/automate/${slug}`),
   '/kits',
   ...Object.keys(KITS).map((slug) => `/kits/${slug}`),
