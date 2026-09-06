@@ -29,9 +29,9 @@ const NAV_GROUPS = [
   {
     label: 'Premium',
     items: [
-      { href: '/bundles', label: 'Ready-to-run Packs', note: 'Tested workflow + playbook, one-time' },
       { href: '/tools', label: 'Premium Tools', note: 'Paid, one-time automations' },
       { href: '/templates', label: 'Workflow Templates', note: 'Free, working n8n automations' },
+      { href: '/automate', label: 'What to Automate', note: 'The job you want done, and the workflow for it' },
       { href: '/deals', label: 'Deals', note: 'Group-buy tool pricing' },
     ],
   },

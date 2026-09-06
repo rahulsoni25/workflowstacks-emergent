@@ -69,6 +69,12 @@ function passesSkillGate(s) {
     // Linux kernel, Flutter and yt-dlp as `ai-agent`, which is how those pages
     // ended up submitted to Google as top-tier assets. See lib/skill-relevance.
     isAiRelevant(s) &&
+    // 495 of 2,215 catalog entries never got a slug, so `s.slug || s.id` below
+    // yields /skills/<uuid> — a URL carrying no keyword signal, unreadable in
+    // a SERP and unquotable by an answer engine. 37 were in the live sitemap.
+    // They stay live and linked; they just stop being submitted until the slug
+    // backfill reaches them.
+    !!s.slug &&
     score >= SKILL_SITEMAP_GATE.minRewriteScore &&
     stars >= SKILL_SITEMAP_GATE.minStars &&
     guideRichness(s.use_guide) >= SKILL_SITEMAP_GATE.minGuideRichness
