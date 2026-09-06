@@ -1133,7 +1133,7 @@ function DfyTab({ hdr, jhdr, showToast }) {
               <div className="space-y-2 min-h-[200px]">
                 {(grouped[col.id] || []).map((r) => {
                   const isOpen = expanded === r.id
-                  const tierPrice = { starter: 99, pro: 249, agency: 499 }[r.tier || 'starter']
+                  const tierPrice = TIER_PRICE[r.tier || 'starter'] ?? null
                   const nextCol = DFY_COLUMNS[DFY_COLUMNS.findIndex((c) => c.id === col.id) + 1]
                   return (
                     <div key={r.id} className={`${CARD} border rounded-lg p-3 text-sm`}>
@@ -1142,12 +1142,21 @@ function DfyTab({ hdr, jhdr, showToast }) {
                         <div className="text-[#7A8487] text-xs truncate">{r.email}</div>
                         <div className="text-[#ECEFEA] text-xs mt-1.5 line-clamp-2">{r.agent_goal || <span className="italic opacity-60">(no goal)</span>}</div>
                         <div className="flex items-center justify-between mt-2">
-                          <Badge className="bg-[#0A0C0D] border border-[#262B2D] text-[#C6F24E]">{r.tier || 'starter'} · ${tierPrice}</Badge>
+                          <Badge className="bg-[#0A0C0D] border border-[#262B2D] text-[#C6F24E]">{r.tier || 'starter'} · {tierPrice === null ? 'custom' : `$${tierPrice}`}</Badge>
                           <span className="text-[10px] text-[#7A8487]">{relTime(r.created_at)}</span>
                         </div>
                       </div>
                       {isOpen && (
                         <div className="mt-3 pt-3 border-t border-[#262B2D] space-y-2 text-xs">
+                          {r.company && (
+                            <div><span className="text-[#7A8487]">Company:</span> <span className="text-[#ECEFEA]">{r.company}</span></div>
+                          )}
+                          {r.source && (
+                            <div><span className="text-[#7A8487]">Source:</span> <span className="text-[#ECEFEA]">{r.source}</span></div>
+                          )}
+                          {r.budget && (
+                            <div><span className="text-[#7A8487]">Budget:</span> <span className="text-[#ECEFEA]">{r.budget}</span></div>
+                          )}
                           {r.preferred_contact_time && (
                             <div><span className="text-[#7A8487]">Contact time:</span> <span className="text-[#ECEFEA]">{r.preferred_contact_time}</span></div>
                           )}
@@ -1172,7 +1181,14 @@ function DfyTab({ hdr, jhdr, showToast }) {
                           <div className="flex flex-wrap gap-1 pt-1">
                             {nextCol && (
                               <button
-                                onClick={() => updateRequest(r.id, nextCol.id === 'paid' ? { status: 'paid', paid: true, paid_amount_usd: tierPrice } : { status: nextCol.id })}
+                                onClick={() => {
+                                  if (nextCol.id !== 'paid') return updateRequest(r.id, { status: nextCol.id })
+                                  const entered = window.prompt('Amount actually invoiced (USD):', tierPrice ?? '')
+                                  if (entered === null) return // cancelled — leave the card where it is
+                                  const amount = Number(entered)
+                                  if (!Number.isFinite(amount) || amount < 0) return window.alert('Enter a number, e.g. 750')
+                                  updateRequest(r.id, { status: 'paid', paid: true, paid_amount_usd: amount })
+                                }}
                                 className="text-[10px] px-2 py-1 rounded border border-[#C6F24E]/30 text-[#C6F24E] hover:bg-[#C6F24E]/10"
                               >
                                 → {nextCol.label}
@@ -1219,11 +1235,16 @@ function DfyTab({ hdr, jhdr, showToast }) {
    4c. Roadmap (revenue model — static strategic guide)
    ───────────────────────────────────────────────────────────────────────────── */
 
+// DfY tier prices — must match the budget bands offered in
+// app/build-for-me/BuildForMeClient.js (BUDGETS) and the "from $500" figure on
+// /pricing. Enterprise is scoped per contract, so it has no list price.
+const TIER_PRICE = { starter: 500, pro: 750, agency: 1500, enterprise: null }
+
 const ROADMAP = [
   {
     tier: 'Tier 1 — Live revenue this month',
     items: [
-      { id: 'dfy', title: 'Done-for-You service ($99/$249/$499)', status: 'live', desc: 'Builder form captures intent; pipeline tracked in /admin → DfY tab. Stripe link sent manually after scope confirmation.', mrr: '0 → $1k achievable' },
+      { id: 'dfy', title: 'Done-for-You service ($500/$750/$1,500)', status: 'live', desc: 'Builder form captures intent; pipeline tracked in /admin → DfY tab. Stripe link sent manually after scope confirmation.', mrr: '0 → $1k achievable' },
       { id: 'affiliate', title: 'Affiliate revenue on /deals', status: 'in-progress', desc: '8 placeholder deals seeded. Apply for partner IDs (Cursor, Perplexity, Notion, Linear, Vercel, n8n, Resend, Replicate), drop links in /admin → Deals.', mrr: '0 → $200–500' },
       { id: 'premium-playbooks', title: 'Premium playbooks ($19–$49 each)', status: 'planned', desc: 'Rewrite the 4 free playbooks as paid deliverables: 30-min walkthrough video + Notion template + custom GPT instructions + email support. Sell via Stripe Payment Links.', mrr: '0 → $300–600' },
     ],

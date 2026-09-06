@@ -2445,21 +2445,22 @@ export async function POST(request) {
       const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
       const body = await request.json().catch(() => ({}));
       const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 });
-      const { email, name, agent_goal, goal, tools, budget, source_goal, skill_ids, preferred_contact_time, tier, source } = body;
+      const { email, name, company, agent_goal, goal, tools, budget, source_goal, skill_ids, preferred_contact_time, tier, source } = body;
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return Response.json({ error: 'Valid email required' }, { status: 400 });
       const goalText = ((agent_goal || goal) || '').toString().trim();
       const doc = {
         id: uuidv4(),
         email: email.toLowerCase().trim(),
         name: (name || '').trim().slice(0, 100),
+        company: (company || '').toString().trim().slice(0, 120),
         agent_goal: goalText.slice(0, 2000),
         tools: (tools || '').toString().trim().slice(0, 500),
         budget: (budget || '').toString().trim().slice(0, 50),
         source_goal: (source_goal || '').toString().trim().slice(0, 600), // recommender goal that led here, if any
         skill_ids: Array.isArray(skill_ids) ? skill_ids.slice(0, 30) : [],
         preferred_contact_time: (preferred_contact_time || '').slice(0, 200),
-        tier: ['starter', 'pro', 'agency'].includes(tier) ? tier : 'starter',
-        source: source === 'build-for-me' ? 'build-for-me' : 'builder',
+        tier: ['starter', 'pro', 'agency', 'enterprise'].includes(tier) ? tier : 'starter',
+        source: ['build-for-me', 'enterprise'].includes(source) ? source : 'builder',
         status: 'new',
         paid: false,
         created_at: new Date(),
@@ -2474,8 +2475,8 @@ export async function POST(request) {
             body: JSON.stringify({
               from: 'WorkflowStacks <hello@workflowstacks.com>',
               to: ['rahul@workflowstacks.com'],
-              subject: `💰 New done-for-you request: ${(goalText || '(no goal)').slice(0, 60)}`,
-              text: `Name: ${doc.name || '—'}\nEmail: ${doc.email}\nBudget: ${doc.budget || '—'}\nTools: ${doc.tools || '—'}\nSource: ${doc.source}\n\nGoal:\n${goalText || '—'}\n\nRecommender goal: ${doc.source_goal || '—'}`,
+              subject: `${doc.source === 'enterprise' ? '🏢 New ENTERPRISE enquiry' : '💰 New done-for-you request'}: ${(goalText || '(no goal)').slice(0, 60)}`,
+              text: `Name: ${doc.name || '—'}\nEmail: ${doc.email}\nCompany: ${doc.company || '—'}\nBudget: ${doc.budget || '—'}\nTools: ${doc.tools || '—'}\nSource: ${doc.source}\nTier: ${doc.tier}\n\nGoal:\n${goalText || '—'}\n\nRecommender goal: ${doc.source_goal || '—'}`,
             }),
           });
         } catch {}
@@ -2489,8 +2490,12 @@ export async function POST(request) {
             body: JSON.stringify({
               from: 'WorkflowStacks <hello@workflowstacks.com>',
               to: [email],
-              subject: 'Done-for-You request received — we’ll confirm scope within 24h',
-              html: `<div style="font-family:system-ui;max-width:560px;margin:0 auto;padding:24px;background:#0A0C0D;color:#ECEFEA"><h2 style="color:#C6F24E">Got it.</h2><p>Thanks for the Done-for-You request. We’ll review your agent goal and reply within 24h with a scoped plan and a one-time Stripe checkout link.</p><p style="color:#8B928D;font-size:14px">Your goal: <em>${(goalText || '(none)').slice(0, 200)}</em></p><p style="color:#8B928D;font-size:14px">— WorkflowStacks</p></div>`,
+              subject: doc.source === 'enterprise'
+                ? 'Enterprise enquiry received — we’ll be in touch within one business day'
+                : 'Done-for-You request received — we’ll confirm scope within 24h',
+              html: `<div style="font-family:system-ui;max-width:560px;margin:0 auto;padding:24px;background:#0A0C0D;color:#ECEFEA"><h2 style="color:#C6F24E">Got it.</h2><p>${doc.source === 'enterprise'
+                  ? 'Thanks for reaching out about WorkflowStacks Enterprise. We’ll review what you need and reply within one business day to arrange a demo and scoped pricing.'
+                  : 'Thanks for the Done-for-You request. We’ll review your agent goal and reply within 24h with a scoped plan and a one-time Stripe checkout link.'}</p><p style="color:#8B928D;font-size:14px">Your goal: <em>${(goalText || '(none)').slice(0, 200)}</em></p><p style="color:#8B928D;font-size:14px">— WorkflowStacks</p></div>`,
             }),
           });
         } catch {}

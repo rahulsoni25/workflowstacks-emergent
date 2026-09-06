@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { ArrowLeft, Building, Check } from 'lucide-react'
+import { ArrowLeft, Building } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
+import EnterpriseContactClient from './EnterpriseContactClient'
 
 export const metadata = {
   title: 'Enterprise AI Solutions | WorkflowStacks',
@@ -42,13 +43,7 @@ export default function EnterprisePage() {
           ))}
         </div>
 
-        <Card className="bg-gradient-to-br from-teal-500/10 to-cyan-500/10 border-teal-500/30">
-          <CardContent className="py-10 text-center">
-            <h2 className="text-2xl font-bold text-white mb-3">Ready to Scale Your AI Operations?</h2>
-            <p className="text-slate-300 mb-6">Get in touch with our enterprise team for a custom demo and pricing.</p>
-            <Button size="lg" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 shadow-lg shadow-teal-500/20">Contact Enterprise Sales</Button>
-          </CardContent>
-        </Card>
+        <EnterpriseContactClient />
       </div>
     </div>
   )
