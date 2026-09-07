@@ -80,7 +80,7 @@ function StepBar({ step, canGoInstall, onGo }) {
         const active = n === step
         const past = n < step
         const can = past || (n === 3 && step === 2 && canGoInstall)
-        const color = active ? 'text-[#ECEFEA]' : past ? 'text-[#C6F24E]' : 'text-[#5A615D]'
+        const color = active ? 'text-text-primary' : past ? 'text-[#C6F24E]' : 'text-text-muted'
         return (
           <div key={n} className="flex items-center">
             <button
@@ -95,7 +95,7 @@ function StepBar({ step, canGoInstall, onGo }) {
                     ? 'bg-[#C6F24E] text-[#0A0C0D] border-[#C6F24E]'
                     : past
                     ? 'bg-transparent text-[#C6F24E] border-[#C6F24E]'
-                    : 'bg-transparent text-[#5A615D] border-[#323A3C]'
+                    : 'bg-transparent text-text-muted border-[#323A3C]'
                 }`}
               >
                 {n}
@@ -381,15 +381,15 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
           {/* ---------- STEP 1 ---------- */}
           {step === 1 && (
             <div className="anim-rise mt-7 flex w-full flex-col items-center gap-[22px]">
-              <p className="m-0 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-[#8B928D]">
+              <p className="m-0 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-text-muted">
                 Open-source AI skills, agents &amp; MCP servers · Claude · ChatGPT · Gemini
               </p>
-              <h1 className="m-0 text-center font-bold tracking-[-0.04em] text-[clamp(44px,6.2vw,76px)] leading-[0.98] [text-wrap:balance]">
+              <h1 className="m-0 text-center font-bold text-text-primary tracking-[-0.04em] text-[clamp(44px,6.2vw,76px)] leading-[0.98] [text-wrap:balance]">
                 What should your AI agent do?
               </h1>
-              <p className="m-0 max-w-[560px] text-center text-lg leading-[1.45] text-[#8B928D] [text-wrap:pretty]">
+              <p className="m-0 max-w-[560px] text-center text-lg leading-[1.45] text-text-secondary [text-wrap:pretty]">
                 Describe the job. We match it against{' '}
-                <span className="text-[#ECEFEA]">{countLabel ? `${countLabel} scored open-source AI skills, agents and MCP servers` : 'our scored catalog of open-source AI skills, agents and MCP servers'}</span>, wire the
+                <span className="text-text-primary">{countLabel ? `${countLabel} scored open-source AI skills, agents and MCP servers` : 'our scored catalog of open-source AI skills, agents and MCP servers'}</span>, wire the
                 best one into a blueprint, and install it in Claude, ChatGPT or Gemini. No code.
               </p>
               <form
@@ -412,7 +412,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                   rows={2}
                   placeholder={placeholder || 'e.g. Send me a weekly report of my Meta and Google ad spend with what changed'}
                   aria-label="Describe what your AI agent should do"
-                  className="flex-1 resize-none border-0 bg-transparent px-3 py-3 text-lg leading-[1.45] text-[#ECEFEA] outline-none placeholder:text-[#5A615D] sm:px-0"
+                  className="flex-1 resize-none border-0 bg-transparent px-3 py-3 text-lg leading-[1.45] text-text-primary outline-none placeholder:text-text-muted sm:px-0"
                 />
                 <button
                   type="submit"
@@ -430,7 +430,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                       setQuery(s)
                       submit(s)
                     }}
-                    className="rounded-full border border-[#323A3C] bg-transparent px-3 py-[7px] text-[#8B928D] transition-colors hover:border-[#C6F24E] hover:text-[#ECEFEA]"
+                    className="rounded-full border border-[#323A3C] bg-transparent px-3 py-[7px] text-text-muted transition-colors hover:border-[#C6F24E] hover:text-text-primary"
                   >
                     {s}
                   </button>

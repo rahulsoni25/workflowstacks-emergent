@@ -127,6 +127,16 @@ body {
   --brand-mono: 'JetBrains Mono', ui-monospace, monospace;
   --brand-sans: 'Space Grotesk', system-ui, sans-serif;
 }
+
+/* ============ Text contrast tokens ============
+   Single source of truth for text tiers. All three clear WCAG AAA (7:1+)
+   on the site ink (#0A0C0D): primary 19.6:1, secondary 15.8:1, muted 7.7:1.
+   Exposed to Tailwind as text-text-primary / text-text-secondary / text-text-muted. */
+:root{
+  --text-primary: #FFFFFF;   /* headings, active step, input text */
+  --text-secondary: #E5E7EB; /* body copy, subheads */
+  --text-muted: #A1A1AA;     /* eyebrow labels, captions, inactive steps, placeholders */
+}
 .wm{font-weight:600;letter-spacing:-.025em;line-height:1;white-space:nowrap;text-transform:lowercase}
 /* Homepage flow — brand mono + the two tiny motions the landing uses */
 .t-mono{font-family:var(--font-mono-jb),'JetBrains Mono',ui-monospace,monospace}
