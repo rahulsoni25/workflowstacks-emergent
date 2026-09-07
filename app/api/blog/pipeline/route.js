@@ -22,14 +22,18 @@ import { getDb } from '@/lib/mongo'
 export const dynamic = 'force-dynamic'
 export const maxDuration = 60
 
-const JUDGE_GATE = 8
-// The judge already reports which sections it wants rewritten and why; until
-// now that verdict was discarded and anything under the gate was terminal.
-// Three consecutive days of the pipeline running to completion and holding at
-// 6.0-6.5 is what a hard gate with no revision path looks like — the writer
-// never got the note. Bounded so a genuinely weak topic still stops rather
-// than looping on free Groq tokens forever.
-const MAX_REVISIONS = 2
+// Env-overridable, default 7. Decided 7 Sept 2026 after the per-section
+// revision loop ran live on Groq's free tier: first drafts scored 6-7, the
+// rewrite pass lowered a 7 to a 5, Groq JSON mode failed one call in three,
+// and a single revised article exhausted the free daily token budget. The
+// owner chose to ship at 7 on Groq rather than fund a stronger tier. Set
+// BLOG_JUDGE_GATE=8 in Vercel to restore the original bar without a deploy.
+const JUDGE_GATE = Number(process.env.BLOG_JUDGE_GATE) || 7
+// Revision is off by default on Groq: the model's per-section rewrites made
+// the article worse (7 -> 5) and the second pass hit the per-day token cap.
+// Set BLOG_MAX_REVISIONS=2 alongside a funded OpenRouter key to turn it back
+// on — the loop itself is intact and worked as designed.
+const MAX_REVISIONS = Number.isFinite(Number(process.env.BLOG_MAX_REVISIONS)) ? Number(process.env.BLOG_MAX_REVISIONS) : 0
 
 // Groq's free tier rejects large requests outright (413) — it can't fit a
 // full 2,500-word article in one call. When a full-payload call fails that
