@@ -52,7 +52,7 @@ export default function SlashCommandPage({ params }) {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/commands">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />All commands
             </Button>
           </Link>
@@ -62,19 +62,19 @@ export default function SlashCommandPage({ params }) {
       <div className="container mx-auto px-4 py-16 max-w-2xl">
         <p className="text-xs tracking-widest uppercase text-[#C6F24E] font-semibold mb-3">Claude Code · Slash command</p>
         <h1 className="text-4xl font-bold text-white mb-3 leading-tight font-mono">{cmd.name}</h1>
-        <p className="text-lg text-slate-300 mb-6">{cmd.blurb}</p>
+        <p className="text-lg text-text-secondary mb-6">{cmd.blurb}</p>
 
         <div className="flex flex-wrap items-center gap-3 mb-6 text-sm">
-          <span className="text-slate-400">{cmd.category}</span>
-          <span className="text-slate-500">·</span>
-          <span className="text-slate-400">{cmd.license}</span>
+          <span className="text-text-muted">{cmd.category}</span>
+          <span className="text-text-muted">·</span>
+          <span className="text-text-muted">{cmd.license}</span>
           <a href={cmd.repo} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-teal-300 hover:text-teal-200">
             <ExternalLink className="w-4 h-4" />Source: {cmd.author}
           </a>
         </div>
 
         {cmd.stat && (
-          <p className="flex items-start gap-2 text-xs text-slate-500 mb-8">
+          <p className="flex items-start gap-2 text-xs text-text-muted mb-8">
             <Star className="w-3.5 h-3.5 text-[#C6F24E] shrink-0 mt-0.5" />{cmd.stat}
           </p>
         )}
@@ -83,7 +83,7 @@ export default function SlashCommandPage({ params }) {
           <Card className="bg-slate-900/60 border-slate-700/50 mb-6">
             <CardContent className="py-5">
               <p className="text-[11px] tracking-widest uppercase text-[#C6F24E] font-semibold mb-2">What this actually does for you</p>
-              <p className="text-slate-200 text-sm leading-relaxed">{cmd.plainWhy}</p>
+              <p className="text-text-secondary text-sm leading-relaxed">{cmd.plainWhy}</p>
             </CardContent>
           </Card>
         )}
@@ -92,19 +92,19 @@ export default function SlashCommandPage({ params }) {
           <Card className="bg-[#C6F24E]/5 border-[#C6F24E]/20 mb-10">
             <CardContent className="py-5 flex items-start gap-3">
               <Lightbulb className="w-5 h-5 text-[#C6F24E] shrink-0 mt-0.5" />
-              <p className="text-slate-200 text-sm leading-relaxed"><span className="text-[#C6F24E] font-semibold">Try it for: </span>{cmd.idea}</p>
+              <p className="text-text-secondary text-sm leading-relaxed"><span className="text-[#C6F24E] font-semibold">Try it for: </span>{cmd.idea}</p>
             </CardContent>
           </Card>
         )}
 
         <h2 className="text-white font-bold text-lg mb-3">Install with one command</h2>
         <CopyCommand code={`mkdir -p .claude/commands && curl -fsSL https://workflowstacks.com/api/commands/${cmd.slug} -o .claude/commands/${cmd.slug}.md`} />
-        <p className="text-sm text-slate-400 mt-3 mb-8">Run it in your project folder — the command appears in Claude Code's / menu immediately. Prefer to inspect first? The full file is below.</p>
+        <p className="text-sm text-text-muted mt-3 mb-8">Run it in your project folder — the command appears in Claude Code's / menu immediately. Prefer to inspect first? The full file is below.</p>
 
         <h2 className="text-white font-bold text-lg mb-3">The command file</h2>
         <CopyCommand code={cmd.content} />
         {cmd.note && (
-          <p className="text-sm text-slate-400 mt-3 flex items-start gap-2">
+          <p className="text-sm text-text-muted mt-3 flex items-start gap-2">
             <span className="text-[#C6F24E] font-bold">›</span>{cmd.note}
           </p>
         )}
@@ -115,19 +115,19 @@ export default function SlashCommandPage({ params }) {
             <Card key={i} className="bg-slate-900/60 border-slate-700/50">
               <CardContent className="py-3.5 flex items-start gap-3">
                 <span className="text-[#C6F24E] font-bold text-sm leading-none mt-0.5">{String(i + 1).padStart(2, '0')}</span>
-                <p className="text-slate-300 text-sm leading-relaxed">{s}</p>
+                <p className="text-text-secondary text-sm leading-relaxed">{s}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <p className="text-xs text-slate-500 mb-8">
+        <p className="text-xs text-text-muted mb-8">
           The linked repo is the source of truth — if the author updates it, the repo link stays current.
         </p>
 
         <Card className="bg-gradient-to-br from-[#C6F24E]/10 to-transparent border-[#C6F24E]/25">
           <CardContent className="py-5 flex flex-wrap items-center justify-between gap-4">
-            <p className="text-slate-300 text-sm flex items-center gap-2"><ScrollText className="w-4 h-4 text-[#C6F24E]" />Want a whole automation, not just one command? <span className="text-white font-semibold">Grab a working n8n template.</span></p>
+            <p className="text-text-secondary text-sm flex items-center gap-2"><ScrollText className="w-4 h-4 text-[#C6F24E]" />Want a whole automation, not just one command? <span className="text-white font-semibold">Grab a working n8n template.</span></p>
             <Link href="/templates"><Button className="bg-white/5 hover:bg-white/10 text-white border border-[#323A3C]">Browse templates</Button></Link>
           </CardContent>
         </Card>

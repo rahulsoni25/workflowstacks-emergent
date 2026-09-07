@@ -82,7 +82,7 @@ export default function ProblemsClient({ initialProblems = [] }) {
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
+          <Link href="/"><Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
           <Button onClick={() => setShowForm((s) => !s)} className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white"><Plus className="w-4 h-4 mr-2" />Post a problem</Button>
         </div>
       </header>
@@ -90,7 +90,7 @@ export default function ProblemsClient({ initialProblems = [] }) {
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Workflow Problems</h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+          <p className="text-lg text-text-muted max-w-2xl mx-auto">
             What's the bottleneck you wish AI could kill? <strong className="text-teal-300">Post it, upvote others</strong> — and turn any problem into an agent in one click.
           </p>
         </div>
@@ -114,18 +114,18 @@ export default function ProblemsClient({ initialProblems = [] }) {
 
         <div className="flex flex-wrap gap-2 justify-center mb-8">
           {CATEGORIES.map((c) => (
-            <button key={c} onClick={() => setCategory(c)} className={`px-3 py-1.5 rounded-full text-sm border transition-all ${category === c ? 'bg-teal-500 text-white border-teal-500' : 'bg-slate-900/60 text-slate-300 border-slate-700 hover:border-teal-500/40'}`}>{c}</button>
+            <button key={c} onClick={() => setCategory(c)} className={`px-3 py-1.5 rounded-full text-sm border transition-all ${category === c ? 'bg-teal-500 text-white border-teal-500' : 'bg-slate-900/60 text-text-secondary border-slate-700 hover:border-teal-500/40'}`}>{c}</button>
           ))}
         </div>
 
         {filtered.length === 0 ? (
-          <p className="text-center text-slate-400 py-16">No problems yet — be the first to post one.</p>
+          <p className="text-center text-text-muted py-16">No problems yet — be the first to post one.</p>
         ) : (
           <div className="space-y-3">
             {filtered.map((p) => (
               <Card key={p.id} className="bg-slate-900/60 border-slate-700/50 hover:border-teal-500/40 transition-all">
                 <CardContent className="py-4 flex items-start gap-4">
-                  <button onClick={() => upvote(p.id)} title="Upvote" className={`flex flex-col items-center rounded-lg px-2.5 py-1.5 border transition-all ${voted[p.id] ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-slate-800/50 border-slate-700 text-slate-300 hover:border-teal-500/40'}`}>
+                  <button onClick={() => upvote(p.id)} title="Upvote" className={`flex flex-col items-center rounded-lg px-2.5 py-1.5 border transition-all ${voted[p.id] ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-slate-800/50 border-slate-700 text-text-secondary hover:border-teal-500/40'}`}>
                     <ArrowBigUp className="w-5 h-5" />
                     {/* Only show a count once there's genuine traction (>1) so seeded
                         starters don't display uniform placeholder-looking numbers. */}
@@ -133,17 +133,17 @@ export default function ProblemsClient({ initialProblems = [] }) {
                   </button>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <Badge className={`${CAT_COLOR[p.category] || 'bg-slate-700/50 text-slate-300 border-slate-600'} border text-xs`}>{p.category}</Badge>
-                      <span className="text-slate-500 text-xs">by @{p.author || 'anonymous'}</span>
+                      <Badge className={`${CAT_COLOR[p.category] || 'bg-slate-700/50 text-text-secondary border-slate-600'} border text-xs`}>{p.category}</Badge>
+                      <span className="text-text-muted text-xs">by @{p.author || 'anonymous'}</span>
                     </div>
                     <h3 className="text-white font-semibold">{p.title}</h3>
-                    {p.description && <p className="text-slate-400 text-sm mt-1 line-clamp-2">{p.description}</p>}
+                    {p.description && <p className="text-text-muted text-sm mt-1 line-clamp-2">{p.description}</p>}
                     {p.matched_template ? (
                       <Link href={`/templates/${p.matched_template.slug}`} className="inline-flex items-center gap-1.5 mt-2 text-xs font-semibold text-[#C6F24E] hover:text-[#A6D62E]">
                         ⚡ Ready template: {p.matched_template.title} — solve it now →
                       </Link>
                     ) : (
-                      <Link href={`/build-for-me?goal=${encodeURIComponent(p.title)}`} className="inline-flex items-center gap-1.5 mt-2 text-xs text-slate-400 hover:text-slate-200">
+                      <Link href={`/build-for-me?goal=${encodeURIComponent(p.title)}`} className="inline-flex items-center gap-1.5 mt-2 text-xs text-text-muted hover:text-text-secondary">
                         🛠️ No template yet — we’ll build it for you →
                       </Link>
                     )}

@@ -28,8 +28,8 @@ export default async function BlogIndex({ searchParams }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <div className="container mx-auto px-4 py-12">
         <header className="max-w-2xl">
-          <h1 className="text-4xl font-bold tracking-tight text-[#ECEFEA]">The WorkflowStacks Journal</h1>
-          <p className="mt-3 text-[15.5px] leading-relaxed text-[#A3ABA6]">
+          <h1 className="text-4xl font-bold tracking-tight text-text-primary">The WorkflowStacks Journal</h1>
+          <p className="mt-3 text-[15.5px] leading-relaxed text-text-muted">
             What we built, tested and verified this week — n8n workflows, MCP configs, Claude Code, and the
             open-source agent repos worth your time. Every claim is checked against the actual files.
           </p>
@@ -38,7 +38,7 @@ export default async function BlogIndex({ searchParams }) {
         <nav aria-label="Topics" className="mt-8 flex flex-wrap gap-2">
           <Link
             href="/blog"
-            className={`rounded-full border px-3.5 py-1.5 text-[13px] font-medium no-underline ${!topic ? 'border-[#C6F24E] bg-[#C6F24E] text-[#0A0C0D]' : 'border-[#262B2D] text-[#A3ABA6] hover:text-[#ECEFEA]'}`}
+            className={`rounded-full border px-3.5 py-1.5 text-[13px] font-medium no-underline ${!topic ? 'border-[#C6F24E] bg-[#C6F24E] text-[#0A0C0D]' : 'border-[#262B2D] text-text-muted hover:text-text-primary'}`}
           >
             All
           </Link>
@@ -46,7 +46,7 @@ export default async function BlogIndex({ searchParams }) {
             <Link
               key={slug}
               href={`/blog?topic=${slug}`}
-              className={`rounded-full border px-3.5 py-1.5 text-[13px] font-medium no-underline ${topic === slug ? 'border-[#C6F24E] bg-[#C6F24E] text-[#0A0C0D]' : 'border-[#262B2D] text-[#A3ABA6] hover:text-[#ECEFEA]'}`}
+              className={`rounded-full border px-3.5 py-1.5 text-[13px] font-medium no-underline ${topic === slug ? 'border-[#C6F24E] bg-[#C6F24E] text-[#0A0C0D]' : 'border-[#262B2D] text-text-muted hover:text-text-primary'}`}
             >
               {label}
             </Link>
@@ -54,7 +54,7 @@ export default async function BlogIndex({ searchParams }) {
         </nav>
 
         {items.length === 0 ? (
-          <div className="mt-16 rounded-xl border border-[#262B2D] bg-[#101314] p-10 text-center text-[#A3ABA6]">
+          <div className="mt-16 rounded-xl border border-[#262B2D] bg-[#101314] p-10 text-center text-text-muted">
             No articles here yet — new ones publish daily.{' '}
             <Link href="/templates" className="text-[#C6F24E] no-underline">Browse the free templates</Link> in the meantime.
           </div>
@@ -71,11 +71,11 @@ export default async function BlogIndex({ searchParams }) {
             {totalPages > 1 && (
               <div className="mt-10 flex items-center justify-center gap-3 text-[13.5px]">
                 {page > 1 && (
-                  <Link className="rounded-lg border border-[#262B2D] px-4 py-2 text-[#A3ABA6] no-underline hover:text-[#ECEFEA]" href={`/blog?${new URLSearchParams({ ...(topic ? { topic } : {}), page: String(page - 1) })}`}>← Newer</Link>
+                  <Link className="rounded-lg border border-[#262B2D] px-4 py-2 text-text-muted no-underline hover:text-text-primary" href={`/blog?${new URLSearchParams({ ...(topic ? { topic } : {}), page: String(page - 1) })}`}>← Newer</Link>
                 )}
-                <span className="text-[#6E7772]">Page {page} of {totalPages}</span>
+                <span className="text-text-muted">Page {page} of {totalPages}</span>
                 {page < totalPages && (
-                  <Link className="rounded-lg border border-[#262B2D] px-4 py-2 text-[#A3ABA6] no-underline hover:text-[#ECEFEA]" href={`/blog?${new URLSearchParams({ ...(topic ? { topic } : {}), page: String(page + 1) })}`}>Older →</Link>
+                  <Link className="rounded-lg border border-[#262B2D] px-4 py-2 text-text-muted no-underline hover:text-text-primary" href={`/blog?${new URLSearchParams({ ...(topic ? { topic } : {}), page: String(page + 1) })}`}>Older →</Link>
                 )}
               </div>
             )}
@@ -84,8 +84,8 @@ export default async function BlogIndex({ searchParams }) {
 
         <div className="mt-14 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#262B2D] bg-[#101314] p-6">
           <div>
-            <div className="text-[15px] font-semibold text-[#ECEFEA]">One useful automation in your inbox, weekly.</div>
-            <div className="mt-1 text-[13px] text-[#8A938D]">The Monday digest: new templates, new articles, no filler.</div>
+            <div className="text-[15px] font-semibold text-text-primary">One useful automation in your inbox, weekly.</div>
+            <div className="mt-1 text-[13px] text-text-muted">The Monday digest: new templates, new articles, no filler.</div>
           </div>
           <Link href="/join" className="rounded-lg bg-[#C6F24E] px-5 py-2.5 text-[13.5px] font-semibold text-[#0A0C0D] no-underline hover:bg-[#A6D62E]">Subscribe</Link>
         </div>

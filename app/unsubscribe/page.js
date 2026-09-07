@@ -44,7 +44,7 @@ export default function UnsubscribePage() {
               <div className="flex justify-center mb-5">
                 <div className="w-10 h-10 border-2 border-teal-400/30 border-t-teal-400 rounded-full animate-spin" />
               </div>
-              <p className="text-white/60 text-sm">Processing your request…</p>
+              <p className="text-text-muted text-sm">Processing your request…</p>
             </>
           )}
 
@@ -58,7 +58,7 @@ export default function UnsubscribePage() {
                 </div>
               </div>
               <h1 className="text-white text-xl font-semibold mb-3">You've been unsubscribed</h1>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <p className="text-text-muted text-sm leading-relaxed">
                 You've been unsubscribed from WorkflowStacks emails. You can resubscribe anytime on the homepage.
               </p>
             </>
@@ -74,7 +74,7 @@ export default function UnsubscribePage() {
                 </div>
               </div>
               <h1 className="text-white text-xl font-semibold mb-3">Something went wrong</h1>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <p className="text-text-muted text-sm leading-relaxed">
                 We couldn't process your request. Please try again or contact us if the issue persists.
               </p>
             </>
@@ -84,13 +84,13 @@ export default function UnsubscribePage() {
             <>
               <div className="flex justify-center mb-5">
                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-6 h-6 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
               </div>
               <h1 className="text-white text-xl font-semibold mb-3">No email specified</h1>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <p className="text-text-muted text-sm leading-relaxed">
                 This link appears to be invalid. Please use the unsubscribe link from one of our emails.
               </p>
             </>
@@ -99,7 +99,7 @@ export default function UnsubscribePage() {
 
         <Link
           href="/"
-          className="inline-block mt-6 text-sm text-white/40 hover:text-teal-400 transition-colors"
+          className="inline-block mt-6 text-sm text-text-muted hover:text-teal-400 transition-colors"
         >
           ← Back to WorkflowStacks
         </Link>

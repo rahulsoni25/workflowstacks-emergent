@@ -20,8 +20,8 @@ export default function RelatedBundleCard({ bundle, skill }) {
             Ready-to-run pack · one-time ${bundle.price_usd}
           </div>
           <h2 className="text-xl font-bold text-white">{bundle.title}</h2>
-          <p className="mt-1 text-slate-300">{bundle.tagline}</p>
-          <p className="mt-2 text-xs text-slate-500">Includes the tested workflow and a written setup playbook. Needs: {bundle.needs}.</p>
+          <p className="mt-1 text-text-secondary">{bundle.tagline}</p>
+          <p className="mt-2 text-xs text-text-muted">Includes the tested workflow and a written setup playbook. Needs: {bundle.needs}.</p>
         </div>
         <Link
           href={`/bundles/${bundle.slug}?ref=skill:${encodeURIComponent(skillKey)}`}

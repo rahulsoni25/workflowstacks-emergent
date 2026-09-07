@@ -28,14 +28,14 @@ export default function DocsPage() {
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
+          <Link href="/"><Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
         </div>
       </header>
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <div className="text-center mb-16">
           <Code2 className="w-16 h-16 text-teal-400 mx-auto mb-4" />
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">API Documentation</h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">Access WorkflowStacks's marketplace data programmatically.</p>
+          <p className="text-xl text-text-secondary max-w-2xl mx-auto">Access WorkflowStacks's marketplace data programmatically.</p>
         </div>
 
         <Card className="bg-teal-500/10 border-teal-500/30 mb-8">
@@ -51,7 +51,7 @@ export default function DocsPage() {
                 <span className={`text-xs font-bold px-2 py-1 rounded ${ep.method === 'GET' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-cyan-500/20 text-cyan-400'}`}>{ep.method}</span>
                 <div>
                   <code className="text-white font-mono text-sm">{ep.path}</code>
-                  <p className="text-slate-400 text-sm mt-1">{ep.desc}</p>
+                  <p className="text-text-muted text-sm mt-1">{ep.desc}</p>
                 </div>
               </CardContent>
             </Card>

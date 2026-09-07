@@ -16,7 +16,7 @@ function audienceColor(a) {
     Creator: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     Agency: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
   }
-  return c[a] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+  return c[a] || 'bg-slate-500/10 text-text-muted border-slate-500/20'
 }
 
 async function getPlaybooks() {
@@ -51,7 +51,7 @@ export default async function PlaybooksPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Back to Home</Button></Link>
+          <Link href="/"><Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Back to Home</Button></Link>
         </div>
       </header>
 
@@ -61,13 +61,13 @@ export default async function PlaybooksPage() {
             <BookOpen className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Playbooks</h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+          <p className="text-xl text-text-secondary max-w-2xl mx-auto">
             A <span className="text-teal-300 font-semibold">Playbook</span> solves one specific problem with a proven set of skills. Open it in the Builder to get the agent that runs it.
           </p>
         </div>
 
         {playbooks.length === 0 ? (
-          <div className="text-center py-20"><p className="text-slate-400 text-xl">No playbooks available yet.</p></div>
+          <div className="text-center py-20"><p className="text-text-muted text-xl">No playbooks available yet.</p></div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {playbooks.map((playbook) => {
@@ -77,10 +77,10 @@ export default async function PlaybooksPage() {
                   <CardHeader className="flex-1">
                     <div className="flex items-start justify-between mb-3">
                       <Badge className={`${audienceColor(playbook.audience)} border`}><Users className="w-3 h-3 mr-1" />{playbook.audience}</Badge>
-                      <Badge variant="outline" className="border-slate-600 text-slate-300">{playbook.skillIds?.length || 0} skills</Badge>
+                      <Badge variant="outline" className="border-slate-600 text-text-secondary">{playbook.skillIds?.length || 0} skills</Badge>
                     </div>
                     <CardTitle className="text-white text-xl">{playbook.title}</CardTitle>
-                    <CardDescription className="text-slate-400">{playbook.description}</CardDescription>
+                    <CardDescription className="text-text-muted">{playbook.description}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {/* At-a-glance signals so the value is legible before click-through */}
@@ -89,17 +89,17 @@ export default async function PlaybooksPage() {
                         <span className="inline-flex items-center gap-1 rounded-full border border-teal-500/20 bg-teal-500/10 px-2.5 py-1 text-teal-300"><Clock className="w-3 h-3" />{playbook.timeEstimate}</span>
                       )}
                       {stepCount > 0 && (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-600 bg-slate-800/50 px-2.5 py-1 text-slate-300"><ListChecks className="w-3 h-3" />{stepCount} steps</span>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-slate-600 bg-slate-800/50 px-2.5 py-1 text-text-secondary"><ListChecks className="w-3 h-3" />{stepCount} steps</span>
                       )}
                     </div>
                     {playbook.outcome && (
-                      <div className="flex items-start gap-2 text-sm text-slate-300 bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/15">
+                      <div className="flex items-start gap-2 text-sm text-text-secondary bg-emerald-500/5 p-3 rounded-lg border border-emerald-500/15">
                         <Target className="w-4 h-4 mt-0.5 flex-shrink-0 text-emerald-400" />
                         <span><span className="text-emerald-300 font-medium">Outcome:</span> {playbook.outcome}</span>
                       </div>
                     )}
                     {playbook.problem && (
-                      <div className="flex items-start gap-2 text-sm text-slate-400 bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
+                      <div className="flex items-start gap-2 text-sm text-text-muted bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
                         <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-400" /><span>{playbook.problem}</span>
                       </div>
                     )}

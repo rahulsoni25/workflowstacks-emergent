@@ -64,8 +64,8 @@ export default async function BlogPost({ params }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(article) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <div className="container mx-auto px-4 py-10">
-        <nav className="text-[12.5px] text-[#6E7772]">
-          <Link href="/blog" className="text-[#8A938D] no-underline hover:text-[#ECEFEA]">← All articles</Link>
+        <nav className="text-[12.5px] text-text-muted">
+          <Link href="/blog" className="text-text-muted no-underline hover:text-text-primary">← All articles</Link>
           <span className="mx-2">·</span>
           <span className="font-semibold uppercase tracking-widest text-[#C6F24E]">{TOPICS[post.topic] || post.topic}</span>
           {post.persona && <span className="ml-2 uppercase tracking-widest">{PERSONAS[post.persona]}</span>}
@@ -73,15 +73,15 @@ export default async function BlogPost({ params }) {
 
         <div className="mt-6 grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
           <article className="min-w-0 max-w-[760px]">
-            <h1 className="text-[clamp(28px,4vw,40px)] font-bold leading-tight tracking-tight text-[#ECEFEA]" style={{ textWrap: 'balance' }}>
+            <h1 className="text-[clamp(28px,4vw,40px)] font-bold leading-tight tracking-tight text-text-primary" style={{ textWrap: 'balance' }}>
               {post.title}
             </h1>
-            <div className="mt-4 flex items-center gap-3 text-[13px] text-[#8A938D]">
+            <div className="mt-4 flex items-center gap-3 text-[13px] text-text-muted">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#C6F24E] text-[13px] font-bold text-[#0A0C0D]">
                 {(author.name || 'W').slice(0, 1)}
               </span>
               <span>
-                <span className="text-[#ECEFEA]">{author.name}</span> · {fmtDate(post.published_at)}
+                <span className="text-text-primary">{author.name}</span> · {fmtDate(post.published_at)}
                 {post.refreshed_at && <> · Updated {fmtDate(post.refreshed_at)}</>}
                 {post.reading_min ? <> · {post.reading_min} min read</> : null}
               </span>
@@ -95,8 +95,8 @@ export default async function BlogPost({ params }) {
 
             {post.key_takeaways?.length > 0 && (
               <div className="mt-10 rounded-xl border border-[#262B2D] bg-[#101314] p-6">
-                <div className="text-[11px] font-semibold uppercase tracking-widest text-[#6E7772]">Key takeaways</div>
-                <ul className="mt-3 mb-0 space-y-2 pl-5 text-[14.5px] text-[#ECEFEA] list-disc">
+                <div className="text-[11px] font-semibold uppercase tracking-widest text-text-muted">Key takeaways</div>
+                <ul className="mt-3 mb-0 space-y-2 pl-5 text-[14.5px] text-text-primary list-disc">
                   {post.key_takeaways.map((t, i) => (<li key={i}>{t}</li>))}
                 </ul>
               </div>
@@ -104,10 +104,10 @@ export default async function BlogPost({ params }) {
 
             {post.sources?.length > 0 && (
               <div className="mt-8">
-                <div className="text-[11px] font-semibold uppercase tracking-widest text-[#6E7772]">Sources</div>
-                <ul className="mt-2 mb-0 space-y-1 pl-5 text-[13px] text-[#8A938D] list-disc">
+                <div className="text-[11px] font-semibold uppercase tracking-widest text-text-muted">Sources</div>
+                <ul className="mt-2 mb-0 space-y-1 pl-5 text-[13px] text-text-muted list-disc">
                   {post.sources.map((s, i) => (
-                    <li key={i}><a href={s.url} target="_blank" rel="noopener" className="text-[#8A938D] underline decoration-[#3a4144] hover:text-[#C6F24E]">{s.title || s.url}</a></li>
+                    <li key={i}><a href={s.url} target="_blank" rel="noopener" className="text-text-muted underline decoration-[#3a4144] hover:text-[#C6F24E]">{s.title || s.url}</a></li>
                   ))}
                 </ul>
               </div>
@@ -119,9 +119,9 @@ export default async function BlogPost({ params }) {
                   {(author.name || 'W').slice(0, 1)}
                 </span>
                 <div>
-                  <div className="text-[14.5px] font-semibold text-[#ECEFEA]">{author.name}</div>
-                  <div className="text-[12.5px] text-[#6E7772]">{author.role}</div>
-                  <p className="mt-1.5 mb-0 text-[13px] leading-relaxed text-[#8A938D]">{author.bio}</p>
+                  <div className="text-[14.5px] font-semibold text-text-primary">{author.name}</div>
+                  <div className="text-[12.5px] text-text-muted">{author.role}</div>
+                  <p className="mt-1.5 mb-0 text-[13px] leading-relaxed text-text-muted">{author.bio}</p>
                 </div>
               </div>
             </div>
@@ -139,7 +139,7 @@ export default async function BlogPost({ params }) {
 
         {related.length > 0 && (
           <section className="mt-14">
-            <h2 className="text-xl font-semibold text-[#ECEFEA]">Keep reading</h2>
+            <h2 className="text-xl font-semibold text-text-primary">Keep reading</h2>
             <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p) => (<PostCard key={p.slug} post={p} />))}
             </div>

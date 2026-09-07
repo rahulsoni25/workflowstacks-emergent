@@ -44,7 +44,7 @@ function MiniCard({ skill }) {
     <Link href={`/skills/${skill.slug || skill.id}`} className="block group">
       <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 h-full hover:border-teal-500/40 transition-all">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-slate-500">{skill.category}</span>
+          <span className="text-xs text-text-muted">{skill.category}</span>
           {typeof skill.rewrite_score === 'number' && (
             <span className="text-xs text-teal-300" title="Guide quality — how clear and useful our listing is, not repo health">{skill.rewrite_score}/10</span>
           )}
@@ -52,8 +52,8 @@ function MiniCard({ skill }) {
         <h3 className="text-white font-semibold leading-snug group-hover:text-teal-300 transition-colors line-clamp-2">
           {skill.title_human || skill.name}
         </h3>
-        <p className="text-slate-400 text-sm mt-1 line-clamp-2">{skill.description_human || skill.description}</p>
-        <div className="flex items-center gap-3 mt-3 text-xs text-slate-400">
+        <p className="text-text-muted text-sm mt-1 line-clamp-2">{skill.description_human || skill.description}</p>
+        <div className="flex items-center gap-3 mt-3 text-xs text-text-muted">
           {skill.github_stars > 0 && (
             <span className="flex items-center gap-1"><Star className="w-3 h-3 fill-amber-400 text-amber-400" />{skill.github_stars.toLocaleString()}</span>
           )}
@@ -72,19 +72,19 @@ export default async function DiscoverPage() {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
           <Link href="/skills">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">Full catalog →</Button>
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">Full catalog →</Button>
           </Link>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 text-center">Discover</h1>
-        <p className="text-lg text-slate-400 text-center mb-12 max-w-2xl mx-auto">
+        <p className="text-lg text-text-muted text-center mb-12 max-w-2xl mx-auto">
           The best free AI skills for founders — sorted six ways by <strong className="text-teal-300">real GitHub + quality data</strong>. No fake downloads or ratings.
         </p>
 
@@ -97,10 +97,10 @@ export default async function DiscoverPage() {
                 <div className="flex items-end justify-between mb-5">
                   <div>
                     <h2 className="text-2xl font-bold text-white">{sec.label}</h2>
-                    <p className="text-slate-400 text-sm">{sec.hint}</p>
+                    <p className="text-text-muted text-sm">{sec.hint}</p>
                   </div>
                   <Link href={`/skills?sort=${sec.key}`} className="shrink-0">
-                    <Button variant="outline" size="sm" className="border-slate-700 text-slate-300 hover:text-teal-300 hover:border-teal-500/40">
+                    <Button variant="outline" size="sm" className="border-slate-700 text-text-secondary hover:text-teal-300 hover:border-teal-500/40">
                       See all <ArrowRight className="w-4 h-4 ml-1" />
                     </Button>
                   </Link>

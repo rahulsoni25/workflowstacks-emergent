@@ -24,11 +24,11 @@ function Tile({ label, value, change, suffix = '' }) {
     <Card className="bg-[#101314] border border-[#262B2D]">
       <CardContent className="py-4">
         <div className="text-2xl font-bold text-white">{value}{suffix}</div>
-        <div className="text-xs text-slate-400 mt-0.5">{label}</div>
+        <div className="text-xs text-text-muted mt-0.5">{label}</div>
         {change != null && (
-          <div className={`text-xs mt-1.5 flex items-center gap-1 ${up ? 'text-[#C6F24E]' : down ? 'text-amber-400' : 'text-slate-500'}`}>
+          <div className={`text-xs mt-1.5 flex items-center gap-1 ${up ? 'text-[#C6F24E]' : down ? 'text-amber-400' : 'text-text-muted'}`}>
             {up ? <ArrowUp className="w-3 h-3" /> : down ? <ArrowDown className="w-3 h-3" /> : null}
-            {pct(change)} <span className="text-slate-500">vs previous period</span>
+            {pct(change)} <span className="text-text-muted">vs previous period</span>
           </div>
         )}
       </CardContent>
@@ -41,7 +41,7 @@ function RowTable({ title, data }) {
     return (
       <div>
         <h2 className="text-lg font-semibold mb-3">{title}</h2>
-        <p className="text-sm text-slate-500">No rows in this window.</p>
+        <p className="text-sm text-text-muted">No rows in this window.</p>
       </div>
     )
   }
@@ -50,7 +50,7 @@ function RowTable({ title, data }) {
       <h2 className="text-lg font-semibold mb-3">{title}</h2>
       <div className="overflow-x-auto rounded-lg border border-[#262B2D]">
         <table className="w-full text-sm">
-          <thead className="bg-[#101314] text-slate-400">
+          <thead className="bg-[#101314] text-text-muted">
             <tr>
               <th className="text-left font-medium px-3 py-2">{data.dimension}</th>
               <th className="text-right font-medium px-3 py-2">Clicks</th>
@@ -62,11 +62,11 @@ function RowTable({ title, data }) {
           <tbody>
             {data.rows.map((r) => (
               <tr key={r.key} className="border-t border-[#1B1F20]">
-                <td className="px-3 py-2 text-slate-200 max-w-[420px] truncate" title={r.key}>{r.key}</td>
+                <td className="px-3 py-2 text-text-secondary max-w-[420px] truncate" title={r.key}>{r.key}</td>
                 <td className="px-3 py-2 text-right text-white">{r.clicks}</td>
-                <td className="px-3 py-2 text-right text-slate-300">{r.impressions}</td>
-                <td className="px-3 py-2 text-right text-slate-300">{r.ctr}%</td>
-                <td className="px-3 py-2 text-right text-slate-300">{r.position}</td>
+                <td className="px-3 py-2 text-right text-text-secondary">{r.impressions}</td>
+                <td className="px-3 py-2 text-right text-text-secondary">{r.ctr}%</td>
+                <td className="px-3 py-2 text-right text-text-secondary">{r.position}</td>
               </tr>
             ))}
           </tbody>
@@ -120,14 +120,14 @@ export default function SearchConsoleDashboard() {
     <div className="min-h-screen bg-neptune text-white">
       <div className="container mx-auto px-4 py-12 max-w-5xl">
         <h1 className="text-3xl font-bold mb-2">Search Console</h1>
-        <p className="text-slate-400 mb-8">
+        <p className="text-text-muted mb-8">
           Organic search, read straight from Google. Windows end {data?.lag_days ?? 2} days back — Search Console finalises data on a lag, so a window ending today always looks like a dip.
         </p>
 
         {!data ? (
           <Card className="bg-[#101314] border-[#262B2D] max-w-md">
             <CardContent className="py-6">
-              <label className="flex items-center gap-2 text-sm text-slate-300 mb-2"><Lock className="w-4 h-4" />Admin secret</label>
+              <label className="flex items-center gap-2 text-sm text-text-secondary mb-2"><Lock className="w-4 h-4" />Admin secret</label>
               <div className="flex gap-2">
                 <Input type="password" value={secret} onChange={(e) => setSecret(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && load()}
                   placeholder="ADMIN_SECRET" className="bg-slate-950/60 border-slate-700 text-white" />
@@ -139,7 +139,7 @@ export default function SearchConsoleDashboard() {
         ) : (
           <>
             <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-text-muted">
                 {status?.site_url} · {status?.auth_mode} · {data.window?.startDate} → {data.window?.endDate}
               </div>
               <div className="flex items-center gap-2">

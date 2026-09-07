@@ -53,7 +53,7 @@ export default function AutomateIndexPage() {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
@@ -65,12 +65,12 @@ export default function AutomateIndexPage() {
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-5 text-center leading-tight">
           What can you actually automate with AI?
         </h1>
-        <p className="text-lg text-slate-300 text-center mb-4 max-w-2xl mx-auto">
+        <p className="text-lg text-text-secondary text-center mb-4 max-w-2xl mx-auto">
           Not &ldquo;anything&rdquo; — that answer helps nobody. Below are {outcomes.length} specific,
           repetitive business jobs that an AI workflow does well today, grouped by who usually
           owns them.
         </p>
-        <p className="text-slate-400 text-center mb-14 max-w-2xl mx-auto">
+        <p className="text-text-muted text-center mb-14 max-w-2xl mx-auto">
           Every one links to a free, importable workflow rather than a prompt: you download a
           file, connect your own accounts, and it runs on your own n8n instance. Setup is about
           five minutes. Nothing here is hosted or executed by us.
@@ -82,7 +82,7 @@ export default function AutomateIndexPage() {
           return (
             <section key={g.key} className="mb-14">
               <h2 className="text-2xl font-bold text-white mb-1">{g.label}</h2>
-              <p className="text-slate-400 text-sm mb-5">{g.blurb}</p>
+              <p className="text-text-muted text-sm mb-5">{g.blurb}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {items.map((o) => {
                   const tpl = getTemplate(o.template)
@@ -94,13 +94,13 @@ export default function AutomateIndexPage() {
                             {o.h1}
                           </Link>
                         </h3>
-                        <p className="text-slate-400 text-sm leading-relaxed mb-4 flex-1">{o.how}</p>
+                        <p className="text-text-muted text-sm leading-relaxed mb-4 flex-1">{o.how}</p>
                         <div className="flex items-center justify-between gap-3">
                           <Link href={`/automate/${o.slug}`} className="text-sm text-[#C6F24E] hover:text-[#A6D62E] font-medium inline-flex items-center gap-1">
                             How it works <ArrowRight className="w-3.5 h-3.5" />
                           </Link>
                           {tpl && (
-                            <span className="text-xs text-slate-500 flex items-center gap-1 whitespace-nowrap">
+                            <span className="text-xs text-text-muted flex items-center gap-1 whitespace-nowrap">
                               <Clock className="w-3.5 h-3.5" />~{tpl.setup_minutes} min setup
                             </span>
                           )}
@@ -120,7 +120,7 @@ export default function AutomateIndexPage() {
               <Wrench className="w-5 h-5 text-[#C6F24E] mt-0.5" />
               <div>
                 <h2 className="text-white font-semibold text-sm mb-1">Your job isn&apos;t on this list?</h2>
-                <p className="text-slate-400 text-sm">Describe it and we&apos;ll build the workflow into your tools, tested and running within 7 days.</p>
+                <p className="text-text-muted text-sm">Describe it and we&apos;ll build the workflow into your tools, tested and running within 7 days.</p>
               </div>
             </div>
             <Link href="/build-for-me">
@@ -131,7 +131,7 @@ export default function AutomateIndexPage() {
           </CardContent>
         </Card>
 
-        <p className="text-sm text-slate-400 text-center mt-10">
+        <p className="text-sm text-text-muted text-center mt-10">
           Prefer to browse by the workflow itself?{' '}
           <Link href="/templates" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">
             See all free templates →

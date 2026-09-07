@@ -26,10 +26,10 @@ export default function ToolsPage() {
             <h3 className="text-xl font-bold text-white">{t.title}</h3>
             <span className="text-[#C6F24E] font-extrabold whitespace-nowrap">${t.price_usd}</span>
           </div>
-          <p className="text-slate-300 text-sm font-medium mb-2">{t.tagline}</p>
-          <p className="text-slate-400 text-sm leading-relaxed flex-1">{t.description}</p>
+          <p className="text-text-secondary text-sm font-medium mb-2">{t.tagline}</p>
+          <p className="text-text-muted text-sm leading-relaxed flex-1">{t.description}</p>
           {t.needs && (
-            <p className="flex items-center gap-1.5 text-xs text-slate-500 mt-4">
+            <p className="flex items-center gap-1.5 text-xs text-text-muted mt-4">
               {t.needs.startsWith('No') ? <Check className="w-3.5 h-3.5 text-[#C6F24E]/70" /> : <KeyRound className="w-3.5 h-3.5 text-amber-300/60" />}
               {t.needs}
             </p>
@@ -47,7 +47,7 @@ export default function ToolsPage() {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
@@ -59,7 +59,7 @@ export default function ToolsPage() {
         <h1 className="text-4xl md:text-5xl font-bold text-white text-center mb-4 leading-tight">
           The automations every business needs
         </h1>
-        <p className="text-lg text-slate-300 text-center mb-12 max-w-2xl mx-auto">
+        <p className="text-lg text-text-secondary text-center mb-12 max-w-2xl mx-auto">
           Find leads. Track rankings. Watch competitors. Catch bad reviews. Buy once, own it forever — or let us set it up for you.
         </p>
 
@@ -69,7 +69,7 @@ export default function ToolsPage() {
 
         {other.length > 0 && (
           <>
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">More packs</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted mb-3">More packs</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {other.map(Cardish)}
             </div>
@@ -77,12 +77,12 @@ export default function ToolsPage() {
         )}
 
         <div className="mt-16 mb-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-1">Coming soon — vote with your email</h2>
-          <p className="text-slate-500 text-sm">We build the ones people actually want. Tap “notify me” on any you’d use.</p>
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted mb-1">Coming soon — vote with your email</h2>
+          <p className="text-text-muted text-sm">We build the ones people actually want. Tap “notify me” on any you’d use.</p>
         </div>
         <ComingSoon tools={COMING_SOON} />
 
-        <p className="text-sm text-slate-500 text-center mt-12">
+        <p className="text-sm text-text-muted text-center mt-12">
           Prefer free? <Link href="/templates" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">Browse 11 free workflow templates</Link>.
         </p>
       </div>

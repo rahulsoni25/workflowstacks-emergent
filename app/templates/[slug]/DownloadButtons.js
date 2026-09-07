@@ -86,10 +86,10 @@ export default function DownloadButtons({ slug, filename }) {
     return (
       <div className="text-center space-y-2">
         <p className="text-white font-semibold">✓ Downloading — check your Downloads folder.</p>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-text-muted">
           Next: open n8n → Import from File → follow the setup note inside the workflow.
         </p>
-        <button onClick={() => setDone(false)} className="text-xs text-slate-500 hover:text-slate-300 underline underline-offset-2">
+        <button onClick={() => setDone(false)} className="text-xs text-text-muted hover:text-text-secondary underline underline-offset-2">
           Download again
         </button>
       </div>
@@ -100,7 +100,7 @@ export default function DownloadButtons({ slug, filename }) {
     <div className="max-w-md mx-auto">
       <form onSubmit={onSubmit} className="space-y-3">
         <div className="relative">
-          <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Mail className="w-4 h-4 text-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="email"
             value={email}
@@ -125,18 +125,18 @@ export default function DownloadButtons({ slug, filename }) {
       </form>
 
       <div className="text-center mt-3 space-y-1">
-        <button onClick={skip} disabled={state === 'working'} className="text-xs text-slate-400 hover:text-slate-200 underline underline-offset-2">
+        <button onClick={skip} disabled={state === 'working'} className="text-xs text-text-muted hover:text-text-secondary underline underline-offset-2">
           No thanks — just download
         </button>
         {personalizable && (
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-text-muted">
             Tuned to: “{goal.slice(0, 80)}{goal.length > 80 ? '…' : ''}”
           </p>
         )}
         {state === 'error' && (
           <p className="text-xs text-amber-400">Something hiccuped — click “just download” to grab the standard file.</p>
         )}
-        <p className="text-[11px] text-slate-600">We email new templates occasionally. Unsubscribe anytime. No spam.</p>
+        <p className="text-[11px] text-text-muted">We email new templates occasionally. Unsubscribe anytime. No spam.</p>
       </div>
     </div>
   )
