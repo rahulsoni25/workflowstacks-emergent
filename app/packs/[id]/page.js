@@ -22,7 +22,7 @@ function categoryColor(cat) {
     'ai-agent': 'bg-cyan-500/10 text-cyan-500',
     'ai-tool': 'bg-indigo-500/10 text-indigo-500',
   }
-  return colors[cat] || 'bg-gray-500/10 text-slate-500'
+  return colors[cat] || 'bg-gray-500/10 text-text-muted'
 }
 
 async function getPack(id) {
@@ -72,7 +72,7 @@ export default async function PackDetailPage({ params }) {
       <header className="border-b border-slate-700/50 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/packs">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Back to Packs
             </Button>
           </Link>
@@ -83,16 +83,16 @@ export default async function PackDetailPage({ params }) {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
             <Badge className="bg-teal-500/10 text-teal-500 border-teal-500/20 border"><Users className="w-3 h-3 mr-1" />{pack.audience}</Badge>
-            {pack.useCase && <Badge variant="outline" className="border-white/20 text-slate-300"><Target className="w-3 h-3 mr-1" />{pack.useCase}</Badge>}
+            {pack.useCase && <Badge variant="outline" className="border-white/20 text-text-secondary"><Target className="w-3 h-3 mr-1" />{pack.useCase}</Badge>}
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">{pack.name}</h1>
-          <p className="text-xl text-slate-300 mb-6">{pack.description}</p>
+          <p className="text-xl text-text-secondary mb-6">{pack.description}</p>
           <Link href={builderHref}>
             <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
               <Zap className="w-4 h-4 mr-2" />Build an Agent from this Pack
             </Button>
           </Link>
-          <p className="text-sm text-slate-500 mt-2">Loads all {skills.length} skills into the builder and generates a paste-ready blueprint.</p>
+          <p className="text-sm text-text-muted mt-2">Loads all {skills.length} skills into the builder and generates a paste-ready blueprint.</p>
         </div>
 
         {skills.length > 0 && (
@@ -106,17 +106,17 @@ export default async function PackDetailPage({ params }) {
                       <Badge className={`${categoryColor(skill.category)} border border-slate-700/50`}>{skill.category}</Badge>
                     </div>
                     <CardTitle className="text-white">{skill.title_human || skill.name}</CardTitle>
-                    <CardDescription className="text-slate-400 line-clamp-2">{skill.description_human || skill.description}</CardDescription>
+                    <CardDescription className="text-text-muted line-clamp-2">{skill.description_human || skill.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex items-center gap-4 text-sm text-slate-400 mb-3">
+                    <div className="flex items-center gap-4 text-sm text-text-muted mb-3">
                       {skill.github_stars > 0 && (
                         <span className="flex items-center gap-1"><Star className="w-4 h-4 fill-amber-400 text-amber-400" />{skill.github_stars.toLocaleString()}</span>
                       )}
-                      {skill.language && <span className="text-slate-500">{skill.language}</span>}
+                      {skill.language && <span className="text-text-muted">{skill.language}</span>}
                     </div>
                     <Link href={`/skills/${skill.slug || skill.id}`}>
-                      <Button variant="outline" className="w-full border-white/20 text-slate-300 hover:text-white hover:bg-white/5">View Details</Button>
+                      <Button variant="outline" className="w-full border-white/20 text-text-secondary hover:text-white hover:bg-white/5">View Details</Button>
                     </Link>
                   </CardContent>
                 </Card>

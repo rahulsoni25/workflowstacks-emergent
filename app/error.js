@@ -11,7 +11,7 @@ export default function Error({ error, reset }) {
     <div className="min-h-screen bg-neptune flex items-center justify-center px-4">
       <div className="text-center max-w-md">
         <h1 className="text-2xl font-bold text-white mb-3">Something went wrong</h1>
-        <p className="text-slate-400 mb-8">
+        <p className="text-text-muted mb-8">
           An unexpected error occurred. Try again, or head back home.
         </p>
         <div className="flex gap-3 justify-center">
@@ -21,7 +21,7 @@ export default function Error({ error, reset }) {
           >
             Try again
           </button>
-          <a href="/" className="px-5 py-2.5 rounded-lg border border-slate-700 text-slate-200">
+          <a href="/" className="px-5 py-2.5 rounded-lg border border-slate-700 text-text-secondary">
             Go Home
           </a>
         </div>

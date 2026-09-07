@@ -73,7 +73,7 @@ export default async function CollectionsPage() {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
@@ -85,7 +85,7 @@ export default async function CollectionsPage() {
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-5 text-center leading-tight">
           Someone already picked the skills for your job
         </h1>
-        <p className="text-lg text-slate-300 text-center mb-12 max-w-2xl mx-auto">
+        <p className="text-lg text-text-secondary text-center mb-12 max-w-2xl mx-auto">
           The catalog runs to thousands of repositories, which is useless if you do not
           already know what you are looking for. These are pre-picked sets — chosen for one
           role or one job, with every skill linking back to its source repository.
@@ -103,9 +103,9 @@ export default async function CollectionsPage() {
                     <Link href={`/${k.kind}`} className="text-white font-semibold hover:text-[#C6F24E] transition-colors">
                       {k.plural}
                     </Link>
-                    <span className="text-xs text-slate-500 ml-auto">{n}</span>
+                    <span className="text-xs text-text-muted ml-auto">{n}</span>
                   </div>
-                  <p className="text-slate-400 text-sm leading-relaxed">{k.blurb}</p>
+                  <p className="text-text-muted text-sm leading-relaxed">{k.blurb}</p>
                 </CardContent>
               </Card>
             )
@@ -129,7 +129,7 @@ export default async function CollectionsPage() {
                           {Icon && <Icon className="w-3.5 h-3.5 text-[#C6F24E]" />}
                           <span className="text-xs uppercase tracking-wide text-[#C6F24E] font-semibold">{meta?.label}</span>
                           {i.timeEstimate && (
-                            <span className="text-xs text-slate-500 ml-auto flex items-center gap-1">
+                            <span className="text-xs text-text-muted ml-auto flex items-center gap-1">
                               <Clock className="w-3 h-3" />{i.timeEstimate}
                             </span>
                           )}
@@ -139,7 +139,7 @@ export default async function CollectionsPage() {
                             {i.title}
                           </Link>
                         </h3>
-                        <p className="text-slate-400 text-sm leading-relaxed mb-4 flex-1">
+                        <p className="text-text-muted text-sm leading-relaxed mb-4 flex-1">
                           {i.outcome || i.description}
                         </p>
                         <div className="flex items-center justify-between gap-3">
@@ -147,7 +147,7 @@ export default async function CollectionsPage() {
                             Open <ArrowRight className="w-3.5 h-3.5" />
                           </Link>
                           {i.skillCount > 0 && (
-                            <span className="text-xs text-slate-500 whitespace-nowrap">{i.skillCount} skills</span>
+                            <span className="text-xs text-text-muted whitespace-nowrap">{i.skillCount} skills</span>
                           )}
                         </div>
                       </CardContent>
@@ -159,13 +159,13 @@ export default async function CollectionsPage() {
           )
         })}
 
-        <p className="text-sm text-slate-400 text-center mt-10">
+        <p className="text-sm text-text-muted text-center mt-10">
           Know exactly what you want?{' '}
           <Link href="/skills" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">
             Browse the full catalog →
           </Link>
         </p>
-        <p className="text-sm text-slate-500 text-center mt-4">
+        <p className="text-sm text-text-muted text-center mt-4">
           Want the job done rather than the tools?{' '}
           <Link href="/automate" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">
             See what you can automate.

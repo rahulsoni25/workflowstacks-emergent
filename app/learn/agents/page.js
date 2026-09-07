@@ -14,22 +14,22 @@ export default function LearnAgentsPage() {
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
+          <Link href="/"><Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
         </div>
       </header>
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center">What Are AI Agents?</h1>
-        <p className="text-xl text-slate-300 text-center mb-16 max-w-2xl mx-auto">AI agents are custom-configured AI assistants that combine multiple skills to accomplish complex goals autonomously.</p>
+        <p className="text-xl text-text-secondary text-center mb-16 max-w-2xl mx-auto">AI agents are custom-configured AI assistants that combine multiple skills to accomplish complex goals autonomously.</p>
         
         <div className="space-y-8">
           <Card className="bg-slate-900/60 border-slate-700/50">
             <CardContent className="py-6">
               <h2 className="text-2xl font-bold text-white mb-3">How Agents Work on WorkflowStacks</h2>
-              <p className="text-slate-300 leading-relaxed mb-4">An AI agent on WorkflowStacks is a prompt blueprint that combines multiple skills into a coherent instruction set. When you paste this blueprint into ChatGPT, Claude, or Gemini, the AI becomes your specialized assistant.</p>
+              <p className="text-text-secondary leading-relaxed mb-4">An AI agent on WorkflowStacks is a prompt blueprint that combines multiple skills into a coherent instruction set. When you paste this blueprint into ChatGPT, Claude, or Gemini, the AI becomes your specialized assistant.</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {['Pick Skills \u2192 Choose the capabilities your agent needs', 'Set a Goal \u2192 Describe what you want in plain English', 'Deploy \u2192 Copy the blueprint and paste into any AI tool'].map((s, i) => (
                   <div key={i} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
-                    <p className="text-slate-300 text-sm">{s}</p>
+                    <p className="text-text-secondary text-sm">{s}</p>
                   </div>
                 ))}
               </div>
@@ -46,7 +46,7 @@ export default function LearnAgentsPage() {
                   'Ecommerce Ops Agent â€” Responds to reviews, syncs inventory, generates product descriptions',
                   'Lead Gen Agent â€” Qualifies leads, personalizes outreach, tracks follow-ups',
                 ].map((ex, i) => (
-                  <li key={i} className="flex items-start gap-3 text-slate-300">
+                  <li key={i} className="flex items-start gap-3 text-text-secondary">
                     <span className="text-teal-400">•</span>{ex}
                   </li>
                 ))}

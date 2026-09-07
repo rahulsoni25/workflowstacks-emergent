@@ -56,7 +56,7 @@ function DesktopDropdown({ group, openLabel, setOpenLabel }) {
     <div className="relative">
       <button
         onClick={() => setOpenLabel(isOpen ? null : group.label)}
-        className="flex items-center gap-1 text-sm text-slate-300 hover:text-white px-3 py-2 rounded-md hover:bg-white/5 transition-colors"
+        className="flex items-center gap-1 text-sm text-text-secondary hover:text-white px-3 py-2 rounded-md hover:bg-white/5 transition-colors"
         aria-expanded={isOpen}
       >
         {group.label}
@@ -72,8 +72,8 @@ function DesktopDropdown({ group, openLabel, setOpenLabel }) {
                 onClick={() => setOpenLabel(null)}
                 className="block rounded-lg px-3 py-2 hover:bg-white/5 transition-colors"
               >
-                <span className="block text-sm text-slate-200">{item.label}</span>
-                {item.note && <span className="block text-[11px] text-slate-500">{item.note}</span>}
+                <span className="block text-sm text-text-secondary">{item.label}</span>
+                {item.note && <span className="block text-[11px] text-text-muted">{item.note}</span>}
               </Link>
             ))}
           </div>
@@ -108,7 +108,7 @@ export default function SiteHeader() {
             <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: '#C6F24E' }}>
               <WsMark className="w-6 h-6" style={{ color: '#0A0C0D' }} />
             </div>
-            <span className="wm text-xl text-slate-100">workflow<span className="s" style={{ color: '#C6F24E' }}>stacks</span></span>
+            <span className="wm text-xl text-text-primary">workflow<span className="s" style={{ color: '#C6F24E' }}>stacks</span></span>
           </Link>
 
           {/* Desktop nav */}
@@ -116,10 +116,10 @@ export default function SiteHeader() {
             {NAV_GROUPS.map((group) => (
               <DesktopDropdown key={group.label} group={group} openLabel={openLabel} setOpenLabel={setOpenLabel} />
             ))}
-            <Link href="/pricing" className="text-sm text-slate-300 hover:text-white px-3 py-2 rounded-md hover:bg-white/5 transition-colors">
+            <Link href="/pricing" className="text-sm text-text-secondary hover:text-white px-3 py-2 rounded-md hover:bg-white/5 transition-colors">
               Pricing
             </Link>
-            <Link href="/learn/creators" className="text-sm text-slate-300 hover:text-white px-3 py-2 rounded-md hover:bg-white/5 transition-colors">
+            <Link href="/learn/creators" className="text-sm text-text-secondary hover:text-white px-3 py-2 rounded-md hover:bg-white/5 transition-colors">
               Creators
             </Link>
             <div className="w-px h-6 bg-slate-700 mx-2" />
@@ -134,7 +134,7 @@ export default function SiteHeader() {
           {/* Mobile toggle */}
           <button
             onClick={() => setMobileOpen((v) => !v)}
-            className="lg:hidden flex items-center justify-center w-10 h-10 rounded-md text-slate-300 hover:text-white hover:bg-white/5"
+            className="lg:hidden flex items-center justify-center w-10 h-10 rounded-md text-text-secondary hover:text-white hover:bg-white/5"
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileOpen}
           >
@@ -152,15 +152,15 @@ export default function SiteHeader() {
                 <Zap className="w-4 h-4 mr-1.5" />Build Agent
               </Button>
             </Link>
-            <Link href="/pricing" onClick={() => setMobileOpen(false)} className="block text-sm text-slate-200 font-semibold mb-6">
+            <Link href="/pricing" onClick={() => setMobileOpen(false)} className="block text-sm text-text-secondary font-semibold mb-6">
               Pricing
             </Link>
-            <Link href="/learn/creators" onClick={() => setMobileOpen(false)} className="block text-sm text-slate-200 font-semibold mb-6">
+            <Link href="/learn/creators" onClick={() => setMobileOpen(false)} className="block text-sm text-text-secondary font-semibold mb-6">
               Creators
             </Link>
             {NAV_GROUPS.map((group) => (
               <div key={group.label} className="mb-6">
-                <h4 className="text-[11px] uppercase tracking-wider text-slate-500 font-mono mb-2">{group.label}</h4>
+                <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-mono mb-2">{group.label}</h4>
                 <div className="space-y-0.5">
                   {group.items.map((item) => (
                     <Link
@@ -169,8 +169,8 @@ export default function SiteHeader() {
                       onClick={() => setMobileOpen(false)}
                       className="block rounded-lg px-2.5 py-2 hover:bg-white/5 transition-colors"
                     >
-                      <span className="block text-sm text-slate-200">{item.label}</span>
-                      {item.note && <span className="block text-[11px] text-slate-500">{item.note}</span>}
+                      <span className="block text-sm text-text-secondary">{item.label}</span>
+                      {item.note && <span className="block text-[11px] text-text-muted">{item.note}</span>}
                     </Link>
                   ))}
                 </div>

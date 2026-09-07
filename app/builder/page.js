@@ -400,7 +400,7 @@ export default function BuilderPage() {
       'ai-agent': 'bg-cyan-500/10 text-cyan-400',
       'ai-tool': 'bg-indigo-500/10 text-indigo-400'
     }
-    return colors[cat] || 'bg-slate-500/10 text-slate-400'
+    return colors[cat] || 'bg-slate-500/10 text-text-muted'
   }
 
   return (
@@ -408,7 +408,7 @@ export default function BuilderPage() {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
@@ -422,7 +422,7 @@ export default function BuilderPage() {
             <Zap className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">Build My Agent</h1>
-          <p className="text-xl text-slate-300">Combine multiple skills into one powerful AI agent prompt</p>
+          <p className="text-xl text-text-secondary">Combine multiple skills into one powerful AI agent prompt</p>
         </motion.div>
 
         {/* Progress Steps */}
@@ -430,8 +430,8 @@ export default function BuilderPage() {
           {[{ n: 1, label: 'Define Goal' }, { n: 2, label: 'Select Skills' }, { n: 3, label: 'Get Blueprint' }].map((s, i) => (
             <div key={s.n} className="flex items-center gap-2">
               {i > 0 && <div className="w-12 h-0.5 bg-slate-700"></div>}
-              <div className={`flex items-center gap-2 ${step >= s.n ? 'text-teal-400' : 'text-slate-500'}`}>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step >= s.n ? 'bg-teal-500 text-white' : 'bg-slate-800 text-slate-500'}`}>
+              <div className={`flex items-center gap-2 ${step >= s.n ? 'text-teal-400' : 'text-text-muted'}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${step >= s.n ? 'bg-teal-500 text-white' : 'bg-slate-800 text-text-muted'}`}>
                   {s.n}
                 </div>
                 <span className="hidden sm:inline text-sm">{s.label}</span>
@@ -446,14 +446,14 @@ export default function BuilderPage() {
             <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
               <CardHeader>
                 <CardTitle className="text-white">What do you want your agent to do?</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="text-text-muted">
                   Describe your agent's purpose in natural language
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="bg-teal-500/10 border border-teal-500/20 rounded-lg p-4">
                   <h3 className="text-teal-300 font-semibold mb-2">💡 Examples:</h3>
-                  <ul className="text-slate-300 text-sm space-y-1 list-disc list-inside">
+                  <ul className="text-text-secondary text-sm space-y-1 list-disc list-inside">
                     <li>"Help me write professional emails to clients"</li>
                     <li>"Analyze customer feedback and create monthly reports"</li>
                     <li>"Generate social media content for my business"</li>
@@ -464,7 +464,7 @@ export default function BuilderPage() {
                   value={goal}
                   onChange={(e) => setGoal(e.target.value)}
                   placeholder="Example: Help me analyze customer feedback, generate reports, and suggest improvements..."
-                  className="min-h-[150px] bg-slate-800/50 border-slate-600/50 text-white placeholder:text-slate-500 focus:border-teal-500/50"
+                  className="min-h-[150px] bg-slate-800/50 border-slate-600/50 text-white placeholder:text-text-muted focus:border-teal-500/50"
                 />
                 <Button
                   onClick={() => setStep(2)}
@@ -485,7 +485,7 @@ export default function BuilderPage() {
             <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
               <CardHeader>
                 <CardTitle className="text-white">Select Skills for Your Agent</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="text-text-muted">
                   Choose the capabilities your agent needs ({selectedSkillIds.length} selected)
                 </CardDescription>
               </CardHeader>
@@ -501,7 +501,7 @@ export default function BuilderPage() {
                     const role = s._rec_role || 'primary'
                     const roleStyle = role === 'primary' ? 'bg-violet-500/20 text-violet-200 border-violet-500/40' :
                                      role === 'secondary' ? 'bg-cyan-500/15 text-cyan-200 border-cyan-500/30' :
-                                     'bg-slate-700/40 text-slate-300 border-slate-700/50'
+                                     'bg-slate-700/40 text-text-secondary border-slate-700/50'
                     return (
                       <div
                         key={`${sectionKey}-${s.id}`}
@@ -524,19 +524,19 @@ export default function BuilderPage() {
                                 <span className={`text-[10px] px-1.5 py-0.5 rounded ${
                                   s.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
                                   s.explainer.difficulty === 'advanced' ? 'bg-orange-500/15 text-orange-300' :
-                                  'bg-slate-500/15 text-slate-300'
+                                  'bg-slate-500/15 text-text-secondary'
                                 }`}>{s.explainer.difficulty}</span>
                               )}
-                              {s.explainer?.time_to_setup && <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">⏱ {s.explainer.time_to_setup}</span>}
-                              {s.explainer?.cost_to_run && <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">💵 {s.explainer.cost_to_run}</span>}
+                              {s.explainer?.time_to_setup && <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-text-secondary">⏱ {s.explainer.time_to_setup}</span>}
+                              {s.explainer?.cost_to_run && <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-700/40 text-text-secondary">💵 {s.explainer.cost_to_run}</span>}
                             </div>
                             {s._rec_what_it_handles && (
-                              <p className="text-[11px] text-slate-400 mb-1">
+                              <p className="text-[11px] text-text-muted mb-1">
                                 <span className="text-violet-300 font-medium">Handles:</span> {s._rec_what_it_handles}
                               </p>
                             )}
                             {s._rec_why && (
-                              <p className="text-xs text-slate-200">
+                              <p className="text-xs text-text-secondary">
                                 <span className="text-violet-300 font-medium">Why this: </span>{s._rec_why}
                               </p>
                             )}
@@ -554,7 +554,7 @@ export default function BuilderPage() {
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-violet-300" />
                         <span className="text-sm font-semibold text-white">Recommended by WorkflowStacks</span>
-                        <span className="text-xs text-slate-400">for "<span className="text-slate-200">{goal.length > 80 ? goal.slice(0, 80) + '…' : goal}</span>"</span>
+                        <span className="text-xs text-text-muted">for "<span className="text-text-secondary">{goal.length > 80 ? goal.slice(0, 80) + '…' : goal}</span>"</span>
                       </div>
                       {recommendations && recommendations.length > 0 && (
                         <div className="flex items-center gap-1.5">
@@ -562,7 +562,7 @@ export default function BuilderPage() {
                             type="button"
                             size="sm"
                             onClick={saveAndShareStack}
-                            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs px-3 h-7"
+                            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-text-secondary text-xs px-3 h-7"
                             title="Save as a public, shareable stack page"
                           >
                             🔗 Save & share
@@ -571,7 +571,7 @@ export default function BuilderPage() {
                             type="button"
                             size="sm"
                             onClick={addAllRecommended}
-                            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 text-xs px-3 h-7"
+                            className="bg-slate-800 hover:bg-slate-700 border border-slate-600 text-text-secondary text-xs px-3 h-7"
                           >
                             + Add all {recommendations.length}
                           </Button>
@@ -579,13 +579,13 @@ export default function BuilderPage() {
                       )}
                     </div>
                     {recommendationsLoading && (
-                      <div className="text-sm text-slate-300 py-3 flex items-center gap-2">
+                      <div className="text-sm text-text-secondary py-3 flex items-center gap-2">
                         <span className="inline-block w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
                         Reading your goal and selecting the exact stack that solves it…
                       </div>
                     )}
                     {!recommendationsLoading && recommendations && recommendations.length === 0 && (
-                      <div className="text-sm text-slate-400 py-2">
+                      <div className="text-sm text-text-muted py-2">
                         No strong matches yet — try the use-case search below or browse the full catalog.
                       </div>
                     )}
@@ -598,7 +598,7 @@ export default function BuilderPage() {
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <div>
                                 <p className="text-white text-sm font-semibold">{recTemplate.title}</p>
-                                <p className="text-slate-300 text-xs mt-0.5">{recTemplate.outcome} Import into n8n, running in ~{recTemplate.setup_minutes} min.</p>
+                                <p className="text-text-secondary text-xs mt-0.5">{recTemplate.outcome} Import into n8n, running in ~{recTemplate.setup_minutes} min.</p>
                               </div>
                               <Link href={`/templates/${recTemplate.slug}?goal=${encodeURIComponent(goal || '')}`} className="text-xs font-semibold bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] px-3 py-1.5 rounded whitespace-nowrap">
                                 Get the working template →
@@ -610,14 +610,14 @@ export default function BuilderPage() {
                         {recContext && (
                           <div className="p-2.5 bg-slate-900/50 border border-slate-700/50 rounded text-xs">
                             <div className="text-violet-300 font-semibold uppercase tracking-wide text-[10px] mb-1">What we understood</div>
-                            <p className="text-slate-200">{recContext}</p>
+                            <p className="text-text-secondary">{recContext}</p>
                           </div>
                         )}
                         {/* How the picked skills combine to solve it */}
                         {recSummary && (
                           <div className="p-2.5 bg-teal-500/5 border border-teal-500/30 rounded text-xs">
                             <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Recommended solution</div>
-                            <p className="text-slate-100">{recSummary}</p>
+                            <p className="text-text-primary">{recSummary}</p>
                           </div>
                         )}
                         {/* Workflow diagram — horizontal flow of skill roles */}
@@ -631,7 +631,7 @@ export default function BuilderPage() {
                                     <div className="bg-gradient-to-br from-violet-500/30 to-cyan-500/30 border border-violet-500/40 rounded-md px-2 py-1.5 w-full">
                                       <div className="text-[10px] font-semibold text-white truncate" title={s.title_human || s.name}>{s.title_human || s.name}</div>
                                       {s._rec_what_it_handles && (
-                                        <div className="text-[9px] text-slate-300 mt-0.5 truncate" title={s._rec_what_it_handles}>{s._rec_what_it_handles}</div>
+                                        <div className="text-[9px] text-text-secondary mt-0.5 truncate" title={s._rec_what_it_handles}>{s._rec_what_it_handles}</div>
                                       )}
                                     </div>
                                   </div>
@@ -647,18 +647,18 @@ export default function BuilderPage() {
                         <div className="bg-gradient-to-r from-violet-500/15 to-cyan-500/15 border border-violet-500/40 rounded-md p-3 flex flex-wrap items-center justify-between gap-3">
                           <div className="flex flex-wrap items-center gap-3 text-xs">
                             <div>
-                              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Stack cost</div>
-                              <div className="text-slate-100 font-medium">💵 {totals.cost}</div>
+                              <div className="text-[10px] text-text-muted uppercase tracking-wide">Stack cost</div>
+                              <div className="text-text-primary font-medium">💵 {totals.cost}</div>
                             </div>
                             <div className="h-8 w-px bg-slate-600/60" />
                             <div>
-                              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Setup</div>
-                              <div className="text-slate-100 font-medium">⏱ {totals.time}</div>
+                              <div className="text-[10px] text-text-muted uppercase tracking-wide">Setup</div>
+                              <div className="text-text-primary font-medium">⏱ {totals.time}</div>
                             </div>
                             <div className="h-8 w-px bg-slate-600/60" />
                             <div>
-                              <div className="text-[10px] text-slate-400 uppercase tracking-wide">Skills</div>
-                              <div className="text-slate-100 font-medium">{recommendations.length} picked</div>
+                              <div className="text-[10px] text-text-muted uppercase tracking-wide">Skills</div>
+                              <div className="text-text-primary font-medium">{recommendations.length} picked</div>
                             </div>
                           </div>
                           <Button
@@ -675,7 +675,7 @@ export default function BuilderPage() {
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 text-xs">
                               <span className="text-violet-300 font-semibold uppercase tracking-wide text-[10px]">★ Essential</span>
-                              <span className="text-slate-500">— the core of the solution</span>
+                              <span className="text-text-muted">— the core of the solution</span>
                             </div>
                             {primaries.map(s => renderCard(s, 'primary'))}
                           </div>
@@ -685,7 +685,7 @@ export default function BuilderPage() {
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 text-xs">
                               <span className="text-cyan-300 font-semibold uppercase tracking-wide text-[10px]">+ Recommended</span>
-                              <span className="text-slate-500">— makes the stack stronger</span>
+                              <span className="text-text-muted">— makes the stack stronger</span>
                             </div>
                             {secondaries.map(s => renderCard(s, 'secondary'))}
                           </div>
@@ -694,8 +694,8 @@ export default function BuilderPage() {
                         {optionals.length > 0 && (
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 text-xs">
-                              <span className="text-slate-300 font-semibold uppercase tracking-wide text-[10px]">○ Optional</span>
-                              <span className="text-slate-500">— extras you can add later</span>
+                              <span className="text-text-secondary font-semibold uppercase tracking-wide text-[10px]">○ Optional</span>
+                              <span className="text-text-muted">— extras you can add later</span>
                             </div>
                             {optionals.map(s => renderCard(s, 'optional'))}
                           </div>
@@ -704,15 +704,15 @@ export default function BuilderPage() {
                         {recMissing && recMissing.length > 0 && (
                           <div className="p-2.5 bg-amber-500/5 border border-amber-500/30 rounded text-xs">
                             <span className="text-amber-300 font-semibold uppercase tracking-wide text-[10px]">Missing capability: </span>
-                            <span className="text-slate-200">{recMissing}</span>
+                            <span className="text-text-secondary">{recMissing}</span>
                           </div>
                         )}
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-500 pt-2 border-t border-slate-700/40">
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-text-muted pt-2 border-t border-slate-700/40">
                           <span>
                             Confidence: <span className={`font-semibold ${
                               recConfidence === 'high' ? 'text-emerald-300' :
                               recConfidence === 'low' ? 'text-orange-300' :
-                              'text-slate-300'
+                              'text-text-secondary'
                             }`}>{recConfidence || '—'}</span>
                           </span>
                           <span>Refine with search below, or browse the full catalog →</span>
@@ -720,7 +720,7 @@ export default function BuilderPage() {
                         {/* Done-for-you bridge: the recommender shows WHAT to build;
                             this is the escape hatch for people who don't want to build it */}
                         <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-[#C6F24E]/5 border border-[#C6F24E]/25 rounded-md">
-                          <span className="text-xs text-slate-300">
+                          <span className="text-xs text-text-secondary">
                             Don't want to set this up yourself? <span className="text-white font-semibold">We'll build this exact stack for you, working in your tools, within 7 days.</span>
                           </span>
                           <Link
@@ -739,7 +739,7 @@ export default function BuilderPage() {
                 {/* Use-case search — "what are you trying to do?" — picks skills by job-to-be-done */}
                 <div className="p-3 bg-gradient-to-r from-teal-500/5 to-cyan-500/5 border border-teal-500/20 rounded-md">
                   <label className="block text-xs font-semibold uppercase tracking-wide text-teal-300 mb-1.5">
-                    🎯 What do you want to do? <span className="text-slate-500 normal-case font-normal">— let us pick the right skills</span>
+                    🎯 What do you want to do? <span className="text-text-muted normal-case font-normal">— let us pick the right skills</span>
                   </label>
                   <form
                     onSubmit={(e) => { e.preventDefault(); runUseCaseSearch() }}
@@ -749,14 +749,14 @@ export default function BuilderPage() {
                       value={useCaseQuery}
                       onChange={(e) => setUseCaseQuery(e.target.value)}
                       placeholder="e.g., transcribe meetings, build a chatbot for my docs…"
-                      className="flex-1 bg-slate-900/60 border border-slate-700/60 rounded-md px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-teal-500/50 outline-none"
+                      className="flex-1 bg-slate-900/60 border border-slate-700/60 rounded-md px-3 py-2 text-sm text-white placeholder:text-text-muted focus:border-teal-500/50 outline-none"
                       aria-label="Describe your use case"
                     />
                     <Button type="submit" disabled={useCaseLoading || !useCaseQuery.trim()} className="bg-teal-500 hover:bg-teal-600 text-white text-sm px-4">
                       {useCaseLoading ? '…' : 'Find skills'}
                     </Button>
                     {useCaseResults && (
-                      <Button type="button" variant="outline" onClick={clearUseCaseSearch} className="border-slate-700 text-slate-300 text-sm px-3">Clear</Button>
+                      <Button type="button" variant="outline" onClick={clearUseCaseSearch} className="border-slate-700 text-text-secondary text-sm px-3">Clear</Button>
                     )}
                   </form>
                   {!useCaseResults && (
@@ -766,7 +766,7 @@ export default function BuilderPage() {
                           key={s}
                           type="button"
                           onClick={() => { setUseCaseQuery(s); runUseCaseSearch(s) }}
-                          className="text-[11px] px-2 py-0.5 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 rounded text-slate-300 hover:text-white transition"
+                          className="text-[11px] px-2 py-0.5 bg-slate-800/60 hover:bg-slate-700/60 border border-slate-700/50 rounded text-text-secondary hover:text-white transition"
                         >
                           {s}
                         </button>
@@ -775,7 +775,7 @@ export default function BuilderPage() {
                   )}
                   {useCaseResults && (
                     <div className="mt-3 space-y-2">
-                      <div className="text-xs text-slate-400">
+                      <div className="text-xs text-text-muted">
                         {useCaseResults.length === 0
                           ? 'No matches yet. Try simpler keywords like "image generation" or browse all skills below.'
                           : `Top ${useCaseResults.length} skills for "${useCaseQuery}" — click to add, or scroll for full catalog below.`}
@@ -802,12 +802,12 @@ export default function BuilderPage() {
                                     <span className={`text-[10px] px-1.5 py-0.5 rounded ${
                                       s.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
                                       s.explainer.difficulty === 'advanced' ? 'bg-orange-500/15 text-orange-300' :
-                                      'bg-slate-500/15 text-slate-300'
+                                      'bg-slate-500/15 text-text-secondary'
                                     }`}>{s.explainer.difficulty}</span>
                                   )}
                                 </div>
                                 {s.matched?.snippet && (
-                                  <p className="text-xs text-slate-300 italic">"{s.matched.snippet}"</p>
+                                  <p className="text-xs text-text-secondary italic">"{s.matched.snippet}"</p>
                                 )}
                                 {Array.isArray(s.explainer?.best_with_tools) && s.explainer.best_with_tools.length > 0 && (
                                   <div className="mt-1 text-[10px] text-cyan-300">
@@ -826,19 +826,19 @@ export default function BuilderPage() {
                 {/* Keyword search + category filter — when you know the name */}
                 <div className="flex flex-col sm:flex-row gap-2">
                   <div className="relative flex-1">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                     <input
                       value={skillQuery}
                       onChange={(e) => setSkillQuery(e.target.value)}
                       placeholder="Search skills by name, description, or creator…"
-                      className="w-full bg-slate-800/60 border border-slate-700/60 rounded-md pl-9 pr-9 py-2 text-sm text-white placeholder:text-slate-500 focus:border-teal-500/50 outline-none"
+                      className="w-full bg-slate-800/60 border border-slate-700/60 rounded-md pl-9 pr-9 py-2 text-sm text-white placeholder:text-text-muted focus:border-teal-500/50 outline-none"
                       aria-label="Search skills"
                     />
                     {skillQuery && (
                       <button
                         type="button"
                         onClick={() => setSkillQuery('')}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-500 hover:text-white"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-text-muted hover:text-white"
                         aria-label="Clear search"
                       >
                         <X className="w-4 h-4" />
@@ -867,14 +867,14 @@ export default function BuilderPage() {
                   })
                   return (
                     <>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-text-muted">
                         Showing {filtered.length} of {skills.length} skills
                         {skillQuery && <span> matching "{skillQuery}"</span>}
                         {skillCategory !== 'all' && <span> in {skillCategory}</span>}
                       </div>
                       <div className="max-h-[500px] overflow-y-auto space-y-3 pr-2">
                         {filtered.length === 0 ? (
-                          <div className="text-center py-12 text-slate-500 text-sm">
+                          <div className="text-center py-12 text-text-muted text-sm">
                             No skills match your search. Try a different keyword or clear filters.
                           </div>
                         ) : filtered.map((skill) => {
@@ -900,7 +900,7 @@ export default function BuilderPage() {
                                   <button
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); setExpandedSkillId(isExpanded ? null : skill.id) }}
-                                    className="ml-auto inline-flex items-center gap-1 text-xs text-slate-400 hover:text-teal-300 transition-colors"
+                                    className="ml-auto inline-flex items-center gap-1 text-xs text-text-muted hover:text-teal-300 transition-colors"
                                     aria-label={isExpanded ? 'Hide details' : 'What is this skill?'}
                                     title={isExpanded ? 'Hide details' : 'What is this skill? How can it help?'}
                                   >
@@ -909,7 +909,7 @@ export default function BuilderPage() {
                                     <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                                   </button>
                                 </div>
-                                <p className={`text-slate-400 text-sm ${isExpanded ? '' : 'line-clamp-2'}`}>{skill.description}</p>
+                                <p className={`text-text-muted text-sm ${isExpanded ? '' : 'line-clamp-2'}`}>{skill.description}</p>
                                 {/* Quick-glance trust signals — visible on the card without expansion */}
                                 {skill.explainer && (
                                   <div className="flex flex-wrap items-center gap-1.5 mt-2 text-[10px]">
@@ -917,14 +917,14 @@ export default function BuilderPage() {
                                       <span className={`px-1.5 py-0.5 rounded ${
                                         skill.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
                                         skill.explainer.difficulty === 'advanced' ? 'bg-orange-500/15 text-orange-300' :
-                                        'bg-slate-500/15 text-slate-300'
+                                        'bg-slate-500/15 text-text-secondary'
                                       }`}>{skill.explainer.difficulty}</span>
                                     )}
                                     {skill.explainer.time_to_setup && (
-                                      <span className="px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">⏱ {skill.explainer.time_to_setup}</span>
+                                      <span className="px-1.5 py-0.5 rounded bg-slate-700/40 text-text-secondary">⏱ {skill.explainer.time_to_setup}</span>
                                     )}
                                     {skill.explainer.cost_to_run && (
-                                      <span className="px-1.5 py-0.5 rounded bg-slate-700/40 text-slate-300">💵 {skill.explainer.cost_to_run}</span>
+                                      <span className="px-1.5 py-0.5 rounded bg-slate-700/40 text-text-secondary">💵 {skill.explainer.cost_to_run}</span>
                                     )}
                                     {Array.isArray(skill.explainer.best_with_tools) && skill.explainer.best_with_tools.length > 0 && (
                                       <span className="px-1.5 py-0.5 rounded bg-cyan-500/15 text-cyan-300">
@@ -943,24 +943,24 @@ export default function BuilderPage() {
                                       <>
                                         <div>
                                           <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">What it is</div>
-                                          <p className="text-slate-200 text-sm leading-relaxed">{skill.explainer.what_it_is}</p>
+                                          <p className="text-text-secondary text-sm leading-relaxed">{skill.explainer.what_it_is}</p>
                                         </div>
                                         {skill.explainer.what_you_can_make && (
                                           <div>
                                             <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">What you can make</div>
-                                            <p className="text-slate-300">{skill.explainer.what_you_can_make}</p>
+                                            <p className="text-text-secondary">{skill.explainer.what_you_can_make}</p>
                                           </div>
                                         )}
                                         {skill.explainer.how_it_helps && (
                                           <div>
                                             <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">How it helps</div>
-                                            <p className="text-slate-300">{skill.explainer.how_it_helps}</p>
+                                            <p className="text-text-secondary">{skill.explainer.how_it_helps}</p>
                                           </div>
                                         )}
                                         {skill.explainer.use_case_example && (
                                           <div className="p-2.5 bg-teal-500/5 border border-teal-500/20 rounded">
                                             <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Real use case</div>
-                                            <p className="text-slate-200 italic">"{skill.explainer.use_case_example}"</p>
+                                            <p className="text-text-secondary italic">"{skill.explainer.use_case_example}"</p>
                                           </div>
                                         )}
                                         {(skill.explainer.for_novice || skill.explainer.for_pro) && (
@@ -968,13 +968,13 @@ export default function BuilderPage() {
                                             {skill.explainer.for_novice && (
                                               <div className="p-2 bg-emerald-500/5 border border-emerald-500/20 rounded">
                                                 <div className="text-emerald-300 font-semibold text-[10px] uppercase tracking-wide mb-0.5">If you're new</div>
-                                                <p className="text-slate-300">{skill.explainer.for_novice}</p>
+                                                <p className="text-text-secondary">{skill.explainer.for_novice}</p>
                                               </div>
                                             )}
                                             {skill.explainer.for_pro && (
                                               <div className="p-2 bg-violet-500/5 border border-violet-500/20 rounded">
                                                 <div className="text-violet-300 font-semibold text-[10px] uppercase tracking-wide mb-0.5">If you're senior</div>
-                                                <p className="text-slate-300">{skill.explainer.for_pro}</p>
+                                                <p className="text-text-secondary">{skill.explainer.for_pro}</p>
                                               </div>
                                             )}
                                           </div>
@@ -982,7 +982,7 @@ export default function BuilderPage() {
                                         {skill.explainer.common_confusions && (
                                           <div>
                                             <div className="text-amber-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Common confusion</div>
-                                            <p className="text-slate-300">{skill.explainer.common_confusions}</p>
+                                            <p className="text-text-secondary">{skill.explainer.common_confusions}</p>
                                           </div>
                                         )}
                                         {Array.isArray(skill.explainer.best_with_tools) && skill.explainer.best_with_tools.length > 0 && (
@@ -1000,14 +1000,14 @@ export default function BuilderPage() {
                                             <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Pairs with</div>
                                             <div className="flex flex-wrap gap-1.5">
                                               {skill.explainer.works_well_with.map((w, i) => (
-                                                <span key={i} className="px-2 py-0.5 bg-slate-700/40 border border-slate-700/60 rounded text-slate-300">{w}</span>
+                                                <span key={i} className="px-2 py-0.5 bg-slate-700/40 border border-slate-700/60 rounded text-text-secondary">{w}</span>
                                               ))}
                                             </div>
                                           </div>
                                         )}
                                         {skill.explainer.why_its_here && (
-                                          <div className="text-slate-500 text-[11px] pt-1 border-t border-slate-700/40">
-                                            <span className="text-slate-400">Why we list it:</span> {skill.explainer.why_its_here}
+                                          <div className="text-text-muted text-[11px] pt-1 border-t border-slate-700/40">
+                                            <span className="text-text-muted">Why we list it:</span> {skill.explainer.why_its_here}
                                           </div>
                                         )}
                                       </>
@@ -1018,11 +1018,11 @@ export default function BuilderPage() {
                                           <>
                                             <div>
                                               <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">What kind of skill is this?</div>
-                                              <p className="text-slate-300">{info.whatItIs}</p>
+                                              <p className="text-text-secondary">{info.whatItIs}</p>
                                             </div>
                                             <div>
                                               <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">Best for</div>
-                                              <ul className="text-slate-300 space-y-1 list-disc list-inside marker:text-teal-500/60">
+                                              <ul className="text-text-secondary space-y-1 list-disc list-inside marker:text-teal-500/60">
                                                 {info.bestFor.map((b, i) => <li key={i}>{b}</li>)}
                                               </ul>
                                             </div>
@@ -1031,13 +1031,13 @@ export default function BuilderPage() {
                                         {fullDescription && fullDescription !== skill.description && (
                                           <div>
                                             <div className="text-teal-300 font-semibold uppercase tracking-wide text-[10px] mb-1">In plain English</div>
-                                            <p className="text-slate-300">{fullDescription}</p>
+                                            <p className="text-text-secondary">{fullDescription}</p>
                                           </div>
                                         )}
                                       </>
                                     )}
-                                    <div className="flex flex-wrap items-center gap-3 text-slate-500 pt-1">
-                                      {skill.creator && <span>By <span className="text-slate-300">{skill.creator}</span></span>}
+                                    <div className="flex flex-wrap items-center gap-3 text-text-muted pt-1">
+                                      {skill.creator && <span>By <span className="text-text-secondary">{skill.creator}</span></span>}
                                       {skill.language && <span>· {skill.language}</span>}
                                       {skill.github_stars > 0 && <span>· ⭐ {skill.github_stars.toLocaleString()}</span>}
                                     </div>
@@ -1067,22 +1067,22 @@ export default function BuilderPage() {
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input type="checkbox" checked={publish} onChange={(e) => setPublish(e.target.checked)} className="w-4 h-4 accent-teal-500" />
                     <span className="text-white text-sm font-medium">🌍 Publish to the community</span>
-                    <span className="text-slate-500 text-xs">— get a shareable page others can remix</span>
+                    <span className="text-text-muted text-xs">— get a shareable page others can remix</span>
                   </label>
                   {publish && (
                     <div className="mt-3 space-y-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-slate-400 text-sm">@</span>
+                        <span className="text-text-muted text-sm">@</span>
                         <input
                           value={handle}
                           onChange={(e) => setHandle(e.target.value.replace(/^@/, '').slice(0, 30))}
                           placeholder="your-handle"
                           className="flex-1 bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-sm text-white focus:border-teal-500/50 outline-none"
                         />
-                        <span className="text-slate-500 text-xs">creator</span>
+                        <span className="text-text-muted text-xs">creator</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-slate-400 text-sm">$</span>
+                        <span className="text-text-muted text-sm">$</span>
                         <input
                           value={price}
                           onChange={(e) => setPrice(e.target.value.replace(/[^0-9.]/g, ''))}
@@ -1090,14 +1090,14 @@ export default function BuilderPage() {
                           inputMode="decimal"
                           className="w-24 bg-slate-900/60 border border-slate-700 rounded-md px-3 py-1.5 text-sm text-white focus:border-teal-500/50 outline-none"
                         />
-                        <span className="text-slate-500 text-xs">{price && parseFloat(price) > 0 ? `you keep 85% ($${(parseFloat(price) * 0.85).toFixed(2)}) · 3+ skills required` : 'free — or charge for a complete, tuned system'}</span>
+                        <span className="text-text-muted text-xs">{price && parseFloat(price) > 0 ? `you keep 85% ($${(parseFloat(price) * 0.85).toFixed(2)}) · 3+ skills required` : 'free — or charge for a complete, tuned system'}</span>
                       </div>
                     </div>
                   )}
                 </div>
 
                 <div className="flex gap-3">
-                  <Button onClick={() => setStep(1)} variant="outline" className="flex-1 border-slate-600 text-slate-200 hover:bg-white/5">
+                  <Button onClick={() => setStep(1)} variant="outline" className="flex-1 border-slate-600 text-text-secondary hover:bg-white/5">
                     Back
                   </Button>
                   <Button
@@ -1123,7 +1123,7 @@ export default function BuilderPage() {
                   <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                   <CardTitle className="text-white">Your Agent Blueprint is Ready!</CardTitle>
                 </div>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="text-text-muted">
                   One click runs it in Claude, ChatGPT, Gemini, or your AI editor — no copy-paste needed
                 </CardDescription>
               </CardHeader>
@@ -1136,14 +1136,14 @@ export default function BuilderPage() {
                     <Button onClick={() => launchIn('claude')} className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20">
                       <Sparkles className="w-4 h-4 mr-2" />Open in Claude<ExternalLink className="w-3.5 h-3.5 ml-2 opacity-80" />
                     </Button>
-                    <Button onClick={() => launchIn('chatgpt')} variant="outline" className="flex-1 border-slate-600 text-slate-200 hover:bg-white/5">
+                    <Button onClick={() => launchIn('chatgpt')} variant="outline" className="flex-1 border-slate-600 text-text-secondary hover:bg-white/5">
                       Open in ChatGPT<ExternalLink className="w-3.5 h-3.5 ml-2 opacity-70" />
                     </Button>
-                    <Button onClick={() => launchIn('gemini')} variant="outline" className="flex-1 border-slate-600 text-slate-200 hover:bg-white/5">
+                    <Button onClick={() => launchIn('gemini')} variant="outline" className="flex-1 border-slate-600 text-text-secondary hover:bg-white/5">
                       Open in Gemini<ExternalLink className="w-3.5 h-3.5 ml-2 opacity-70" />
                     </Button>
                   </div>
-                  <p className="text-xs text-slate-500 mt-2">Opens a new chat with your agent prefilled — it's also copied to your clipboard, so if it didn't fit just paste (Ctrl/⌘+V).</p>
+                  <p className="text-xs text-text-muted mt-2">Opens a new chat with your agent prefilled — it's also copied to your clipboard, so if it didn't fit just paste (Ctrl/⌘+V).</p>
                 </div>
 
                 <LaunchInTools
@@ -1165,10 +1165,10 @@ export default function BuilderPage() {
                 <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 space-y-3">
                   <div>
                     <Label className="text-white font-semibold">Agent Goal</Label>
-                    <p className="text-slate-300 mt-1">{agentBlueprint.goal}</p>
+                    <p className="text-text-secondary mt-1">{agentBlueprint.goal}</p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-slate-400 text-sm">Skills ({agentBlueprint.skillIds.length}):</span>
+                    <span className="text-text-muted text-sm">Skills ({agentBlueprint.skillIds.length}):</span>
                     {agentBlueprint.skills?.map((skill) => (
                       <Badge key={skill.id} className={getCategoryColor(skill.category)}>{skill.name}</Badge>
                     ))}
@@ -1178,12 +1178,12 @@ export default function BuilderPage() {
                 {/* Raw blueprint is reference material — folded by default */}
                 <Disclosure title="See the full agent prompt (what powers your agent)">
                   <div className="flex justify-end">
-                    <Button onClick={handleCopy} variant="outline" size="sm" className="border-slate-600 text-slate-200 hover:bg-teal-500/10">
+                    <Button onClick={handleCopy} variant="outline" size="sm" className="border-slate-600 text-text-secondary hover:bg-teal-500/10">
                       {copied ? <><CheckCircle2 className="w-4 h-4 mr-2" />Copied!</> : <><Copy className="w-4 h-4 mr-2" />Copy</>}
                     </Button>
                   </div>
                   <div className="bg-slate-950 rounded-lg p-4 border border-slate-700/50 max-h-[400px] overflow-y-auto">
-                    <pre className="text-slate-300 whitespace-pre-wrap font-mono text-sm">{agentBlueprint.agentBlueprint}</pre>
+                    <pre className="text-text-secondary whitespace-pre-wrap font-mono text-sm">{agentBlueprint.agentBlueprint}</pre>
                   </div>
                 </Disclosure>
 
@@ -1195,7 +1195,7 @@ export default function BuilderPage() {
                     </div>
                     <div className="flex-1">
                       <h4 className="text-white font-semibold mb-1">Want us to set this up for you?</h4>
-                      <p className="text-slate-400 text-sm mb-3">We'll configure and test this exact agent for your specific workflow — you get a ready-to-use, fully customised setup. Pick a tier below; <strong className="text-amber-300">one-time payment</strong>, no subscription.</p>
+                      <p className="text-text-muted text-sm mb-3">We'll configure and test this exact agent for your specific workflow — you get a ready-to-use, fully customised setup. Pick a tier below; <strong className="text-amber-300">one-time payment</strong>, no subscription.</p>
                       {dfyRequested ? (
                         <div className="flex items-center gap-2 text-emerald-300 text-sm bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
                           <CheckCircle2 className="w-4 h-4" />
@@ -1221,7 +1221,7 @@ export default function BuilderPage() {
                                     <span className="text-white font-semibold text-sm">{t.label}</span>
                                     <span className="text-amber-300 font-bold text-sm">${t.price}</span>
                                   </div>
-                                  <p className="text-xs text-slate-400 leading-snug">{t.desc}</p>
+                                  <p className="text-xs text-text-muted leading-snug">{t.desc}</p>
                                 </button>
                               )
                             })}
@@ -1253,7 +1253,7 @@ export default function BuilderPage() {
                           </Button>
                         </form>
                       )}
-                      <p className="text-xs text-slate-500 mt-2">No payment yet — we confirm scope first, then send a one-time Stripe checkout link.</p>
+                      <p className="text-xs text-text-muted mt-2">No payment yet — we confirm scope first, then send a one-time Stripe checkout link.</p>
                     </div>
                   </div>
                 </div>
@@ -1261,7 +1261,7 @@ export default function BuilderPage() {
                 {agentBlueprint?.isPublic ? (
                   <div className="bg-teal-500/10 border border-teal-500/30 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-teal-300 font-semibold mb-2">🎉 Live in the community!</div>
-                    <p className="text-slate-300 text-sm mb-3">Anyone can now view and remix your agent. Share the link:</p>
+                    <p className="text-text-secondary text-sm mb-3">Anyone can now view and remix your agent. Share the link:</p>
                     <div className="flex flex-wrap gap-2">
                       <Link href={`/a/${agentBlueprint.id}`}>
                         <Button className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white" size="sm">View public page →</Button>
@@ -1275,7 +1275,7 @@ export default function BuilderPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 flex items-center gap-2 text-sm text-slate-300">
+                  <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 flex items-center gap-2 text-sm text-text-secondary">
                     <CheckCircle2 className="w-4 h-4 text-teal-400" />
                     Saved to <Link href="/my-agents" className="text-teal-300 underline hover:text-teal-200">My Agents</Link> — come back anytime, no login needed.
                   </div>
@@ -1284,7 +1284,7 @@ export default function BuilderPage() {
                   <Button
                     onClick={() => { setStep(1); setGoal(''); setSelectedSkillIds([]); setAgentBlueprint(null) }}
                     variant="outline"
-                    className="flex-1 border-slate-600 text-slate-200 hover:bg-white/5"
+                    className="flex-1 border-slate-600 text-text-secondary hover:bg-white/5"
                   >
                     Build Another Agent
                   </Button>

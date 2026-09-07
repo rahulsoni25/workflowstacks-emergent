@@ -112,7 +112,7 @@ export default function AddToClaude({ skill, codeflow = null }) {
           </CardTitle>
           <Badge className="bg-teal-500/15 text-teal-300 border-teal-500/30 border text-xs">New</Badge>
         </div>
-        <p className="text-slate-400 text-sm mt-1">Skip the builder — one click puts this in Claude, Cursor, Antigravity and more.</p>
+        <p className="text-text-muted text-sm mt-1">Skip the builder — one click puts this in Claude, Cursor, Antigravity and more.</p>
         {/* Readiness: set expectations BEFORE the click — what stands between
             "installed" and "working product" for this particular repo. */}
         <div className="mt-2">
@@ -124,11 +124,11 @@ export default function AddToClaude({ skill, codeflow = null }) {
               </span>
             )}
           </div>
-          <p className="text-xs text-slate-500 mt-1.5">{readiness.detail}</p>
+          <p className="text-xs text-text-muted mt-1.5">{readiness.detail}</p>
           <button
             onClick={saveToLibrary}
             disabled={saved}
-            className={`mt-2 text-xs transition-colors ${saved ? 'text-teal-300 cursor-default' : 'text-slate-400 hover:text-teal-300'}`}
+            className={`mt-2 text-xs transition-colors ${saved ? 'text-teal-300 cursor-default' : 'text-text-muted hover:text-teal-300'}`}
           >
             {saved ? '✓ Saved to My Library — Claude can recall it via the connector' : '＋ Save to My Library'}
           </button>
@@ -149,41 +149,41 @@ export default function AddToClaude({ skill, codeflow = null }) {
           </a>
           <button
             onClick={() => setShowSteps((s) => !s)}
-            className="mt-2 flex items-center gap-1 text-xs text-slate-400 hover:text-teal-300 transition-colors"
+            className="mt-2 flex items-center gap-1 text-xs text-text-muted hover:text-teal-300 transition-colors"
           >
             <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showSteps ? 'rotate-180' : ''}`} />
             How to finish the install (2 steps)
           </button>
           {showSteps && (
-            <ol className="mt-2 space-y-1.5 text-sm text-slate-300 bg-slate-950/50 border border-slate-800 rounded-lg p-3">
-              <li className="flex gap-2"><span className="text-teal-400 font-semibold">1.</span><span>In the Claude app or claude.ai, open <span className="text-slate-100">Settings → Capabilities → Skills</span>.</span></li>
-              <li className="flex gap-2"><span className="text-teal-400 font-semibold">2.</span><span>Click <span className="text-slate-100">Upload skill</span> and pick the .zip you just downloaded. Done — Claude uses it automatically when relevant.</span></li>
-              <li className="text-xs text-slate-500 pt-1">Skills require a paid Claude plan (Pro/Max/Team).</li>
+            <ol className="mt-2 space-y-1.5 text-sm text-text-secondary bg-slate-950/50 border border-slate-800 rounded-lg p-3">
+              <li className="flex gap-2"><span className="text-teal-400 font-semibold">1.</span><span>In the Claude app or claude.ai, open <span className="text-text-primary">Settings → Capabilities → Skills</span>.</span></li>
+              <li className="flex gap-2"><span className="text-teal-400 font-semibold">2.</span><span>Click <span className="text-text-primary">Upload skill</span> and pick the .zip you just downloaded. Done — Claude uses it automatically when relevant.</span></li>
+              <li className="text-xs text-text-muted pt-1">Skills require a paid Claude plan (Pro/Max/Team).</li>
             </ol>
           )}
         </div>
 
         {/* 2 — Zero-install: open Claude with the skill preloaded */}
         <div className={`border-t border-slate-700/50 pt-4 ${blocked ? 'pointer-events-none opacity-40' : ''}`} aria-disabled={blocked}>
-          <div className="text-sm text-slate-300 font-medium mb-2">Try it instantly — no install</div>
+          <div className="text-sm text-text-secondary font-medium mb-2">Try it instantly — no install</div>
           <div className="grid grid-cols-2 gap-2">
             <Button onClick={openInClaude} disabled={openingClaude || blocked} variant="outline" className="border-teal-500/30 text-teal-300 hover:bg-teal-500/10">
               <Sparkles className="w-4 h-4 mr-1.5" />{openingClaude ? 'Opening…' : 'Open in Claude'}
             </Button>
-            <Button onClick={copyPrompt} disabled={blocked} variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5">
+            <Button onClick={copyPrompt} disabled={blocked} variant="outline" className="border-slate-600 text-text-secondary hover:bg-white/5">
               {copied === 'prompt' ? <><CheckCircle2 className="w-4 h-4 mr-1.5" />Copied</> : <><Copy className="w-4 h-4 mr-1.5" />Copy prompt</>}
             </Button>
           </div>
           {triedClaude && !blocked && (
-            <p className="text-xs text-slate-500 mt-2">App didn't open? Use “Copy prompt” and paste it into a new chat at claude.ai.</p>
+            <p className="text-xs text-text-muted mt-2">App didn't open? Use “Copy prompt” and paste it into a new chat at claude.ai.</p>
           )}
         </div>
 
         {/* 3 — Claude Code one-liner */}
         <div className={`border-t border-slate-700/50 pt-4 ${blocked ? 'pointer-events-none opacity-40' : ''}`} aria-disabled={blocked}>
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5 text-sm text-slate-300 font-medium"><Terminal className="w-4 h-4 text-teal-400" />Claude Code</div>
-            <Button onClick={() => { trackInstall(slug, 'claude-code'); copy('code', codeCmd) }} variant="ghost" size="sm" className="h-7 px-2 text-slate-400 hover:text-teal-300">
+            <div className="flex items-center gap-1.5 text-sm text-text-secondary font-medium"><Terminal className="w-4 h-4 text-teal-400" />Claude Code</div>
+            <Button onClick={() => { trackInstall(slug, 'claude-code'); copy('code', codeCmd) }} variant="ghost" size="sm" className="h-7 px-2 text-text-muted hover:text-teal-300">
               {copied === 'code' ? <><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Copied</> : <><Copy className="w-3.5 h-3.5 mr-1" />Copy</>}
             </Button>
           </div>
@@ -200,8 +200,8 @@ export default function AddToClaude({ skill, codeflow = null }) {
         {/* 5 — MCP connector for power users */}
         <div className="border-t border-slate-700/50 pt-4">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1.5 text-sm text-slate-300 font-medium"><Plug className="w-4 h-4 text-teal-400" />Connect the whole catalog (MCP)</div>
-            <Button onClick={() => { trackInstall(slug, 'mcp-copy'); copy('mcp', mcpCmd) }} variant="ghost" size="sm" className="h-7 px-2 text-slate-400 hover:text-teal-300">
+            <div className="flex items-center gap-1.5 text-sm text-text-secondary font-medium"><Plug className="w-4 h-4 text-teal-400" />Connect the whole catalog (MCP)</div>
+            <Button onClick={() => { trackInstall(slug, 'mcp-copy'); copy('mcp', mcpCmd) }} variant="ghost" size="sm" className="h-7 px-2 text-text-muted hover:text-teal-300">
               {copied === 'mcp' ? <><CheckCircle2 className="w-3.5 h-3.5 mr-1" />Copied</> : <><Copy className="w-3.5 h-3.5 mr-1" />Copy</>}
             </Button>
           </div>
@@ -209,9 +209,9 @@ export default function AddToClaude({ skill, codeflow = null }) {
             <code className="text-teal-300 font-mono text-xs whitespace-nowrap">{mcpCmd}</code>
           </div>
           <div className="flex items-center justify-between mt-1.5 gap-2">
-            <p className="text-xs text-slate-500">Adds a WorkflowStacks connector to Claude Code: search and load any skill here by chatting.</p>
+            <p className="text-xs text-text-muted">Adds a WorkflowStacks connector to Claude Code: search and load any skill here by chatting.</p>
             <a href={cursorMcpLink} className="flex-shrink-0" onClick={() => trackInstall(slug, 'cursor-mcp')}>
-              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-slate-400 hover:text-teal-300 border border-slate-700">
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-text-muted hover:text-teal-300 border border-slate-700">
                 Add to Cursor
               </Button>
             </a>

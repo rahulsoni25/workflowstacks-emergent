@@ -63,7 +63,7 @@ function FacetButton({ on, onClick, children }) {
       type="button"
       onClick={onClick}
       className={`flex items-center justify-between rounded-[7px] border-0 px-2.5 py-2 text-left text-sm ${
-        on ? 'bg-[#ECEFEA] font-semibold text-[#0A0C0D]' : 'bg-transparent text-[#8B928D] hover:text-[#ECEFEA]'
+        on ? 'bg-[#ECEFEA] font-semibold text-[#0A0C0D]' : 'bg-transparent text-text-muted hover:text-text-primary'
       }`}
     >
       <span>{children}</span>
@@ -75,7 +75,7 @@ function StatCell({ value, label, accent = false }) {
   return (
     <div className="t-mono flex min-w-0 flex-col gap-0.5 bg-[#0A0C0D] p-3">
       <span className={`truncate text-[17px] font-medium ${accent ? 'text-[#C6F24E]' : ''}`}>{value}</span>
-      <span className="text-[10.5px] text-[#5A615D]">{label}</span>
+      <span className="text-[10.5px] text-text-muted">{label}</span>
     </div>
   )
 }
@@ -271,26 +271,26 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
   ]
 
   return (
-    <div className="min-h-screen bg-[#0A0C0D] text-[#ECEFEA]">
+    <div className="min-h-screen bg-[#0A0C0D] text-text-primary">
       {/* ---------- header + search ---------- */}
       <section className="mx-auto flex max-w-[1280px] flex-col gap-[18px] px-5 pb-2 pt-10 sm:px-10">
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <h1 className="m-0 text-[34px] font-bold leading-none tracking-[-0.04em]">Marketplace</h1>
-          <Mono className="whitespace-nowrap text-xs text-[#5A615D]">
+          <Mono className="whitespace-nowrap text-xs text-text-muted">
             {total ? `${total.toLocaleString()} listings` : 'Loading listings'} · GitHub stats refreshed daily · quality gate ≥ 8/10
           </Mono>
         </div>
         <div className="flex items-center gap-2 rounded-[10px] border border-[#323A3C] bg-[#101314] pl-3.5 pr-1.5 transition-colors focus-within:border-[#C6F24E]">
-          <span className="text-sm text-[#5A615D]">⌕</span>
+          <span className="text-sm text-text-muted">⌕</span>
           <input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search agents, skills, MCPs…"
             aria-label="Search the marketplace"
-            className="min-w-0 flex-1 border-0 bg-transparent py-2.5 text-[15px] text-[#ECEFEA] outline-none placeholder:text-[#5A615D]"
+            className="min-w-0 flex-1 border-0 bg-transparent py-2.5 text-[15px] text-text-primary outline-none placeholder:text-text-muted"
           />
           {searchInput && (
-            <button type="button" onClick={() => { setSearchInput(''); setSearch('') }} className="border-0 bg-transparent px-2 py-1.5 text-[13px] text-[#5A615D] hover:text-[#ECEFEA]">
+            <button type="button" onClick={() => { setSearchInput(''); setSearch('') }} className="border-0 bg-transparent px-2 py-1.5 text-[13px] text-text-muted hover:text-text-primary">
               Clear
             </button>
           )}
@@ -304,7 +304,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                 type="button"
                 onClick={() => openPanel(s, false)}
                 className={`flex min-w-0 flex-col gap-3.5 rounded-2xl border p-6 text-left transition-transform duration-200 hover:-translate-y-0.5 ${
-                  lime ? 'border-[#C6F24E] bg-[#C6F24E] text-[#0A0C0D]' : 'border-[#323A3C] bg-[#101314] text-[#ECEFEA]'
+                  lime ? 'border-[#C6F24E] bg-[#C6F24E] text-[#0A0C0D]' : 'border-[#323A3C] bg-[#101314] text-text-primary'
                 }`}
               >
                 <div className="t-mono flex justify-between gap-2.5 text-[11px] tracking-wider opacity-80">
@@ -322,7 +322,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                   <span className="whitespace-nowrap opacity-75">
                     {categoryLabel(s.category)} · {priceLabel(s)}
                   </span>
-                  <span className={`whitespace-nowrap rounded-md px-3.5 py-2 font-sans text-[13px] font-bold ${lime ? 'bg-[#0A0C0D] text-[#ECEFEA]' : 'bg-[#ECEFEA] text-[#0A0C0D]'}`}>View →</span>
+                  <span className={`whitespace-nowrap rounded-md px-3.5 py-2 font-sans text-[13px] font-bold ${lime ? 'bg-[#0A0C0D] text-text-primary' : 'bg-[#ECEFEA] text-[#0A0C0D]'}`}>View →</span>
                 </div>
               </button>
             ))}
@@ -340,7 +340,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
           </div>
           {facetGroups.map((g) => (
             <div key={g.title} className="flex flex-col gap-1">
-              <Mono className="px-2.5 pb-1.5 text-[11px] tracking-[.06em] text-[#5A615D]">{g.title}</Mono>
+              <Mono className="px-2.5 pb-1.5 text-[11px] tracking-[.06em] text-text-muted">{g.title}</Mono>
               {g.items.map(([slug, label]) => (
                 <FacetButton key={slug} on={category === slug} onClick={() => setCategory(category === slug ? 'all' : slug)}>
                   {label}
@@ -348,7 +348,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
               ))}
             </div>
           ))}
-          <label className="flex cursor-pointer items-center gap-2.5 px-2.5 text-sm text-[#8B928D]">
+          <label className="flex cursor-pointer items-center gap-2.5 px-2.5 text-sm text-text-muted">
             <input type="checkbox" checked={freeOnly} onChange={() => setFreeOnly((v) => !v)} className="h-[15px] w-[15px] accent-[#C6F24E]" />
             Free only
           </label>
@@ -360,7 +360,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
             <button
               type="button"
               onClick={() => setCategory('all')}
-              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] ${category === 'all' ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] text-[#8B928D]'}`}
+              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] ${category === 'all' ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] text-text-muted'}`}
             >
               All
             </button>
@@ -369,7 +369,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                 key={slug}
                 type="button"
                 onClick={() => setCategory(category === slug ? 'all' : slug)}
-                className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] ${category === slug ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] text-[#8B928D]'}`}
+                className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] ${category === slug ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] text-text-muted'}`}
               >
                 {label}
               </button>
@@ -377,34 +377,34 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
             <button
               type="button"
               onClick={() => setFreeOnly((v) => !v)}
-              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] ${freeOnly ? 'border-[#C6F24E] bg-[#C6F24E] text-[#0A0C0D]' : 'border-[#323A3C] text-[#8B928D]'}`}
+              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-[13px] ${freeOnly ? 'border-[#C6F24E] bg-[#C6F24E] text-[#0A0C0D]' : 'border-[#323A3C] text-text-muted'}`}
             >
               Free only
             </button>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="t-mono flex flex-wrap items-center gap-2 text-xs text-[#5A615D]">
+            <div className="t-mono flex flex-wrap items-center gap-2 text-xs text-text-muted">
               <span>{loading ? '…' : total.toLocaleString()} results</span>
               {active.map((f) => (
                 <button
                   key={f.label}
                   type="button"
                   onClick={f.clear}
-                  className="flex items-center gap-1.5 rounded-full border border-[#323A3C] bg-[#101314] px-2.5 py-1 text-xs text-[#ECEFEA] hover:border-[#C6F24E]"
+                  className="flex items-center gap-1.5 rounded-full border border-[#323A3C] bg-[#101314] px-2.5 py-1 text-xs text-text-primary hover:border-[#C6F24E]"
                 >
                   {f.label}
-                  <span className="text-[#5A615D]">×</span>
+                  <span className="text-text-muted">×</span>
                 </button>
               ))}
             </div>
-            <div className="t-mono flex items-center gap-2 text-xs text-[#5A615D]">
+            <div className="t-mono flex items-center gap-2 text-xs text-text-muted">
               <label htmlFor="mk-sort">Sort</label>
               <select
                 id="mk-sort"
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="rounded-md border border-[#323A3C] bg-[#101314] px-2.5 py-[7px] text-[13px] text-[#ECEFEA]"
+                className="rounded-md border border-[#323A3C] bg-[#101314] px-2.5 py-[7px] text-[13px] text-text-primary"
               >
                 {SORTS.map((s) => (
                   <option key={s.key} value={s.key}>
@@ -416,19 +416,19 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
           </div>
 
           {loading ? (
-            <div className="t-mono flex items-center gap-2.5 py-16 text-[13px] text-[#8B928D]">
+            <div className="t-mono flex items-center gap-2.5 py-16 text-[13px] text-text-muted">
               <span className="anim-blink h-2 w-2 rounded-full bg-[#C6F24E]" />
               Loading listings…
             </div>
           ) : skills.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 rounded-[14px] border border-dashed border-[#323A3C] p-10 text-center text-[#8B928D] sm:p-14">
-              <span className="text-xl text-[#ECEFEA]">Nothing in the catalog matches those filters yet.</span>
-              <span className="text-sm text-[#5A615D]">We can build it for you from proven skills, working in your tools within 7 days.</span>
+            <div className="flex flex-col items-center gap-3 rounded-[14px] border border-dashed border-[#323A3C] p-10 text-center text-text-secondary sm:p-14">
+              <span className="text-xl text-text-primary">Nothing in the catalog matches those filters yet.</span>
+              <span className="text-sm text-text-muted">We can build it for you from proven skills, working in your tools within 7 days.</span>
               <div className="flex flex-wrap justify-center gap-2.5">
                 <Link href="/build-for-me" className="rounded-md bg-[#C6F24E] px-4 py-2.5 text-sm font-bold text-[#0A0C0D] hover:bg-[#A6D62E]">
                   Get it built
                 </Link>
-                <button type="button" onClick={clearAll} className="rounded-md border border-[#323A3C] bg-transparent px-4 py-2.5 text-sm font-semibold text-[#ECEFEA] hover:border-[#C6F24E]">
+                <button type="button" onClick={clearAll} className="rounded-md border border-[#323A3C] bg-transparent px-4 py-2.5 text-sm font-semibold text-text-primary hover:border-[#C6F24E]">
                   Clear filters
                 </button>
               </div>
@@ -446,25 +446,25 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                       className="anim-rise flex min-w-0 flex-col gap-3.5 rounded-[14px] border border-[#262B2D] bg-[#101314] p-5 transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-[#C6F24E]"
                     >
                       <button type="button" onClick={() => openPanel(s, false)} className="flex min-w-0 flex-col gap-3 border-0 bg-transparent p-0 text-left text-inherit">
-                        <div className="t-mono flex w-full items-center justify-between gap-2 text-[11px] text-[#8B928D]">
+                        <div className="t-mono flex w-full items-center justify-between gap-2 text-[11px] text-text-muted">
                           <span className="flex flex-wrap gap-1.5">
                             <span className="whitespace-nowrap rounded bg-[#C6F24E] px-[7px] py-[3px] font-medium text-[#0A0C0D]">{categoryLabel(s.category)}</span>
                             {s.language && <span className="whitespace-nowrap rounded border border-[#323A3C] px-[7px] py-[3px]">{s.language}</span>}
                           </span>
-                          <span className={`whitespace-nowrap font-medium ${paid ? 'text-[#ECEFEA]' : 'text-[#C6F24E]'}`}>{priceLabel(s)}</span>
+                          <span className={`whitespace-nowrap font-medium ${paid ? 'text-text-primary' : 'text-[#C6F24E]'}`}>{priceLabel(s)}</span>
                         </div>
                         <div className="flex w-full flex-col gap-[5px]">
                           <h3 className="m-0 text-[19px] font-bold tracking-[-0.02em]">{skillTitle(s)}</h3>
-                          <p className="m-0 text-sm leading-[1.45] text-[#8B928D] line-clamp-2">{skillDesc(s)}</p>
+                          <p className="m-0 text-sm leading-[1.45] text-text-secondary line-clamp-2">{skillDesc(s)}</p>
                         </div>
                         {uc && (
-                          <div className="t-mono w-full min-w-0 rounded-md border border-[#262B2D] border-l-[3px] border-l-[#C6F24E] bg-[#0A0C0D] px-2.5 py-[7px] text-[11px] leading-[1.45] text-[#8B928D] line-clamp-2 [overflow-wrap:anywhere]">
+                          <div className="t-mono w-full min-w-0 rounded-md border border-[#262B2D] border-l-[3px] border-l-[#C6F24E] bg-[#0A0C0D] px-2.5 py-[7px] text-[11px] leading-[1.45] text-text-muted line-clamp-2 [overflow-wrap:anywhere]">
                             {uc}
                           </div>
                         )}
                       </button>
                       <div className="mt-auto flex items-center justify-between gap-2.5 border-t border-[#262B2D] pt-3">
-                        <span className="t-mono flex min-w-0 flex-wrap gap-[9px] text-[11.5px] text-[#8B928D]">
+                        <span className="t-mono flex min-w-0 flex-wrap gap-[9px] text-[11.5px] text-text-muted">
                           <span className="whitespace-nowrap">★ {fmt(s.github_stars)}</span>
                           {h !== null && <span className="whitespace-nowrap text-[#C6F24E]">● {h}</span>}
                           {s.installs > 0 && <span className="whitespace-nowrap">↓ {fmt(s.installs)}</span>}
@@ -494,7 +494,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                     type="button"
                     onClick={loadMore}
                     disabled={loadingMore}
-                    className="rounded-md border border-[#323A3C] bg-transparent px-5 py-2.5 text-sm font-semibold text-[#ECEFEA] hover:border-[#C6F24E] disabled:opacity-60"
+                    className="rounded-md border border-[#323A3C] bg-transparent px-5 py-2.5 text-sm font-semibold text-text-primary hover:border-[#C6F24E] disabled:opacity-60"
                   >
                     {loadingMore ? 'Loading…' : `Load more (${(total - skills.length).toLocaleString()} left)`}
                   </button>
@@ -519,16 +519,16 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
               <div className="flex min-w-0 flex-col gap-2">
                 <span className="t-mono flex flex-wrap gap-1.5 text-[11px]">
                   <span className="whitespace-nowrap rounded bg-[#C6F24E] px-[7px] py-[3px] font-medium text-[#0A0C0D]">{categoryLabel(sel.category)}</span>
-                  {sel.language && <span className="whitespace-nowrap rounded border border-[#323A3C] px-[7px] py-[3px] text-[#8B928D]">{sel.language}</span>}
-                  {skillCreator(sel) && <span className="whitespace-nowrap rounded border border-[#323A3C] px-[7px] py-[3px] text-[#8B928D]">by {skillCreator(sel)}</span>}
+                  {sel.language && <span className="whitespace-nowrap rounded border border-[#323A3C] px-[7px] py-[3px] text-text-muted">{sel.language}</span>}
+                  {skillCreator(sel) && <span className="whitespace-nowrap rounded border border-[#323A3C] px-[7px] py-[3px] text-text-muted">by {skillCreator(sel)}</span>}
                 </span>
                 <h2 className="m-0 text-[28px] font-bold leading-[1.05] tracking-[-0.03em]">{skillTitle(sel)}</h2>
               </div>
-              <button type="button" onClick={closePanel} aria-label="Close" className="shrink-0 border-0 bg-transparent text-2xl leading-none text-[#8B928D] hover:text-[#ECEFEA]">
+              <button type="button" onClick={closePanel} aria-label="Close" className="shrink-0 border-0 bg-transparent text-2xl leading-none text-text-muted hover:text-text-primary">
                 ×
               </button>
             </div>
-            <p className="m-0 text-base leading-[1.55] text-[#8B928D]">{skillDesc(sel)}</p>
+            <p className="m-0 text-base leading-[1.55] text-text-secondary">{skillDesc(sel)}</p>
 
             <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-[#262B2D] bg-[#262B2D] sm:grid-cols-4">
               <StatCell value={`★ ${fmt(sel.github_stars)}`} label="stars" />
@@ -539,19 +539,19 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
 
             {skillUseCase(sel) && (
               <div className="flex flex-col gap-1.5">
-                <Mono className="text-[11px] tracking-wider text-[#5A615D]">EXAMPLE USE CASE</Mono>
-                <div className="t-mono rounded-lg border border-[#262B2D] border-l-[3px] border-l-[#C6F24E] bg-[#0A0C0D] px-3.5 py-2.5 text-[12.5px] leading-normal text-[#ECEFEA] [overflow-wrap:anywhere]">
+                <Mono className="text-[11px] tracking-wider text-text-muted">EXAMPLE USE CASE</Mono>
+                <div className="t-mono rounded-lg border border-[#262B2D] border-l-[3px] border-l-[#C6F24E] bg-[#0A0C0D] px-3.5 py-2.5 text-[12.5px] leading-normal text-text-primary [overflow-wrap:anywhere]">
                   {skillUseCase(sel)}
                 </div>
               </div>
             )}
 
-            <div className="t-mono flex flex-col gap-2 text-xs text-[#5A615D]">
+            <div className="t-mono flex flex-col gap-2 text-xs text-text-muted">
               {Array.isArray(sel.github_topics) && sel.github_topics.length > 0 && (
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span>Topics</span>
                   {sel.github_topics.slice(0, 6).map((t) => (
-                    <span key={t} className="whitespace-nowrap rounded border border-[#262B2D] bg-[#0A0C0D] px-2 py-[3px] text-[#8B928D]">
+                    <span key={t} className="whitespace-nowrap rounded border border-[#262B2D] bg-[#0A0C0D] px-2 py-[3px] text-text-muted">
                       {t}
                     </span>
                   ))}
@@ -560,13 +560,13 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
               <div className="flex flex-wrap items-center gap-1.5">
                 <span>Runs in</span>
                 {TARGETS.map((t) => (
-                  <span key={t.name} className="whitespace-nowrap rounded border border-[#323A3C] px-2 py-[3px] text-[#8B928D]">
+                  <span key={t.name} className="whitespace-nowrap rounded border border-[#323A3C] px-2 py-[3px] text-text-muted">
                     {t.name}
                   </span>
                 ))}
               </div>
               {sel.github_url && (
-                <a href={sel.github_url} target="_blank" rel="noopener noreferrer" className="w-fit text-[#8B928D] underline hover:text-[#C6F24E]">
+                <a href={sel.github_url} target="_blank" rel="noopener noreferrer" className="w-fit text-text-secondary underline hover:text-[#C6F24E]">
                   Source on GitHub ↗
                 </a>
               )}
@@ -578,7 +578,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                   <div className="flex items-center justify-between rounded-[10px] border border-[#323A3C] bg-[#0A0C0D] px-4 py-3.5">
                     <span className="flex flex-col gap-0.5">
                       <strong className="text-sm">Creator listing · one-time purchase</strong>
-                      <span className="text-[12.5px] text-[#8B928D]">Pricing and checkout are on the listing page.</span>
+                      <span className="text-[12.5px] text-text-muted">Pricing and checkout are on the listing page.</span>
                     </span>
                     <span className="text-[22px] font-bold">${Number(sel.price)}</span>
                   </div>
@@ -589,7 +589,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
               ) : (
                 <>
                   <div className="flex flex-col gap-2">
-                    <Mono className="text-[11px] tracking-wider text-[#5A615D]">RUN IN</Mono>
+                    <Mono className="text-[11px] tracking-wider text-text-muted">RUN IN</Mono>
                     <div className="flex gap-1.5">
                       {TARGETS.map((t) => {
                         const on = t.name === target
@@ -602,7 +602,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                               setCopied(false)
                             }}
                             className={`flex-1 rounded-lg border p-2.5 text-sm font-semibold ${
-                              on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-[#ECEFEA] hover:border-[#C6F24E]'
+                              on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-text-primary hover:border-[#C6F24E]'
                             }`}
                           >
                             {t.name}
@@ -612,7 +612,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                     </div>
                   </div>
                   {showBp && (
-                    <pre className="t-mono m-0 max-h-[180px] overflow-auto whitespace-pre-wrap rounded-[10px] border border-[#323A3C] bg-[#0A0C0D] p-3.5 text-xs leading-[1.55] text-[#8B928D]">
+                    <pre className="t-mono m-0 max-h-[180px] overflow-auto whitespace-pre-wrap rounded-[10px] border border-[#323A3C] bg-[#0A0C0D] p-3.5 text-xs leading-[1.55] text-text-muted">
                       {blueprint || 'Compiling the blueprint from the source repository…'}
                     </pre>
                   )}
@@ -629,16 +629,16 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                       type="button"
                       onClick={openInTarget}
                       disabled={!blueprint}
-                      className="whitespace-nowrap rounded-lg border border-[#323A3C] bg-transparent px-4 py-3.5 text-sm font-semibold text-[#ECEFEA] hover:border-[#C6F24E] disabled:opacity-60"
+                      className="whitespace-nowrap rounded-lg border border-[#323A3C] bg-transparent px-4 py-3.5 text-sm font-semibold text-text-primary hover:border-[#C6F24E] disabled:opacity-60"
                     >
                       Open {target} ↗
                     </button>
                   </div>
-                  <div className="t-mono flex items-center justify-between text-[11px] text-[#5A615D]">
-                    <button type="button" onClick={() => setShowBp((v) => !v)} className="border-0 bg-transparent p-0 text-[11px] text-[#5A615D] hover:text-[#ECEFEA]">
+                  <div className="t-mono flex items-center justify-between text-[11px] text-text-muted">
+                    <button type="button" onClick={() => setShowBp((v) => !v)} className="border-0 bg-transparent p-0 text-[11px] text-text-muted hover:text-text-primary">
                       {showBp ? '▾ Hide blueprint' : '▸ Preview blueprint'}
                     </button>
-                    <Link href={`/skills/${selKey}`} className="text-[#8B928D] underline hover:text-[#C6F24E]">
+                    <Link href={`/skills/${selKey}`} className="text-text-secondary underline hover:text-[#C6F24E]">
                       Full report ↗
                     </Link>
                   </div>

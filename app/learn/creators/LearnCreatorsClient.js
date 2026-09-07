@@ -53,7 +53,7 @@ export default function LearnCreatorsClient() {
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
+          <Link href="/"><Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
         </div>
       </header>
 
@@ -63,7 +63,7 @@ export default function LearnCreatorsClient() {
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
           Built something useful? <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">Get it in front of people who'll pay for it.</span>
         </h1>
-        <p className="text-lg text-slate-300 max-w-2xl mx-auto mb-8">
+        <p className="text-lg text-text-secondary max-w-2xl mx-auto mb-8">
           List your Claude Skill, MCP server, or AI agent on WorkflowStacks. We handle discovery, review, and payments — you keep 85% of every sale.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -73,7 +73,7 @@ export default function LearnCreatorsClient() {
             </Button>
           </Link>
           <a href="#how-it-works">
-            <Button size="lg" variant="outline" className="border-slate-700 text-slate-300 hover:bg-white/5 px-8">
+            <Button size="lg" variant="outline" className="border-slate-700 text-text-secondary hover:bg-white/5 px-8">
               See how it works
             </Button>
           </a>
@@ -88,7 +88,7 @@ export default function LearnCreatorsClient() {
               <CardContent className="py-5 text-center">
                 <Icon className="w-5 h-5 text-teal-400 mx-auto mb-1.5" />
                 <div className="text-2xl font-bold text-white">{value}</div>
-                <div className="text-xs text-slate-400">{label}</div>
+                <div className="text-xs text-text-muted">{label}</div>
               </CardContent>
             </Card>
           ))}
@@ -100,7 +100,7 @@ export default function LearnCreatorsClient() {
         {/* How it works */}
         <div id="how-it-works" className="scroll-mt-20">
           <h2 className="text-2xl font-bold text-white mb-2 text-center">Two ways to submit</h2>
-          <p className="text-slate-400 text-center mb-8">Pick whichever fits what you've already built.</p>
+          <p className="text-text-muted text-center mb-8">Pick whichever fits what you've already built.</p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="bg-slate-900/60 border-slate-700/50">
               <CardContent className="py-6">
@@ -114,7 +114,7 @@ export default function LearnCreatorsClient() {
                       <div className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-500/15 text-teal-400 text-xs font-bold flex items-center justify-center mt-0.5">{s.n}</div>
                       <div>
                         <div className="text-white text-sm font-medium">{s.title}</div>
-                        <div className="text-slate-400 text-xs mt-0.5">{s.body}</div>
+                        <div className="text-text-muted text-xs mt-0.5">{s.body}</div>
                       </div>
                     </div>
                   ))}
@@ -134,7 +134,7 @@ export default function LearnCreatorsClient() {
                       <div className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-500/15 text-teal-400 text-xs font-bold flex items-center justify-center mt-0.5">{s.n}</div>
                       <div>
                         <div className="text-white text-sm font-medium">{s.title}</div>
-                        <div className="text-slate-400 text-xs mt-0.5">{s.body}</div>
+                        <div className="text-text-muted text-xs mt-0.5">{s.body}</div>
                       </div>
                     </div>
                   ))}
@@ -147,12 +147,12 @@ export default function LearnCreatorsClient() {
         {/* What makes a great listing */}
         <div>
           <h2 className="text-2xl font-bold text-white mb-2 text-center">What gets approved fast</h2>
-          <p className="text-slate-400 text-center mb-8">Reviewers see a lot of listings — these are the difference between a same-week approval and back-and-forth.</p>
+          <p className="text-text-muted text-center mb-8">Reviewers see a lot of listings — these are the difference between a same-week approval and back-and-forth.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {GOOD_LISTING_TIPS.map(({ icon: Icon, good, text }, i) => (
               <div key={i} className={`flex gap-3 items-start rounded-lg border p-4 ${good ? 'bg-teal-500/5 border-teal-500/20' : 'bg-red-500/5 border-red-500/20'}`}>
                 <Icon className={`w-4 h-4 flex-shrink-0 mt-0.5 ${good ? 'text-teal-400' : 'text-red-400'}`} />
-                <span className="text-slate-300 text-sm">{text}</span>
+                <span className="text-text-secondary text-sm">{text}</span>
               </div>
             ))}
           </div>
@@ -165,7 +165,7 @@ export default function LearnCreatorsClient() {
               <ShieldCheck className="w-6 h-6 text-teal-400" />
               <h2 className="text-xl font-bold text-white">Every submission is screened</h2>
             </div>
-            <p className="text-slate-300 text-sm leading-relaxed">
+            <p className="text-text-secondary text-sm leading-relaxed">
               Before anything reaches a human reviewer, we automatically scan every application and upload for spam, malicious code,
               phishing links, and attempts to manipulate our automated review pipeline. Legitimate submissions pass straight through —
               this exists to protect buyers (and keep your listing next to trustworthy ones), not to slow honest creators down.
@@ -184,7 +184,7 @@ export default function LearnCreatorsClient() {
                 {FAQS.map((f, i) => (
                   <AccordionItem key={i} value={`item-${i}`} className="border-slate-700/50">
                     <AccordionTrigger className="text-white hover:no-underline text-left px-2">{f.q}</AccordionTrigger>
-                    <AccordionContent className="text-slate-400 text-sm px-2">{f.a}</AccordionContent>
+                    <AccordionContent className="text-text-muted text-sm px-2">{f.a}</AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>
@@ -196,7 +196,7 @@ export default function LearnCreatorsClient() {
         <div className="text-center pt-4">
           <Rocket className="w-8 h-8 text-teal-400 mx-auto mb-3" />
           <h2 className="text-2xl font-bold text-white mb-2">Ready when you are</h2>
-          <p className="text-slate-400 mb-6 max-w-md mx-auto">Takes under 5 minutes. You'll hear back within a few days.</p>
+          <p className="text-text-muted mb-6 max-w-md mx-auto">Takes under 5 minutes. You'll hear back within a few days.</p>
           <Link href="/submit">
             <Button size="lg" className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white px-10 font-semibold">
               Submit your skill <ArrowRight className="w-4 h-4 ml-2" />

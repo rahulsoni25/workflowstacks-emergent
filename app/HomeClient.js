@@ -118,7 +118,7 @@ function StatCell({ value, label }) {
   return (
     <div className="bg-[#0A0C0D] px-3.5 py-3 flex flex-col gap-0.5 t-mono min-w-0">
       <span className="text-lg font-medium truncate">{value}</span>
-      <span className="text-[11px] text-[#5A615D]">{label}</span>
+      <span className="text-[11px] text-text-muted">{label}</span>
     </div>
   )
 }
@@ -360,7 +360,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
   const featured = initialSkills.slice(0, 6)
 
   return (
-    <div className="min-h-screen bg-[#0A0C0D] text-[#ECEFEA]">
+    <div className="min-h-screen bg-[#0A0C0D] text-text-primary">
       {/* ------------------------------------------------------------------ */}
       {/* HERO — describe / match / install                                    */}
       {/* ------------------------------------------------------------------ */}
@@ -443,9 +443,9 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
           {step === 2 && (
             <div className="anim-rise mt-6 flex w-full flex-col gap-5">
               <div className="flex flex-wrap items-baseline gap-3 text-[17px] leading-[1.45]">
-                <Mono className="whitespace-nowrap text-xs text-[#5A615D]">YOU ASKED</Mono>
+                <Mono className="whitespace-nowrap text-xs text-text-muted">YOU ASKED</Mono>
                 <span className="font-medium">“{query}”</span>
-                <button type="button" onClick={editQuery} className="ml-auto whitespace-nowrap border-0 bg-transparent text-xs text-[#5A615D] underline hover:text-[#ECEFEA]">
+                <button type="button" onClick={editQuery} className="ml-auto whitespace-nowrap border-0 bg-transparent text-xs text-text-muted underline hover:text-text-primary">
                   edit
                 </button>
               </div>
@@ -453,7 +453,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
               {searching && (
                 <div className="t-mono flex flex-col gap-2.5 py-1 text-[13px]" aria-live="polite">
                   {PHASES.map((text, i) => {
-                    const cls = i < phase ? 'text-[#5A615D]' : i === phase ? 'text-[#ECEFEA]' : 'text-[#323A3C]'
+                    const cls = i < phase ? 'text-text-muted' : i === phase ? 'text-text-primary' : 'text-[#323A3C]'
                     const dot = i < phase ? 'bg-[#5A615D]' : i === phase ? 'bg-[#C6F24E] anim-blink' : 'bg-[#323A3C]'
                     return (
                       <div key={text} className={`flex items-center gap-2.5 ${cls}`}>
@@ -467,8 +467,8 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
 
               {noMatch && (
                 <div className="flex flex-col items-start gap-3 rounded-[14px] border border-dashed border-[#323A3C] p-6 sm:p-8">
-                  <Mono className="text-[13px] text-[#8B928D]">Nothing in the catalog matches that description closely enough yet.</Mono>
-                  <p className="m-0 leading-normal text-[#8B928D]">
+                  <Mono className="text-[13px] text-text-muted">Nothing in the catalog matches that description closely enough yet.</Mono>
+                  <p className="m-0 leading-normal text-text-secondary">
                     Three options: let the Builder recommend a multi-skill stack for this goal, have us build it for you from proven skills (from $500, live in 7 days), or
                     browse the closest categories in the marketplace.
                   </p>
@@ -482,7 +482,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                     <Link href={`/skills?q=${encodeURIComponent(query)}`} className="rounded-lg border border-[#323A3C] px-4 py-2.5 text-sm font-semibold hover:border-[#C6F24E]">
                       Browse marketplace
                     </Link>
-                    <button type="button" onClick={reset} className="border-0 bg-transparent text-[13px] text-[#5A615D] underline hover:text-[#ECEFEA]">
+                    <button type="button" onClick={reset} className="border-0 bg-transparent text-[13px] text-text-muted underline hover:text-text-primary">
                       Try another description
                     </button>
                   </div>
@@ -491,12 +491,12 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
 
               {found && (
                 <div className="flex flex-col gap-3.5">
-                  <Mono className="text-[13px] text-[#8B928D]">
+                  <Mono className="text-[13px] text-text-muted">
                     Best match · {matchTokens.length ? `matched "${matchTokens.slice(0, 4).join('", "')}"` : 'closest by popularity and guide quality'}
                   </Mono>
 
                   <article className="flex flex-col gap-5 rounded-2xl border border-[#C6F24E] bg-[#101314] p-5 shadow-[0_0_0_1px_rgba(198,242,78,0.15),0_24px_60px_-30px_rgba(198,242,78,0.25)] sm:p-7">
-                    <div className="t-mono flex flex-wrap items-center justify-between gap-2.5 text-xs text-[#8B928D]">
+                    <div className="t-mono flex flex-wrap items-center justify-between gap-2.5 text-xs text-text-muted">
                       <span className="flex gap-1.5">
                         <span className="rounded bg-[#C6F24E] px-2 py-[3px] text-[#0A0C0D]">{categoryLabel(agent.category)}</span>
                         {agent.language && <CategoryChip>{agent.language}</CategoryChip>}
@@ -514,7 +514,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
 
                     <div className="flex flex-col gap-2">
                       <h2 className="m-0 text-[26px] font-bold tracking-[-0.03em] sm:text-[30px]">{skillTitle(agent)}</h2>
-                      <p className="m-0 text-base leading-normal text-[#8B928D]">{skillDesc(agent)}</p>
+                      <p className="m-0 text-base leading-normal text-text-secondary">{skillDesc(agent)}</p>
                     </div>
 
                     <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-[#262B2D] bg-[#262B2D] sm:grid-cols-4">
@@ -526,14 +526,14 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
 
                     {useCase && (
                       <div className="flex flex-col gap-1.5">
-                        <Mono className="text-[11px] tracking-wider text-[#5A615D]">EXAMPLE USE CASE</Mono>
-                        <div className="t-mono flex min-w-0 items-center gap-2.5 rounded-lg border border-[#262B2D] border-l-[3px] border-l-[#C6F24E] bg-[#0A0C0D] px-3.5 py-2.5 text-[12.5px] leading-normal text-[#ECEFEA]">
+                        <Mono className="text-[11px] tracking-wider text-text-muted">EXAMPLE USE CASE</Mono>
+                        <div className="t-mono flex min-w-0 items-center gap-2.5 rounded-lg border border-[#262B2D] border-l-[3px] border-l-[#C6F24E] bg-[#0A0C0D] px-3.5 py-2.5 text-[12.5px] leading-normal text-text-primary">
                           <span className="min-w-0 [overflow-wrap:anywhere]">{useCase}</span>
                         </div>
                       </div>
                     )}
 
-                    <div className="t-mono flex flex-wrap items-center gap-1.5 text-xs text-[#5A615D]">
+                    <div className="t-mono flex flex-wrap items-center gap-1.5 text-xs text-text-muted">
                       {Array.isArray(agent.github_topics) && agent.github_topics.length > 0 && (
                         <>
                           <span>Topics:</span>
@@ -577,17 +577,17 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
 
                   {alts.length > 0 && (
                     <div className="flex flex-col gap-2">
-                      <Mono className="text-xs text-[#5A615D]">ALSO CLOSE</Mono>
+                      <Mono className="text-xs text-text-muted">ALSO CLOSE</Mono>
                       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                         {alts.map((a) => (
                           <button
                             key={skillKey(a)}
                             type="button"
                             onClick={() => chooseAgent(a)}
-                            className="flex flex-col items-start gap-1.5 rounded-xl border border-[#262B2D] bg-[#101314] px-[18px] py-4 text-left text-[#ECEFEA] hover:border-[#C6F24E]"
+                            className="flex flex-col items-start gap-1.5 rounded-xl border border-[#262B2D] bg-[#101314] px-[18px] py-4 text-left text-text-primary hover:border-[#C6F24E]"
                           >
                             <span className="text-base font-bold">{skillTitle(a)}</span>
-                            <Mono className="text-xs text-[#5A615D]">
+                            <Mono className="text-xs text-text-muted">
                               {categoryLabel(a.category)} · ★ {fmt(a.github_stars)}
                               {healthScore(a) !== null ? ` · ● ${healthScore(a)}` : ''}
                             </Mono>
@@ -597,7 +597,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                     </div>
                   )}
 
-                  <button type="button" onClick={reset} className="self-center border-0 bg-transparent text-[13px] text-[#5A615D] underline hover:text-[#ECEFEA]">
+                  <button type="button" onClick={reset} className="self-center border-0 bg-transparent text-[13px] text-text-muted underline hover:text-text-primary">
                     Describe something else
                   </button>
                 </div>
@@ -619,13 +619,13 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                     setStep(2)
                     setDone(false)
                   }}
-                  className="whitespace-nowrap rounded-md border border-[#323A3C] bg-transparent px-3 py-2 text-[13px] text-[#8B928D] hover:border-[#C6F24E] hover:text-[#ECEFEA]"
+                  className="whitespace-nowrap rounded-md border border-[#323A3C] bg-transparent px-3 py-2 text-[13px] text-text-muted hover:border-[#C6F24E] hover:text-text-primary"
                 >
                   ← Change agent
                 </button>
               </div>
 
-              <div className="t-mono flex flex-wrap gap-5 text-xs text-[#8B928D]">
+              <div className="t-mono flex flex-wrap gap-5 text-xs text-text-muted">
                 <span className="whitespace-nowrap">
                   <span className="text-[#C6F24E]">✓</span> One paste, nothing to install
                 </span>
@@ -639,7 +639,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="flex flex-col gap-3 rounded-[14px] border border-[#262B2D] bg-[#101314] p-5">
-                  <Mono className="text-xs text-[#5A615D]">RUN IN</Mono>
+                  <Mono className="text-xs text-text-muted">RUN IN</Mono>
                   <div className="flex flex-col gap-2">
                     {TARGETS.map((t) => {
                       const on = t.name === target
@@ -652,7 +652,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                             setDone(false)
                           }}
                           className={`flex items-center justify-between rounded-lg border px-3.5 py-3 font-semibold ${
-                            on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-[#ECEFEA] hover:border-[#C6F24E]'
+                            on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-text-primary hover:border-[#C6F24E]'
                           }`}
                         >
                           <span className="flex items-center gap-2.5">
@@ -668,7 +668,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
 
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col gap-3 rounded-[14px] border border-[#262B2D] bg-[#101314] p-5">
-                    <Mono className="text-xs text-[#5A615D]">DELIVER AS</Mono>
+                    <Mono className="text-xs text-text-muted">DELIVER AS</Mono>
                     <div className="flex gap-1.5">
                       {[
                         ['Copy', 'Copy'],
@@ -685,7 +685,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                               setDone(false)
                             }}
                             className={`flex-1 whitespace-nowrap rounded-lg border px-1.5 py-2.5 text-[13px] font-semibold ${
-                              on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-[#8B928D] hover:border-[#C6F24E]'
+                              on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-text-muted hover:border-[#C6F24E]'
                             }`}
                           >
                             {label}
@@ -695,7 +695,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                     </div>
                   </div>
                   <div className="flex flex-col gap-2.5 rounded-[14px] border border-[#262B2D] bg-[#101314] p-5">
-                    <Mono className="text-xs text-[#5A615D]">INCLUDE</Mono>
+                    <Mono className="text-xs text-text-muted">INCLUDE</Mono>
                     <div className="flex flex-wrap gap-1.5">
                       {OPTION_DEFS.map(([k, label]) => {
                         const on = !!opts[k]
@@ -709,7 +709,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                               setDone(false)
                             }}
                             className={`whitespace-nowrap rounded-full border px-3 py-[7px] text-[13px] font-semibold ${
-                              on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-[#8B928D] hover:border-[#C6F24E]'
+                              on ? 'border-[#ECEFEA] bg-[#ECEFEA] text-[#0A0C0D]' : 'border-[#323A3C] bg-transparent text-text-muted hover:border-[#C6F24E]'
                             }`}
                           >
                             {label}
@@ -725,13 +725,13 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                 <button
                   type="button"
                   onClick={() => setPreview((p) => !p)}
-                  className="t-mono flex items-center gap-2 self-start border-0 bg-transparent p-0 text-xs text-[#5A615D] hover:text-[#ECEFEA]"
+                  className="t-mono flex items-center gap-2 self-start border-0 bg-transparent p-0 text-xs text-text-muted hover:text-text-primary"
                 >
                   <span>{preview ? '▾' : '▸'}</span>
                   BLUEPRINT · FORMATTED FOR {target.toUpperCase()} · {promptLoading && !blueprint ? 'COMPILING…' : `${blueprintLines} LINES`}
                 </button>
                 {preview && (
-                  <pre className="t-mono m-0 max-h-[220px] overflow-auto whitespace-pre-wrap rounded-xl border border-[#262B2D] bg-[#101314] p-[18px] text-[12.5px] leading-[1.55] text-[#8B928D]">
+                  <pre className="t-mono m-0 max-h-[220px] overflow-auto whitespace-pre-wrap rounded-xl border border-[#262B2D] bg-[#101314] p-[18px] text-[12.5px] leading-[1.55] text-text-muted">
                     {blueprint || 'Compiling the blueprint from the source repository…'}
                   </pre>
                 )}
@@ -749,7 +749,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
               ) : (
                 <div className="flex flex-col gap-3.5 rounded-[14px] border border-[#C6F24E] bg-[#101314] p-6">
                   <Mono className="text-[13px] text-[#C6F24E]">✓ {doneMsg}</Mono>
-                  <p className="m-0 text-base leading-normal text-[#8B928D]">
+                  <p className="m-0 text-base leading-normal text-text-secondary">
                     Paste it as a system prompt or custom instruction in {target} and the agent is live. Want the full report on this repo, or the rest of the catalog?
                   </p>
                   <div className="flex flex-wrap gap-2.5">
@@ -787,7 +787,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
         <section id="agents" className="mx-auto max-w-[1200px] px-5 py-[72px] sm:px-10">
           <div className="mb-7 flex flex-wrap items-baseline justify-between gap-3">
             <h2 className="m-0 text-[28px] font-bold tracking-[-0.03em] sm:text-[32px]">Trending this week</h2>
-            <Link href="/skills" className="t-mono text-sm text-[#8B928D] hover:text-[#C6F24E]">
+            <Link href="/skills" className="t-mono text-sm text-text-muted hover:text-[#C6F24E]">
               {countLabel ? `All ${countLabel} in the marketplace →` : 'Browse the marketplace →'}
             </Link>
           </div>
@@ -799,7 +799,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                   key={skillKey(s)}
                   className="flex min-w-0 flex-col gap-[18px] rounded-[14px] border border-[#262B2D] bg-[#101314] p-[26px] transition-[transform,border-color] duration-200 hover:-translate-y-[3px] hover:border-[#C6F24E]"
                 >
-                  <div className="t-mono flex items-center justify-between gap-2 text-xs text-[#8B928D]">
+                  <div className="t-mono flex items-center justify-between gap-2 text-xs text-text-muted">
                     <CategoryChip>{categoryLabel(s.category)}</CategoryChip>
                     {h !== null && <span className="whitespace-nowrap text-[#C6F24E]">● {h}/10</span>}
                   </div>
@@ -809,10 +809,10 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                         {skillTitle(s)}
                       </Link>
                     </h3>
-                    <p className="m-0 text-[15px] leading-normal text-[#8B928D] line-clamp-3">{skillDesc(s)}</p>
+                    <p className="m-0 text-[15px] leading-normal text-text-secondary line-clamp-3">{skillDesc(s)}</p>
                   </div>
                   <div className="mt-auto flex items-center justify-between gap-2.5 border-t border-[#262B2D] pt-[18px]">
-                    <Mono className="min-w-0 truncate text-[13px] text-[#8B928D]">
+                    <Mono className="min-w-0 truncate text-[13px] text-text-muted">
                       ★ {fmt(s.github_stars)}
                       {s.github_forks > 0 ? ` · ⑂ ${fmt(s.github_forks)}` : ''}
                       {s.installs > 0 ? ` · ${fmt(s.installs)} installs` : ''}
@@ -846,7 +846,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
           </div>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="flex flex-col gap-3.5 rounded-[14px] border border-[#E3E6EC] bg-white p-5">
-              <div className="t-mono flex min-h-[96px] items-center gap-2 rounded-lg bg-[#0A0C0D] p-3 text-[11px] text-[#8B928D]">
+              <div className="t-mono flex min-h-[96px] items-center gap-2 rounded-lg bg-[#0A0C0D] p-3 text-[11px] text-text-muted">
                 <span className="flex-1 truncate">weekly client ad report</span>
                 <span className="rounded bg-[#C6F24E] px-2 py-1 font-sans font-bold text-[#0A0C0D]">Find →</span>
               </div>
@@ -857,8 +857,8 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
               </p>
             </div>
             <div className="flex flex-col gap-3.5 rounded-[14px] border border-[#E3E6EC] bg-white p-5">
-              <div className="t-mono flex min-h-[96px] flex-col justify-center gap-1.5 rounded-lg border border-[#C6F24E] bg-[#0A0C0D] p-3 text-[11px] text-[#8B928D]">
-                <span className="font-sans text-[13px] font-bold text-[#ECEFEA]">Best match</span>
+              <div className="t-mono flex min-h-[96px] flex-col justify-center gap-1.5 rounded-lg border border-[#C6F24E] bg-[#0A0C0D] p-3 text-[11px] text-text-muted">
+                <span className="font-sans text-[13px] font-bold text-text-primary">Best match</span>
                 <span>★ stars · ⑂ forks · ● guide quality · Free</span>
               </div>
               <Mono className="text-xs text-[#5A615D]">02</Mono>
@@ -873,8 +873,8 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                   <span>Claude</span>
                   <span>✓</span>
                 </span>
-                <span className="rounded border border-[#323A3C] px-2 py-1 text-[#8B928D]">ChatGPT</span>
-                <span className="rounded border border-[#323A3C] px-2 py-1 text-[#8B928D]">Gemini</span>
+                <span className="rounded border border-[#323A3C] px-2 py-1 text-text-muted">ChatGPT</span>
+                <span className="rounded border border-[#323A3C] px-2 py-1 text-text-muted">Gemini</span>
               </div>
               <Mono className="text-xs text-[#4E7A00]">03</Mono>
               <h3 className="m-0 text-xl tracking-[-0.02em]">Install</h3>
@@ -897,7 +897,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
             </p>
           </div>
           <div className="flex flex-col items-start gap-2.5 lg:justify-self-end">
-            <Link href="/build-for-me" className="rounded-lg bg-[#0A0C0D] px-[26px] py-4 text-base font-bold text-[#ECEFEA] hover:bg-[#ECEFEA] hover:text-[#0A0C0D]">
+            <Link href="/build-for-me" className="rounded-lg bg-[#0A0C0D] px-[26px] py-4 text-base font-bold text-text-primary hover:bg-[#ECEFEA] hover:text-[#0A0C0D]">
               Get my agent built
             </Link>
             <Mono className="text-xs opacity-80">Agencies: white-label &amp; multi-agent plans available</Mono>
@@ -911,9 +911,9 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
       <section className="mx-auto grid max-w-[1200px] grid-cols-1 gap-8 border-t border-[#262B2D] px-5 py-[72px] sm:px-10 lg:grid-cols-[1fr_2fr] lg:gap-12">
         <div className="flex flex-col gap-3">
           <h2 className="m-0 text-[32px] font-bold leading-none tracking-[-0.04em]">Questions</h2>
-          <p className="m-0 text-sm leading-normal text-[#5A615D]">
+          <p className="m-0 text-sm leading-normal text-text-muted">
             Something else?{' '}
-            <Link href="/help" className="text-[#8B928D] underline hover:text-[#C6F24E]">
+            <Link href="/help" className="text-text-secondary underline hover:text-[#C6F24E]">
               Ask us
             </Link>
             .
@@ -928,12 +928,12 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
                   type="button"
                   aria-expanded={open}
                   onClick={() => setFaqOpen(open ? -1 : i)}
-                  className="flex items-center justify-between gap-4 border-0 bg-transparent py-[18px] text-left text-lg font-semibold text-[#ECEFEA] hover:text-[#C6F24E]"
+                  className="flex items-center justify-between gap-4 border-0 bg-transparent py-[18px] text-left text-lg font-semibold text-text-primary hover:text-[#C6F24E]"
                 >
                   <span>{f.q}</span>
-                  <Mono className="shrink-0 text-lg text-[#5A615D]">{open ? '–' : '+'}</Mono>
+                  <Mono className="shrink-0 text-lg text-text-muted">{open ? '–' : '+'}</Mono>
                 </button>
-                {open && <p className="anim-rise m-0 mb-[18px] max-w-[640px] text-base leading-[1.55] text-[#8B928D]">{f.a}</p>}
+                {open && <p className="anim-rise m-0 mb-[18px] max-w-[640px] text-base leading-[1.55] text-text-secondary">{f.a}</p>}
               </div>
             )
           })}
@@ -946,9 +946,9 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
       <section id="creators" className="border-t border-[#262B2D] bg-gradient-to-b from-[#0A0C0D] to-[#07090E] px-5 py-14 sm:px-10">
         <div className="mx-auto flex max-w-[1200px] flex-col gap-[18px] md:flex-row md:items-center md:justify-between">
           <div className="flex max-w-[560px] flex-col gap-3">
-            <Mono className="text-xs text-[#5A615D]">FOR CREATORS &amp; MAINTAINERS</Mono>
+            <Mono className="text-xs text-text-muted">FOR CREATORS &amp; MAINTAINERS</Mono>
             <h2 className="m-0 text-[26px] font-bold tracking-[-0.03em]">Build or sell AI agents from open-source skills.</h2>
-            <p className="m-0 leading-normal text-[#8B928D]">
+            <p className="m-0 leading-normal text-text-secondary">
               Creators keep 85%. Open-source maintainers: get listed and installed by founders and agencies.
             </p>
           </div>

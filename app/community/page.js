@@ -43,7 +43,7 @@ export default async function CommunityPage() {
             <span className="text-teal-300 text-sm font-medium">{agents.length} community agents · remix any free</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Community Agents</h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+          <p className="text-lg text-text-muted max-w-2xl mx-auto">
             AI agents built by founders, for founders. <strong className="text-teal-300">Remix any of them in one click</strong> — or build your own and share it.
           </p>
         </div>
@@ -54,9 +54,9 @@ export default async function CommunityPage() {
             {agents.length === 0 ? (
               <Card className="bg-slate-900/60 border-slate-700/50">
                 <CardContent className="py-16 text-center">
-                  <Zap className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-                  <p className="text-slate-300 text-lg mb-2">No community agents yet — be the first.</p>
-                  <p className="text-slate-500 mb-6">Build an agent in the Builder and toggle "Publish to community."</p>
+                  <Zap className="w-12 h-12 text-text-muted mx-auto mb-4" />
+                  <p className="text-text-secondary text-lg mb-2">No community agents yet — be the first.</p>
+                  <p className="text-text-muted mb-6">Build an agent in the Builder and toggle "Publish to community."</p>
                   <Link href="/builder"><Button className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white"><Zap className="w-4 h-4 mr-2" />Build the first one</Button></Link>
                 </CardContent>
               </Card>
@@ -66,15 +66,15 @@ export default async function CommunityPage() {
                   <Link key={a.id} href={`/a/${a.id}`} className="block group">
                     <Card className="bg-slate-900/60 border-slate-700/50 hover:border-teal-500/40 transition-all h-full">
                       <CardHeader>
-                        <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
+                        <div className="flex items-center justify-between text-xs text-text-muted mb-2">
                           <span className="flex items-center gap-1"><User className="w-3 h-3" />@{a.creatorName || 'anonymous'}</span>
                           <span className="flex items-center gap-1"><Repeat className="w-3 h-3" />{a.copyCount || 0}</span>
                         </div>
                         <CardTitle className="text-white text-lg group-hover:text-teal-300 transition-colors line-clamp-2">{a.name}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <p className="text-slate-400 text-sm line-clamp-2 mb-3">{a.goal || a.description}</p>
-                        <Badge className="bg-slate-800 text-slate-300 border-slate-700 text-xs">{a.skillIds?.length || 0} skills</Badge>
+                        <p className="text-text-muted text-sm line-clamp-2 mb-3">{a.goal || a.description}</p>
+                        <Badge className="bg-slate-800 text-text-secondary border-slate-700 text-xs">{a.skillIds?.length || 0} skills</Badge>
                       </CardContent>
                     </Card>
                   </Link>
@@ -91,15 +91,15 @@ export default async function CommunityPage() {
               </CardHeader>
               <CardContent>
                 {creators.length === 0 ? (
-                  <p className="text-slate-500 text-sm">No creators yet — publish an agent to claim the top spot.</p>
+                  <p className="text-text-muted text-sm">No creators yet — publish an agent to claim the top spot.</p>
                 ) : (
                   <ol className="space-y-3">
                     {creators.map((c, i) => (
                       <li key={c.handle} className="flex items-center gap-3">
-                        <span className={`w-6 text-center font-bold ${i === 0 ? 'text-amber-400' : i === 1 ? 'text-slate-300' : i === 2 ? 'text-orange-400' : 'text-slate-500'}`}>{i + 1}</span>
+                        <span className={`w-6 text-center font-bold ${i === 0 ? 'text-amber-400' : i === 1 ? 'text-text-secondary' : i === 2 ? 'text-orange-400' : 'text-text-muted'}`}>{i + 1}</span>
                         <div className="flex-1 min-w-0">
                           <div className="text-white text-sm font-medium truncate">@{c.handle}</div>
-                          <div className="text-slate-500 text-xs">{c.agents} agents · {c.copies} remixes</div>
+                          <div className="text-text-muted text-xs">{c.agents} agents · {c.copies} remixes</div>
                         </div>
                       </li>
                     ))}

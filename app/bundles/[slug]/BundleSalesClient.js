@@ -38,7 +38,7 @@ export default function BundleSalesClient({ bundle }) {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/templates">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Templates
             </Button>
           </Link>
@@ -52,13 +52,13 @@ export default function BundleSalesClient({ bundle }) {
 
         <p className="text-xs tracking-widest uppercase text-[#C6F24E] font-semibold mb-3">Premium · one-time</p>
         <h1 className="text-4xl font-bold text-white mb-2 leading-tight">{bundle.title}</h1>
-        <p className="text-lg text-slate-300 mb-6">{bundle.tagline}</p>
-        <p className="text-slate-400 mb-6">{bundle.description}</p>
+        <p className="text-lg text-text-secondary mb-6">{bundle.tagline}</p>
+        <p className="text-text-muted mb-6">{bundle.description}</p>
 
         {bundle.needs && (
-          <div className="flex items-center gap-2 mb-8 text-sm text-slate-400">
+          <div className="flex items-center gap-2 mb-8 text-sm text-text-muted">
             <KeyRound className="w-4 h-4 text-amber-300/70" />
-            <span>What it needs: <span className="text-slate-300">{bundle.needs}</span></span>
+            <span>What it needs: <span className="text-text-secondary">{bundle.needs}</span></span>
           </div>
         )}
 
@@ -67,7 +67,7 @@ export default function BundleSalesClient({ bundle }) {
             <h2 className="text-white font-bold mb-4">What's inside</h2>
             <ul className="space-y-2.5">
               {bundle.includes.map((f) => (
-                <li key={f} className="flex items-start gap-2.5 text-sm text-slate-300">
+                <li key={f} className="flex items-start gap-2.5 text-sm text-text-secondary">
                   <Check className="w-4 h-4 text-[#C6F24E] flex-shrink-0 mt-0.5" />{f}
                 </li>
               ))}
@@ -79,13 +79,13 @@ export default function BundleSalesClient({ bundle }) {
           <Card className="bg-slate-900/60 border-slate-700/50 mb-8">
             <CardContent className="py-6">
               <h2 className="text-white font-bold mb-1">Sample output</h2>
-              <p className="text-slate-500 text-xs mb-4">{bundle.preview.note}</p>
+              <p className="text-text-muted text-xs mb-4">{bundle.preview.note}</p>
               <div className="overflow-x-auto -mx-2 px-2">
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="border-b border-slate-700/50">
                       {bundle.preview.columns.map((col) => (
-                        <th key={col} className="text-left font-medium text-slate-400 py-2 pr-4 whitespace-nowrap">{col}</th>
+                        <th key={col} className="text-left font-medium text-text-muted py-2 pr-4 whitespace-nowrap">{col}</th>
                       ))}
                     </tr>
                   </thead>
@@ -95,7 +95,7 @@ export default function BundleSalesClient({ bundle }) {
                         {row.map((cell, j) => {
                           const isBlurred = bundle.preview.blurredColumns.includes(bundle.preview.columns[j])
                           return (
-                            <td key={j} className="py-2.5 pr-4 text-slate-300 whitespace-nowrap">
+                            <td key={j} className="py-2.5 pr-4 text-text-secondary whitespace-nowrap">
                               <span className={isBlurred ? 'blur-[5px] select-none' : ''}>{cell}</span>
                             </td>
                           )
@@ -105,7 +105,7 @@ export default function BundleSalesClient({ bundle }) {
                   </tbody>
                 </table>
               </div>
-              <p className="text-slate-500 text-xs mt-4">{bundle.preview.unlockNote || 'Unlock the full data after purchase — run it yourself, as often as you like.'}</p>
+              <p className="text-text-muted text-xs mt-4">{bundle.preview.unlockNote || 'Unlock the full data after purchase — run it yourself, as often as you like.'}</p>
             </CardContent>
           </Card>
         )}
@@ -113,8 +113,8 @@ export default function BundleSalesClient({ bundle }) {
         <div className="flex items-center justify-between gap-4 p-5 bg-slate-900/60 border border-[#C6F24E]/25 rounded-lg">
           <div>
             <span className="text-3xl font-extrabold text-white">${bundle.price_usd}</span>
-            <span className="text-slate-400 text-sm"> one-time</span>
-            <p className="text-slate-500 text-xs mt-1">Pay once. You own it. Free updates.</p>
+            <span className="text-text-muted text-sm"> one-time</span>
+            <p className="text-text-muted text-xs mt-1">Pay once. You own it. Free updates.</p>
           </div>
           <Button onClick={buy} disabled={state === 'working'} size="lg"
             className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold shadow-lg shadow-lime-500/20">
@@ -129,7 +129,7 @@ export default function BundleSalesClient({ bundle }) {
               <Wrench className="w-5 h-5 text-teal-300 mt-0.5" />
               <div>
                 <h2 className="text-white font-semibold text-sm mb-1">Don’t want to touch the setup?</h2>
-                <p className="text-slate-400 text-sm">Buy it, and we’ll set it up in your tools — keys, connections, tested — within 7 days.</p>
+                <p className="text-text-muted text-sm">Buy it, and we’ll set it up in your tools — keys, connections, tested — within 7 days.</p>
               </div>
             </div>
             <Link href={`/build-for-me?goal=${encodeURIComponent('Set up the ' + bundle.title + ' tool for me')}`}>
@@ -138,7 +138,7 @@ export default function BundleSalesClient({ bundle }) {
           </CardContent>
         </Card>
 
-        <p className="text-center text-sm text-slate-500 mt-10">
+        <p className="text-center text-sm text-text-muted mt-10">
           Want the free single-purpose versions first?{' '}
           <Link href="/templates" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">Browse free templates</Link>
         </p>

@@ -46,7 +46,7 @@ export default function PurchaseBanner({ bundleTitle }) {
         <p className="text-white font-semibold">Purchase complete!</p>
         {unlockUrl ? (
           <>
-            <p className="text-slate-300 text-sm mt-1 mb-4">Your download is ready — the link is yours to keep.</p>
+            <p className="text-text-secondary text-sm mt-1 mb-4">Your download is ready — the link is yours to keep.</p>
             <Link href={unlockUrl}>
               <Button className="bg-[#C6F24E] hover:bg-[#A6D62E] text-[#0A0C0D] font-semibold">
                 Download {bundleTitle} →
@@ -54,7 +54,7 @@ export default function PurchaseBanner({ bundleTitle }) {
             </Link>
           </>
         ) : (
-          <p className="text-slate-300 text-sm mt-1">Preparing your download… We&apos;ll also email your private link so you never lose it.</p>
+          <p className="text-text-secondary text-sm mt-1">Preparing your download… We&apos;ll also email your private link so you never lose it.</p>
         )}
       </CardContent>
     </Card>

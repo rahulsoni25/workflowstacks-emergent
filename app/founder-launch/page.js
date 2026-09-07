@@ -31,7 +31,7 @@ export default function FounderLaunchPage() {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-slate-800/50">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-slate-800/50">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
@@ -48,7 +48,7 @@ export default function FounderLaunchPage() {
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
             Founder Launch Assistant
           </h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
+          <p className="text-xl text-text-secondary max-w-2xl mx-auto">
             Validate your offer and plan your path to your first customers with AI-powered market research, competitor analysis, and outreach
           </p>
         </div>
@@ -64,28 +64,28 @@ export default function FounderLaunchPage() {
                 <CheckCircle2 className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="text-white font-semibold">Market Research Agent</h3>
-                  <p className="text-slate-400 text-sm">Analyze your market, find gaps, identify opportunities</p>
+                  <p className="text-text-muted text-sm">Analyze your market, find gaps, identify opportunities</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="text-white font-semibold">Competitor Intelligence</h3>
-                  <p className="text-slate-400 text-sm">Track what competitors are doing, find their weaknesses</p>
+                  <p className="text-text-muted text-sm">Track what competitors are doing, find their weaknesses</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="text-white font-semibold">Customer Discovery</h3>
-                  <p className="text-slate-400 text-sm">Create surveys, interview scripts, validation frameworks</p>
+                  <p className="text-text-muted text-sm">Create surveys, interview scripts, validation frameworks</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="w-5 h-5 text-green-400 mt-1 flex-shrink-0" />
                 <div>
                   <h3 className="text-white font-semibold">WhatsApp Lead Qualifier</h3>
-                  <p className="text-slate-400 text-sm">Auto-qualify and route your first leads</p>
+                  <p className="text-text-muted text-sm">Auto-qualify and route your first leads</p>
                 </div>
               </div>
             </div>
@@ -96,7 +96,7 @@ export default function FounderLaunchPage() {
         <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl mb-8">
           <CardHeader>
             <CardTitle className="text-white text-2xl">Tell Us About Your Offer</CardTitle>
-            <CardDescription className="text-slate-400">
+            <CardDescription className="text-text-muted">
               We'll create a custom AI agent to help you validate and launch
             </CardDescription>
           </CardHeader>
@@ -110,7 +110,7 @@ export default function FounderLaunchPage() {
                 value={formData.offer}
                 onChange={(e) => setFormData({ ...formData, offer: e.target.value })}
                 placeholder="Example: AI-powered email marketing tool for D2C ecommerce brands that automatically writes product launch emails based on customer data..."
-                className="min-h-[100px] bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+                className="min-h-[100px] bg-slate-800/50 border-slate-700/50 text-white placeholder:text-text-muted"
               />
             </div>
 
@@ -123,7 +123,7 @@ export default function FounderLaunchPage() {
                 value={formData.market}
                 onChange={(e) => setFormData({ ...formData, market: e.target.value })}
                 placeholder="Example: D2C Shopify stores doing $10k-$100k/month"
-                className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+                className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-text-muted"
               />
             </div>
 
@@ -136,7 +136,7 @@ export default function FounderLaunchPage() {
                 value={formData.timeline}
                 onChange={(e) => setFormData({ ...formData, timeline: e.target.value })}
                 placeholder="48 hours, 1 week, etc."
-                className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500"
+                className="bg-slate-800/50 border-slate-700/50 text-white placeholder:text-text-muted"
               />
             </div>
 
@@ -163,21 +163,21 @@ export default function FounderLaunchPage() {
                 <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">1</div>
                 <div>
                   <h3 className="text-white font-semibold mb-1">We create your custom AI agent</h3>
-                  <p className="text-slate-400">Based on your offer and market, we configure the perfect skill combination</p>
+                  <p className="text-text-muted">Based on your offer and market, we configure the perfect skill combination</p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">2</div>
                 <div>
                   <h3 className="text-white font-semibold mb-1">You get a ready-to-use blueprint</h3>
-                  <p className="text-slate-400">Copy the agent prompt and paste into ChatGPT or Claude</p>
+                  <p className="text-text-muted">Copy the agent prompt and paste into ChatGPT or Claude</p>
                 </div>
               </div>
               <div className="flex gap-4">
                 <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold">3</div>
                 <div>
                   <h3 className="text-white font-semibold mb-1">Start validating immediately</h3>
-                  <p className="text-slate-400">Get market research, customer surveys, and outreach templates in minutes</p>
+                  <p className="text-text-muted">Get market research, customer surveys, and outreach templates in minutes</p>
                 </div>
               </div>
             </div>
