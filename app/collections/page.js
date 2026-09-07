@@ -28,6 +28,24 @@ const KIND_ICON = { packs: Layers, playbooks: ListOrdered, personas: UserRound }
 // the biggest audiences lead.
 const AUDIENCE_ORDER = ['Founder', 'Agency', 'Marketer', 'Creator', 'Sales', 'Developer']
 
+// Written out rather than templated. `If you are a ${audience.toLowerCase()}`
+// produces "a agency" and "a sales" — the audience values are job categories,
+// not job titles, so no amount of article-picking makes them read as English.
+const AUDIENCE_HEADING = {
+  Founder: 'If you are a founder',
+  Agency: 'If you run an agency',
+  Marketer: 'If you are a marketer',
+  Creator: 'If you are a creator',
+  Sales: 'If you are in sales',
+  Developer: 'If you are a developer',
+}
+
+function headingFor(audience) {
+  if (AUDIENCE_HEADING[audience]) return AUDIENCE_HEADING[audience]
+  const word = String(audience).toLowerCase()
+  return `If you are ${/^[aeiou]/.test(word) ? 'an' : 'a'} ${word}`
+}
+
 export default async function CollectionsPage() {
   const items = await allCollectionItems()
 
@@ -99,7 +117,7 @@ export default async function CollectionsPage() {
           if (!mine.length) return null
           return (
             <section key={aud} className="mb-14">
-              <h2 className="text-2xl font-bold text-white mb-5">If you are a {aud.toLowerCase()}</h2>
+              <h2 className="text-2xl font-bold text-white mb-5">{headingFor(aud)}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {mine.map((i) => {
                   const meta = COLLECTION_KINDS[i.kind]
