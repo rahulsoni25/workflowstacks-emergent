@@ -445,6 +445,16 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                       key={skillKey(s)}
                       className="anim-rise flex min-w-0 flex-col gap-3.5 rounded-[14px] border border-[#262B2D] bg-[#101314] p-5 transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-[#C6F24E]"
                     >
+                      {/* The title is a real anchor, and it sits outside the
+                          panel button on purpose. Until now the only <a> on a
+                          card was the paid-only "View" button, so the served
+                          HTML of the catalog index linked to almost none of
+                          its own pages — Search Console shows impressions
+                          collapsing ~97% the week that shipped. Google needs
+                          an href; the click-to-panel UX stays for people. */}
+                      <h3 className="m-0 text-[19px] font-bold tracking-[-0.02em]">
+                        <Link href={`/skills/${skillKey(s)}`} className="hover:text-[#C6F24E]">{skillTitle(s)}</Link>
+                      </h3>
                       <button type="button" onClick={() => openPanel(s, false)} className="flex min-w-0 flex-col gap-3 border-0 bg-transparent p-0 text-left text-inherit">
                         <div className="t-mono flex w-full items-center justify-between gap-2 text-[11px] text-text-muted">
                           <span className="flex flex-wrap gap-1.5">
@@ -454,7 +464,6 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                           <span className={`whitespace-nowrap font-medium ${paid ? 'text-text-primary' : 'text-[#C6F24E]'}`}>{priceLabel(s)}</span>
                         </div>
                         <div className="flex w-full flex-col gap-[5px]">
-                          <h3 className="m-0 text-[19px] font-bold tracking-[-0.02em]">{skillTitle(s)}</h3>
                           <p className="m-0 text-sm leading-[1.45] text-text-secondary line-clamp-2">{skillDesc(s)}</p>
                         </div>
                         {uc && (

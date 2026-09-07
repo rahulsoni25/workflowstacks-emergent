@@ -1,4 +1,5 @@
 import SkillsCatalogClient from './SkillsCatalogClient'
+import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
 export const metadata = {
@@ -71,10 +72,35 @@ export default async function SkillsPage() {
       name: s.title_human || s.name,
     })),
   }
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  // A short run of page links so the paginated chain starts from the index
+  // itself, not only from the "Next" link on page 2. Server-rendered on
+  // purpose: the grid above is interactive, and until the card titles became
+  // anchors this page's HTML linked to none of the catalog it lists.
+  const pageLinks = Array.from({ length: Math.min(pages - 1, 10) }, (_, i) => i + 2)
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }} />
       <SkillsCatalogClient initialSkills={skills} initialTotal={total} initialHasMore={hasMore} pageSize={PAGE_SIZE} />
+      {pages > 1 && (
+        <nav aria-label="Browse the whole catalog" className="container mx-auto px-4 pb-16 max-w-6xl">
+          <p className="text-sm text-text-muted mb-3">
+            Browse all {total.toLocaleString('en-US')} skills, newest first — {pages} pages of {PAGE_SIZE}.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {pageLinks.map((p) => (
+              <Link key={p} href={`/skills/page/${p}`} className="rounded-md border border-[#323A3C] px-3 py-1.5 text-sm text-text-secondary hover:border-[#C6F24E] hover:text-white">
+                Page {p}
+              </Link>
+            ))}
+            {pages > 11 && (
+              <Link href={`/skills/page/${pages}`} className="rounded-md border border-[#323A3C] px-3 py-1.5 text-sm text-text-secondary hover:border-[#C6F24E] hover:text-white">
+                … Page {pages}
+              </Link>
+            )}
+          </div>
+        </nav>
+      )}
     </>
   )
 }
