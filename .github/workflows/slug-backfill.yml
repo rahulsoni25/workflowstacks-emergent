@@ -35,7 +35,7 @@ jobs:
         run: |
           echo '### backfill-slugs' >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
-          curl -s -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+          curl -s -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
             "$BASE_URL/api/backfill-slugs?force=${{ github.event.inputs.force || 'false' }}" \
             | tee -a $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
