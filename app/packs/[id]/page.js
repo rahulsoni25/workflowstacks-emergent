@@ -1,10 +1,11 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { ArrowLeft, Users, Target, Zap, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { resolveItem, slugifyName } from '@/lib/collections'
 
 export const revalidate = 86400
 // Without generateStaticParams the segment is rendered on every request (no
@@ -35,19 +36,34 @@ async function getPack(id) {
   }
 }
 
+// The path segment used to be a raw UUID and nothing else. Both forms now
+// resolve — already-indexed and externally linked UUID URLs keep working — but
+// only the slug is canonical, and the page permanently redirects the UUID to
+// it so a single URL accumulates the signal.
+async function load(param) {
+  const hit = await resolveItem('packs', param)
+  if (!hit) return null
+  const data = await getPack(hit.item.id)
+  if (!data) return null
+  return { ...data, slug: hit.item._slug, matchedBy: hit.matchedBy }
+}
+
 export async function generateMetadata({ params }) {
-  const data = await getPack(params.id)
+  const data = await load(params.id)
   if (!data) return { title: 'Pack not found | WorkflowStacks', robots: { index: false, follow: false } }
   const p = data.pack
   const title = `${p.name} — AI Starter Pack | WorkflowStacks`
   const description = (p.description || '').slice(0, 160)
-  const url = `/packs/${p.id}`
+  const url = `/packs/${data.slug || p.id}`
   return { title, description, alternates: { canonical: url }, openGraph: { title, description, type: 'article', url } }
 }
 
 export default async function PackDetailPage({ params }) {
-  const data = await getPack(params.id)
+  const data = await load(params.id)
   if (!data) notFound()
+  if (data.matchedBy === 'id' && data.slug && data.slug !== params.id) {
+    permanentRedirect(`/packs/${data.slug}`)
+  }
   const { pack, skills } = data
   const builderHref = `/builder?skillIds=${(pack.skillIds || []).join(',')}&goal=${encodeURIComponent(pack.name)}`
 

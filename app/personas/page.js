@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { slugifyName } from '@/lib/collections'
 
 export const revalidate = 1800
 
@@ -64,7 +65,7 @@ export default async function PersonasPage() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-2 text-sm text-slate-400"><Target className="w-4 h-4" /><span>Best for: {persona.audience}{/(?:s|sh|ch|x|z|y)$/i.test(persona.audience || '') ? '' : 's'}</span></div>
-                  <Link href={`/personas/${persona.id}`} className="block">
+                  <Link href={`/personas/${slugifyName(persona.name) || persona.id}`} className="block">
                     <Button className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
                       <Zap className="w-4 h-4 mr-2" />See What This Agent Does
                     </Button>

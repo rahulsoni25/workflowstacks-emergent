@@ -1,10 +1,11 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { ArrowLeft, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { resolveItem, slugifyName } from '@/lib/collections'
 
 export const revalidate = 86400
 
@@ -19,13 +20,25 @@ async function getPlaybook(id) {
   }
 }
 
+// The path segment used to be a raw UUID and nothing else. Both forms now
+// resolve — already-indexed and externally linked UUID URLs keep working — but
+// only the slug is canonical, and the page permanently redirects the UUID to
+// it so a single URL accumulates the signal.
+async function load(param) {
+  const hit = await resolveItem('playbooks', param)
+  if (!hit) return null
+  const data = await getPlaybook(hit.item.id)
+  if (!data) return null
+  return { ...data, slug: hit.item._slug, matchedBy: hit.matchedBy }
+}
+
 export async function generateMetadata({ params }) {
-  const data = await getPlaybook(params.id)
+  const data = await load(params.id)
   if (!data) return { title: 'Playbook not found | WorkflowStacks', robots: { index: false, follow: false } }
   const p = data.playbook
   const title = `${p.title} | WorkflowStacks Playbook`
   const description = (p.description || p.outcome || '').slice(0, 160)
-  const url = `/playbooks/${p.id}`
+  const url = `/playbooks/${data.slug || p.id}`
   return {
     title,
     description,
@@ -35,8 +48,11 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function PlaybookDetailPage({ params }) {
-  const data = await getPlaybook(params.id)
+  const data = await load(params.id)
   if (!data) notFound()
+  if (data.matchedBy === 'id' && data.slug && data.slug !== params.id) {
+    permanentRedirect(`/playbooks/${data.slug}`)
+  }
   const { playbook, skills } = data
   const builderHref = `/builder?skillIds=${(playbook.skillIds || []).join(',')}&goal=${encodeURIComponent(playbook.title)}`
 

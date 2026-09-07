@@ -88,6 +88,7 @@ const STATIC_ROUTES = [
   ...Object.keys(TEMPLATES).map((slug) => `/templates/${slug}`),
   '/tools',
   ...Object.keys(BUNDLES).map((slug) => `/bundles/${slug}`),
+  '/collections',
   '/automate',
   ...Object.keys(OUTCOMES).map((slug) => `/automate/${slug}`),
   '/kits',
@@ -182,5 +183,25 @@ export default async function sitemap() {
     // Sitemap still valid without blog entries if Mongo is unreachable.
   }
 
-  return [...staticEntries, ...blogEntries, ...skillEntries]
+  // Curated collections. Hand-built groupings of catalog skills, so they rank
+  // above a bare catalog page and below our own written work. They were absent
+  // from the sitemap entirely — only the three section indexes were listed,
+  // never the twelve items under them.
+  let collectionEntries = []
+  try {
+    const { allCollectionItems } = await import('@/lib/collections')
+    const items = await allCollectionItems()
+    collectionEntries = items
+      .filter((i) => i.slug)
+      .map((i) => ({
+        url: `${BASE}/${i.kind}/${i.slug}`,
+        lastModified: now,
+        changeFrequency: 'monthly',
+        priority: 0.7,
+      }))
+  } catch (e) {
+    console.error('[sitemap] collection entries unavailable:', e?.message || e)
+  }
+
+  return [...staticEntries, ...blogEntries, ...collectionEntries, ...skillEntries]
 }

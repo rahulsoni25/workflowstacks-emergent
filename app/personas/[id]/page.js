@@ -1,10 +1,11 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { ArrowLeft, Briefcase, Zap, CheckCircle2, Star } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { resolveItem, slugifyName } from '@/lib/collections'
 
 export const revalidate = 86400
 
@@ -19,19 +20,34 @@ async function getPersona(id) {
   }
 }
 
+// The path segment used to be a raw UUID and nothing else. Both forms now
+// resolve — already-indexed and externally linked UUID URLs keep working — but
+// only the slug is canonical, and the page permanently redirects the UUID to
+// it so a single URL accumulates the signal.
+async function load(param) {
+  const hit = await resolveItem('personas', param)
+  if (!hit) return null
+  const data = await getPersona(hit.item.id)
+  if (!data) return null
+  return { ...data, slug: hit.item._slug, matchedBy: hit.matchedBy }
+}
+
 export async function generateMetadata({ params }) {
-  const data = await getPersona(params.id)
+  const data = await load(params.id)
   if (!data) return { title: 'Persona not found | WorkflowStacks', robots: { index: false, follow: false } }
   const p = data.persona
   const title = `${p.name} — AI Agent Persona | WorkflowStacks`
   const description = (p.whatItDoes || p.description || '').slice(0, 160)
-  const url = `/personas/${p.id}`
+  const url = `/personas/${data.slug || p.id}`
   return { title, description, alternates: { canonical: url }, openGraph: { title, description, type: 'article', url } }
 }
 
 export default async function PersonaDetailPage({ params }) {
-  const data = await getPersona(params.id)
+  const data = await load(params.id)
   if (!data) notFound()
+  if (data.matchedBy === 'id' && data.slug && data.slug !== params.id) {
+    permanentRedirect(`/personas/${data.slug}`)
+  }
   const { persona, skills } = data
   const goal = persona.description || `Act as my ${persona.name}`
   const builderHref = `/builder?skillIds=${(persona.skillIds || []).join(',')}&goal=${encodeURIComponent(goal)}`

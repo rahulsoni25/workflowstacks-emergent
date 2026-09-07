@@ -21,9 +21,12 @@ const NAV_GROUPS = [
     items: [
       { href: '/skills', label: 'All Skills', note: 'The open-source catalog' },
       { href: '/mcp', label: 'MCP Servers', note: 'Add tools to Claude Desktop' },
-      { href: '/packs', label: 'Starter Packs', note: 'Skill bundles by job' },
-      { href: '/personas', label: 'Personas', note: 'Role-in-a-box agents' },
-      { href: '/playbooks', label: 'Playbooks', note: 'Solve one problem, step by step' },
+      // One slot, not three. Packs, playbooks and personas hold four items
+      // each; giving twelve items three of the nav's strongest positions
+      // starved the hubs that can actually rank, and made the site harder to
+      // describe in one sentence. /collections is the shared entry point and
+      // each section keeps its own URL and index.
+      { href: '/collections', label: 'Collections', note: 'Packs, playbooks and personas, picked by role' },
     ],
   },
   {

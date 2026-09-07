@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { slugifyName } from '@/lib/collections'
 
 export const revalidate = 1800
 
@@ -79,7 +80,7 @@ export default async function PacksPage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {pack.useCase && <div className="flex items-center gap-2 text-sm text-slate-400"><Target className="w-4 h-4" /><span>{pack.useCase}</span></div>}
-                  <Link href={`/packs/${pack.id}`} className="block">
+                  <Link href={`/packs/${slugifyName(pack.name) || pack.id}`} className="block">
                     <Button className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20">View Pack<ArrowRight className="w-4 h-4 ml-2" /></Button>
                   </Link>
                 </CardContent>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { slugifyName } from '@/lib/collections'
 
 export const revalidate = 1800
 
@@ -102,7 +103,7 @@ export default async function PlaybooksPage() {
                         <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-amber-400" /><span>{playbook.problem}</span>
                       </div>
                     )}
-                    <Link href={`/playbooks/${playbook.id}`} className="block">
+                    <Link href={`/playbooks/${slugifyName(playbook.title) || playbook.id}`} className="block">
                       <Button className="w-full bg-gradient-to-r from-amber-500 to-teal-500 hover:from-amber-600 hover:to-teal-600 text-white shadow-lg shadow-amber-500/20">View Playbook</Button>
                     </Link>
                   </CardContent>
