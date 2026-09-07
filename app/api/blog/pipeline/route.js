@@ -205,7 +205,7 @@ async function start() {
 
 async function advance() {
   const col = await postsCollection()
-  const post = await col.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'styled', 'judged'] } }).sort({ updated_at: 1 }).limit(1).next()
+  const post = await col.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'revising', 'styled', 'judged'] } }).sort({ updated_at: 1 }).limit(1).next()
   if (!post) return { idle: true, note: 'no in-flight post — action=start begins one' }
   const now = new Date()
 
@@ -301,6 +301,67 @@ async function advance() {
     return { slug: post.slug, step: 'humanize', style_score: style.score, overlap: +(overlap2.max * 100).toFixed(1), status: clean ? 'styled' : 'held' }
   }
 
+  // 2c. Revise: one flagged section per call, from the queue the judge left.
+  // Same shape as drafting — one section per invocation is what fits both
+  // Vercel's 60s cap and Groq's per-minute token budget; the workflow's sleep
+  // between calls is the cooldown.
+  if (post.status === 'revising') {
+    const queue = Array.isArray(post.revise_queue) ? post.revise_queue : []
+    if (!queue.length) {
+      // Back to 'edited', not 'styled': the humanizer re-runs so a revision
+      // cannot smuggle machine-writing tells back in.
+      await col.updateOne({ slug: post.slug }, {
+        $set: { body_md: assembleBody(post), status: 'edited', updated_at: now },
+        $unset: { revise_queue: '', revise_note: '', revise_failures: '' },
+      })
+      return { slug: post.slug, step: 'all revisions applied → edited', revision: post.revisions }
+    }
+    const idx = queue[0]
+    const sec = post.sections[idx]
+    const note = post.revise_note || {}
+    try {
+      const { data } = await callJson({
+        system: REVISE_SYSTEM, tier: 'strong', maxTokens: 1400, temperature: 0.5,
+        tag: `revise:${post.slug}:${post.revisions}:${idx}`,
+        user: JSON.stringify({
+          section: { index: idx, h2: sec.h2, md: sec.md },
+          section_brief: post.brief?.outline?.[idx] || null,
+          firsthand_section: post.brief?.firsthand_section,
+          table_spec: post.brief?.table_spec,
+          rubric: note.rubric, rationale: note.rationale, score: note.score, gate: JUDGE_GATE,
+          primary_keyword: post.seo?.primary, persona: post.persona,
+          sources: (post.sources || []).slice(0, 8),
+          neighbours: { prev_h2: post.sections[idx - 1]?.h2 || null, next_h2: post.sections[idx + 1]?.h2 || null },
+        }),
+      })
+      const md = typeof data?.md === 'string' ? data.md.trim().replace(/^##\s.*\n/, '') : ''
+      if (countWords(md) < 80) throw new Error('reviser returned no usable section')
+      await col.updateOne({ slug: post.slug }, {
+        $set: { [`sections.${idx}.md`]: md, revise_queue: queue.slice(1), updated_at: now },
+        $push: { revise_log: { index: idx, revision: post.revisions, changes: data.changes || [], at: now } },
+      })
+      return { slug: post.slug, step: `revised section ${idx + 1}/${post.sections.length}`, remaining: queue.length - 1, words: countWords(md) }
+    } catch (e) {
+      // Never swallow. Leave the index queued so the next call retries after
+      // the workflow's sleep; after two failures skip the section rather than
+      // stall the whole article on one stubborn rewrite.
+      const failures = { ...(post.revise_failures || {}) }
+      failures[idx] = (failures[idx] || 0) + 1
+      const skip = failures[idx] >= 2
+      await col.updateOne({ slug: post.slug }, { $set: {
+        revise_failures: failures,
+        ...(skip ? { revise_queue: queue.slice(1) } : {}),
+        updated_at: now,
+      } })
+      return {
+        slug: post.slug,
+        step: `revise section ${idx + 1} ${skip ? 'skipped' : 'retry pending'}`,
+        error: String(e.message || e).slice(0, 200),
+        remaining: skip ? queue.length - 1 : queue.length,
+      }
+    }
+  }
+
   // 3. Judge (different model family), claim fixes, gate.
   if (post.status === 'styled') {
     const { data: judge } = await callJsonCompact(
@@ -331,58 +392,36 @@ async function advance() {
     const attempt = (post.revisions || 0)
     const history = [...(post.judge_history || []), { score: judge.score, rubric: judge.rubric, at: now }]
 
-    // Below the gate, but with revisions left: hand the writer the editor's
-    // note and try again. The gate itself never moves — nothing ships under 8.
+    // Below the gate, but with revisions left: queue the sections the editor
+    // flagged and let advance() rewrite them one per call. The gate itself
+    // never moves — nothing ships under 8.
+    //
+    // Why a queue and not one call: the first live run of the loop (7 Sept)
+    // sent the whole article plus brief and sources straight after the judge
+    // call and asked for 4,000 tokens back — over Groq's 8,000 tokens-per-
+    // minute free tier on its own. The 429 retry hit the same wall, and the
+    // catch turned it into "nothing to revise" and a held post. One section
+    // per invocation fits the budget, fits Vercel's 60s function cap the same
+    // way drafting does, and cannot misattribute a rewrite: callJsonSplit
+    // re-stamps `index` from array position, which this path never uses.
     if (judge.score < JUDGE_GATE && attempt < MAX_REVISIONS) {
       const flagged = Array.isArray(judge.revise_sections)
         ? judge.revise_sections.filter((i) => Number.isInteger(i) && sections[i])
         : []
-      // Pass the FULL section array, never a filtered subset: callJsonSplit
-      // re-stamps `index` from array position, so handing it only sections
-      // [2,5] would come back as indexes 0 and 1 and overwrite the wrong two.
-      // Which sections to touch is communicated as data instead.
       const targets = flagged.length ? flagged : sections.map((_, i) => i)
-      const { data: revised } = await callJsonSplit(
-        { system: REVISE_SYSTEM, tier: 'strong', maxTokens: 4000, tag: `revise:${post.slug}:${attempt + 1}` },
-        sections,
-        (chunk) => JSON.stringify({
-          revise_only_these_indexes: targets,
-          rubric: judge.rubric,
-          rationale: judge.rationale,
-          score: judge.score,
-          gate: JUDGE_GATE,
-          brief: { outline: post.brief?.outline, firsthand_section: post.brief?.firsthand_section, table_spec: post.brief?.table_spec },
-          primary_keyword: post.seo?.primary,
-          persona: post.persona,
-          sources: post.sources,
-          sections: chunk,
-        })
-      ).catch(() => ({ data: null }))
-
-      let next = sections
-      if (revised?.sections?.length) {
-        next = [...sections]
-        for (const r of revised.sections) if (next[r.index]) next[r.index] = { ...next[r.index], md: r.md }
-      }
-      // Back to 'edited' rather than straight to the judge, so the humanizer
-      // re-runs and a revision cannot smuggle machine-writing tells back in.
       await col.updateOne({ slug: post.slug }, { $set: {
-        sections: next,
-        body_md: assembleBody({ ...post, sections: next }),
+        sections,
+        body_md,
         judge: { ...judge, at: now },
         judge_history: history,
         revisions: attempt + 1,
-        status: revised?.sections?.length ? 'edited' : 'held',
+        revise_queue: targets,
+        revise_note: { rubric: judge.rubric, rationale: judge.rationale, score: judge.score },
+        revise_failures: {},
+        status: 'revising',
         updated_at: now,
       } })
-      return {
-        slug: post.slug,
-        step: 'judged',
-        score: judge.score,
-        status: revised?.sections?.length ? 'revising' : 'held',
-        revision: attempt + 1,
-        revised_sections: revised?.sections?.length || 0,
-      }
+      return { slug: post.slug, step: 'judged', score: judge.score, status: 'revising', revision: attempt + 1, queued_sections: targets.length }
     }
 
     const status = judge.score >= JUDGE_GATE ? 'judged' : 'held'
