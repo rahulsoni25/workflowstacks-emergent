@@ -41,11 +41,12 @@ jobs:
 
       - name: Advance until done (sections → edit → judge → revise → schedule)
         run: |
-          # 30, not 22: a judge score under the gate now sends the article back
-          # for up to two revisions, and each revision costs three more advances
-          # (revise, re-humanize, re-judge). 22 was enough for a straight run
-          # and would have cut a revising article off mid-loop.
-          for i in $(seq 1 30); do
+          # 48: a judge score under the gate sends the article back for up to two
+          # revisions, and a revision now rewrites ONE section per advance (that is
+          # what fits Groq's 8k tokens-per-minute free tier). Worst case is 8 writes
+          # + edit/humanize/judge + 2 x (8 sections + humanize + judge) = 31, plus
+          # a retry or two. 30 would have cut a revising article off mid-loop.
+          for i in $(seq 1 48); do
             R=$(curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
               "$BASE_URL/api/blog/pipeline?action=advance") || break
             echo "step $i: $R"
