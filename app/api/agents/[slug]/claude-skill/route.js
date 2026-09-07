@@ -1,5 +1,5 @@
-// GET /api/agents/:id/claude-skill        → agent blueprint as SKILL.md
-// GET /api/agents/:id/claude-skill?format=zip → installable skill package
+// GET /api/agents/:slug/claude-skill        → agent blueprint as SKILL.md
+// GET /api/agents/:slug/claude-skill?format=zip → installable skill package
 //
 // Loads the agent through the PUBLIC /api/agents endpoint (never Mongo
 // directly) so paid-agent blueprint redaction is inherited: if the public
@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 export async function GET(request, { params }) {
   let agent = null
   try {
-    const res = await fetch(`${SITE}/api/agents/${encodeURIComponent(params.id)}`, {
+    const res = await fetch(`${SITE}/api/agents/${encodeURIComponent(params.slug)}`, {
       next: { revalidate: 300 },
       signal: AbortSignal.timeout(10_000),
     })
