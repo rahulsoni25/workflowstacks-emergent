@@ -3,6 +3,7 @@ import { ArrowLeft, Terminal, Lightbulb } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { SLASH_COMMANDS } from '@/lib/commands'
+import { itemListSchema, breadcrumbSchema } from '@/lib/schema'
 
 function starsOf(s) {
   const m = /^([\d,]+)★/.exec(s || '')
@@ -20,8 +21,21 @@ export default function CommandsIndexPage() {
   const categories = [...new Set(commands.map((c) => c.category))]
   const totalStars = commands.reduce((n, c) => n + starsOf(c.stat), 0)
 
+  const list = itemListSchema({
+    name: 'Claude Code slash commands',
+    description: 'Verified, copy-paste Claude Code slash commands.',
+    url: '/commands',
+    items: commands.map((c) => ({ name: c.title || c.name, url: `https://workflowstacks.com/commands/${c.slug}` })),
+  })
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Slash commands', path: '/commands' },
+  ])
+
   return (
     <div className="min-h-screen bg-neptune">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(list) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">

@@ -23,6 +23,17 @@ const nextConfig = {
         destination: 'https://workflowstacks.com/:path*',
         permanent: true,
       },
+      {
+        // /bundles never existed as an index — only /bundles/[slug] does — yet
+        // it was linked from the header nav AND the footer, so every page on
+        // the site pointed at a 404. /tools is already that index (it lists
+        // every bundle and carries the metadata), so send the URL there rather
+        // than build a second one. Exact path only: /bundles/:slug must not
+        // be caught by this.
+        source: '/bundles',
+        destination: '/tools',
+        permanent: true,
+      },
     ]
   },
   async rewrites() {

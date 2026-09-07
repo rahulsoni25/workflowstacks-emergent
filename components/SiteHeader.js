@@ -21,17 +21,20 @@ const NAV_GROUPS = [
     items: [
       { href: '/skills', label: 'All Skills', note: 'The open-source catalog' },
       { href: '/mcp', label: 'MCP Servers', note: 'Add tools to Claude Desktop' },
-      { href: '/packs', label: 'Starter Packs', note: 'Skill bundles by job' },
-      { href: '/personas', label: 'Personas', note: 'Role-in-a-box agents' },
-      { href: '/playbooks', label: 'Playbooks', note: 'Solve one problem, step by step' },
+      // One slot, not three. Packs, playbooks and personas hold four items
+      // each; giving twelve items three of the nav's strongest positions
+      // starved the hubs that can actually rank, and made the site harder to
+      // describe in one sentence. /collections is the shared entry point and
+      // each section keeps its own URL and index.
+      { href: '/collections', label: 'Collections', note: 'Packs, playbooks and personas, picked by role' },
     ],
   },
   {
     label: 'Premium',
     items: [
-      { href: '/bundles', label: 'Ready-to-run Packs', note: 'Tested workflow + playbook, one-time' },
       { href: '/tools', label: 'Premium Tools', note: 'Paid, one-time automations' },
       { href: '/templates', label: 'Workflow Templates', note: 'Free, working n8n automations' },
+      { href: '/automate', label: 'What to Automate', note: 'The job you want done, and the workflow for it' },
       { href: '/deals', label: 'Deals', note: 'Group-buy tool pricing' },
     ],
   },

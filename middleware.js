@@ -6,13 +6,41 @@ import { getSlashCommand } from '@/lib/commands'
 import { getBundle } from '@/lib/bundles'
 import { getKit } from '@/lib/kits'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { slugifyName } from '@/lib/collections'
 
 // 36-char UUID with the standard dash positions (8-4-4-4-12).
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 // Tiny in-memory cache so we don't hit the API on every UUID request from the
-// same Edge instance. Slugs are immutable so this can live forever per worker.
+// same Edge instance. A found slug is immutable and lives for the worker's
+// life. A MISS is not: 495 catalog entries have no slug today and a backfill
+// assigns them in one pass, so a worker that cached "no slug" for a UUID would
+// keep serving the UUID page after the slug exists. Misses expire.
 const slugCache = new Map()
+const MISS_TTL_MS = 10 * 60 * 1000
+
+function cachedSlug(key) {
+  const hit = slugCache.get(key)
+  if (!hit) return undefined
+  if (hit.slug) return hit.slug
+  if (Date.now() - hit.at < MISS_TTL_MS) return null
+  slugCache.delete(key)
+  return undefined
+}
+function remember(key, slug) {
+  slugCache.set(key, { slug: slug || null, at: Date.now() })
+}
+
+// How to turn an API response for a UUID into the slug its page lives at.
+// Skills store a slug; packs, playbooks and personas derive one from the name
+// (see lib/collections.js), so the same derivation runs here — otherwise this
+// redirect and the page's canonical could disagree about the URL.
+const SLUG_SOURCES = {
+  skills: (d) => d?.skill?.slug || null,
+  packs: (d) => slugifyName(d?.pack?.name),
+  playbooks: (d) => slugifyName(d?.playbook?.title || d?.playbook?.name),
+  personas: (d) => slugifyName(d?.persona?.name),
+}
 
 // Content types whose pages come from generateStaticParams() over a static
 // in-memory registry (not the DB). Verified live 2026-08-11: an unmatched
@@ -75,31 +103,37 @@ export async function middleware(request) {
     return NextResponse.next()
   }
 
-  // --- /skills/{maybe-uuid} -> canonical slug redirect (unchanged) ---
-  const m = pathname.match(/^\/skills\/([^/?#]+)\/?$/)
+  // --- /{skills|packs|playbooks|personas}/{uuid} -> canonical slug, 308 ---
+  //
+  // This has to happen here rather than in the page. app/loading.js is a root
+  // Suspense boundary, so every page starts streaming before its async work
+  // finishes — and a redirect() thrown after the first flush cannot change the
+  // status code. It degrades to a 200 carrying <meta http-equiv="refresh">,
+  // which is what /skills/<uuid> was serving in production. The Edge runs
+  // before any of that.
+  const m = pathname.match(/^\/(skills|packs|playbooks|personas)\/([^/?#]+)\/?$/)
   if (!m) return NextResponse.next()
-  const param = m[1]
+  const [, kind, param] = m
   if (!UUID_RE.test(param)) return NextResponse.next() // already a slug
+  const key = `${kind}:${param}`
 
-  // Cached?
-  if (slugCache.has(param)) {
-    const slug = slugCache.get(param)
-    if (!slug) return NextResponse.next() // negative cache — no slug exists, let it through
+  const known = cachedSlug(key)
+  if (known === null) return NextResponse.next() // recent miss — let it through
+  if (known) {
     const url = request.nextUrl.clone()
-    url.pathname = `/skills/${slug}`
+    url.pathname = `/${kind}/${known}`
     return NextResponse.redirect(url, 308)
   }
 
-  // Look up the slug via our own API (Edge runtime is allowed to fetch).
+  // Look up via our own API (Edge runtime is allowed to fetch).
   try {
-    const r = await fetch(`${BASE}/api/skills/${param}`, { headers: { 'User-Agent': 'WS-Middleware' } })
-    if (!r.ok) { slugCache.set(param, null); return NextResponse.next() }
-    const data = await r.json()
-    const slug = data?.skill?.slug
-    if (!slug || slug === param) { slugCache.set(param, null); return NextResponse.next() }
-    slugCache.set(param, slug)
+    const r = await fetch(`${BASE}/api/${kind}/${param}`, { headers: { 'User-Agent': 'WS-Middleware' } })
+    if (!r.ok) { remember(key, null); return NextResponse.next() }
+    const slug = SLUG_SOURCES[kind](await r.json())
+    if (!slug || slug === param) { remember(key, null); return NextResponse.next() }
+    remember(key, slug)
     const url = request.nextUrl.clone()
-    url.pathname = `/skills/${slug}`
+    url.pathname = `/${kind}/${slug}`
     return NextResponse.redirect(url, 308)
   } catch {
     return NextResponse.next() // never break the page if the lookup fails
@@ -108,5 +142,5 @@ export async function middleware(request) {
 
 // Only run the middleware for these paths — every other request skips it.
 export const config = {
-  matcher: ['/skills/:path*', '/automate/:path*', '/mcp/:path*', '/templates/:path*', '/commands/:path*', '/bundles/:path*', '/kits/:path*'],
+  matcher: ['/skills/:path*', '/packs/:path*', '/playbooks/:path*', '/personas/:path*', '/automate/:path*', '/mcp/:path*', '/templates/:path*', '/commands/:path*', '/bundles/:path*', '/kits/:path*'],
 }

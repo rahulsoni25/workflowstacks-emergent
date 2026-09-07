@@ -1,6 +1,7 @@
 import HomeClient from './HomeClient'
 import { homeFaqs } from '@/lib/home-faqs'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { isAiRelevant, qualityRank } from '@/lib/skill-relevance'
 
 // The root layout no longer sets alternates.canonical — it silently applied
 // '/' to every route that forgot to declare one, so /help, /join and
@@ -68,10 +69,18 @@ function trimSkill(s) {
 }
 
 export default async function HomePage() {
-  // The homepage renders a six-card "Trending this week" rail, so ask the API
-  // for exactly that instead of pulling the catalog to throw most of it away.
-  const [skillsData, statsData] = await Promise.all([getJson('/api/skills?sort=trending&limit=6'), getJson('/api/stats')])
-  const featured = (skillsData?.skills || []).map(trimSkill)
+  // The homepage's six-card rail is the strongest internal link the site has
+  // to give, and `sort=trending` was spending it on AdminLTE, the Linux kernel
+  // and OBS Studio — `popularity_score` is raw GitHub reach, and the stored
+  // `category` that might have caught them files all three as `ai-agent`.
+  // Ask for a wider slice, then pick on topical relevance and our own rewrite
+  // quality. Still one request. See lib/skill-relevance.js.
+  const [skillsData, statsData] = await Promise.all([getJson('/api/skills?sort=trending&limit=60'), getJson('/api/stats')])
+  const featured = (skillsData?.skills || [])
+    .filter((s) => s.slug && !s.dead_repo && isAiRelevant(s, { strict: true }))
+    .sort((a, b) => qualityRank(b) - qualityRank(a))
+    .slice(0, 6)
+    .map(trimSkill)
 
   // Single source of truth for the headline count: the real number of
   // published, browsable listings from /api/stats (a countDocuments(), not a

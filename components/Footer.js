@@ -14,7 +14,7 @@ const footerLinks = {
       { label: 'MCP Configs', href: '/mcp' },
       { label: 'Slash Commands', href: '/commands' },
       { label: 'Premium Tools', href: '/tools' },
-      { label: 'Bundles', href: '/bundles' },
+      { label: 'Premium Tools', href: '/tools' },
     ]
   },
   browse: {

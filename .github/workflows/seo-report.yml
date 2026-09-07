@@ -1,0 +1,93 @@
+name: SEO report (Search Console)
+
+# Pulls the real numbers out of Search Console and prints them into the run
+# summary. The admin secret and the service-account key both stay inside the
+# runner — nothing here echoes a credential, and the output is only this
+# property's own search statistics.
+#
+# Run it with:  gh workflow run seo-report.yml -f days=28
+# Read it with: gh run view <id> --log
+on:
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Lookback window in days'
+        required: false
+        default: '28'
+      inspect:
+        description: 'Also run URL Inspection on one page per template type (needs Full permission in GSC)'
+        required: false
+        default: 'true'
+  schedule:
+    - cron: '15 6 * * 1' # Monday mornings, after the daily blog run
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connection check
+        run: |
+          DAYS="${{ github.event.inputs.days || '28' }}"
+          echo "DAYS=$DAYS" >> $GITHUB_ENV
+          echo "## Search Console — last $DAYS days" >> $GITHUB_STEP_SUMMARY
+          echo '### status' >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          curl -s -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/gsc?action=status" | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo '### readable properties' >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          curl -s -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/gsc?action=sites" | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Totals and trend
+        run: |
+          echo '### overview' >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          curl -s -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/gsc?action=overview&days=$DAYS" | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Top queries and pages
+        run: |
+          for dim in queries pages countries devices; do
+            echo "### $dim" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            curl -s -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/gsc?action=$dim&days=$DAYS&limit=60" | tee -a $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          done
+
+      # One URL per template type. Indexation differs by type far more than it
+      # differs within a type, so a handful of probes answers "which page types
+      # is Google actually keeping?" without spending the daily quota.
+      - name: Indexation by page type
+        if: ${{ github.event.inputs.inspect != 'false' }}
+        run: |
+          echo '### indexation sample (one URL per page type)' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          for u in \
+            "/" \
+            "/templates" \
+            "/templates/cold-email-personalizer" \
+            "/automate/triage-your-inbox" \
+            "/mcp" \
+            "/mcp/filesystem" \
+            "/commands/commit" \
+            "/bundles/lead-finder" \
+            "/blog/best-mcp-servers-claude-desktop" \
+            "/skills/openclaw" \
+            "/skills/browser-use" ; do
+            R=$(curl -s -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/gsc?action=inspect&url=$(printf '%s' "$BASE_URL$u" | sed 's|/|%2F|g; s|:|%3A|g')")
+            V=$(echo "$R" | jq -r '[.verdict // .inspectionResult.indexStatusResult.verdict // "?", .coverageState // .inspectionResult.indexStatusResult.coverageState // "?", .lastCrawlTime // .inspectionResult.indexStatusResult.lastCrawlTime // "?"] | join(" | ")' 2>/dev/null || echo "$R")
+            printf '%-46s %s\n' "$u" "$V" >> $GITHUB_STEP_SUMMARY
+          done
+          echo '```' >> $GITHUB_STEP_SUMMARY

@@ -1108,8 +1108,12 @@ export async function GET(request) {
     if (path === '/backfill-slugs') {
       const { searchParams } = new URL(request.url);
       const force = searchParams.get('force') === 'true'; // if true, regenerate even existing slugs
+      // `{ slug: { $exists: false } }` alone misses the rows where the field
+      // is present but empty or null, which then keep resolving to
+      // /skills/<uuid> after a backfill that reported success.
+      const MISSING_SLUG = { $or: [{ slug: { $exists: false } }, { slug: null }, { slug: '' }] };
       const skills = await database.collection('skills')
-        .find(force ? {} : { slug: { $exists: false } })
+        .find(force ? {} : MISSING_SLUG)
         .toArray();
       let assigned = 0;
       let skipped = 0;

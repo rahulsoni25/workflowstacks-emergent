@@ -3,6 +3,7 @@ import { ArrowLeft, KeyRound, Check, Plug } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { MCP_SERVERS } from '@/lib/mcp-servers'
+import { itemListSchema, breadcrumbSchema } from '@/lib/schema'
 
 export const metadata = {
   title: 'MCP Servers for Claude Desktop — Copy-Paste Configs | WorkflowStacks',
@@ -15,8 +16,24 @@ export default function McpIndexPage() {
   const servers = Object.values(MCP_SERVERS)
   const categories = [...new Set(servers.map((s) => s.category))]
 
+  // ItemList lets a crawler read an index page as the catalog it is, rather
+  // than as a wall of link text — and it is what makes the page eligible to be
+  // quoted back as a list by answer engines.
+  const list = itemListSchema({
+    name: 'MCP servers for Claude Desktop',
+    description: 'Verified, copy-paste MCP server configurations for Claude Desktop.',
+    url: '/mcp',
+    items: servers.map((s) => ({ name: s.title || s.name, url: `https://workflowstacks.com/mcp/${s.slug}` })),
+  })
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'MCP servers', path: '/mcp' },
+  ])
+
   return (
     <div className="min-h-screen bg-neptune">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(list) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">

@@ -3,6 +3,7 @@ import { ArrowLeft, Download, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { TEMPLATES } from '@/lib/templates'
+import { itemListSchema, breadcrumbSchema } from '@/lib/schema'
 
 export const metadata = {
   title: 'Free Working AI Agent Templates — Import & Run | WorkflowStacks',
@@ -16,8 +17,21 @@ const PERSONA_LABEL = { ecommerce: '🛍️ Ecommerce', agency: '📈 Agency', f
 export default function TemplatesIndexPage() {
   const templates = Object.values(TEMPLATES)
 
+  const list = itemListSchema({
+    name: 'Free working AI agent templates',
+    description: 'Importable, tested n8n automation templates you run on your own instance.',
+    url: '/templates',
+    items: templates.map((t) => ({ name: t.title, url: `https://workflowstacks.com/templates/${t.slug}` })),
+  })
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Templates', path: '/templates' },
+  ])
+
   return (
     <div className="min-h-screen bg-neptune">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(list) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { getOutcome, OUTCOMES } from '@/lib/outcomes'
 import { getTemplate } from '@/lib/templates'
+import { breadcrumbSchema } from '@/lib/schema'
 
 export function generateStaticParams() {
   return Object.keys(OUTCOMES).map((slug) => ({ slug }))
@@ -37,14 +38,23 @@ export default function OutcomePage({ params }) {
     })),
   }
 
+  // Breadcrumbs place the page inside the /automate cluster for crawlers and
+  // can replace the raw URL in the SERP with a readable trail.
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'What to automate', path: '/automate' },
+    { name: o.h1, path: `/automate/${o.slug}` },
+  ])
+
   return (
     <div className="min-h-screen bg-neptune">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/templates">
+          <Link href="/automate">
             <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
-              <ArrowLeft className="w-4 h-4 mr-2" />All templates
+              <ArrowLeft className="w-4 h-4 mr-2" />All automations
             </Button>
           </Link>
         </div>
