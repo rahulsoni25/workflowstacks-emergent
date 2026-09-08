@@ -47,9 +47,15 @@ jobs:
           # + edit/humanize/judge + 2 x (8 sections + humanize + judge) = 31, plus
           # a retry or two. 30 would have cut a revising article off mid-loop.
           for i in $(seq 1 48); do
-            R=$(curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
-              "$BASE_URL/api/blog/pipeline?action=advance") || break
-            echo "step $i: $R"
+            # No -f: a non-2xx used to make curl exit silently and `|| break` ended
+            # the loop with zero output — on 8 Sept the run went green having
+            # written nothing, and the error body was never seen. Capture the
+            # status and body, print both, then stop on failure.
+            CODE=$(curl -s -o /tmp/adv.json -w '%{http_code}' -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/blog/pipeline?action=advance")
+            R=$(cat /tmp/adv.json)
+            echo "step $i (HTTP $CODE): $R"
+            if [ "$CODE" -ge 400 ] || [ "$CODE" -lt 200 ]; then echo "ADVANCE FAILED — HTTP $CODE"; echo "### advance failed (HTTP $CODE)" >> $GITHUB_STEP_SUMMARY; echo "$R" >> $GITHUB_STEP_SUMMARY; break; fi
             echo "$R" | jq -e '.idle == true' >/dev/null && break
             echo "$R" | jq -e '.step == "scheduled"' >/dev/null && break
             echo "$R" | jq -e '.status == "held"' >/dev/null && { echo "HELD"; break; }
