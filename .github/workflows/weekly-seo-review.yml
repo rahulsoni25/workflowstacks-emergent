@@ -1,0 +1,121 @@
+name: Weekly SEO review
+
+# Every Monday: pull Search Console, crawl the live site, run the scored audit,
+# read the blog pipeline, and commit one report to reports/seo/<date>.{json,md}
+# plus open an issue with it. A cloud Claude routine reads the committed report
+# ~75 minutes later and writes the judgement (what improved, what regressed,
+# what to do next toward 1,000 visits/day) as a PR.
+#
+# The report is committed on purpose: it is the memory the review reads, and
+# it means the reviewing agent needs no secrets — everything it needs is in
+# the repo.
+on:
+  schedule:
+    - cron: '15 5 * * 1' # Monday 05:15 UTC = 09:15 Asia/Dubai
+  workflow_dispatch: {}
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+permissions:
+  contents: write
+  issues: write
+  actions: read
+
+concurrency:
+  group: weekly-seo-review
+  cancel-in-progress: false
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Dates
+        id: d
+        run: |
+          echo "today=$(date -u +%F)" >> $GITHUB_OUTPUT
+          mkdir -p /tmp/seo
+
+      - name: Search Console pulls
+        run: |
+          H="x-admin-secret: ${{ secrets.ADMIN_SECRET }}"
+          for spec in "overview&days=7:gsc-overview-7" "overview&days=28:gsc-overview-28" \
+                      "queries&days=7&limit=200:gsc-queries-7" "pages&days=7&limit=200:gsc-pages-7" \
+                      "pages&days=28&limit=300:gsc-pages-28"; do
+            Q="${spec%%:*}"; F="${spec##*:}"
+            curl -s -H "$H" "$BASE_URL/api/gsc?action=$Q" -o "/tmp/seo/$F.json" || true
+            echo "$F: $(head -c 160 /tmp/seo/$F.json)"
+          done
+
+      - name: Crawl the live site
+        env:
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+        run: node scripts/seo-crawl.mjs > /tmp/seo/crawl.json && head -c 600 /tmp/seo/crawl.json
+
+      - name: Blog pipeline state
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          H="x-admin-secret: ${{ secrets.ADMIN_SECRET }}"
+          curl -s -H "$H" "$BASE_URL/api/blog/posts?limit=300" -o /tmp/seo/blog-posts.json || true
+          curl -s -X POST -H "$H" "$BASE_URL/api/blog/pipeline?action=status" -o /tmp/seo/blog-status.json || true
+          gh run list --workflow=blog-daily.yml --limit 7 --json conclusion,createdAt > /tmp/seo/blog-runs.json || echo '[]' > /tmp/seo/blog-runs.json
+
+      - name: Scored audit
+        id: audit
+        continue-on-error: true
+        run: node scripts/seo-check.mjs
+      - name: Record audit result
+        run: |
+          printf '{"score":%s,"high_failures":%s}\n' "${{ steps.audit.outputs.score || 'null' }}" "${{ steps.audit.outputs.high_failures || 'null' }}" > /tmp/seo/audit.json
+          cat /tmp/seo/audit.json
+
+      - name: Assemble report
+        run: |
+          node scripts/seo-weekly-report.mjs --in /tmp/seo --out reports/seo --date ${{ steps.d.outputs.today }}
+          # Append what shipped since the previous report.
+          PREV=$(ls reports/seo/*.json 2>/dev/null | grep -v "${{ steps.d.outputs.today }}" | sort | tail -1 | xargs -r basename | sed 's/.json//')
+          SINCE=${PREV:-7.days.ago}
+          {
+            echo
+            git log --since="$SINCE" --format='- %ad %s' --date=short -- . ':!reports' | head -40
+          } >> "reports/seo/${{ steps.d.outputs.today }}.md"
+          if [ -f seo-report.md ]; then
+            { echo; echo '## Audit detail'; echo; cat seo-report.md; } >> "reports/seo/${{ steps.d.outputs.today }}.md"
+          fi
+          echo "----"; head -80 "reports/seo/${{ steps.d.outputs.today }}.md"
+
+      - name: Commit the report
+        run: |
+          git config user.name "seo-review-bot"
+          git config user.email "seo-review-bot@users.noreply.github.com"
+          git add reports/seo
+          if git diff --cached --quiet; then echo "no change"; exit 0; fi
+          git commit -m "Weekly SEO report ${{ steps.d.outputs.today }}"
+          git push
+
+      - name: Open the issue (one per date)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const date = '${{ steps.d.outputs.today }}'
+            const regressed = '${{ steps.audit.outcome }}' === 'failure'
+            const title = `${regressed ? 'REGRESSION: ' : ''}Weekly SEO review — ${date}`
+            const body = fs.readFileSync(`reports/seo/${date}.md`, 'utf8').slice(0, 60000)
+            const { data: open } = await github.rest.issues.listForRepo({ owner: context.repo.owner, repo: context.repo.repo, state: 'open', labels: 'seo-weekly', per_page: 50 })
+            const existing = open.find((i) => i.title.endsWith(date))
+            if (existing) {
+              await github.rest.issues.update({ owner: context.repo.owner, repo: context.repo.repo, issue_number: existing.number, body })
+              core.info(`updated #${existing.number}`)
+            } else {
+              const { data: issue } = await github.rest.issues.create({ owner: context.repo.owner, repo: context.repo.repo, title, body, labels: ['seo-weekly', ...(regressed ? ['seo'] : [])] })
+              core.info(`opened #${issue.number}`)
+            }

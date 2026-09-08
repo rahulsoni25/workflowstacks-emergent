@@ -18,8 +18,6 @@ on:
         description: 'Also run URL Inspection on one page per template type (needs Full permission in GSC)'
         required: false
         default: 'true'
-  schedule:
-    - cron: '15 6 * * 1' # Monday mornings, after the daily blog run
 
 env:
   BASE_URL: https://workflowstacks.com
