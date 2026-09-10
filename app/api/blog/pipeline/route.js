@@ -137,7 +137,7 @@ async function start() {
   // advance loop then spread its 48 calls across all of them and none reached
   // the judge. Finish what exists before beginning another.
   const posts = await postsCollection()
-  const inflight = await posts.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'revising', 'styled', 'judged'] } }, { projection: { slug: 1, status: 1 } }).limit(5).toArray()
+  const inflight = await posts.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'humanizing', 'revising', 'styled', 'judged'] } }, { projection: { slug: 1, status: 1 } }).limit(5).toArray()
   if (inflight.length) return { skipped: 'in-flight post exists — advance it first', in_flight: inflight.map((p) => `${p.slug}:${p.status}`) }
   const queue = await topicQueueCollection()
   const topic = await queue.find({ status: 'open' }).sort({ score: -1 }).limit(1).next()
@@ -218,7 +218,7 @@ async function advance() {
   const col = await postsCollection()
   // Most recently touched first, so one article runs to the judge before
   // another is picked up. The old ascending sort round-robined every call.
-  const post = await col.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'revising', 'styled', 'judged'] } }).sort({ updated_at: -1 }).limit(1).next()
+  const post = await col.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'humanizing', 'revising', 'styled', 'judged'] } }).sort({ updated_at: -1 }).limit(1).next()
   if (!post) return { idle: true, note: 'no in-flight post — action=start begins one' }
   const now = new Date()
 
@@ -289,45 +289,88 @@ async function advance() {
     return { slug: post.slug, step: 'seo edit', score: updated.seo_report.score }
   }
 
-  // 2b. Humanize: deterministic style linter + corpus-duplication check, then
-  // one bounded LLM pass that fixes ONLY the linter findings. A post that
-  // still fails after the pass is held — machine-flavored writing never ships.
+  // 2b. Humanize: deterministic style linter + corpus-duplication check. If it
+  // fails, queue the sections that carry a finding and rewrite them ONE PER
+  // CALL (status 'humanizing'), then re-lint. Up to two passes; the second runs
+  // on the judge tier so a different model family takes the line-editing turn.
+  // Only a post that still fails after two passes is held — machine-flavored
+  // writing never ships, but a free-tier writer gets a fair chance to fix it.
+  //
+  // Why per section: the old single whole-article rewrite (4k tokens out, one
+  // JSON reply) 504'd on Vercel's 60s cap and, when it did return, cleared
+  // ~nothing on free models. The first clean Gemma article (10 Sept) wrote
+  // eight sections at 324-497 words and then died here at style 64/75.
   if (post.status === 'edited') {
     const body_md = post.body_md || assembleBody(post)
-    let style = styleCheck({ ...post, body_md })
+    const style = styleCheck({ ...post, body_md })
     const others = await col.find({ slug: { $ne: post.slug }, body_md: { $exists: true } }, { projection: { slug: 1, body_md: 1 } }).limit(100).toArray()
     const overlap = overlapWithCorpus({ ...post, body_md }, others)
-    let sections = post.sections
-    let changes = []
-    if (!style.pass || overlap.max > OVERLAP_LIMIT) {
-      const { data: fix } = await callJsonSplit(
-        { system: HUMANIZE_SYSTEM, tier: 'strong', maxTokens: 4000, tag: `humanize:${post.slug}` },
-        post.sections,
-        (sections) => JSON.stringify({
-          findings: style.findings,
-          duplication: overlap.max > OVERLAP_LIMIT ? `${(overlap.max * 100).toFixed(1)}% 8-gram overlap with sibling post ${overlap.worst} — rewrite the overlapping passages in this article's own words` : null,
-          sections,
-        })
-      ).catch(() => ({ data: null }))
-      if (fix?.sections) {
-        sections = [...post.sections]
-        for (const s of fix.sections) if (sections[s.index]) sections[s.index] = { ...sections[s.index], md: s.md }
-        changes = fix.changes || []
-      }
-    }
-    const newBody = assembleBody({ ...post, sections })
-    style = styleCheck({ ...post, sections, body_md: newBody })
-    const overlap2 = overlapWithCorpus({ ...post, body_md: newBody }, others)
-    const clean = style.pass && overlap2.max <= OVERLAP_LIMIT
-    await col.updateOne({ slug: post.slug }, {
-      $set: {
-        sections, body_md: newBody, word_count: countWords(newBody),
-        style_report: { ...style, overlap: overlap2, changes, at: now },
+    const clean = style.pass && overlap.max <= OVERLAP_LIMIT
+    const pass = post.humanize_pass || 0
+    if (clean || pass >= 2) {
+      await col.updateOne({ slug: post.slug }, { $set: {
+        body_md, word_count: countWords(body_md),
+        style_report: { ...style, overlap, passes: pass, at: now },
         status: clean ? 'styled' : 'held',
         updated_at: now,
-      },
-    })
-    return { slug: post.slug, step: 'humanize', style_score: style.score, overlap: +(overlap2.max * 100).toFixed(1), status: clean ? 'styled' : 'held' }
+      } })
+      return { slug: post.slug, step: 'humanize', style_score: style.score, overlap: +(overlap.max * 100).toFixed(1), passes: pass, status: clean ? 'styled' : 'held' }
+    }
+    // Which sections to touch: any that contains a flagged phrase; if the only
+    // findings are article-level (rhythm, contractions, openers, bolding) or
+    // duplication, every section.
+    const phrases = (style.findings.find((f) => f.id === 'ai_phrases')?.detail || '').replace(/^stock AI phrases: /, '').split(' · ').filter(Boolean)
+    const escapeRe = (h) => (h.includes('{0,20}') ? h : h.replace(/[.*+?^$()|[\]\\]/g, '\\$&'))
+    const perSection = post.sections
+      .map((sec, i) => (phrases.some((h) => { try { return new RegExp(escapeRe(h), 'i').test(sec.md || '') } catch { return false } }) ? i : -1))
+      .filter((i) => i >= 0)
+    const globalOnly = style.findings.every((f) => f.id !== 'ai_phrases') || overlap.max > OVERLAP_LIMIT
+    const queue = globalOnly || !perSection.length ? post.sections.map((_, i) => i) : perSection
+    await col.updateOne({ slug: post.slug }, { $set: {
+      status: 'humanizing',
+      humanize_pass: pass + 1,
+      humanize_queue: queue,
+      humanize_findings: style.findings,
+      humanize_duplication: overlap.max > OVERLAP_LIMIT ? `${(overlap.max * 100).toFixed(1)}% 8-gram overlap with sibling post ${overlap.worst} — rewrite the overlapping passages in this article's own words` : null,
+      updated_at: now,
+    } })
+    return { slug: post.slug, step: 'humanize', style_score: style.score, overlap: +(overlap.max * 100).toFixed(1), status: 'humanizing', pass: pass + 1, queued_sections: queue.length }
+  }
+
+  // 2c. Humanizing: rewrite one queued section per call, then return to
+  // 'edited' for a fresh lint. Pass 1 on the writer's tier, pass 2 on the
+  // judge tier (a different family), so the same model does not get two turns
+  // at the same tells.
+  if (post.status === 'humanizing') {
+    const queue = Array.isArray(post.humanize_queue) ? post.humanize_queue : []
+    if (!queue.length) {
+      await col.updateOne({ slug: post.slug }, { $set: { body_md: assembleBody(post), status: 'edited', updated_at: now }, $unset: { humanize_queue: '', humanize_findings: '', humanize_duplication: '' } })
+      return { slug: post.slug, step: 'humanize pass applied → re-lint', pass: post.humanize_pass }
+    }
+    const idx = queue[0]
+    const sec = post.sections[idx]
+    const tier = (post.humanize_pass || 1) >= 2 ? 'judge' : 'strong'
+    try {
+      const { data } = await callJson({
+        system: HUMANIZE_SYSTEM, tier, maxTokens: 1600, temperature: 0.4,
+        tag: `humanize:${post.slug}:${post.humanize_pass}:${idx}`,
+        user: JSON.stringify({
+          findings: post.humanize_findings || [],
+          duplication: post.humanize_duplication || null,
+          note: 'You are given ONE section of the article. Fix only the findings within it and return that section in full.',
+          sections: [{ index: idx, h2: sec.h2, md: sec.md }],
+        }),
+      })
+      const out = Array.isArray(data?.sections) ? data.sections[0] : null
+      const md = typeof out?.md === 'string' ? out.md.trim().replace(/^##\s.*\n/, '') : ''
+      if (countWords(md) < 60) throw new Error('humanizer returned no usable section')
+      await col.updateOne({ slug: post.slug }, { $set: { [`sections.${idx}.md`]: md, humanize_queue: queue.slice(1), updated_at: now } })
+      return { slug: post.slug, step: `humanized section ${idx + 1}/${post.sections.length}`, pass: post.humanize_pass, remaining: queue.length - 1 }
+    } catch (e) {
+      // Skip the section rather than stall the article; the re-lint decides.
+      await col.updateOne({ slug: post.slug }, { $set: { humanize_queue: queue.slice(1), updated_at: now } })
+      return { slug: post.slug, step: `humanize section ${idx + 1} skipped`, error: String(e.message || e).slice(0, 160), remaining: queue.length - 1 }
+    }
   }
 
   // 2c. Revise: one flagged section per call, from the queue the judge left.
@@ -517,6 +560,14 @@ export async function POST(request) {
     // Park a draft. Used to clear poisoned drafts (e.g. sections written by a
     // model that has since been swapped out) so start() can begin a fresh
     // article instead of the daily run spending itself on a doomed one.
+    // Put a held draft back in play at the lint step with a fresh pass count.
+    if (action === 'resume') {
+      const slug = url.searchParams.get('slug')
+      if (!slug) return Response.json({ error: 'slug required' }, { status: 400 })
+      const col = await postsCollection()
+      const r = await col.updateOne({ slug, status: 'held' }, { $set: { status: 'edited', humanize_pass: 0, updated_at: new Date() }, $unset: { held_reason: '' } })
+      return Response.json({ slug, resumed: r.modifiedCount === 1 })
+    }
     if (action === 'hold') {
       const slug = url.searchParams.get('slug')
       if (!slug) return Response.json({ error: 'slug required' }, { status: 400 })
