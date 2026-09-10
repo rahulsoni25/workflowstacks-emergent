@@ -132,6 +132,13 @@ async function scout() {
 }
 
 async function start() {
+  // One article at a time. The daily run calls start before advance, and
+  // three failed days in a row (8-10 Sept) left three drafts in flight; the
+  // advance loop then spread its 48 calls across all of them and none reached
+  // the judge. Finish what exists before beginning another.
+  const posts = await postsCollection()
+  const inflight = await posts.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'revising', 'styled', 'judged'] } }, { projection: { slug: 1, status: 1 } }).limit(5).toArray()
+  if (inflight.length) return { skipped: 'in-flight post exists — advance it first', in_flight: inflight.map((p) => `${p.slug}:${p.status}`) }
   const queue = await topicQueueCollection()
   const topic = await queue.find({ status: 'open' }).sort({ score: -1 }).limit(1).next()
   if (!topic) return { error: 'topic_queue empty — run action=scout first' }
@@ -209,7 +216,9 @@ async function start() {
 
 async function advance() {
   const col = await postsCollection()
-  const post = await col.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'revising', 'styled', 'judged'] } }).sort({ updated_at: 1 }).limit(1).next()
+  // Most recently touched first, so one article runs to the judge before
+  // another is picked up. The old ascending sort round-robined every call.
+  const post = await col.find({ status: { $in: ['briefed', 'drafting', 'drafted', 'edited', 'revising', 'styled', 'judged'] } }).sort({ updated_at: -1 }).limit(1).next()
   if (!post) return { idle: true, note: 'no in-flight post — action=start begins one' }
   const now = new Date()
 
@@ -227,9 +236,25 @@ async function advance() {
       user: JSON.stringify({ brief: post.brief, h2: sec.h2, goal: sec.goal, must_include: sec.must_include, target_words: sec.target_words, previous_sections_tail: prevText }),
       tier: 'strong', maxTokens: 1800, temperature: 0.5, tag: `write:${post.slug}:${idx}`,
     })
-    const md = text.trim().replace(/^##\s.*\n/, '')
+    let md = text.trim().replace(/^##\s.*\n/, '')
+    // Free-tier models drift badly on length (a 350-word target came back as
+    // 1,188 and as 51 words in the same run). One corrective retry when the
+    // section is more than 2.2x or under 0.4x the target; the SEO edit does
+    // not fix length, and the judge marks it down.
+    const target = Number(sec.target_words) || 350
+    const got = countWords(md)
+    if (got > target * 2.2 || got < target * 0.4) {
+      const { text: retry } = await callLLM({
+        system: WRITE_SYSTEM,
+        user: JSON.stringify({ brief: post.brief, h2: sec.h2, goal: sec.goal, must_include: sec.must_include, target_words: sec.target_words, previous_sections_tail: prevText, length_note: `Your previous attempt was ${got} words; the target is ${target} (+/-15%). Rewrite to that length.` }),
+        tier: 'strong', maxTokens: 1800, temperature: 0.4, tag: `write-retry:${post.slug}:${idx}`,
+      }).catch(() => ({ text: '' }))
+      const md2 = (retry || '').trim().replace(/^##\s.*\n/, '')
+      const got2 = countWords(md2)
+      if (got2 && Math.abs(got2 - target) < Math.abs(got - target)) md = md2
+    }
     await col.updateOne({ slug: post.slug }, { $set: { [`sections.${idx}.md`]: md, status: 'drafting', updated_at: now } })
-    return { slug: post.slug, step: `wrote section ${idx + 1}/${post.sections.length}`, words: countWords(md) }
+    return { slug: post.slug, step: `wrote section ${idx + 1}/${post.sections.length}`, words: countWords(md), ...(got !== countWords(md) ? { length_retry: `${got} -> ${countWords(md)}` } : {}) }
   }
 
   // 2. Deterministic checks + one fix pass.
