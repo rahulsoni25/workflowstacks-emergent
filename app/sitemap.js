@@ -203,5 +203,25 @@ export default async function sitemap() {
     console.error('[sitemap] collection entries unavailable:', e?.message || e)
   }
 
-  return [...staticEntries, ...blogEntries, ...collectionEntries, ...skillEntries]
+  // Crawlable catalog pagination (/skills/page/N). These are the link path
+  // to every published skill regardless of the gate above; listing them here
+  // just tells Google the chain exists. Count comes from the API's `total`.
+  let pageEntries = []
+  try {
+    const res = await fetch(`${BASE}/api/skills?limit=1`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
+    if (res.ok) {
+      const total = (await res.json()).total || 0
+      const pages = Math.ceil(total / 48)
+      pageEntries = Array.from({ length: Math.max(0, pages - 1) }, (_, i) => ({
+        url: `${BASE}/skills/page/${i + 2}`,
+        lastModified: now,
+        changeFrequency: 'weekly',
+        priority: 0.4,
+      }))
+    }
+  } catch (e) {
+    console.error('[sitemap] catalog page entries unavailable:', e?.message || e)
+  }
+
+  return [...staticEntries, ...blogEntries, ...collectionEntries, ...pageEntries, ...skillEntries]
 }
