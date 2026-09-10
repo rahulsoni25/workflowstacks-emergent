@@ -51,7 +51,7 @@ const sevenDaysAgo = new Date(Date.now() - 7 * 86400e3)
 const publishedWeek = postList.filter((p) => p.status === 'published' && p.published_at && new Date(p.published_at) <= new Date() && new Date(p.published_at) >= sevenDaysAgo)
 const lastPublished = postList.filter((p) => p.status === 'published' && p.published_at && new Date(p.published_at) <= new Date()).sort((a, b) => new Date(b.published_at) - new Date(a.published_at))[0]
 const held = postList.filter((p) => p.status === 'held')
-const inflight = postList.filter((p) => ['briefed', 'drafting', 'drafted', 'edited', 'revising', 'styled', 'judged'].includes(p.status))
+const inflight = postList.filter((p) => ['briefed', 'drafting', 'drafted', 'edited', 'humanizing', 'revising', 'styled', 'judged'].includes(p.status))
 const recentJudged = postList.filter((p) => p.judge?.score != null).sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0)).slice(0, 5)
 
 const json = {
