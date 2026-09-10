@@ -25,7 +25,7 @@ function load(name) {
 }
 const num = (v, d = 1) => (typeof v === 'number' && Number.isFinite(v) ? v.toFixed(d) : '—')
 const int = (v) => (typeof v === 'number' ? Math.round(v).toLocaleString('en-US') : '—')
-const strip = (u) => String(u || '').replace(BASE, '') || '/'
+const strip = (u) => (String(u || '').replace(/^https?:\/\/[^/]+/, '').replace(/\/$/, '') || '/')
 const section = (u) => '/' + strip(u).replace(/^\//, '').split('/')[0]
 const delta = (a, b) => (typeof a === 'number' && typeof b === 'number') ? (b === 0 ? (a === 0 ? '±0' : 'new') : `${a - b >= 0 ? '+' : ''}${Math.round(((a - b) / b) * 100)}%`) : '—'
 
@@ -125,7 +125,7 @@ if (crawl?.crawl) {
     `- \`/skills\` links to **${c.skills_index_anchor_count}** skill pages (last report: ${pc?.skills_index_anchor_count ?? '—'}); \`/skills/page/2\` → HTTP ${c.skills_page2_status}, ${c.skills_page2_anchor_count} anchors.`,
     `- Homepage skill links: ${c.homepage_skill_links?.length ? c.homepage_skill_links.join(', ') : 'none'}.`,
     `- Pages linked internally but not 200: **${c.non_200_linked.length}**${c.non_200_linked.length ? ' — ' + c.non_200_linked.slice(0, 8).map((x) => `${x.url} (${x.status}${x.location ? ' → ' + strip(x.location) : ''})`).join('; ') : ''}.`,
-    `- Pages with ≤1 inbound link: **${c.weak_inbound.length}** (last report: ${pc?.weak_inbound?.length ?? '—'}).`,
+    `- Pages with ≤1 inbound link: **${c.weak_inbound.filter((x) => !x.url.startsWith('/skills/')).length}** outside the catalog (last report: ${pc?.weak_inbound ? pc.weak_inbound.filter((x) => !x.url.startsWith('/skills/')).length : '—'}); ${c.weak_inbound.filter((x) => x.url.startsWith('/skills/')).length} catalog pages reached only via pagination, which is expected.`,
     `- UUID URLs still linked: **${c.uuid_urls_linked.length}**.`)
   if (crawl.sitemap) L.push(`- Sitemap: **${crawl.sitemap.count}** URLs (last report: ${prev?.sitemap?.count ?? '—'}), ${crawl.sitemap.uuid_urls} UUID, ${crawl.sitemap.has_pagination} pagination pages. By section: ${Object.entries(crawl.sitemap.by_section).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k, v]) => `${k}=${v}`).join(', ')}.`)
   if (crawl.llms_top10?.length) L.push(`- llms.txt top 10: ${crawl.llms_top10.join(', ')}.`)

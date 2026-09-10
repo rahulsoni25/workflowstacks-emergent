@@ -107,7 +107,14 @@ jobs:
           script: |
             const fs = require('fs')
             const date = '${{ steps.d.outputs.today }}'
-            const regressed = '${{ steps.audit.outcome }}' === 'failure'
+            // "REGRESSION" only when something actually got worse: a high-severity
+            // audit failure, or the score dropping by 0.5+ against the previous
+            // report. The first run scored 8.9 against a pass mark of 9 with zero
+            // high failures and was labelled a regression from nothing.
+            const cur = JSON.parse(fs.readFileSync(`reports/seo/${date}.json`, 'utf8'))
+            const prevFile = fs.readdirSync('reports/seo').filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f) && f < `${date}.json`).sort().pop()
+            const prevScore = prevFile ? (JSON.parse(fs.readFileSync(`reports/seo/${prevFile}`, 'utf8')).audit?.score ?? null) : null
+            const regressed = (cur.audit?.high_failures ?? 0) > 0 || (prevScore != null && cur.audit?.score != null && cur.audit.score <= prevScore - 0.5)
             const title = `${regressed ? 'REGRESSION: ' : ''}Weekly SEO review — ${date}`
             const body = fs.readFileSync(`reports/seo/${date}.md`, 'utf8').slice(0, 60000)
             const { data: open } = await github.rest.issues.listForRepo({ owner: context.repo.owner, repo: context.repo.repo, state: 'open', labels: 'seo-weekly', per_page: 50 })
