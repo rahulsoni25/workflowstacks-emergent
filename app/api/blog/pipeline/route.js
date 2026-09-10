@@ -514,6 +514,16 @@ export async function POST(request) {
     if (action === 'rank') return Response.json(await rankCheck(Math.min(parseInt(url.searchParams.get('limit') || '8', 10), 15)))
     if (action === 'start') return Response.json(await start())
     if (action === 'advance') return Response.json(await advance())
+    // Park a draft. Used to clear poisoned drafts (e.g. sections written by a
+    // model that has since been swapped out) so start() can begin a fresh
+    // article instead of the daily run spending itself on a doomed one.
+    if (action === 'hold') {
+      const slug = url.searchParams.get('slug')
+      if (!slug) return Response.json({ error: 'slug required' }, { status: 400 })
+      const col = await postsCollection()
+      const r = await col.updateOne({ slug, status: { $ne: 'published' } }, { $set: { status: 'held', held_reason: url.searchParams.get('reason') || 'manual hold', updated_at: new Date() } })
+      return Response.json({ slug, held: r.modifiedCount === 1 })
+    }
     if (action === 'status') {
       const col = await postsCollection()
       const counts = await col.aggregate([{ $group: { _id: '$status', n: { $sum: 1 } } }]).toArray()
