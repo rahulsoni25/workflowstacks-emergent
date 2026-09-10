@@ -437,7 +437,10 @@ async function advance() {
   // 3. Judge (different model family), claim fixes, gate.
   if (post.status === 'styled') {
     const { data: judge } = await callJsonCompact(
-      { system: JUDGE_SYSTEM, tier: 'judge', maxTokens: 2500, tag: `judge:${post.slug}` },
+      // 3500, not 2500: with the claims list now capped at 10 the verdict fits
+      // comfortably, and a reply cut off by the budget is invalid JSON — the
+      // 10 Sept run failed here three times in a row.
+      { system: JUDGE_SYSTEM, tier: 'judge', maxTokens: 3500, tag: `judge:${post.slug}` },
       post.sections,
       (sections) => JSON.stringify({
         persona: post.persona, primary_keyword: post.seo?.primary,
