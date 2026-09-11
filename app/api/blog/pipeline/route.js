@@ -20,7 +20,11 @@ import { suggestLinks, linkUniverse } from '@/lib/blog/links'
 import { getDb } from '@/lib/mongo'
 
 export const dynamic = 'force-dynamic'
-export const maxDuration = 60
+// 300, not 60: a judge or writer call on a free-tier model can take 60-90s
+// (10-11 Sept: three consecutive 504s at the judge, and earlier at drafting).
+// agent-rewrite already runs at 300 on this project. The loop caller sleeps
+// between calls anyway, so a slow call costs waiting, not budget.
+export const maxDuration = 300
 
 // Env-overridable, default 7. Decided 7 Sept 2026 after the per-section
 // revision loop ran live on Groq's free tier: first drafts scored 6-7, the
