@@ -20,6 +20,7 @@ const NAV_GROUPS = [
     label: 'Catalog',
     items: [
       { href: '/skills', label: 'All Skills', note: 'The open-source catalog' },
+      { href: '/ask', label: 'Ask', note: 'Describe your problem, get real tools' },
       { href: '/mcp', label: 'MCP Servers', note: 'Add tools to Claude Desktop' },
       // One slot, not three. Packs, playbooks and personas hold four items
       // each; giving twelve items three of the nav's strongest positions
