@@ -60,7 +60,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/seed-affiliate-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs', '/dfy-requests', '/dfy-request/update', '/dfy-stats', '/deals/all', '/deal-update', '/security/dns-check', '/security/audit-summary', '/security/run-now'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/seed-affiliate-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs', '/dfy-requests', '/dfy-request/update', '/dfy-stats', '/deals/all', '/deal-update', '/security/dns-check', '/security/audit-summary', '/security/run-now', '/newsletter/send-hot'];
 
 // Audit log — capture every admin action for security visibility.
 // Append-only collection: audit_logs { id, path, method, ip, ua, at }
@@ -1315,7 +1315,24 @@ export async function GET(request) {
           };
           if (data.pushed_at) set.last_updated = data.pushed_at;
           if (data.stargazers_count !== s.github_stars) changed++;
-          await database.collection('skills').updateOne({ id: s.id }, { $set: set });
+
+          // Compute 7-day star velocity from existing history before appending today's snapshot
+          let velocity_7d = null, provisional = true;
+          const history = s.stars_history || [];
+          const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+          const weekAgoEntry = history.filter(h => new Date(h.date).getTime() <= sevenDaysAgo).slice(-1)[0]
+                            || history[0];
+          if (weekAgoEntry) {
+            velocity_7d = data.stargazers_count - weekAgoEntry.stars;
+            provisional = !history.some(h => new Date(h.date).getTime() <= sevenDaysAgo);
+          }
+          set.velocity_7d = velocity_7d;
+          set.velocity_provisional = provisional;
+
+          await database.collection('skills').updateOne(
+            { id: s.id },
+            { $set: set, $push: { stars_history: { $each: [{ date: new Date(), stars: data.stargazers_count }], $slice: -90 } } }
+          );
           refreshed++;
         } catch { skipped++; }
         await new Promise((res) => setTimeout(res, process.env.GITHUB_TOKEN ? 120 : 800));
@@ -2005,6 +2022,115 @@ export async function GET(request) {
         recipient_count: sentCount,
       });
       return Response.json({ ok: true, sent: sentCount, templates: templates.length, tools: freshTools.length });
+    }
+
+    // Admin: weekly Hot / Top / New & rising digest, ranked by 7-day star velocity
+    if (path === '/newsletter/send-hot') {
+      const denied = requireAdmin(request);
+      if (denied) return denied;
+      if (!process.env.RESEND_API_KEY) {
+        return Response.json({ ok: false, error: 'RESEND_API_KEY not set' }, { status: 500 });
+      }
+      const subscribers = await database.collection('subscribers').find({}).toArray();
+      if (subscribers.length === 0) return Response.json({ ok: false, message: 'No subscribers yet.' });
+
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+      const hot = await database.collection('skills')
+        .find({ published: { $ne: false }, velocity_7d: { $gt: 0 } })
+        .sort({ velocity_7d: -1 }).limit(5).toArray();
+
+      const top = await database.collection('skills')
+        .find({ published: { $ne: false } })
+        .sort({ github_stars: -1 }).limit(8).toArray();
+
+      const rising = await database.collection('skills')
+        .find({ published: { $ne: false }, added_at: { $gte: thirtyDaysAgo } })
+        .sort({ github_stars: -1 }).limit(5).toArray();
+
+      const usedIds = new Set(hot.map(s => s.id));
+      const topFiltered = top.filter(s => !usedIds.has(s.id));
+      topFiltered.forEach(s => usedIds.add(s.id));
+      const risingFiltered = rising.filter(s => !usedIds.has(s.id));
+
+      const buildLine = (s) => {
+        const b = (s.use_guide && s.use_guide.whatItDoes) || s.description_human || s.description || '';
+        return b.length > 110 ? b.slice(0, 107) + '…' : b;
+      };
+      const skillUrl = (s) => `https://workflowstacks.com/skills/${s.slug || s.id}`;
+
+      const rowHot = (s, i) => `
+        <tr><td style="padding:12px 0;border-bottom:1px solid #262626;">
+          <div style="color:#737373;font-size:11px;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">#${i + 1} · +${s.velocity_7d}★ this week${s.velocity_provisional ? ' (early data)' : ''}</div>
+          <a href="${skillUrl(s)}" style="color:#fff;font-weight:600;text-decoration:none;font-size:15px;">${s.title_human || s.name}</a>
+          <div style="color:#a3a3a3;font-size:13px;margin-top:3px;">${buildLine(s)}</div>
+        </td></tr>`;
+
+      const rowPlain = (s) => `
+        <tr><td style="padding:8px 0;border-bottom:1px solid #262626;">
+          <a href="${skillUrl(s)}" style="color:#e5e5e5;font-weight:600;text-decoration:none;font-size:14px;">${s.title_human || s.name}</a>
+          <span style="color:#737373;font-size:12px;"> · ${(s.github_stars || 0).toLocaleString()}★</span>
+          <div style="color:#a3a3a3;font-size:12px;margin-top:2px;">${buildLine(s)}</div>
+        </td></tr>`;
+
+      const hotRows = hot.length ? hot.map(rowHot).join('') : `<tr><td style="padding:10px 0;color:#737373;font-size:13px;">Still gathering velocity data — check back next week.</td></tr>`;
+      const topRows = topFiltered.map(rowPlain).join('');
+      const risingRows = risingFiltered.length ? risingFiltered.map(rowPlain).join('') : '';
+
+      let sentCount = 0;
+      for (const sub of subscribers) {
+        const unsubUrl = `https://workflowstacks.com/unsubscribe?email=${encodeURIComponent(sub.email)}`;
+        const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WorkflowStacks Weekly</title></head>
+<body style="margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e5e5e5;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <tr><td style="text-align:center;padding-bottom:28px;"><span style="font-size:22px;font-weight:700;color:#fff;">WorkflowStacks Weekly</span></td></tr>
+    <tr><td style="background:#1a1a1a;border-radius:12px;padding:28px;">
+      <h1 style="color:#C6F24E;font-size:16px;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.5px;">🔥 Hot this week</h1>
+      <p style="color:#737373;font-size:12px;margin:0 0 14px;">Ranked by star growth, not just total stars.</p>
+      <table width="100%" cellpadding="0" cellspacing="0">${hotRows}</table>
+
+      <h2 style="color:#fff;font-size:16px;margin:28px 0 4px;text-transform:uppercase;letter-spacing:0.5px;">⭐ Top overall</h2>
+      <table width="100%" cellpadding="0" cellspacing="0">${topRows}</table>
+
+      ${risingRows ? `<h2 style="color:#fff;font-size:16px;margin:28px 0 4px;text-transform:uppercase;letter-spacing:0.5px;">🌱 New &amp; rising</h2>
+      <table width="100%" cellpadding="0" cellspacing="0">${risingRows}</table>` : ''}
+
+      <div style="text-align:center;margin-top:26px;">
+        <a href="https://workflowstacks.com" style="display:inline-block;background:#C6F24E;color:#0A0C0D;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;">Browse the full catalog</a>
+      </div>
+    </td></tr>
+    <tr><td style="text-align:center;padding-top:20px;color:#525252;font-size:12px;">
+      You're receiving this because you subscribed to WorkflowStacks.<br>
+      <a href="${unsubUrl}" style="color:#525252;">Unsubscribe</a>
+    </td></tr>
+  </table>
+</body></html>`;
+        try {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+            body: JSON.stringify({
+              from: 'WorkflowStacks <newsletter@workflowstacks.com>',
+              to: sub.email,
+              subject: hot.length ? `🔥 ${hot[0].title_human || hot[0].name} is on fire this week` : '⭐ This week\'s top AI skills on WorkflowStacks',
+              html,
+            }),
+          });
+          sentCount++;
+        } catch (e) {
+          console.error('Weekly-hot send error for', sub.email, e.message);
+        }
+      }
+
+      await database.collection('newsletter_sends').insertOne({
+        type: 'weekly-hot',
+        sent_at: new Date(),
+        recipient_count: sentCount,
+        hot_count: hot.length,
+        top_count: topFiltered.length,
+        rising_count: risingFiltered.length,
+      });
+      return Response.json({ ok: true, sent: sentCount, hot: hot.length, top: topFiltered.length, rising: risingFiltered.length });
     }
 
     // Admin: discover creator leads from skills with github_url + creator field
