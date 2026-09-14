@@ -60,7 +60,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/seed-affiliate-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs', '/dfy-requests', '/dfy-request/update', '/dfy-stats', '/deals/all', '/deal-update', '/security/dns-check', '/security/audit-summary', '/security/run-now', '/newsletter/send-hot'];
+const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/seed-affiliate-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs', '/dfy-requests', '/dfy-request/update', '/dfy-stats', '/deals/all', '/deal-update', '/security/dns-check', '/security/audit-summary', '/security/run-now', '/newsletter/send-hot', '/newsletter/notify-featured'];
 
 // Audit log — capture every admin action for security visibility.
 // Append-only collection: audit_logs { id, path, method, ip, ua, at }
@@ -446,6 +446,258 @@ function applyFallback(skills) {
   }));
 }
 
+// ---------------------------------------------------------------------------
+// Newsletter growth loop — shared pieces behind the weekly digest, the public
+// /hot and /newsletter/issues endpoints, the README badge, the welcome email
+// and the featured-creator notifications. One definition of "hot" so every
+// surface (email, homepage strip, /hot page, badge) agrees.
+// ---------------------------------------------------------------------------
+const SITE = 'https://workflowstacks.com';
+const RESEND_FROM = 'WorkflowStacks <newsletter@workflowstacks.com>';
+
+// Sources a signup may claim. Whitelisted so the field stays queryable:
+// /subscribers reports a per-source breakdown, which is how we learn which
+// surface actually converts before investing further in it.
+const SUBSCRIBE_SOURCES = [
+  'newsletter', 'template-download', 'skill-page', 'footer', 'blog', 'hot-list', 'home',
+  'exit-intent', 'best-page', 'creator-share', 'cli', 'mcp', 'switch-weekly', 'newsletter-page',
+];
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Tag every email-driven visit so analytics can attribute it to the send.
+function withUtm(url, campaign, content = null) {
+  try {
+    const u = new URL(url);
+    u.searchParams.set('utm_source', 'newsletter');
+    u.searchParams.set('utm_medium', 'email');
+    u.searchParams.set('utm_campaign', campaign);
+    if (content) u.searchParams.set('utm_content', content);
+    return u.toString();
+  } catch { return url; }
+}
+
+function fmtCompact(n) {
+  const v = Number(n) || 0;
+  if (v >= 1e6) return `${(v / 1e6).toFixed(v >= 1e7 ? 0 : 1)}M`;
+  if (v >= 1e3) return `${(v / 1e3).toFixed(v >= 1e4 ? 0 : 1)}k`;
+  return String(v);
+}
+
+function skillPath(s) { return `${SITE}/skills/${s.slug || s.id}`; }
+function skillLabel(s) { return s.title_human || s.name || s.slug || ''; }
+function skillBlurb(s, max = 110) {
+  const b = (s.use_guide && s.use_guide.whatItDoes) || s.description_human || s.description || '';
+  return b.length > max ? b.slice(0, max - 3) + '…' : b;
+}
+
+// Only what the lists render. Keeps /hot, the stored issue and the homepage
+// strip small — stars_history alone is up to 90 entries per skill.
+const WEEKLY_FIELDS = {
+  _id: 0, id: 1, slug: 1, name: 1, title_human: 1, description: 1, description_human: 1,
+  'use_guide.whatItDoes': 1, category: 1, github_stars: 1, github_forks: 1, github_url: 1,
+  creator: 1, velocity_7d: 1, velocity_provisional: 1, added_at: 1, last_updated: 1,
+};
+
+// Hot = most stars gained in the last 7 days (velocity_7d, written by
+// /refresh-stars). Top = most stars overall, minus anything already in Hot.
+// Rising = added in the last 30 days, minus anything above.
+async function getWeeklyLists(database, { category = null, hotLimit = 5, topLimit = 8, risingLimit = 5 } = {}) {
+  const base = { published: { $ne: false }, ...TOOLS_ONLY };
+  if (category) base.category = category;
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const col = database.collection('skills');
+  const q = (filter, sort, limit) => (limit > 0
+    ? col.find(filter, { projection: WEEKLY_FIELDS }).sort(sort).limit(limit).toArray()
+    : Promise.resolve([]));
+  const [hot, top, rising] = await Promise.all([
+    q({ ...base, velocity_7d: { $gt: 0 } }, { velocity_7d: -1, github_stars: -1 }, hotLimit),
+    q(base, { github_stars: -1 }, topLimit + hotLimit),
+    q({ ...base, added_at: { $gte: thirtyDaysAgo } }, { github_stars: -1 }, risingLimit + hotLimit),
+  ]);
+  const used = new Set(hot.map((s) => s.id));
+  const topOut = top.filter((s) => !used.has(s.id)).slice(0, topLimit);
+  topOut.forEach((s) => used.add(s.id));
+  const risingOut = rising.filter((s) => !used.has(s.id)).slice(0, risingLimit);
+  return { hot, top: topOut, rising: risingOut };
+}
+
+function hotShareText(hot) {
+  if (!hot.length) return `The fastest-growing open-source AI skills this week, ranked by GitHub star growth: ${SITE}/hot`;
+  const lines = hot.slice(0, 5).map((s, i) => `${i + 1}. ${skillLabel(s)} (+${s.velocity_7d}★)`);
+  return `🔥 Hottest open-source AI skills this week, ranked by GitHub star growth:\n\n${lines.join('\n')}\n\nFull list + Monday digest: ${SITE}/hot`;
+}
+
+function tweetUrl(text, url = null) {
+  const u = new URL('https://twitter.com/intent/tweet');
+  u.searchParams.set('text', text);
+  if (url) u.searchParams.set('url', url);
+  return u.toString();
+}
+
+async function sendEmail({ to, subject, html }) {
+  if (!process.env.RESEND_API_KEY) return { ok: false, error: 'RESEND_API_KEY not set' };
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
+      body: JSON.stringify({ from: RESEND_FROM, to, subject, html }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!r.ok) return { ok: false, error: `resend ${r.status}` };
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+async function postDiscord(content) {
+  const url = process.env.DISCORD_WEBHOOK_URL;
+  if (!url) return false;
+  try {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content, username: 'WorkflowStacks Hot' }),
+      signal: AbortSignal.timeout(8_000),
+    });
+    return r.ok;
+  } catch { return false; }
+}
+
+// Shared email footer: forward + share (the cheapest referral loop an email
+// has), read online, switch the daily send off, unsubscribe.
+function emailFooter(email, { campaign, shareText, shareUrl, readOnlineUrl = null, downloaded = false }) {
+  const enc = encodeURIComponent(email);
+  const unsubUrl = `${SITE}/unsubscribe?email=${enc}`;
+  const weeklyUrl = `${SITE}/unsubscribe?email=${enc}&mode=weekly`;
+  const sep = shareUrl.includes('?') ? '&' : '?';
+  const fwdUrl = `mailto:?subject=${encodeURIComponent('Worth a look: ' + shareText.split('\n')[0].slice(0, 80))}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl + sep + 'ref=forward')}`;
+  const xUrl = tweetUrl(shareText, `${shareUrl}${sep}ref=share`);
+  const why = downloaded
+    ? 'You’re getting this because you downloaded a WorkflowStacks template.'
+    : 'You’re receiving this because you subscribed to WorkflowStacks.';
+  return `
+    <tr><td style="text-align:center;padding-top:22px;font-size:12px;color:#8a8a8a;line-height:1.7;">
+      <a href="${fwdUrl}" style="color:#C6F24E;text-decoration:none;font-weight:600;">Forward this to a builder friend</a>
+      &nbsp;·&nbsp; <a href="${xUrl}" style="color:#C6F24E;text-decoration:none;font-weight:600;">Share on X</a>
+      ${readOnlineUrl ? `&nbsp;·&nbsp; <a href="${readOnlineUrl}" style="color:#8a8a8a;">Read online</a>` : ''}
+    </td></tr>
+    <tr><td style="text-align:center;padding-top:14px;font-size:12px;color:#555;line-height:1.7;">
+      ${why}<br>
+      ${campaign === 'daily' ? `<a href="${weeklyUrl}" style="color:#555;">Switch to the Monday digest only</a> &nbsp;·&nbsp; ` : ''}<a href="${unsubUrl}" style="color:#555;">Unsubscribe</a>
+    </td></tr>`;
+}
+
+const EMAIL_H2 = 'color:#fff;font-size:16px;margin:28px 0 4px;text-transform:uppercase;letter-spacing:0.5px;';
+const EMAIL_HEAD = '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
+const EMAIL_BODY = 'margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;color:#e5e5e5;';
+
+function hotRowHtml(s, i, campaign) {
+  const badge = `#${i + 1} · +${s.velocity_7d}★ this week${s.velocity_provisional ? ' (early data)' : ''}`;
+  return `
+    <tr><td style="padding:12px 0;border-bottom:1px solid #262626;">
+      <div style="color:#737373;font-size:11px;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">${badge}</div>
+      <a href="${withUtm(skillPath(s), campaign, 'hot')}" style="color:#fff;font-weight:600;text-decoration:none;font-size:15px;">${escapeHtml(skillLabel(s))}</a>
+      <div style="color:#a3a3a3;font-size:13px;margin-top:3px;">${escapeHtml(skillBlurb(s))}</div>
+    </td></tr>`;
+}
+
+function plainRowHtml(s, campaign, content) {
+  return `
+    <tr><td style="padding:8px 0;border-bottom:1px solid #262626;">
+      <a href="${withUtm(skillPath(s), campaign, content)}" style="color:#e5e5e5;font-weight:600;text-decoration:none;font-size:14px;">${escapeHtml(skillLabel(s))}</a>
+      <span style="color:#737373;font-size:12px;"> · ${(s.github_stars || 0).toLocaleString()}★</span>
+      <div style="color:#a3a3a3;font-size:12px;margin-top:2px;">${escapeHtml(skillBlurb(s))}</div>
+    </td></tr>`;
+}
+
+// The weekly Hot / Top / Rising email. Also used (with an intro) as the
+// welcome email, so a new subscriber sees the product within a minute.
+function weeklyEmailHtml({ email, lists, issueUrl, campaign = 'weekly-hot', intro = null }) {
+  const { hot, top, rising } = lists;
+  const hotRows = hot.length
+    ? hot.map((s, i) => hotRowHtml(s, i, campaign)).join('')
+    : `<tr><td style="padding:10px 0;color:#737373;font-size:13px;">Still gathering velocity data — check back next week.</td></tr>`;
+  const topRows = top.map((s) => plainRowHtml(s, campaign, 'top')).join('');
+  const risingRows = rising.map((s) => plainRowHtml(s, campaign, 'rising')).join('');
+  const shareText = hotShareText(hot);
+  return `<!DOCTYPE html><html lang="en"><head>${EMAIL_HEAD}<title>WorkflowStacks Weekly</title></head>
+<body style="${EMAIL_BODY}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <tr><td style="text-align:center;padding-bottom:28px;"><span style="font-size:22px;font-weight:700;color:#fff;">WorkflowStacks Weekly</span></td></tr>
+    <tr><td style="background:#1a1a1a;border-radius:12px;padding:28px;">
+      ${intro ? `<p style="color:#e5e5e5;font-size:15px;line-height:1.6;margin:0 0 22px;">${intro}</p>` : ''}
+      <h1 style="color:#C6F24E;font-size:16px;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.5px;">🔥 Hot this week</h1>
+      <p style="color:#737373;font-size:12px;margin:0 0 14px;">Ranked by GitHub star growth this week, not total stars.</p>
+      <table width="100%" cellpadding="0" cellspacing="0">${hotRows}</table>
+      ${topRows ? `<h2 style="${EMAIL_H2}">⭐ Top overall</h2><table width="100%" cellpadding="0" cellspacing="0">${topRows}</table>` : ''}
+      ${risingRows ? `<h2 style="${EMAIL_H2}">🌱 New &amp; rising</h2><table width="100%" cellpadding="0" cellspacing="0">${risingRows}</table>` : ''}
+      <div style="text-align:center;margin-top:26px;">
+        <a href="${withUtm(`${SITE}/hot`, campaign, 'cta')}" style="display:inline-block;background:#C6F24E;color:#0A0C0D;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;">See the full Hot list</a>
+      </div>
+    </td></tr>
+    ${emailFooter(email, { campaign, shareText, shareUrl: `${SITE}/hot`, readOnlineUrl: issueUrl })}
+  </table>
+</body></html>`;
+}
+
+async function sendWelcomeEmail(database, email) {
+  if (!process.env.RESEND_API_KEY) return false;
+  const lists = await getWeeklyLists(database, { hotLimit: 3, topLimit: 3, risingLimit: 0 });
+  const intro = 'You’re in. Every Monday you’ll get the five open-source AI skills gaining the most GitHub stars, plus the top overall and what’s new. Here’s where things stand right now — forward it to one builder who’d want it.';
+  const html = weeklyEmailHtml({ email, lists, issueUrl: `${SITE}/hot`, campaign: 'welcome', intro });
+  const r = await sendEmail({ to: email, subject: '✅ You’re in — here’s what’s hot right now', html });
+  return r.ok;
+}
+
+// "Your repo is #N this week" — badge markdown for the README plus a
+// ready-to-post line. One-time per feature; nothing else is sent.
+function creatorEmailHtml({ label, rank, velocity, url, badgeMd, share, slug }) {
+  const xUrl = tweetUrl(share);
+  return `<!DOCTYPE html><html lang="en"><head>${EMAIL_HEAD}<title>You’re featured on WorkflowStacks</title></head>
+<body style="${EMAIL_BODY}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <tr><td style="text-align:center;padding-bottom:28px;"><span style="font-size:22px;font-weight:700;color:#fff;">WorkflowStacks</span></td></tr>
+    <tr><td style="background:#1a1a1a;border-radius:12px;padding:28px;">
+      <p style="color:#737373;font-size:12px;text-transform:uppercase;letter-spacing:0.5px;margin:0 0 6px;">Hot this week · #${rank}</p>
+      <h1 style="color:#fff;font-size:22px;margin:0 0 12px;line-height:1.3;">${escapeHtml(label)} is #${rank} on this week’s Hot list</h1>
+      <p style="color:#ccc;font-size:15px;line-height:1.6;margin:0 0 18px;">It gained <strong style="color:#C6F24E;">+${velocity}★</strong> on GitHub this week, which put it at #${rank} across the whole WorkflowStacks catalog, ranked by star growth rather than total stars. Its page: <a href="${url}?utm_source=creator-email&amp;utm_medium=email" style="color:#C6F24E;">${url}</a></p>
+      <p style="color:#e5e5e5;font-size:14px;font-weight:600;margin:18px 0 6px;">Show it off in your README</p>
+      <div style="background:#0f0f0f;border-radius:8px;padding:12px 14px;margin:0 0 8px;"><img src="${SITE}/api/badge/${slug}.svg" alt="Featured on WorkflowStacks" height="20" style="height:20px;"></div>
+      <div style="background:#0f0f0f;border-radius:8px;padding:12px 14px;"><code style="font-family:monospace;font-size:12px;color:#6ee7b7;word-break:break-all;">${escapeHtml(badgeMd)}</code></div>
+      <p style="color:#e5e5e5;font-size:14px;font-weight:600;margin:22px 0 6px;">Or tell your users</p>
+      <div style="background:#0f0f0f;border-radius:8px;padding:12px 14px;color:#ccc;font-size:13px;line-height:1.6;">${escapeHtml(share)}</div>
+      <div style="text-align:center;margin-top:22px;">
+        <a href="${xUrl}" style="display:inline-block;background:#C6F24E;color:#0A0C0D;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;">Post it on X</a>
+      </div>
+      <p style="color:#737373;font-size:12px;line-height:1.6;margin:22px 0 0;">Want to update the listing or claim it? <a href="${SITE}/submit" style="color:#737373;">Claim your listing</a>. This is a one-time note — you won’t hear from us again unless your repo is featured again.</p>
+    </td></tr>
+  </table>
+</body></html>`;
+}
+
+// Flat shields-style badge. Left: brand. Right: this week's rank while it is
+// fresh, otherwise the star count. Creators paste it into their README; every
+// badge is a link from a GitHub repo back to the skill page.
+function badgeSvg(leftText, rightText) {
+  const w = (t) => Math.round(t.length * 6.4) + 12;
+  const lw = w(leftText), rw = w(rightText), tw = lw + rw;
+  const l = escapeHtml(leftText), r = escapeHtml(rightText);
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${tw}" height="20" role="img" aria-label="${l}: ${r}">
+<title>${l}: ${r}</title>
+<linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient>
+<clipPath id="c"><rect width="${tw}" height="20" rx="3" fill="#fff"/></clipPath>
+<g clip-path="url(#c)"><rect width="${lw}" height="20" fill="#0A0C0D"/><rect x="${lw}" width="${rw}" height="20" fill="#C6F24E"/><rect width="${tw}" height="20" fill="url(#s)"/></g>
+<g text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="110" text-rendering="geometricPrecision">
+<text x="${lw * 5}" y="140" transform="scale(.1)" fill="#fff" textLength="${(lw - 10) * 10}">${l}</text>
+<text x="${(lw + rw / 2) * 10}" y="140" transform="scale(.1)" fill="#0A0C0D" textLength="${(rw - 10) * 10}">${r}</text>
+</g></svg>`;
+}
+
+
 export async function GET(request) {
   const { pathname } = new URL(request.url);
   const path = pathname.replace('/api', '') || '/';
@@ -465,6 +717,58 @@ export async function GET(request) {
     if (path === '/' || path === '') {
       return Response.json({ message: 'WorkflowStacks API v1.0' });
     }
+
+    // Public: the three weekly lists behind the digest, the homepage strip,
+    // /hot and the /best/<category> pages. Cached at the edge for 10 minutes.
+    if (path === '/hot') {
+      const { searchParams } = new URL(request.url);
+      const category = (searchParams.get('category') || '').trim().slice(0, 40) || null;
+      const lists = await getWeeklyLists(database, { category, hotLimit: 10, topLimit: 10, risingLimit: 8 });
+      return Response.json(
+        { ...lists, share_text: hotShareText(lists.hot), generated_at: new Date().toISOString() },
+        { headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600' } }
+      );
+    }
+
+    // Public: the weekly-issue archive. Each send of /newsletter/send-hot is
+    // stored with its lists so it renders as a page at /newsletter/<issue>.
+    if (path === '/newsletter/issues') {
+      const docs = await database.collection('newsletter_sends')
+        .find({ type: 'weekly-hot', issue: { $exists: true } }, { projection: { _id: 0, issue: 1, sent_at: 1, subject: 1, hot_count: 1, top_count: 1, rising_count: 1, 'items.hot': 1 } })
+        .sort({ sent_at: -1 }).limit(104).toArray();
+      const issues = docs.map((d) => ({
+        issue: d.issue, sent_at: d.sent_at, subject: d.subject || null,
+        hot_count: d.hot_count || 0, top_count: d.top_count || 0, rising_count: d.rising_count || 0,
+        hot_preview: ((d.items && d.items.hot) || []).slice(0, 3).map((s) => ({ slug: s.slug || s.id, name: skillLabel(s), velocity_7d: s.velocity_7d })),
+      }));
+      return Response.json({ issues }, { headers: { 'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600' } });
+    }
+    if (path.startsWith('/newsletter/issues/')) {
+      const issue = decodeURIComponent(path.slice('/newsletter/issues/'.length)).slice(0, 20);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(issue)) return Response.json({ error: 'Issue not found' }, { status: 404 });
+      const doc = await database.collection('newsletter_sends').findOne({ type: 'weekly-hot', issue }, { projection: { _id: 0 } });
+      if (!doc) return Response.json({ error: 'Issue not found' }, { status: 404 });
+      return Response.json({ issue: doc }, { headers: { 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' } });
+    }
+
+    // Public: "Featured on WorkflowStacks" README badge (SVG). Shows this
+    // week's Hot rank for 8 days after a feature, otherwise the star count.
+    if (path.startsWith('/badge/')) {
+      const key = decodeURIComponent(path.slice('/badge/'.length)).replace(/\.svg$/i, '').slice(0, 120);
+      const skill = key
+        ? await database.collection('skills').findOne({ $or: [{ slug: key }, { id: key }] }, { projection: { github_stars: 1, hot_rank: 1, hot_rank_at: 1 } })
+        : null;
+      let right = 'featured';
+      if (skill) {
+        const fresh = skill.hot_rank && skill.hot_rank_at && (Date.now() - new Date(skill.hot_rank_at).getTime()) < 8 * 24 * 60 * 60 * 1000;
+        if (fresh) right = `#${skill.hot_rank} hot this week`;
+        else if (skill.github_stars > 0) right = `★ ${fmtCompact(skill.github_stars)} · featured`;
+      }
+      return new Response(badgeSvg('WorkflowStacks', right), {
+        headers: { 'Content-Type': 'image/svg+xml; charset=utf-8', 'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400' },
+      });
+    }
+
     
     // Get all skills
     // Smart search — logs query, falls back to GitHub auto-discovery when local
@@ -1818,8 +2122,22 @@ export async function GET(request) {
     }
 
     if (path === '/subscribers') {
-      const subs = await database.collection('subscribers').find({}).sort({ created_at: -1 }).limit(500).toArray()
-      return Response.json({ subscribers: subs, count: subs.length })
+      const col = database.collection('subscribers')
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+      const [subs, total, newLast30d, bySource, byFrequency] = await Promise.all([
+        col.find({}).sort({ created_at: -1 }).limit(500).toArray(),
+        col.countDocuments(),
+        col.countDocuments({ created_at: { $gte: thirtyDaysAgo } }),
+        col.aggregate([{ $group: { _id: { $ifNull: ['$source', 'unknown'] }, count: { $sum: 1 } } }, { $sort: { count: -1 } }]).toArray(),
+        col.aggregate([{ $group: { _id: { $ifNull: ['$frequency', 'all'] }, count: { $sum: 1 } } }]).toArray(),
+      ])
+      // by_source is the measurement the growth work hangs on: which surface
+      // (skill page, footer, blog, /hot, CLI, creator share…) actually converts.
+      return Response.json({
+        subscribers: subs, count: subs.length, total, new_last_30d: newLast30d,
+        by_source: Object.fromEntries(bySource.map((r) => [r._id, r.count])),
+        by_frequency: Object.fromEntries(byFrequency.map((r) => [r._id, r.count])),
+      })
     }
 
     if (path === '/newsletter/preview') {
@@ -1854,7 +2172,8 @@ export async function GET(request) {
     if (path === '/newsletter/send') {
       const denied = requireAdmin(request);
       if (denied) return denied;
-      const subscribers = await database.collection('subscribers').find({}).toArray();
+      // Subscribers who chose the Monday digest only are skipped here.
+      const subscribers = await database.collection('subscribers').find({ frequency: { $ne: 'weekly' } }).toArray();
       if (subscribers.length === 0) {
         return Response.json({ ok: false, message: 'No subscribers yet.' });
       }
@@ -1886,11 +2205,10 @@ export async function GET(request) {
       const installCmd = (skill.use_guide && skill.use_guide.install) ? skill.use_guide.install : null;
       const stars = skill.github_stars || 0;
       const ctaUrl = `https://claude.ai/new?q=${encodeURIComponent('Act as ' + skillName + '. ' + whatItDoes)}`;
-      const guideUrl = `https://workflowstacks.com/skills/${skill.slug || skill.id}`;
+      const guideUrl = withUtm(skillPath(skill), 'daily', 'guide');
 
       let sentCount = 0;
       for (const sub of subscribers) {
-        const unsubUrl = `https://workflowstacks.com/unsubscribe?email=${encodeURIComponent(sub.email)}`;
         const html = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WorkflowStacks</title></head>
@@ -1909,10 +2227,7 @@ export async function GET(request) {
       <br>
       <a href="${guideUrl}" style="display:inline-block;margin-top:8px;font-size:14px;color:#888;text-decoration:underline;">View full guide</a>
     </td></tr>
-    <tr><td style="text-align:center;padding-top:24px;font-size:12px;color:#555;line-height:1.6;">
-      You're receiving this because you subscribed to WorkflowStacks.<br>
-      <a href="${unsubUrl}" style="color:#555;">Unsubscribe</a>
-    </td></tr>
+    ${emailFooter(sub.email, { campaign: 'daily', shareText: `${skillName} — today's top open-source AI skill on WorkflowStacks`, shareUrl: skillPath(skill) })}
   </table>
 </body>
 </html>`;
@@ -1967,18 +2282,17 @@ export async function GET(request) {
 
       const tplRows = templates.map((t) => `
         <tr><td style="padding:10px 0;border-bottom:1px solid #262626;">
-          <a href="https://workflowstacks.com/templates/${t.slug}" style="color:#C6F24E;font-weight:600;text-decoration:none;font-size:15px;">${t.title}</a>
+          <a href="${withUtm('https://workflowstacks.com/templates/' + t.slug, 'digest', 'template')}" style="color:#C6F24E;font-weight:600;text-decoration:none;font-size:15px;">${t.title}</a>
           <div style="color:#a3a3a3;font-size:13px;margin-top:3px;">${t.outcome}</div>
         </td></tr>`).join('');
       const toolRows = freshTools.map((s) => `
         <tr><td style="padding:8px 0;border-bottom:1px solid #262626;">
-          <a href="https://workflowstacks.com/skills/${s.slug || s.id}" style="color:#e5e5e5;font-weight:600;text-decoration:none;font-size:14px;">${s.title_human || s.name}</a>
+          <a href="${withUtm(skillPath(s), 'digest', 'tool')}" style="color:#e5e5e5;font-weight:600;text-decoration:none;font-size:14px;">${s.title_human || s.name}</a>
           <span style="color:#737373;font-size:12px;"> · ${(s.github_stars || 0).toLocaleString()}★</span>
         </td></tr>`).join('');
 
       let sentCount = 0;
       for (const sub of subscribers) {
-        const unsubUrl = `https://workflowstacks.com/unsubscribe?email=${encodeURIComponent(sub.email)}`;
         const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WorkflowStacks</title></head>
 <body style="margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e5e5e5;">
   <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
@@ -1990,13 +2304,10 @@ export async function GET(request) {
       <h2 style="color:#fff;font-size:16px;margin:26px 0 6px;">Fresh tools worth a look</h2>
       <table width="100%" cellpadding="0" cellspacing="0">${toolRows}</table>
       <div style="text-align:center;margin-top:26px;">
-        <a href="https://workflowstacks.com/templates" style="display:inline-block;background:#C6F24E;color:#0A0C0D;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;">Browse all templates</a>
+        <a href="${withUtm('https://workflowstacks.com/templates', 'digest', 'cta')}" style="display:inline-block;background:#C6F24E;color:#0A0C0D;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;">Browse all templates</a>
       </div>
     </td></tr>
-    <tr><td style="text-align:center;padding-top:20px;color:#525252;font-size:12px;">
-      You’re getting this because you downloaded a WorkflowStacks template.<br>
-      <a href="${unsubUrl}" style="color:#737373;">Unsubscribe</a>
-    </td></tr>
+    ${emailFooter(sub.email, { campaign: 'digest', shareText: 'Free, working n8n templates and the fastest-growing open-source AI skills — WorkflowStacks', shareUrl: 'https://workflowstacks.com/templates', downloaded: true })}
   </table>
 </body></html>`;
         try {
@@ -2024,113 +2335,108 @@ export async function GET(request) {
       return Response.json({ ok: true, sent: sentCount, templates: templates.length, tools: freshTools.length });
     }
 
-    // Admin: weekly Hot / Top / New & rising digest, ranked by 7-day star velocity
+    // Admin: weekly Hot / Top / New & rising digest, ranked by 7-day star
+    // velocity. Beyond the send it (1) stores the issue so it renders at
+    // /newsletter/<date>, (2) stamps hot_rank on the featured skills so the
+    // README badge can show it, (3) posts the list to Discord when a webhook
+    // is configured, and (4) returns ready-to-post share text. ?dry=true
+    // previews the lists and subject without sending anything.
     if (path === '/newsletter/send-hot') {
       const denied = requireAdmin(request);
       if (denied) return denied;
-      if (!process.env.RESEND_API_KEY) {
+      const { searchParams } = new URL(request.url);
+      const dry = searchParams.get('dry') === 'true';
+      if (!dry && !process.env.RESEND_API_KEY) {
         return Response.json({ ok: false, error: 'RESEND_API_KEY not set' }, { status: 500 });
       }
+      const lists = await getWeeklyLists(database);
+      const { hot, top, rising } = lists;
+      const issue = new Date().toISOString().slice(0, 10);
+      const issueUrl = `${SITE}/newsletter/${issue}`;
+      const shareText = hotShareText(hot);
+      const subject = hot.length ? `🔥 ${skillLabel(hot[0])} is on fire this week` : '⭐ This week\'s top AI skills on WorkflowStacks';
+      if (dry) {
+        return Response.json({ ok: true, dry: true, issue, subject, share_text: shareText, hot: hot.map(skillLabel), top: top.map(skillLabel), rising: rising.map(skillLabel) });
+      }
+
       const subscribers = await database.collection('subscribers').find({}).toArray();
       if (subscribers.length === 0) return Response.json({ ok: false, message: 'No subscribers yet.' });
 
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-
-      const hot = await database.collection('skills')
-        .find({ published: { $ne: false }, velocity_7d: { $gt: 0 } })
-        .sort({ velocity_7d: -1 }).limit(5).toArray();
-
-      const top = await database.collection('skills')
-        .find({ published: { $ne: false } })
-        .sort({ github_stars: -1 }).limit(8).toArray();
-
-      const rising = await database.collection('skills')
-        .find({ published: { $ne: false }, added_at: { $gte: thirtyDaysAgo } })
-        .sort({ github_stars: -1 }).limit(5).toArray();
-
-      const usedIds = new Set(hot.map(s => s.id));
-      const topFiltered = top.filter(s => !usedIds.has(s.id));
-      topFiltered.forEach(s => usedIds.add(s.id));
-      const risingFiltered = rising.filter(s => !usedIds.has(s.id));
-
-      const buildLine = (s) => {
-        const b = (s.use_guide && s.use_guide.whatItDoes) || s.description_human || s.description || '';
-        return b.length > 110 ? b.slice(0, 107) + '…' : b;
-      };
-      const skillUrl = (s) => `https://workflowstacks.com/skills/${s.slug || s.id}`;
-
-      const rowHot = (s, i) => `
-        <tr><td style="padding:12px 0;border-bottom:1px solid #262626;">
-          <div style="color:#737373;font-size:11px;font-weight:700;letter-spacing:0.5px;margin-bottom:2px;">#${i + 1} · +${s.velocity_7d}★ this week${s.velocity_provisional ? ' (early data)' : ''}</div>
-          <a href="${skillUrl(s)}" style="color:#fff;font-weight:600;text-decoration:none;font-size:15px;">${s.title_human || s.name}</a>
-          <div style="color:#a3a3a3;font-size:13px;margin-top:3px;">${buildLine(s)}</div>
-        </td></tr>`;
-
-      const rowPlain = (s) => `
-        <tr><td style="padding:8px 0;border-bottom:1px solid #262626;">
-          <a href="${skillUrl(s)}" style="color:#e5e5e5;font-weight:600;text-decoration:none;font-size:14px;">${s.title_human || s.name}</a>
-          <span style="color:#737373;font-size:12px;"> · ${(s.github_stars || 0).toLocaleString()}★</span>
-          <div style="color:#a3a3a3;font-size:12px;margin-top:2px;">${buildLine(s)}</div>
-        </td></tr>`;
-
-      const hotRows = hot.length ? hot.map(rowHot).join('') : `<tr><td style="padding:10px 0;color:#737373;font-size:13px;">Still gathering velocity data — check back next week.</td></tr>`;
-      const topRows = topFiltered.map(rowPlain).join('');
-      const risingRows = risingFiltered.length ? risingFiltered.map(rowPlain).join('') : '';
-
-      let sentCount = 0;
+      let sentCount = 0, failed = 0;
       for (const sub of subscribers) {
-        const unsubUrl = `https://workflowstacks.com/unsubscribe?email=${encodeURIComponent(sub.email)}`;
-        const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WorkflowStacks Weekly</title></head>
-<body style="margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e5e5e5;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
-    <tr><td style="text-align:center;padding-bottom:28px;"><span style="font-size:22px;font-weight:700;color:#fff;">WorkflowStacks Weekly</span></td></tr>
-    <tr><td style="background:#1a1a1a;border-radius:12px;padding:28px;">
-      <h1 style="color:#C6F24E;font-size:16px;margin:0 0 4px;text-transform:uppercase;letter-spacing:0.5px;">🔥 Hot this week</h1>
-      <p style="color:#737373;font-size:12px;margin:0 0 14px;">Ranked by star growth, not just total stars.</p>
-      <table width="100%" cellpadding="0" cellspacing="0">${hotRows}</table>
-
-      <h2 style="color:#fff;font-size:16px;margin:28px 0 4px;text-transform:uppercase;letter-spacing:0.5px;">⭐ Top overall</h2>
-      <table width="100%" cellpadding="0" cellspacing="0">${topRows}</table>
-
-      ${risingRows ? `<h2 style="color:#fff;font-size:16px;margin:28px 0 4px;text-transform:uppercase;letter-spacing:0.5px;">🌱 New &amp; rising</h2>
-      <table width="100%" cellpadding="0" cellspacing="0">${risingRows}</table>` : ''}
-
-      <div style="text-align:center;margin-top:26px;">
-        <a href="https://workflowstacks.com" style="display:inline-block;background:#C6F24E;color:#0A0C0D;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;">Browse the full catalog</a>
-      </div>
-    </td></tr>
-    <tr><td style="text-align:center;padding-top:20px;color:#525252;font-size:12px;">
-      You're receiving this because you subscribed to WorkflowStacks.<br>
-      <a href="${unsubUrl}" style="color:#525252;">Unsubscribe</a>
-    </td></tr>
-  </table>
-</body></html>`;
-        try {
-          await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-            body: JSON.stringify({
-              from: 'WorkflowStacks <newsletter@workflowstacks.com>',
-              to: sub.email,
-              subject: hot.length ? `🔥 ${hot[0].title_human || hot[0].name} is on fire this week` : '⭐ This week\'s top AI skills on WorkflowStacks',
-              html,
-            }),
-          });
-          sentCount++;
-        } catch (e) {
-          console.error('Weekly-hot send error for', sub.email, e.message);
-        }
+        const html = weeklyEmailHtml({ email: sub.email, lists, issueUrl });
+        const r = await sendEmail({ to: sub.email, subject, html });
+        if (r.ok) sentCount++;
+        else { failed++; console.error('Weekly-hot send failed for', sub.email, r.error); }
       }
 
-      await database.collection('newsletter_sends').insertOne({
-        type: 'weekly-hot',
-        sent_at: new Date(),
-        recipient_count: sentCount,
-        hot_count: hot.length,
-        top_count: topFiltered.length,
-        rising_count: risingFiltered.length,
-      });
-      return Response.json({ ok: true, sent: sentCount, hot: hot.length, top: topFiltered.length, rising: risingFiltered.length });
+      // This week's rank on the featured skills — the README badge reads it.
+      const now = new Date();
+      await Promise.all(hot.map((s, i) => database.collection('skills').updateOne({ id: s.id }, { $set: { hot_rank: i + 1, hot_rank_at: now } })));
+
+      await database.collection('newsletter_sends').updateOne(
+        { type: 'weekly-hot', issue },
+        { $set: {
+          type: 'weekly-hot', issue, sent_at: now, recipient_count: sentCount, failed_count: failed,
+          hot_count: hot.length, top_count: top.length, rising_count: rising.length,
+          subject, share_text: shareText, items: lists,
+        } },
+        { upsert: true }
+      );
+
+      const discordPosted = await postDiscord(`${shareText}\n${issueUrl}`);
+      return Response.json({ ok: true, issue, issue_url: issueUrl, sent: sentCount, failed, hot: hot.length, top: top.length, rising: rising.length, discord_posted: discordPosted, share_text: shareText });
+    }
+
+    // Admin: tell the creators of this week's Hot skills they were featured —
+    // badge markdown for their README plus a ready-to-post share line.
+    // Creators share rankings about themselves to audiences far larger than
+    // ours, and every share lands on a page with a signup box. Dedupe: one
+    // notice per skill per 30 days, one email per address per run. Emails
+    // come from creator_leads (filled by /find-creators). ?dry=true previews.
+    if (path === '/newsletter/notify-featured') {
+      const denied = requireAdmin(request);
+      if (denied) return denied;
+      const { searchParams } = new URL(request.url);
+      const dry = searchParams.get('dry') === 'true';
+      if (!dry && !process.env.RESEND_API_KEY) {
+        return Response.json({ ok: false, error: 'RESEND_API_KEY not set' }, { status: 500 });
+      }
+      const { hot } = await getWeeklyLists(database);
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const seen = new Set();
+      let notified = 0, skipped = 0;
+      const results = [];
+      for (const [i, s] of hot.entries()) {
+        const rank = i + 1;
+        const label = skillLabel(s);
+        const slug = s.slug || s.id;
+        const recent = await database.collection('featured_notifications').findOne({ skill_id: s.id, sent_at: { $gte: thirtyDaysAgo } });
+        if (recent) { skipped++; results.push({ skill: label, rank, status: 'already-notified' }); continue; }
+        const or = [{ skill_id: s.id }];
+        if (s.creator) or.push({ creator_username: s.creator });
+        const lead = await database.collection('creator_leads').findOne({ $or: or, email: { $nin: [null, ''] } });
+        const to = lead && lead.email;
+        if (!to) { skipped++; results.push({ skill: label, rank, status: 'no-email', creator: s.creator || null }); continue; }
+        if (seen.has(to)) { skipped++; results.push({ skill: label, rank, status: 'duplicate-address' }); continue; }
+        seen.add(to);
+        const url = skillPath(s);
+        const badgeMd = `[![Featured on WorkflowStacks](${SITE}/api/badge/${slug}.svg)](${url}?utm_source=github&utm_medium=badge)`;
+        const share = `${label} is #${rank} on this week's hottest open-source AI skills (+${s.velocity_7d}★ this week) 🔥 ${url}?ref=creator`;
+        const subject = `${label} is #${rank} on WorkflowStacks Hot this week 🔥`;
+        if (dry) { results.push({ skill: label, rank, status: 'would-send', to }); continue; }
+        const html = creatorEmailHtml({ label, rank, velocity: s.velocity_7d, url, badgeMd, share, slug });
+        const r = await sendEmail({ to, subject, html });
+        if (r.ok) {
+          notified++;
+          await database.collection('featured_notifications').insertOne({ skill_id: s.id, slug, rank, email: to, sent_at: new Date() });
+          results.push({ skill: label, rank, status: 'sent' });
+        } else {
+          skipped++;
+          results.push({ skill: label, rank, status: 'send-failed', error: r.error });
+        }
+      }
+      return Response.json({ ok: true, dry, notified, skipped, results });
     }
 
     // Admin: discover creator leads from skills with github_url + creator field
@@ -2695,26 +3001,41 @@ export async function POST(request) {
     // Email subscribe — stores waitlist emails (deduped)
     if (path === '/subscribe') {
       const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
-      const body = await request.json();
+      const body = await request.json().catch(() => ({}));
       const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 })
-      const email = (body.email || '').trim().toLowerCase();
+      const email = (body.email || '').toString().trim().toLowerCase();
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
         return Response.json({ success: false, error: 'Invalid email' }, { status: 400 });
       }
-      // Optional attribution — where the signup came from (e.g. a template
-      // download). Whitelisted + length-capped; never trust raw source strings.
-      const source = ['newsletter', 'template-download'].includes(body.source) ? body.source : 'newsletter';
+      // Attribution — which surface produced the signup (see SUBSCRIBE_SOURCES).
+      // Whitelisted + length-capped; never trust raw source strings.
+      const source = SUBSCRIBE_SOURCES.includes(body.source) ? body.source : 'newsletter';
       const template = (body.template || '').toString().trim().slice(0, 60);
-      await database.collection('subscribers').updateOne(
+      // 'weekly' = Monday digests only; 'all' adds the daily Skill of the Day.
+      // Unset = legacy subscriber, treated as 'all'. An explicit choice always wins.
+      const frequency = ['weekly', 'all'].includes(body.frequency) ? body.frequency : null;
+      // ?ref= on share/forward links — who brought this person in.
+      const ref = (body.ref || '').toString().trim().slice(0, 80);
+      const set = { last_seen_at: new Date() };
+      if (frequency) set.frequency = frequency;
+      const r = await database.collection('subscribers').updateOne(
         { email },
         {
-          $setOnInsert: { email, created_at: new Date(), source },
+          $setOnInsert: { email, created_at: new Date(), source, ...(ref ? { referred_by: ref } : {}) },
           ...(template ? { $addToSet: { templates_downloaded: template } } : {}),
-          $set: { last_seen_at: new Date() },
+          $set: set,
         },
         { upsert: true }
       );
-      return Response.json({ success: true });
+      const created = (r.upsertedCount || 0) > 0;
+      // First signup only: a welcome email carrying the current Hot list, so
+      // the product shows up in the inbox within a minute of subscribing.
+      let welcomed = false;
+      if (created) {
+        try { welcomed = await sendWelcomeEmail(database, email); }
+        catch (e) { console.error('Welcome email failed for', email, e.message); }
+      }
+      return Response.json({ success: true, created, welcomed });
     }
 
     // Email unsubscribe — removes the email from the subscribers collection

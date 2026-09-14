@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import PostCard from '@/components/blog/PostCard'
+import NewsletterSignup from '@/components/NewsletterSignup'
 import { listPublished, TOPICS } from '@/lib/blog/store'
 import { breadcrumbSchema } from '@/lib/schema'
 
@@ -82,13 +83,12 @@ export default async function BlogIndex({ searchParams }) {
           </>
         )}
 
-        <div className="mt-14 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#262B2D] bg-[#101314] p-6">
-          <div>
-            <div className="text-[15px] font-semibold text-text-primary">One useful automation in your inbox, weekly.</div>
-            <div className="mt-1 text-[13px] text-text-muted">The Monday digest: new templates, new articles, no filler.</div>
-          </div>
-          <Link href="/join" className="rounded-lg bg-[#C6F24E] px-5 py-2.5 text-[13.5px] font-semibold text-[#0A0C0D] no-underline hover:bg-[#A6D62E]">Subscribe</Link>
-        </div>
+        <NewsletterSignup
+          source="blog"
+          className="mt-14"
+          headline="One useful automation in your inbox, weekly."
+          sub="The Monday digest: the fastest-growing open-source AI skills, new templates, new articles. No filler."
+        />
       </div>
     </div>
   )

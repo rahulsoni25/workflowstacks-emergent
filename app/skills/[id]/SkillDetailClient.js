@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye, Terminal, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye, Terminal, AlertTriangle, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +12,8 @@ import CodeflowCard from './CodeflowCard'
 import AddToClaude from '@/components/AddToClaude'
 import Disclosure from '@/components/Disclosure'
 import RelatedBundleCard from '@/components/RelatedBundleCard'
+import NewsletterSignup from '@/components/NewsletterSignup'
+import ExitIntentSignup from '@/components/ExitIntentSignup'
 
 function getCategoryColor(cat) {
   const colors = {
@@ -26,6 +28,7 @@ function getCategoryColor(cat) {
 
 export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [], bundle = null }) {
   const [copied, setCopied] = useState(false)
+  const [copiedBadge, setCopiedBadge] = useState(false)
   const [reacted, setReacted] = useState(false)
   const [reactionCount, setReactionCount] = useState(skill.reactions_up || 0)
   const guide = skill.use_guide || null
@@ -44,6 +47,16 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
     setReactionCount(c => c + 1)
     try { localStorage.setItem(`ws_reacted_${skill.id}`, '1') } catch {}
     fetch(`/api/skills/${skill.id}/react`, { method: 'POST' }).catch(() => {})
+  }
+
+  // README badge for creators: a link from their repo back to this page.
+  const badgeMd = `[![Featured on WorkflowStacks](https://workflowstacks.com/api/badge/${skill.slug || skill.id}.svg)](https://workflowstacks.com/skills/${skill.slug || skill.id}?utm_source=github&utm_medium=badge)`
+  const copyBadge = async () => {
+    try {
+      await navigator.clipboard.writeText(badgeMd)
+      setCopiedBadge(true)
+      setTimeout(() => setCopiedBadge(false), 2000)
+    } catch {}
   }
 
   const copyPrompt = async () => {
@@ -105,6 +118,11 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                     <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-text-secondary">
                       <Star className="w-4 h-4 fill-amber-400 text-amber-400" />{skill.github_stars.toLocaleString('en-US')} stars
                     </span>
+                  )}
+                  {skill.velocity_7d > 0 && (
+                    <Link href="/hot" title="GitHub stars gained in the last 7 days — see this week's Hot list" className="flex items-center gap-1.5 text-sm bg-[#C6F24E]/10 border border-[#C6F24E]/30 rounded-full px-3 py-1 text-[#C6F24E] no-underline hover:bg-[#C6F24E]/20">
+                      <TrendingUp className="w-4 h-4" />+{skill.velocity_7d.toLocaleString('en-US')}★ this week{skill.velocity_provisional ? ' (early data)' : ''}
+                    </Link>
                   )}
                   {skill.github_forks > 0 && (
                     <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-text-secondary">
@@ -425,9 +443,24 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                 {skill.created_at && <div className="flex items-start gap-3"><Calendar className="w-5 h-5 text-text-muted mt-0.5" /><div><div className="text-sm text-text-muted">Published</div><div className="text-white font-medium">{new Date(skill.created_at).toLocaleDateString('en-US')}</div></div></div>}
                 <div className="mt-4 p-3 bg-teal-500/5 border border-teal-500/15 rounded-lg">
                   <p className="text-text-muted text-xs">Are you the creator of this tool? <Link href="/submit" className="text-teal-300 hover:text-teal-200">Claim your listing →</Link> and earn 85% of every sale.</p>
+                  <div className="mt-3 border-t border-teal-500/15 pt-3">
+                    <p className="text-text-muted text-xs mb-2">Show it off in your README:</p>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/api/badge/${skill.slug || skill.id}.svg`} alt="Featured on WorkflowStacks" height={20} className="h-5 mb-2" />
+                    <div className="flex items-start gap-2">
+                      <code className="flex-1 min-w-0 break-all rounded bg-slate-950/70 border border-slate-700/60 px-2 py-1.5 text-[10.5px] leading-snug text-emerald-300">{badgeMd}</code>
+                      <button type="button" onClick={copyBadge} aria-label="Copy badge markdown" className="shrink-0 rounded border border-slate-600 px-2 py-1.5 text-[11px] text-text-secondary hover:bg-white/5">{copiedBadge ? 'Copied' : 'Copy'}</button>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
+
+            <NewsletterSignup
+              source="skill-page"
+              headline="Skills like this, every Monday."
+              sub="The five fastest-growing open-source AI skills, ranked by GitHub star growth. One email a week, unsubscribe anytime."
+            />
           </motion.div>
         </div>
 
@@ -454,6 +487,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
           </div>
         )}
       </div>
+      <ExitIntentSignup source="exit-intent" />
     </div>
   )
 }

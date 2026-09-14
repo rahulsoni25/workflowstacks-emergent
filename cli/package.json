@@ -1,6 +1,6 @@
 {
   "name": "workflowstacks",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Install WorkflowStacks skills into Claude Code from the terminal: npx workflowstacks add <slug>",
   "bin": {
     "workflowstacks": "./index.js"

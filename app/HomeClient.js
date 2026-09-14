@@ -19,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { trackInstall } from '@/lib/track-install'
 import { homeFaqs } from '@/lib/home-faqs'
+import NewsletterSignup from '@/components/NewsletterSignup'
 import {
   TARGETS,
   fmt,
@@ -127,7 +128,7 @@ function StatCell({ value, label }) {
 // Page
 // ---------------------------------------------------------------------------
 
-export default function HomeClient({ initialSkills = [], initialStats = null }) {
+export default function HomeClient({ initialSkills = [], initialStats = null, hot = [] }) {
   // ----- flow state -----
   const [step, setStep] = useState(1)
   const [query, setQuery] = useState('')
@@ -831,6 +832,50 @@ export default function HomeClient({ initialSkills = [], initialStats = null }) 
           </div>
         </section>
       )}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* HOT THIS WEEK + MONDAY DIGEST                                       */}
+      {/* ------------------------------------------------------------------ */}
+      <section id="hot" className="border-t border-[#262B2D] px-5 py-[64px] sm:px-10">
+        <div className="mx-auto grid max-w-[1200px] grid-cols-1 gap-10 lg:grid-cols-[3fr_2fr] lg:gap-14">
+          <div>
+            <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3">
+              <h2 className="m-0 text-[28px] font-bold tracking-[-0.03em] sm:text-[32px]">🔥 Hot this week</h2>
+              <Link href="/hot" className="t-mono text-sm text-text-muted hover:text-[#C6F24E]">Full list + archive →</Link>
+            </div>
+            <p className="m-0 mb-5 text-[15px] text-text-secondary">Ranked by GitHub stars gained in the last 7 days, not total stars. Refreshed daily.</p>
+            {hot.length > 0 ? (
+              <ol className="m-0 list-none divide-y divide-[#262B2D] rounded-[14px] border border-[#262B2D] bg-[#101314] p-0">
+                {hot.map((s, i) => (
+                  <li key={skillKey(s)} className="flex items-center gap-4 px-5 py-4">
+                    <span className="t-mono w-6 shrink-0 text-sm text-text-muted">{i + 1}</span>
+                    <div className="min-w-0 flex-1">
+                      <Link href={`/skills/${skillKey(s)}`} className="block truncate text-[16px] font-semibold text-text-primary hover:text-[#C6F24E]">{skillTitle(s)}</Link>
+                      <div className="t-mono mt-0.5 text-xs text-text-muted">{categoryLabel(s.category)} · ★ {fmt(s.github_stars)}</div>
+                    </div>
+                    <span className="t-mono shrink-0 rounded-full border border-[#C6F24E]/30 bg-[#C6F24E]/10 px-2.5 py-1 text-xs text-[#C6F24E]">
+                      +{fmt(s.velocity_7d)}★{s.velocity_provisional ? ' · early' : ''}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="m-0 rounded-[14px] border border-[#262B2D] bg-[#101314] px-5 py-6 text-[14px] text-text-muted">
+                Velocity data is still accumulating — the first ranking appears once a week of star snapshots exists.{' '}
+                <Link href="/discover" className="text-[#C6F24E]">See what’s trending meanwhile →</Link>
+              </p>
+            )}
+          </div>
+          <div className="lg:pt-12">
+            <NewsletterSignup
+              source="home"
+              headline="Get this list every Monday."
+              sub="The five fastest-growing open-source AI skills, the top overall, and what’s new. One email a week, unsubscribe anytime."
+              showDailyOption
+            />
+          </div>
+        </div>
+      </section>
 
       {/* ------------------------------------------------------------------ */}
       {/* HOW IT WORKS (light band)                                           */}

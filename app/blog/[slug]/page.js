@@ -8,6 +8,7 @@ import AssetCard from '@/components/blog/AssetCard'
 import Toc from '@/components/blog/Toc'
 import Prose from '@/components/blog/Prose'
 import PostCard from '@/components/blog/PostCard'
+import NewsletterSignup from '@/components/NewsletterSignup'
 
 export const revalidate = 3600
 // Slugs come from Mongo, not a registry — render on demand.
@@ -125,6 +126,13 @@ export default async function BlogPost({ params }) {
                 </div>
               </div>
             </div>
+
+            <NewsletterSignup
+              source="blog"
+              className="mt-6"
+              headline="Liked this? Get the Monday digest."
+              sub="The five fastest-growing open-source AI skills, ranked by GitHub star growth, plus new templates and articles like this one."
+            />
           </article>
 
           <aside className="hidden lg:block">
