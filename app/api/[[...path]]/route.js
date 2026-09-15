@@ -1586,8 +1586,16 @@ export async function GET(request) {
     if (path === '/refresh-stars') {
       const { searchParams } = new URL(request.url);
       const max = Math.min(120, parseInt(searchParams.get('max') || '60', 10));
+      // ?scope=published narrows the rotation to browsable listings — the ones
+      // the Hot list, the /best pages and the Monday digest rank. velocity_7d
+      // needs a snapshot per repo at least weekly; one 80-repo pass a day over
+      // the whole catalog (2,000+ repos incl. unpublished and resources) cycles
+      // in ~25 days and leaves velocity empty for most skills. The workflow
+      // runs several published passes and one catalog-wide pass per day.
+      const query = { github_url: { $exists: true, $ne: null } };
+      if (searchParams.get('scope') === 'published') Object.assign(query, { published: { $ne: false }, ...TOOLS_ONLY });
       const skills = await database.collection('skills')
-        .find({ github_url: { $exists: true, $ne: null } })
+        .find(query)
         .sort({ stars_refreshed_at: 1 }) // missing field sorts first → never-refreshed go first
         .limit(max)
         .toArray();
