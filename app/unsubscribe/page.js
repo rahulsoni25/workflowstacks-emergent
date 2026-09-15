@@ -7,11 +7,36 @@ import Link from 'next/link'
 export default function UnsubscribePage() {
   const searchParams = useSearchParams()
   const email = searchParams.get('email')
-  const [status, setStatus] = useState('loading') // 'loading' | 'success' | 'error' | 'no-email'
+  const mode = searchParams.get('mode') // 'weekly' switches the daily send off instead of unsubscribing
+  const [status, setStatus] = useState('loading') // 'loading' | 'success' | 'weekly' | 'error' | 'no-email'
+
+  function switchToWeekly() {
+    setStatus('loading')
+    fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, frequency: 'weekly', source: 'switch-weekly' }),
+    })
+      .then((res) => res.json())
+      .then((data) => setStatus(data.success ? 'weekly' : 'error'))
+      .catch(() => setStatus('error'))
+  }
 
   useEffect(() => {
     if (!email) {
       setStatus('no-email')
+      return
+    }
+
+    if (mode === 'weekly') {
+      fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, frequency: 'weekly', source: 'switch-weekly' }),
+      })
+        .then((res) => res.json())
+        .then((data) => setStatus(data.success ? 'weekly' : 'error'))
+        .catch(() => setStatus('error'))
       return
     }
 
@@ -26,7 +51,7 @@ export default function UnsubscribePage() {
         else setStatus('error')
       })
       .catch(() => setStatus('error'))
-  }, [email])
+  }, [email, mode])
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
@@ -60,6 +85,29 @@ export default function UnsubscribePage() {
               <h1 className="text-white text-xl font-semibold mb-3">You've been unsubscribed</h1>
               <p className="text-text-muted text-sm leading-relaxed">
                 You've been unsubscribed from WorkflowStacks emails. You can resubscribe anytime on the homepage.
+              </p>
+              <button
+                type="button"
+                onClick={switchToWeekly}
+                className="mt-5 rounded-md border border-[#262B2D] px-4 py-2 text-sm text-text-secondary hover:border-[#C6F24E]/50 hover:text-white"
+              >
+                Too much email? Get the Monday digest only instead
+              </button>
+            </>
+          )}
+
+          {status === 'weekly' && (
+            <>
+              <div className="flex justify-center mb-5">
+                <div className="w-12 h-12 rounded-full bg-teal-400/10 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </div>
+              <h1 className="text-white text-xl font-semibold mb-3">Monday digest only</h1>
+              <p className="text-text-muted text-sm leading-relaxed">
+                Done. You'll get the weekly Hot / Top / Rising list and nothing daily. Change your mind anytime from the footer of any email.
               </p>
             </>
           )}

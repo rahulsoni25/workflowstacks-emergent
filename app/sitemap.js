@@ -1,4 +1,5 @@
 import { TEMPLATES } from '../lib/templates'
+import { TYPE_CATEGORIES, FOR_CATEGORIES } from '../lib/skill-display'
 import { BUNDLES } from '../lib/bundles'
 import { OUTCOMES } from '../lib/outcomes'
 import { MCP_SERVERS } from '../lib/mcp-servers'
@@ -98,6 +99,10 @@ const STATIC_ROUTES = [
   '/commands',
   ...Object.keys(SLASH_COMMANDS).map((slug) => `/commands/${slug}`),
   '/blog',
+  // Growth surfaces: the public Hot list, the digest archive, and one
+  // "best of" roundup per catalog category (each links 20+ skill pages).
+  '/hot', '/newsletter', '/best',
+  ...[...TYPE_CATEGORIES, ...FOR_CATEGORIES].map(([slug]) => `/best/${slug}`),
   '/learn', '/learn/how-it-works', '/learn/agents', '/learn/skills',
   '/learn/mcp', '/learn/creators', '/learn/security', '/learn/resources',
   '/about', '/docs', '/help', '/enterprise', '/founder-launch', '/pricing',
@@ -111,7 +116,8 @@ const STATIC_ROUTES = [
 // derivative skill pages a higher priority than hand-built templates.
 function priorityFor(path) {
   if (path === '') return 1
-  if (path.startsWith('/templates') || path.startsWith('/automate') || path === '/blog') return 0.9
+  if (path.startsWith('/templates') || path.startsWith('/automate') || path === '/blog' || path === '/hot') return 0.9
+  if (path.startsWith('/best') || path === '/newsletter') return 0.8
   if (path.startsWith('/tools') || path.startsWith('/bundles') || path.startsWith('/mcp') || path.startsWith('/kits') || path.startsWith('/commands')) return 0.8
   if (path === '/skills' || path === '/pricing' || path.startsWith('/learn')) return 0.7
   return 0.5
@@ -124,7 +130,7 @@ export default async function sitemap() {
   const staticEntries = STATIC_ROUTES.map((path) => ({
     url: `${BASE}${path}`,
     lastModified: now,
-    changeFrequency: path === '' || path === '/skills' ? 'daily' : path === '/submit' ? 'monthly' : 'weekly',
+    changeFrequency: path === '' || path === '/skills' || path === '/hot' ? 'daily' : path === '/submit' ? 'monthly' : 'weekly',
     priority: priorityFor(path),
   }))
 
@@ -223,5 +229,23 @@ export default async function sitemap() {
     console.error('[sitemap] catalog page entries unavailable:', e?.message || e)
   }
 
-  return [...staticEntries, ...blogEntries, ...collectionEntries, ...pageEntries, ...skillEntries]
+  // Archived Monday issues (/newsletter/<date>). Each one is a dated page of
+  // ranked skills — they rank for the skill names they carry.
+  let issueEntries = []
+  try {
+    const res = await fetch(`${BASE}/api/newsletter/issues`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
+    if (res.ok) {
+      const issues = (await res.json()).issues || []
+      issueEntries = issues.map((it) => ({
+        url: `${BASE}/newsletter/${it.issue}`,
+        lastModified: it.sent_at ? new Date(it.sent_at) : now,
+        changeFrequency: 'monthly',
+        priority: 0.6,
+      }))
+    }
+  } catch (e) {
+    console.error('[sitemap] newsletter issue entries unavailable:', e?.message || e)
+  }
+
+  return [...staticEntries, ...blogEntries, ...collectionEntries, ...issueEntries, ...pageEntries, ...skillEntries]
 }

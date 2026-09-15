@@ -75,7 +75,7 @@ export default async function HomePage() {
   // `category` that might have caught them files all three as `ai-agent`.
   // Ask for a wider slice, then pick on topical relevance and our own rewrite
   // quality. Still one request. See lib/skill-relevance.js.
-  const [skillsData, statsData] = await Promise.all([getJson('/api/skills?sort=trending&limit=60'), getJson('/api/stats')])
+  const [skillsData, statsData, hotData] = await Promise.all([getJson('/api/skills?sort=trending&limit=60'), getJson('/api/stats'), getJson('/api/hot')])
   const featured = (skillsData?.skills || [])
     .filter((s) => s.slug && !s.dead_repo && isAiRelevant(s, { strict: true }))
     .sort((a, b) => qualityRank(b) - qualityRank(a))
@@ -90,10 +90,17 @@ export default async function HomePage() {
     publishedSkills: statsData?.publishedSkills || statsData?.totalSkills || 0,
   }
 
+  // This week's five fastest-growing skills (GitHub stars gained in 7 days,
+  // from /refresh-stars snapshots). The public preview of the Monday digest.
+  const hot = (hotData?.hot || []).slice(0, 5).map((s) => ({
+    id: s.id, slug: s.slug, name: s.name, title_human: s.title_human, category: s.category,
+    github_stars: s.github_stars, velocity_7d: s.velocity_7d, velocity_provisional: !!s.velocity_provisional,
+  }))
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <HomeClient initialSkills={featured} initialStats={stats} />
+      <HomeClient initialSkills={featured} initialStats={stats} hot={hot} />
     </>
   )
 }

@@ -114,6 +114,30 @@ jobs:
             "$BASE_URL/api/refresh-stars?max=80" | tee /tmp/stars.json
           echo
 
+      - name: Weekly Hot / Top / Rising digest + creator notices (Mondays only)
+        # Runs AFTER refresh-stars so Monday's ranking uses this morning's star
+        # snapshot. send-hot stores the issue for /newsletter/<date>, stamps
+        # hot_rank for the README badge and posts to Discord (when configured);
+        # notify-featured emails the creators of the five Hot skills.
+        if: github.event_name == 'schedule'
+        run: |
+          if [ "$(date -u +%u)" = "1" ]; then
+            curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/newsletter/send-hot" | tee /tmp/hot.json
+            echo
+            curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/newsletter/notify-featured" | tee /tmp/featured.json
+            echo
+          else
+            echo "Not Monday — skipping weekly Hot digest."
+          fi
+
+      - name: Syndicate new Journal posts (Dev.to / Hashnode, when keys are set)
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/blog/syndicate?limit=2" | tee /tmp/syndicate.json
+          echo
+
       - name: Summary
         run: |
           echo "### Content refresh complete" >> $GITHUB_STEP_SUMMARY
@@ -123,4 +147,8 @@ jobs:
           cat /tmp/dedupe.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
           echo '' >> $GITHUB_STEP_SUMMARY
           cat /tmp/stars.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+          echo '' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/hot.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+          echo '' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/featured.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
           echo '```' >> $GITHUB_STEP_SUMMARY

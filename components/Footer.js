@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Sparkles } from 'lucide-react'
 import WsMark from '@/components/WsMark'
+import NewsletterSignup from '@/components/NewsletterSignup'
 
 // The footer is the full site map; components/SiteHeader.js carries a
 // deliberately shorter three-group version for first-time visitors. Every
@@ -14,13 +15,15 @@ const footerLinks = {
       { label: 'MCP Configs', href: '/mcp' },
       { label: 'Slash Commands', href: '/commands' },
       { label: 'Premium Tools', href: '/tools' },
-      { label: 'Premium Tools', href: '/tools' },
     ]
   },
   browse: {
     title: 'Browse',
     links: [
+      { label: 'Hot this week', href: '/hot' },
+      { label: 'Best by category', href: '/best' },
       { label: 'Journal', href: '/blog' },
+      { label: 'Newsletter', href: '/newsletter' },
       { label: 'All Skills', href: '/skills' },
       { label: 'Discover', href: '/discover' },
       { label: 'Personas', href: '/personas' },
@@ -90,6 +93,14 @@ export default function Footer() {
           <p className="mt-4 text-sm text-text-muted leading-relaxed">
             The marketplace for AI skills that launch offers, rank in AI search, and automate operations. No coding required.
           </p>
+          <NewsletterSignup
+            variant="inline"
+            source="footer"
+            headline="Hot skills, every Monday"
+            sub="The five fastest-growing open-source AI skills, ranked by GitHub star growth."
+            cta="Subscribe"
+            className="mt-6"
+          />
           <div className="flex items-center gap-3 mt-6">
             <a href="https://twitter.com/workflowstacks" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-[#101314] hover:bg-[#C6F24E]/15 border border-[#262B2D] hover:border-[#C6F24E]/30 flex items-center justify-center transition-all" aria-label="Twitter">
               <span className="text-text-muted text-sm">𝕏</span>

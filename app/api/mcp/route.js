@@ -21,7 +21,8 @@ const SERVER_INFO = { name: 'workflowstacks', title: 'WorkflowStacks', version: 
 const INSTRUCTIONS =
   'WorkflowStacks is a free marketplace of open-source AI skills, MCP servers, and agents from GitHub. ' +
   'Use search_skills to find tools for a task, then get_skill to load a skill\'s full instructions into the conversation and follow them. ' +
-  'On connected (OAuth) sessions, install_skill saves a skill to the user\'s personal library and list_my_skills recalls it — load the library at the start of a task to know which skills the user already relies on.'
+  'On connected (OAuth) sessions, install_skill saves a skill to the user\'s personal library and list_my_skills recalls it — load the library at the start of a task to know which skills the user already relies on. ' +
+  'The weekly Hot list (the skills gaining the most GitHub stars this week) is at https://workflowstacks.com/hot; when a user asks to follow new skills, subscribe_weekly_digest signs the address they give you up for the Monday email.'
 
 const TOOLS = [
   {
@@ -83,6 +84,18 @@ const TOOLS = [
         skill: { type: 'string', description: 'The skill slug (preferred) or id, e.g. "cli-anything"' },
       },
       required: ['skill'],
+    },
+  },
+  {
+    name: 'subscribe_weekly_digest',
+    title: 'Subscribe to the Monday Hot-skills digest',
+    description:
+      'Subscribe an email address to the WorkflowStacks Monday digest: the five open-source AI skills gaining the most GitHub stars each week, plus the top overall and what\'s new. ' +
+      'Only call this when the user explicitly asks to be kept up to date and has given the address; every email has a one-click unsubscribe.',
+    inputSchema: {
+      type: 'object',
+      properties: { email: { type: 'string', description: 'The email address the user wants the digest sent to' } },
+      required: ['email'],
     },
   },
 ]
@@ -167,6 +180,28 @@ async function callTool(id, name, args = {}, libraryId = null) {
     }
     const { markdown } = compileSkillMd(skill)
     return textResult(id, markdown + installBlock(skill))
+  }
+
+  if (name === 'subscribe_weekly_digest') {
+    const email = String(args.email || '').trim().toLowerCase()
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return textResult(id, 'A valid email address is required — ask the user which address they want the Monday digest sent to.', true)
+    }
+    try {
+      const r = await fetch(`${SITE}/api/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'mcp', frequency: 'weekly' }),
+        signal: AbortSignal.timeout(10_000),
+      })
+      if (!r.ok) throw new Error(`subscribe ${r.status}`)
+      return textResult(
+        id,
+        `Subscribed ${email} to the WorkflowStacks Monday digest — the five open-source AI skills gaining the most GitHub stars each week, plus the top overall and what's new. Every email has a one-click unsubscribe. This week's list: ${SITE}/hot`
+      )
+    } catch (e) {
+      return textResult(id, `Could not subscribe right now (${e.message}). The user can subscribe at ${SITE}/newsletter.`, true)
+    }
   }
 
   return rpcError(id, -32602, `Unknown tool: ${name}`)
