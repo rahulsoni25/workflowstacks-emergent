@@ -79,7 +79,7 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
+          <Link href="/"><Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
           <Link href="/partner"><Button variant="outline" className="border-teal-500/30 text-teal-300 hover:bg-teal-500/10"><Megaphone className="w-4 h-4 mr-2" />List your deal</Button></Link>
         </div>
       </header>
@@ -92,7 +92,7 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
             <span className="text-emerald-300 text-sm font-medium">Up to {stats.maxOff || 70}% off the AI tools founders use</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">Tool Deals for Founders</h1>
-          <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+          <p className="text-lg text-text-muted max-w-2xl mx-auto">
             Pool with other founders for <strong className="text-teal-300">wholesale rates</strong>, or grab an exclusive discount. Real savings on tools you already pay for.
           </p>
         </div>
@@ -114,7 +114,7 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
               <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-5 text-center">
                 <Icon className="w-5 h-5 text-teal-400 mx-auto mb-1" />
                 <div className="text-2xl font-bold text-white">{s.v}</div>
-                <div className="text-slate-400 text-xs">{s.l}</div>
+                <div className="text-text-muted text-xs">{s.l}</div>
               </div>
             )
           })}
@@ -131,24 +131,24 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
             ].map((s) => (
               <div key={s.n} className="flex gap-3">
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 text-white font-bold text-sm flex items-center justify-center shrink-0">{s.n}</div>
-                <div><div className="text-white font-medium text-sm">{s.t}</div><div className="text-slate-400 text-sm">{s.d}</div></div>
+                <div><div className="text-white font-medium text-sm">{s.t}</div><div className="text-text-muted text-sm">{s.d}</div></div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Honest disclosure: how deals work + affiliate transparency */}
-        <div className="flex items-start gap-2 text-xs text-slate-500 bg-slate-900/40 border border-slate-700/40 rounded-lg p-3 mb-6">
-          <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0 text-slate-400" />
+        <div className="flex items-start gap-2 text-xs text-text-muted bg-slate-900/40 border border-slate-700/40 rounded-lg p-3 mb-6">
+          <ShieldCheck className="w-4 h-4 mt-0.5 flex-shrink-0 text-text-muted" />
           <p>
-            <span className="text-slate-400 font-medium">How these deals work:</span> Group-buy seats pool founders together for wholesale rates and are 100% refundable if a deal doesn&apos;t reach its target. Some discount links are partner/affiliate links — we may earn a commission at no extra cost to you. We never inflate prices or run fake scarcity.
+            <span className="text-text-muted font-medium">How these deals work:</span> Group-buy seats pool founders together for wholesale rates and are 100% refundable if a deal doesn&apos;t reach its target. Some discount links are partner/affiliate links — we may earn a commission at no extra cost to you. We never inflate prices or run fake scarcity.
           </p>
         </div>
 
         {/* Controls */}
         <div className="flex flex-col md:flex-row gap-3 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search tools…" className="pl-10 bg-slate-900/60 border-slate-700 text-white" />
           </div>
           <select value={sort} onChange={(e) => setSort(e.target.value)} className="bg-slate-900/60 border border-slate-700 rounded-md px-3 text-sm text-white outline-none">
@@ -157,13 +157,13 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
         </div>
         <div className="flex flex-wrap gap-2 mb-8">
           {CATS.map((c) => (
-            <button key={c} onClick={() => setCat(c)} className={`px-3 py-1.5 rounded-full text-sm border transition-all ${cat === c ? 'bg-teal-500 text-white border-teal-500' : 'bg-slate-900/60 text-slate-300 border-slate-700 hover:border-teal-500/40'}`}>{c}</button>
+            <button key={c} onClick={() => setCat(c)} className={`px-3 py-1.5 rounded-full text-sm border transition-all ${cat === c ? 'bg-teal-500 text-white border-teal-500' : 'bg-slate-900/60 text-text-secondary border-slate-700 hover:border-teal-500/40'}`}>{c}</button>
           ))}
         </div>
 
         {/* Deals */}
         {shown.length === 0 ? (
-          <p className="text-center text-slate-400 py-16">No deals match — try another filter, or request a tool below.</p>
+          <p className="text-center text-text-muted py-16">No deals match — try another filter, or request a tool below.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {shown.map((d) => {
@@ -181,13 +181,13 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
                           {d.featured && <Badge className="bg-amber-500/15 text-amber-300 border-amber-500/30 border text-xs"><Sparkles className="w-3 h-3 mr-1" />Featured</Badge>}
                         </div>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge className="bg-slate-800 text-slate-300 border-slate-700 text-xs"><Tag className="w-3 h-3 mr-1" />{d.category}</Badge>
-                          <Badge className="bg-slate-800 text-slate-400 border-slate-700 text-xs">{affiliate ? '🔗 Discount' : '🤝 Group-buy'}</Badge>
+                          <Badge className="bg-slate-800 text-text-secondary border-slate-700 text-xs"><Tag className="w-3 h-3 mr-1" />{d.category}</Badge>
+                          <Badge className="bg-slate-800 text-text-muted border-slate-700 text-xs">{affiliate ? '🔗 Discount' : '🤝 Group-buy'}</Badge>
                         </div>
                       </div>
                       {d.savingsPct > 0 && <Badge className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30 border text-base px-2.5 shrink-0">−{d.savingsPct}%</Badge>}
                     </div>
-                    {d.blurb && <p className="text-slate-400 text-sm mt-3">{d.blurb}</p>}
+                    {d.blurb && <p className="text-text-muted text-sm mt-3">{d.blurb}</p>}
                   </CardHeader>
                   <CardContent>
                     {affiliate ? (
@@ -195,17 +195,17 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
                         <a href={d.link || '#'} target="_blank" rel="noopener noreferrer" className="block">
                           <Button className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white">Get this deal →</Button>
                         </a>
-                        {d.code && <p className="text-center text-sm text-slate-400 mt-2">Use code <span className="text-teal-300 font-mono bg-slate-800/60 px-2 py-0.5 rounded">{d.code}</span> at checkout</p>}
-                        <p className="text-center text-xs text-slate-500 mt-2">Exclusive for WorkflowStacks founders · via partner link</p>
+                        {d.code && <p className="text-center text-sm text-text-muted mt-2">Use code <span className="text-teal-300 font-mono bg-slate-800/60 px-2 py-0.5 rounded">{d.code}</span> at checkout</p>}
+                        <p className="text-center text-xs text-text-muted mt-2">Exclusive for WorkflowStacks founders · via partner link</p>
                       </>
                     ) : (
                       <>
                         <div className="flex items-baseline gap-2 mb-1">
                           <span className="text-3xl font-bold text-white">${d.groupPrice}</span>
-                          <span className="text-slate-500 line-through text-sm">${d.retailPrice}/yr</span>
+                          <span className="text-text-muted line-through text-sm">${d.retailPrice}/yr</span>
                           {savePerYr > 0 && <span className="text-emerald-400 text-sm ml-auto">save ${savePerYr}/yr</span>}
                         </div>
-                        <div className="mb-1 flex items-center justify-between text-xs text-slate-400 mt-3">
+                        <div className="mb-1 flex items-center justify-between text-xs text-text-muted mt-3">
                           <span className="flex items-center gap-1"><Users className="w-3 h-3" />{(d.slotsTaken || 0) === 0 ? `Be the first — ${d.slotsTotal} seats` : `${d.slotsTaken}/${d.slotsTotal} joined`}</span>
                           <span className={pct >= 80 ? 'text-amber-400' : ''}>{pct >= 80 ? <><Clock className="w-3 h-3 inline mr-0.5" />almost there!</> : (pct > 0 ? `${pct}%` : 'open')}</span>
                         </div>
@@ -222,10 +222,10 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
                         ) : (
                           <div className="space-y-2">
                             <Button onClick={() => lockSeat(d.id)} disabled={locking === d.id} className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white">{locking === d.id ? 'Opening checkout…' : `Lock your seat — $${d.groupPrice}`}</Button>
-                            <button onClick={() => setOpenId(d.id)} className="w-full text-center text-slate-400 text-xs hover:text-slate-300">or reserve free (pay later)</button>
+                            <button onClick={() => setOpenId(d.id)} className="w-full text-center text-text-muted text-xs hover:text-text-secondary">or reserve free (pay later)</button>
                           </div>
                         )}
-                        <p className="text-center text-[11px] text-slate-500 mt-2 flex items-center justify-center gap-1"><ShieldCheck className="w-3 h-3" />Fully refunded if the deal doesn't reach its target</p>
+                        <p className="text-center text-[11px] text-text-muted mt-2 flex items-center justify-center gap-1"><ShieldCheck className="w-3 h-3" />Fully refunded if the deal doesn't reach its target</p>
                       </>
                     )}
                   </CardContent>
@@ -239,7 +239,7 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
         <div className="mt-16 border-t border-slate-700/50 pt-12">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-white mb-2">Want a deal on a tool we don't have?</h2>
-            <p className="text-slate-400 text-sm">Request it — the most-wanted tools are the ones we negotiate next. (Claude, Perplexity, Higgsfield…)</p>
+            <p className="text-text-muted text-sm">Request it — the most-wanted tools are the ones we negotiate next. (Claude, Perplexity, Higgsfield…)</p>
           </div>
           <div className="max-w-md mx-auto flex gap-2 mb-6">
             <Input value={reqTool} onChange={(e) => setReqTool(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && requestTool(reqTool)} placeholder="e.g. Claude, Perplexity, Higgsfield…" className="bg-slate-800/50 border-slate-700 text-white" />
@@ -248,7 +248,7 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
           {requests.length > 0 && (
             <div className="max-w-2xl mx-auto flex flex-wrap gap-2 justify-center">
               {requests.map((r) => (
-                <button key={r.id} onClick={() => requestTool(r.tool)} disabled={reqVoted[r.tool.toLowerCase()]} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition-all ${reqVoted[r.tool.toLowerCase()] ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-slate-900/60 border-slate-700 text-slate-300 hover:border-teal-500/40'}`}>
+                <button key={r.id} onClick={() => requestTool(r.tool)} disabled={reqVoted[r.tool.toLowerCase()]} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition-all ${reqVoted[r.tool.toLowerCase()] ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-slate-900/60 border-slate-700 text-text-secondary hover:border-teal-500/40'}`}>
                   {r.tool} <span className="text-xs bg-slate-800 rounded-full px-1.5">{r.votes}</span>
                 </button>
               ))}

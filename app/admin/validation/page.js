@@ -41,12 +41,12 @@ export default function ValidationDashboard() {
     <div className="min-h-screen bg-neptune text-white">
       <div className="container mx-auto px-4 py-12 max-w-3xl">
         <h1 className="text-3xl font-bold mb-2">Validation dashboard</h1>
-        <p className="text-slate-400 mb-8">The funnel in real numbers. The score rises with a real “it worked”, downloads that happen on their own, and a first sale.</p>
+        <p className="text-text-muted mb-8">The funnel in real numbers. The score rises with a real “it worked”, downloads that happen on their own, and a first sale.</p>
 
         {!data ? (
           <Card className="bg-[#101314] border-[#262B2D] max-w-md">
             <CardContent className="py-6">
-              <label className="flex items-center gap-2 text-sm text-slate-300 mb-2"><Lock className="w-4 h-4" />Admin secret</label>
+              <label className="flex items-center gap-2 text-sm text-text-secondary mb-2"><Lock className="w-4 h-4" />Admin secret</label>
               <div className="flex gap-2">
                 <Input type="password" value={secret} onChange={(e) => setSecret(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && load()}
                   placeholder="ADMIN_SECRET" className="bg-slate-950/60 border-slate-700 text-white" />
@@ -67,28 +67,28 @@ export default function ValidationDashboard() {
                 <Card key={r.label} className={`bg-[#101314] border ${r.key ? 'border-[#C6F24E]/30' : 'border-[#262B2D]'} ${r.sub ? 'opacity-70' : ''}`}>
                   <CardContent className="py-4">
                     <div className={`text-2xl font-bold ${r.good && r.value > 0 ? 'text-[#C6F24E]' : 'text-white'}`}>{r.value ?? 0}</div>
-                    <div className="text-xs text-slate-400 mt-0.5">{r.label}</div>
+                    <div className="text-xs text-text-muted mt-0.5">{r.label}</div>
                   </CardContent>
                 </Card>
               ))}
             </div>
 
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">Fake-door demand (unbuilt tools)</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted mb-3">Fake-door demand (unbuilt tools)</h2>
             <div className="space-y-1 mb-10">
-              {(data.fake_door_interest || []).length === 0 && <p className="text-slate-500 text-sm">No signups yet.</p>}
+              {(data.fake_door_interest || []).length === 0 && <p className="text-text-muted text-sm">No signups yet.</p>}
               {(data.fake_door_interest || []).map((t) => (
                 <div key={t.tool} className="flex justify-between text-sm border-b border-[#262B2D] py-2">
-                  <span className="text-slate-300">{t.tool}</span><span className="text-[#C6F24E] font-semibold">{t.signups} votes</span>
+                  <span className="text-text-secondary">{t.tool}</span><span className="text-[#C6F24E] font-semibold">{t.signups} votes</span>
                 </div>
               ))}
             </div>
 
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">Downloads by template</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted mb-3">Downloads by template</h2>
             <div className="space-y-1">
-              {(data.per_template_downloads || []).length === 0 && <p className="text-slate-500 text-sm">No downloads yet — the net is set; go get the first users.</p>}
+              {(data.per_template_downloads || []).length === 0 && <p className="text-text-muted text-sm">No downloads yet — the net is set; go get the first users.</p>}
               {(data.per_template_downloads || []).map((t) => (
                 <div key={t.slug} className="flex justify-between text-sm border-b border-[#262B2D] py-2">
-                  <span className="text-slate-300">{t.slug}</span><span className="text-slate-400">{t.count}</span>
+                  <span className="text-text-secondary">{t.slug}</span><span className="text-text-muted">{t.count}</span>
                 </div>
               ))}
             </div>

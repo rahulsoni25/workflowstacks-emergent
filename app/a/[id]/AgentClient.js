@@ -81,24 +81,24 @@ export default function AgentClient({ agent, skills }) {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/community">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Community
             </Button>
           </Link>
-          <Button onClick={share} variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+          <Button onClick={share} variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
             {shared ? <><CheckCircle2 className="w-4 h-4 mr-2 text-teal-400" />Link copied</> : <><Share2 className="w-4 h-4 mr-2" />Share</>}
           </Button>
         </div>
       </header>
 
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="flex items-center gap-2 text-slate-400 text-sm mb-4">
+        <div className="flex items-center gap-2 text-text-muted text-sm mb-4">
           <User className="w-4 h-4" />by <span className="text-teal-300 font-medium">@{agent.creatorName || 'anonymous'}</span>
-          <span className="text-slate-600">•</span>
+          <span className="text-text-muted">•</span>
           <Repeat className="w-4 h-4" />{copies} remixes
         </div>
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">{agent.name}</h1>
-        {agent.goal && <p className="text-xl text-slate-300 mb-6">{agent.goal}</p>}
+        {agent.goal && <p className="text-xl text-text-secondary mb-6">{agent.goal}</p>}
 
         <div className="flex flex-wrap gap-3 mb-8">
           {locked ? (
@@ -110,7 +110,7 @@ export default function AgentClient({ agent, skills }) {
               <Button onClick={openInClaude} className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
                 <Sparkles className="w-4 h-4 mr-2" />Open in Claude<ExternalLink className="w-3.5 h-3.5 ml-2 opacity-80" />
               </Button>
-              <Button onClick={copyBlueprint} variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5" size="lg">
+              <Button onClick={copyBlueprint} variant="outline" className="border-slate-600 text-text-secondary hover:bg-white/5" size="lg">
                 {copied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-teal-400" />Copied</> : <><Copy className="w-4 h-4 mr-2" />Copy blueprint</>}
               </Button>
               <a href={`/api/agents/${agent.id}/claude-skill?format=zip`} download>
@@ -144,9 +144,9 @@ export default function AgentClient({ agent, skills }) {
                   <div className="bg-slate-800/40 border border-slate-700/50 rounded-lg p-3 hover:border-teal-500/40 transition-all">
                     <div className="flex items-center justify-between">
                       <span className="text-white text-sm font-medium line-clamp-1">{s.title_human || s.name}</span>
-                      {s.github_stars > 0 && <span className="flex items-center gap-1 text-xs text-slate-400 shrink-0"><Star className="w-3 h-3 fill-amber-400 text-amber-400" />{s.github_stars.toLocaleString()}</span>}
+                      {s.github_stars > 0 && <span className="flex items-center gap-1 text-xs text-text-muted shrink-0"><Star className="w-3 h-3 fill-amber-400 text-amber-400" />{s.github_stars.toLocaleString()}</span>}
                     </div>
-                    <Badge className="bg-slate-700/50 text-slate-300 border-slate-600 text-xs mt-1">{s.category}</Badge>
+                    <Badge className="bg-slate-700/50 text-text-secondary border-slate-600 text-xs mt-1">{s.category}</Badge>
                   </div>
                 </Link>
               ))}
@@ -161,20 +161,20 @@ export default function AgentClient({ agent, skills }) {
               {locked ? (
                 <div className="relative">
                   <div className="bg-slate-950/60 rounded-lg p-4 border border-slate-800 max-h-48 overflow-hidden">
-                    <pre className="text-slate-400 whitespace-pre-wrap font-mono text-xs blur-sm select-none">{(agent.agentBlueprint || '').slice(0, 600)}</pre>
+                    <pre className="text-text-muted whitespace-pre-wrap font-mono text-xs blur-sm select-none">{(agent.agentBlueprint || '').slice(0, 600)}</pre>
                   </div>
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent rounded-lg">
                     <p className="text-white font-semibold mb-3">🔒 Buy to unlock the full blueprint</p>
                     <Button onClick={buy} disabled={buying} className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">{buying ? 'Opening…' : `Buy for $${agent.price}`}</Button>
-                    <p className="text-slate-500 text-xs mt-2">or remix the skills for free</p>
+                    <p className="text-text-muted text-xs mt-2">or remix the skills for free</p>
                   </div>
                 </div>
               ) : (
                 <>
                   <div className="bg-slate-950/60 rounded-lg p-4 border border-slate-800 max-h-96 overflow-auto">
-                    <pre className="text-slate-300 whitespace-pre-wrap font-mono text-xs">{agent.agentBlueprint}</pre>
+                    <pre className="text-text-secondary whitespace-pre-wrap font-mono text-xs">{agent.agentBlueprint}</pre>
                   </div>
-                  <p className="text-slate-500 text-sm mt-3">{purchased ? '✅ Purchased — ' : ''}Paste into Claude, ChatGPT, or Gemini — or hit Remix to customize it in the Builder.</p>
+                  <p className="text-text-muted text-sm mt-3">{purchased ? '✅ Purchased — ' : ''}Paste into Claude, ChatGPT, or Gemini — or hit Remix to customize it in the Builder.</p>
                 </>
               )}
             </CardContent>

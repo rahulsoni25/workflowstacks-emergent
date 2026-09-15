@@ -20,17 +20,54 @@ export const dynamicParams = true
 export function generateStaticParams() { return [] }
 
 // Sibling skills in the same category, for the "Related skills" cross-link module.
+// Related = 3 most-starred in the category + 3 "neighbours" picked from the
+// category's recently-updated list by a stable hash of this skill's id. The
+// old version linked every page in a category to the same six popular skills,
+// so 227 of 400 crawled pages had a single inbound link (weekly SEO report,
+// crawl.weak_inbound). Rotating the second half spreads inbound links across
+// the catalog; the hash keeps each page's links stable between rebuilds so
+// crawlers see a consistent graph.
+function stableHash(str) {
+  let h = 2166136261
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) }
+  return h >>> 0
+}
 async function getRelated(skill) {
-  try {
-    const res = await fetch(`${BASE}/api/skills?category=${encodeURIComponent(skill.category)}&sort=popular&limit=7`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return []
-    const data = await res.json()
-    return (data.skills || [])
-      .filter((s) => s.id !== skill.id)
-      .slice(0, 6)
-  } catch {
-    return []
+  const cat = encodeURIComponent(skill.category || '')
+  const get = async (qs) => {
+    try {
+      const res = await fetch(`${BASE}/api/skills?${qs}`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
+      if (!res.ok) return []
+      const data = await res.json()
+      return data.skills || []
+    } catch {
+      return []
+    }
   }
+  const [popular, recent] = await Promise.all([
+    get(`category=${cat}&sort=popular&limit=6`),
+    get(`category=${cat}&sort=updated&limit=60`),
+  ])
+  const picked = []
+  const seen = new Set([skill.id])
+  for (const s of popular) {
+    if (picked.length >= 3) break
+    if (!seen.has(s.id)) { seen.add(s.id); picked.push(s) }
+  }
+  const pool = recent.filter((s) => !seen.has(s.id))
+  if (pool.length) {
+    const start = stableHash(String(skill.id || skill.slug || '')) % pool.length
+    for (let i = 0; i < pool.length && picked.length < 6; i++) {
+      const s = pool[(start + i) % pool.length]
+      if (!seen.has(s.id)) { seen.add(s.id); picked.push(s) }
+    }
+  }
+  // Category too small for neighbours: top up from the popular list.
+  for (const s of popular) {
+    if (picked.length >= 6) break
+    if (!seen.has(s.id)) { seen.add(s.id); picked.push(s) }
+  }
+  return picked
 }
 
 async function getSkill(id) {

@@ -61,7 +61,7 @@ export default function TemplatePage({ params }) {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
@@ -73,9 +73,9 @@ export default function TemplatePage({ params }) {
           Free working template · {tpl.deliverable_type === 'n8n' ? 'n8n workflow' : tpl.deliverable_type}
         </p>
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center leading-tight">{tpl.title}</h1>
-        <p className="text-lg text-slate-300 text-center mb-8 max-w-xl mx-auto">{tpl.outcome}</p>
+        <p className="text-lg text-text-secondary text-center mb-8 max-w-xl mx-auto">{tpl.outcome}</p>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 mb-10 text-sm text-slate-400">
+        <div className="flex flex-wrap items-center justify-center gap-4 mb-10 text-sm text-text-muted">
           <span className="flex items-center gap-1.5"><Clock className="w-4 h-4 text-teal-400" />~{tpl.setup_minutes} min setup</span>
           <span className="flex items-center gap-1.5"><FileJson className="w-4 h-4 text-teal-400" />Import &amp; run — not a prompt</span>
           <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-teal-400" />Free, you own it</span>
@@ -92,7 +92,7 @@ export default function TemplatePage({ params }) {
             <h2 className="text-white font-bold mb-4">What you need</h2>
             <ul className="space-y-2.5">
               {tpl.requires.map((r) => (
-                <li key={r} className="flex items-start gap-2.5 text-sm text-slate-300">
+                <li key={r} className="flex items-start gap-2.5 text-sm text-text-secondary">
                   <Check className="w-4 h-4 text-[#C6F24E] flex-shrink-0 mt-0.5" />{r}
                 </li>
               ))}
@@ -108,7 +108,7 @@ export default function TemplatePage({ params }) {
                 <span className="text-[#C6F24E] font-bold text-lg leading-none mt-0.5">{String(i + 1).padStart(2, '0')}</span>
                 <div>
                   <h3 className="text-white font-semibold text-sm mb-1">{s.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{s.desc}</p>
+                  <p className="text-text-muted text-sm leading-relaxed">{s.desc}</p>
                 </div>
               </CardContent>
             </Card>
@@ -118,7 +118,7 @@ export default function TemplatePage({ params }) {
         {kit && (
           <div className="mb-12">
             <h2 className="text-white font-bold text-xl mb-4">Finish editing it with</h2>
-            <Link href={`/kits/${kit.slug}`} className="inline-flex items-center gap-2 text-sm text-slate-300 bg-slate-900/60 border border-slate-700/50 hover:border-[#C6F24E]/40 rounded-full px-4 py-2 transition-colors">
+            <Link href={`/kits/${kit.slug}`} className="inline-flex items-center gap-2 text-sm text-text-secondary bg-slate-900/60 border border-slate-700/50 hover:border-[#C6F24E]/40 rounded-full px-4 py-2 transition-colors">
               <span className="w-1.5 h-1.5 rounded-full bg-[#C6F24E]" />{kit.title}
             </Link>
           </div>
@@ -129,7 +129,7 @@ export default function TemplatePage({ params }) {
             <h2 className="text-white font-bold text-xl mb-4">Use this to…</h2>
             <div className="flex flex-wrap gap-2">
               {relatedOutcomes.map((o) => (
-                <Link key={o.slug} href={`/automate/${o.slug}`} className="text-sm text-slate-300 bg-slate-900/60 border border-slate-700/50 hover:border-[#C6F24E]/40 rounded-full px-4 py-2 transition-colors">
+                <Link key={o.slug} href={`/automate/${o.slug}`} className="text-sm text-text-secondary bg-slate-900/60 border border-slate-700/50 hover:border-[#C6F24E]/40 rounded-full px-4 py-2 transition-colors">
                   {o.h1}
                 </Link>
               ))}
@@ -143,7 +143,7 @@ export default function TemplatePage({ params }) {
               <Wrench className="w-5 h-5 text-[#C6F24E] mt-0.5" />
               <div>
                 <h2 className="text-white font-semibold text-sm mb-1">Rather not set it up yourself?</h2>
-                <p className="text-slate-400 text-sm">We'll build this — customized to your store and running in your tools — within 7 days.</p>
+                <p className="text-text-muted text-sm">We'll build this — customized to your store and running in your tools — within 7 days.</p>
               </div>
             </div>
             <Link href={`/build-for-me?goal=${encodeURIComponent(tpl.outcome)}`}>

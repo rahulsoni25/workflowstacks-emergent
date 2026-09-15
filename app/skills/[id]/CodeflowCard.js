@@ -33,7 +33,7 @@ function dirUrl(cf, path) {
 
 function Signal({ ok, label, warn }) {
   const Icon = ok ? CheckCircle2 : warn ? AlertTriangle : XCircle
-  const tone = ok ? 'text-emerald-300 border-emerald-500/20 bg-emerald-500/5' : warn ? 'text-amber-300 border-amber-500/20 bg-amber-500/5' : 'text-slate-500 border-slate-700/50 bg-slate-800/30'
+  const tone = ok ? 'text-emerald-300 border-emerald-500/20 bg-emerald-500/5' : warn ? 'text-amber-300 border-amber-500/20 bg-amber-500/5' : 'text-text-muted border-slate-700/50 bg-slate-800/30'
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs rounded-full border px-2.5 py-1 ${tone}`}>
       <Icon className="w-3.5 h-3.5" />{label}
@@ -68,9 +68,9 @@ export default function CodeflowCard({ codeflow: cf, name }) {
           <Badge className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 border text-xs">Free to inspect</Badge>
         </div>
         {summary ? (
-          <p className="text-slate-200 text-sm mt-2 leading-relaxed">{summary}</p>
+          <p className="text-text-secondary text-sm mt-2 leading-relaxed">{summary}</p>
         ) : (
-          <p className="text-slate-400 text-sm mt-1">How big the code is, how hard it is to run, and where to start reading — read from the real repository.</p>
+          <p className="text-text-muted text-sm mt-1">How big the code is, how hard it is to run, and where to start reading — read from the real repository.</p>
         )}
       </CardHeader>
       <CardContent className="space-y-6">
@@ -93,16 +93,16 @@ export default function CodeflowCard({ codeflow: cf, name }) {
             <div className="text-sm mt-1 opacity-90">{cf.setup?.note}</div>
           </div>
           <div className="rounded-lg p-4 border border-slate-700/50 bg-slate-800/40">
-            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-slate-400 mb-1"><Layers className="w-3.5 h-3.5" />Runs on</div>
+            <div className="flex items-center gap-1.5 text-[11px] uppercase tracking-wider text-text-muted mb-1"><Layers className="w-3.5 h-3.5" />Runs on</div>
             {isDocs && !/skill|plugin|prompt|no code/i.test(cf.setup?.label || '') ? (
               <>
                 <div className="text-lg font-semibold text-white leading-tight">Nowhere — you read it</div>
-                <div className="text-sm mt-1 text-slate-300">A reading resource, not a program.</div>
+                <div className="text-sm mt-1 text-text-secondary">A reading resource, not a program.</div>
               </>
             ) : cf.setup?.level === 'no-code' ? (
               <>
                 <div className="text-lg font-semibold text-white leading-tight">Inside your AI tool</div>
-                <div className="text-sm mt-1 text-slate-300">
+                <div className="text-sm mt-1 text-text-secondary">
                   {cf.runtime?.length ? `Helper scripts use ${cf.runtime.join(' · ')}` : 'Nothing to install on your machine'}
                   {cf.signals?.env_example ? ' · needs API keys' : ''}
                 </div>
@@ -110,7 +110,7 @@ export default function CodeflowCard({ codeflow: cf, name }) {
             ) : (
               <>
                 <div className="text-lg font-semibold text-white leading-tight">{cf.runtime?.length ? cf.runtime.join(' · ') : cf.languages?.[0]?.name || 'See README'}</div>
-                <div className="text-sm mt-1 text-slate-300">{cf.signals?.env_example ? 'Needs API keys (.env)' : 'No API keys detected'}</div>
+                <div className="text-sm mt-1 text-text-secondary">{cf.signals?.env_example ? 'Needs API keys (.env)' : 'No API keys detected'}</div>
               </>
             )}
           </div>
@@ -126,8 +126,8 @@ export default function CodeflowCard({ codeflow: cf, name }) {
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
               {cf.languages.map((l, i) => (
-                <span key={l.name} className="flex items-center gap-1.5 text-xs text-slate-300">
-                  <span className={`inline-block w-2 h-2 rounded-full ${LANG_COLORS[i % LANG_COLORS.length]}`} />{l.name} <span className="text-slate-500">{l.pct}%</span>
+                <span key={l.name} className="flex items-center gap-1.5 text-xs text-text-secondary">
+                  <span className={`inline-block w-2 h-2 rounded-full ${LANG_COLORS[i % LANG_COLORS.length]}`} />{l.name} <span className="text-text-muted">{l.pct}%</span>
                 </span>
               ))}
             </div>
@@ -138,11 +138,11 @@ export default function CodeflowCard({ codeflow: cf, name }) {
         {flow?.steps?.length >= 3 && (
           <div className="rounded-lg border border-teal-500/20 bg-teal-500/5 p-4">
             <div className="flex items-center gap-2 text-teal-300 font-semibold mb-1"><Play className="w-4 h-4" />What happens, step by step</div>
-            {flow.summary && <p className="text-slate-200 text-sm mb-4">{flow.summary}</p>}
+            {flow.summary && <p className="text-text-secondary text-sm mb-4">{flow.summary}</p>}
             <div className="flex flex-col md:flex-row md:items-stretch gap-2">
               {flow.input && (
                 <div className="flex-shrink-0 rounded-md border border-slate-600 bg-slate-800/60 px-3 py-2 text-xs md:max-w-[140px]">
-                  <div className="text-slate-500 uppercase tracking-wider text-[10px] mb-0.5">You give</div>
+                  <div className="text-text-muted uppercase tracking-wider text-[10px] mb-0.5">You give</div>
                   <div className="text-white font-medium">{flow.input}</div>
                 </div>
               )}
@@ -154,7 +154,7 @@ export default function CodeflowCard({ codeflow: cf, name }) {
                       <span className="w-4 h-4 rounded-full bg-teal-500/20 text-teal-300 text-[10px] flex items-center justify-center font-semibold flex-shrink-0">{i + 1}</span>
                       <span className="text-white text-sm font-medium truncate">{s.title}</span>
                     </div>
-                    <div className="text-slate-300 text-xs leading-snug">{s.detail}</div>
+                    <div className="text-text-secondary text-xs leading-snug">{s.detail}</div>
                     {s.file && (
                       <a href={fileUrl(cf, s.file)} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-[11px] font-mono text-teal-400/80 hover:text-teal-300 truncate max-w-full">
                         <FileText className="w-3 h-3 flex-shrink-0" /><span className="truncate">{s.file}</span>
@@ -186,7 +186,7 @@ export default function CodeflowCard({ codeflow: cf, name }) {
                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-500/15 text-teal-300 text-sm flex items-center justify-center font-semibold">{i + 1}</span>
                   <div className="min-w-0">
                     <a href={fileUrl(cf, r.path)} target="_blank" rel="noopener noreferrer" className="font-mono text-sm text-teal-300 hover:text-teal-200 break-all">{r.path}</a>
-                    <div className="text-slate-400 text-sm">{r.why}</div>
+                    <div className="text-text-muted text-sm">{r.why}</div>
                   </div>
                 </li>
               ))}
@@ -203,8 +203,8 @@ export default function CodeflowCard({ codeflow: cf, name }) {
                 <div key={f.path} className="flex items-center gap-3 px-3 py-2 text-sm">
                   <Folder className="w-4 h-4 text-amber-400 flex-shrink-0" />
                   <a href={dirUrl(cf, f.path)} target="_blank" rel="noopener noreferrer" className="font-mono text-amber-200 hover:text-amber-100 max-w-[45%] md:w-48 truncate flex-shrink-0">{f.path}/</a>
-                  <span className="text-slate-300 flex-1 truncate">{f.purpose || 'Folder'}</span>
-                  <span className="text-slate-500 text-xs flex-shrink-0">{f.files} files</span>
+                  <span className="text-text-secondary flex-1 truncate">{f.purpose || 'Folder'}</span>
+                  <span className="text-text-muted text-xs flex-shrink-0">{f.files} files</span>
                 </div>
               ))}
             </div>
@@ -229,21 +229,21 @@ export default function CodeflowCard({ codeflow: cf, name }) {
 
         {/* Under the hood — for developers, collapsed */}
         <div className="rounded-lg border border-slate-800">
-          <button type="button" onClick={() => setOpen((o) => !o)} className="w-full flex items-center justify-between px-4 py-3 text-sm text-slate-300 hover:text-white">
+          <button type="button" onClick={() => setOpen((o) => !o)} className="w-full flex items-center justify-between px-4 py-3 text-sm text-text-secondary hover:text-white">
             <span className="flex items-center gap-2"><Github className="w-4 h-4" />Under the hood (for developers)</span>
             {open ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           {open && (
             <div className="px-4 pb-4 space-y-4 text-sm">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50"><div className="text-xl font-bold text-white">{cf.size.files}</div><div className="text-xs text-slate-400">files</div></div>
-                <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50"><div className="text-xl font-bold text-white">{cf.size.dirs}</div><div className="text-xs text-slate-400">folders</div></div>
-                <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50"><div className="text-xl font-bold text-white">{cf.size.code_files}</div><div className="text-xs text-slate-400">code · {cf.size.doc_files} docs · {cf.size.config_files} config</div></div>
-                <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50"><div className="text-xl font-bold text-white">{cf.repo?.size_kb >= 1024 ? (cf.repo.size_kb / 1024).toFixed(1) + 'M' : (cf.repo?.size_kb || 0) + 'K'}</div><div className="text-xs text-slate-400">repo size</div></div>
+                <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50"><div className="text-xl font-bold text-white">{cf.size.files}</div><div className="text-xs text-text-muted">files</div></div>
+                <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50"><div className="text-xl font-bold text-white">{cf.size.dirs}</div><div className="text-xs text-text-muted">folders</div></div>
+                <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50"><div className="text-xl font-bold text-white">{cf.size.code_files}</div><div className="text-xs text-text-muted">code · {cf.size.doc_files} docs · {cf.size.config_files} config</div></div>
+                <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50"><div className="text-xl font-bold text-white">{cf.repo?.size_kb >= 1024 ? (cf.repo.size_kb / 1024).toFixed(1) + 'M' : (cf.repo?.size_kb || 0) + 'K'}</div><div className="text-xs text-text-muted">repo size</div></div>
               </div>
               {cf.entry_points?.length > 0 && (
                 <div>
-                  <div className="text-slate-400 mb-1.5">Entry points</div>
+                  <div className="text-text-muted mb-1.5">Entry points</div>
                   <div className="flex flex-wrap gap-2">
                     {cf.entry_points.map((p) => (
                       <a key={p} href={fileUrl(cf, p)} target="_blank" rel="noopener noreferrer"><Badge className="bg-teal-500/10 text-teal-300 border-teal-500/20 border text-xs font-mono"><Play className="w-3 h-3 mr-1" />{p}</Badge></a>
@@ -253,36 +253,36 @@ export default function CodeflowCard({ codeflow: cf, name }) {
               )}
               {cf.config_files?.length > 0 && (
                 <div>
-                  <div className="text-slate-400 mb-1.5">Config & manifests</div>
+                  <div className="text-text-muted mb-1.5">Config & manifests</div>
                   <div className="flex flex-wrap gap-2">
                     {cf.config_files.map((p) => (
-                      <a key={p} href={fileUrl(cf, p)} target="_blank" rel="noopener noreferrer"><Badge variant="outline" className="border-slate-600 text-slate-300 text-xs font-mono"><FileText className="w-3 h-3 mr-1" />{p}</Badge></a>
+                      <a key={p} href={fileUrl(cf, p)} target="_blank" rel="noopener noreferrer"><Badge variant="outline" className="border-slate-600 text-text-secondary text-xs font-mono"><FileText className="w-3 h-3 mr-1" />{p}</Badge></a>
                     ))}
                   </div>
                 </div>
               )}
               {cf.root_files?.length > 0 && (
                 <div>
-                  <div className="text-slate-400 mb-1.5">Top level</div>
+                  <div className="text-text-muted mb-1.5">Top level</div>
                   <div className="bg-slate-950/60 rounded-lg p-3 border border-slate-800 max-h-56 overflow-auto font-mono text-xs">
                     {cf.folders.map((f) => (
                       <div key={'d-' + f.path} className="flex items-center gap-2 text-amber-300 py-0.5"><Folder className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />{f.path}/</div>
                     ))}
                     {cf.root_files.map((f) => (
-                      <div key={'f-' + f} className="flex items-center gap-2 text-slate-300 py-0.5"><FileText className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />{f}</div>
+                      <div key={'f-' + f} className="flex items-center gap-2 text-text-secondary py-0.5"><FileText className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />{f}</div>
                     ))}
                   </div>
                 </div>
               )}
               {cf.truncated && <p className="text-xs text-amber-300/80">Very large repository — GitHub returned a partial file list, so counts are lower bounds.</p>}
-              <p className="text-xs text-slate-500">Line counts are estimates from file sizes ({cf.size.loc_human} lines of code). Computed {cf.computed_at ? new Date(cf.computed_at).toLocaleDateString('en-US') : 'recently'} from the default branch.</p>
+              <p className="text-xs text-text-muted">Line counts are estimates from file sizes ({cf.size.loc_human} lines of code). Computed {cf.computed_at ? new Date(cf.computed_at).toLocaleDateString('en-US') : 'recently'} from the default branch.</p>
             </div>
           )}
         </div>
 
         {cf.repo?.html_url && (
           <a href={cf.repo.html_url} target="_blank" rel="noopener noreferrer" className="block">
-            <Button variant="outline" className="w-full border-slate-600 text-slate-200 hover:bg-white/5">
+            <Button variant="outline" className="w-full border-slate-600 text-text-secondary hover:bg-white/5">
               <Github className="w-4 h-4 mr-2" />Read the full source on GitHub
             </Button>
           </a>

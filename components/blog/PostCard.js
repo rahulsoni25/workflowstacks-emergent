@@ -14,17 +14,17 @@ export default function PostCard({ post, featured = false }) {
       href={`/blog/${post.slug}`}
       className={`group flex flex-col rounded-xl border border-[#262B2D] bg-[#101314] no-underline transition-colors hover:border-[#3a4144] ${featured ? 'p-7' : 'p-5'}`}
     >
-      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-[#6E7772]">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-text-muted">
         <span className="text-[#C6F24E]">{TOPICS[post.topic] || post.topic}</span>
         {post.persona && <span>· {PERSONAS[post.persona] || post.persona}</span>}
       </div>
-      <h3 className={`mt-2 font-semibold leading-snug text-[#ECEFEA] group-hover:text-[#C6F24E] ${featured ? 'text-2xl' : 'text-[17px]'}`}>
+      <h3 className={`mt-2 font-semibold leading-snug text-text-primary group-hover:text-[#C6F24E] ${featured ? 'text-2xl' : 'text-[17px]'}`}>
         {post.title}
       </h3>
-      <p className={`mt-2 text-[#A3ABA6] ${featured ? 'text-[15px]' : 'text-[13.5px]'} leading-relaxed`}>
+      <p className={`mt-2 text-text-muted ${featured ? 'text-[15px]' : 'text-[13.5px]'} leading-relaxed`}>
         {post.excerpt || post.answer}
       </p>
-      <div className="mt-auto pt-4 text-[12px] text-[#6E7772]">
+      <div className="mt-auto pt-4 text-[12px] text-text-muted">
         {fmtDate(post.published_at)}{post.reading_min ? ` · ${post.reading_min} min read` : ''}
       </div>
     </Link>

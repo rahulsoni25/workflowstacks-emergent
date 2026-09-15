@@ -26,7 +26,7 @@ export default function UnlockPage({ params, searchParams }) {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
@@ -39,7 +39,7 @@ export default function UnlockPage({ params, searchParams }) {
           <span className="text-xs tracking-widest uppercase font-semibold">Your download</span>
         </div>
         <h1 className="text-3xl font-bold text-white mb-2">{bundle.title}</h1>
-        <p className="text-slate-400 mb-8">Download your workflow{bundle.files.length > 1 ? 's' : ''} below, then import into n8n (⋮ → Import from File). Setup steps are inside each one.</p>
+        <p className="text-text-muted mb-8">Download your workflow{bundle.files.length > 1 ? 's' : ''} below, then import into n8n (⋮ → Import from File). Setup steps are inside each one.</p>
 
         {!token ? (
           <Card className="bg-amber-500/5 border-amber-500/30">
@@ -64,7 +64,7 @@ export default function UnlockPage({ params, searchParams }) {
           </div>
         )}
 
-        <p className="text-xs text-slate-600 mt-8 text-center">Keep this link private — it's tied to your purchase. Lost it? Reply to your purchase email.</p>
+        <p className="text-xs text-text-muted mt-8 text-center">Keep this link private — it's tied to your purchase. Lost it? Reply to your purchase email.</p>
       </div>
     </div>
   )

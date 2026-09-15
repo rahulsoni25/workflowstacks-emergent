@@ -14,7 +14,7 @@ export default function AboutPage() {
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
+          <Link href="/"><Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
         </div>
       </header>
       <div className="container mx-auto px-4 py-16 max-w-4xl">
@@ -23,21 +23,21 @@ export default function AboutPage() {
             <Sparkles className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">About WorkflowStacks</h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">Making AI accessible to every team, regardless of technical skill.</p>
+          <p className="text-xl text-text-secondary max-w-2xl mx-auto">Making AI accessible to every team, regardless of technical skill.</p>
         </div>
 
         <div className="space-y-8">
           <Card className="bg-slate-900/60 border-slate-700/50">
             <CardContent className="py-6">
               <h2 className="text-2xl font-bold text-white mb-3">Our Mission</h2>
-              <p className="text-slate-300 leading-relaxed">We believe every founder, marketer, and business operator should be able to harness the power of AI without writing a single line of code. WorkflowStacks bridges the gap between powerful AI tools and the people who need them most.</p>
+              <p className="text-text-secondary leading-relaxed">We believe every founder, marketer, and business operator should be able to harness the power of AI without writing a single line of code. WorkflowStacks bridges the gap between powerful AI tools and the people who need them most.</p>
             </CardContent>
           </Card>
 
           <Card className="bg-slate-900/60 border-slate-700/50">
             <CardContent className="py-6">
               <h2 className="text-2xl font-bold text-white mb-3">What We Do</h2>
-              <p className="text-slate-300 leading-relaxed mb-4">WorkflowStacks is an AI skills marketplace that automatically discovers the best AI tools from GitHub, enriches them with benefit-driven descriptions, and packages them into ready-to-use agent blueprints.</p>
+              <p className="text-text-secondary leading-relaxed mb-4">WorkflowStacks is an AI skills marketplace that automatically discovers the best AI tools from GitHub, enriches them with benefit-driven descriptions, and packages them into ready-to-use agent blueprints.</p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {[
                   { n: '500+', label: 'AI skills indexed' },
@@ -46,7 +46,7 @@ export default function AboutPage() {
                 ].map((stat, i) => (
                   <div key={i} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 text-center">
                     <div className="text-2xl font-bold text-teal-400">{stat.n}</div>
-                    <div className="text-slate-400 text-sm">{stat.label}</div>
+                    <div className="text-text-muted text-sm">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -63,7 +63,7 @@ export default function AboutPage() {
                   'Transparency â€” Open-source skills, clear pricing, no hidden fees',
                   'Community â€” Built by creators, for creators',
                 ].map((v, i) => (
-                  <li key={i} className="flex items-start gap-2 text-slate-300">
+                  <li key={i} className="flex items-start gap-2 text-text-secondary">
                     <span className="text-teal-400">•</span>{v}
                   </li>
                 ))}

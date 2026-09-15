@@ -22,12 +22,12 @@ export default function LearnSkillsPage() {
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
-          <Link href="/"><Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
+          <Link href="/"><Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
         </div>
       </header>
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center">What Are AI Skills?</h1>
-        <p className="text-xl text-slate-300 text-center mb-16 max-w-2xl mx-auto">AI skills are pre-built capabilities that give AI models new powers. Think of them as apps for your AI.</p>
+        <p className="text-xl text-text-secondary text-center mb-16 max-w-2xl mx-auto">AI skills are pre-built capabilities that give AI models new powers. Think of them as apps for your AI.</p>
         <div className="space-y-6">
           {skillTypes.map((s, i) => (
             <Card key={i} className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
@@ -35,7 +35,7 @@ export default function LearnSkillsPage() {
                 <div className="text-4xl">{s.emoji}</div>
                 <div>
                   <h2 className="text-xl font-bold text-white mb-2">{s.name}</h2>
-                  <p className="text-slate-300 leading-relaxed">{s.desc}</p>
+                  <p className="text-text-secondary leading-relaxed">{s.desc}</p>
                 </div>
               </CardContent>
             </Card>

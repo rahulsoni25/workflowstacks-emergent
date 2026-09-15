@@ -41,7 +41,7 @@ export default async function LearningResourcesPage() {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/learn">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Learn
             </Button>
           </Link>
@@ -53,16 +53,16 @@ export default async function LearningResourcesPage() {
           <BookOpen className="w-8 h-8 text-teal-400" />
           <h1 className="text-4xl md:text-5xl font-bold text-white text-center">Learning Resources</h1>
         </div>
-        <p className="text-xl text-slate-300 text-center mb-4 max-w-2xl mx-auto">
+        <p className="text-xl text-text-secondary text-center mb-4 max-w-2xl mx-auto">
           The most-starred guides, curated lists, and courses on GitHub — for leveling up, not for wiring into an agent.
         </p>
-        <p className="text-sm text-slate-500 text-center mb-12 max-w-2xl mx-auto">
+        <p className="text-sm text-text-muted text-center mb-12 max-w-2xl mx-auto">
           Looking for tools you can actually deploy? Those live in the{' '}
           <Link href="/skills" className="text-teal-400 hover:text-teal-300 underline underline-offset-2">skills library</Link>.
         </p>
 
         {resources.length === 0 ? (
-          <p className="text-slate-400 text-center py-12">
+          <p className="text-text-muted text-center py-12">
             The shelf is being restocked — check back shortly.
           </p>
         ) : (
@@ -74,10 +74,10 @@ export default async function LearningResourcesPage() {
                     <h2 className="text-lg font-bold text-white mb-1 group-hover:text-teal-300 transition-colors">
                       {r.title_human || r.name}
                     </h2>
-                    <p className="text-slate-400 text-sm leading-relaxed mb-3 line-clamp-2">
+                    <p className="text-text-muted text-sm leading-relaxed mb-3 line-clamp-2">
                       {r.description_human || r.description}
                     </p>
-                    <div className="flex items-center gap-4 text-xs text-slate-500">
+                    <div className="flex items-center gap-4 text-xs text-text-muted">
                       <span className="flex items-center gap-1">
                         <Star className="w-3.5 h-3.5 text-amber-400/70" />{fmt(r.github_stars)}
                       </span>

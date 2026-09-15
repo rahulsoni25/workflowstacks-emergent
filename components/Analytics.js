@@ -9,7 +9,7 @@
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Script from 'next/script'
-import { captureUtm, trackEvent } from '@/lib/analytics'
+import { captureUtm, getUtm, trackEvent } from '@/lib/analytics'
 
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || ''
 const GTM_OK = /^GTM-[A-Z0-9]{4,12}$/.test(GTM_ID)
@@ -19,6 +19,16 @@ export default function Analytics() {
 
   useEffect(() => {
     captureUtm()
+    // Fire the answer-engine arrival as its own event so the GEO channel shows
+    // up in GA4 next to organic search, rather than being buried in "referral".
+    const attribution = getUtm()
+    if (attribution?.ai_engine) {
+      trackEvent('ai_referral', {
+        ai_engine: attribution.ai_engine,
+        landing: attribution.landing || '',
+        referrer: attribution.referrer || '',
+      })
+    }
   }, [])
 
   useEffect(() => {

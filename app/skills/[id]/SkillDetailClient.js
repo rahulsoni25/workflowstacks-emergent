@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye, Terminal, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Star, Github, Code2, User, Calendar, Package, Zap, Copy, CheckCircle2, Lightbulb, ListChecks, PlayCircle, FolderTree, FileText, Folder, Scale, Eye, Terminal, AlertTriangle, TrendingUp } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +12,8 @@ import CodeflowCard from './CodeflowCard'
 import AddToClaude from '@/components/AddToClaude'
 import Disclosure from '@/components/Disclosure'
 import RelatedBundleCard from '@/components/RelatedBundleCard'
+import NewsletterSignup from '@/components/NewsletterSignup'
+import ExitIntentSignup from '@/components/ExitIntentSignup'
 
 function getCategoryColor(cat) {
   const colors = {
@@ -21,11 +23,12 @@ function getCategoryColor(cat) {
     prompt: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
     'ai-agent': 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
   }
-  return colors[cat] || 'bg-slate-500/10 text-slate-400 border-slate-500/20'
+  return colors[cat] || 'bg-slate-500/10 text-text-muted border-slate-500/20'
 }
 
 export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [], bundle = null }) {
   const [copied, setCopied] = useState(false)
+  const [copiedBadge, setCopiedBadge] = useState(false)
   const [reacted, setReacted] = useState(false)
   const [reactionCount, setReactionCount] = useState(skill.reactions_up || 0)
   const guide = skill.use_guide || null
@@ -46,6 +49,16 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
     fetch(`/api/skills/${skill.id}/react`, { method: 'POST' }).catch(() => {})
   }
 
+  // README badge for creators: a link from their repo back to this page.
+  const badgeMd = `[![Featured on WorkflowStacks](https://workflowstacks.com/api/badge/${skill.slug || skill.id}.svg)](https://workflowstacks.com/skills/${skill.slug || skill.id}?utm_source=github&utm_medium=badge)`
+  const copyBadge = async () => {
+    try {
+      await navigator.clipboard.writeText(badgeMd)
+      setCopiedBadge(true)
+      setTimeout(() => setCopiedBadge(false), 2000)
+    } catch {}
+  }
+
   const copyPrompt = async () => {
     if (guide?.examplePrompt) {
       await navigator.clipboard.writeText(guide.examplePrompt)
@@ -59,7 +72,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/skills">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Skills
             </Button>
@@ -79,21 +92,21 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                   )}
                 </div>
                 <h1 className="text-4xl text-white mb-2 font-semibold leading-tight tracking-tight">{skill.title_human || skill.name}</h1>
-                <CardDescription className="text-xl text-slate-300">{skill.description_human || skill.description}</CardDescription>
+                <CardDescription className="text-xl text-text-secondary">{skill.description_human || skill.description}</CardDescription>
                 {skill.explainer && (
                   <div className="flex flex-wrap items-center gap-2 mt-3">
                     {skill.explainer.difficulty && (
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                         skill.explainer.difficulty === 'beginner' ? 'bg-emerald-500/15 text-emerald-300' :
                         skill.explainer.difficulty === 'advanced' ? 'bg-orange-500/15 text-orange-300' :
-                        'bg-slate-500/15 text-slate-300'
+                        'bg-slate-500/15 text-text-secondary'
                       }`}>{skill.explainer.difficulty}</span>
                     )}
                     {skill.explainer.time_to_setup && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-slate-700/40 text-slate-200">⏱ {skill.explainer.time_to_setup}</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-slate-700/40 text-text-secondary">⏱ {skill.explainer.time_to_setup}</span>
                     )}
                     {skill.explainer.cost_to_run && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-slate-700/40 text-slate-200">💵 {skill.explainer.cost_to_run}</span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-slate-700/40 text-text-secondary">💵 {skill.explainer.cost_to_run}</span>
                     )}
                   </div>
                 )}
@@ -102,17 +115,22 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                 {/* Trust strip — verifiable signals (vs competitors' self-attestation) */}
                 <div className="flex flex-wrap items-center gap-3">
                   {skill.github_stars > 0 && (
-                    <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-200">
+                    <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-text-secondary">
                       <Star className="w-4 h-4 fill-amber-400 text-amber-400" />{skill.github_stars.toLocaleString('en-US')} stars
                     </span>
                   )}
+                  {skill.velocity_7d > 0 && (
+                    <Link href="/hot" title="GitHub stars gained in the last 7 days — see this week's Hot list" className="flex items-center gap-1.5 text-sm bg-[#C6F24E]/10 border border-[#C6F24E]/30 rounded-full px-3 py-1 text-[#C6F24E] no-underline hover:bg-[#C6F24E]/20">
+                      <TrendingUp className="w-4 h-4" />+{skill.velocity_7d.toLocaleString('en-US')}★ this week{skill.velocity_provisional ? ' (early data)' : ''}
+                    </Link>
+                  )}
                   {skill.github_forks > 0 && (
-                    <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-200">
+                    <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-text-secondary">
                       <Github className="w-4 h-4" />{skill.github_forks.toLocaleString('en-US')} forks
                     </span>
                   )}
                   {skill.language && (
-                    <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-300">
+                    <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-text-secondary">
                       <Code2 className="w-4 h-4" />{skill.language}
                     </span>
                   )}
@@ -122,7 +140,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                     </span>
                   )}
                   {skill.last_updated && (
-                    <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-300">
+                    <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-text-secondary">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />Updated {new Date(skill.last_updated).toLocaleDateString('en-US')}
                     </span>
                   )}
@@ -138,12 +156,12 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                     <div className="bg-slate-800/30 border border-slate-700/50 rounded-lg p-5 space-y-4">
                       <div>
                         <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">What it is</div>
-                        <p className="text-slate-100 text-base leading-relaxed">{skill.explainer.what_it_is}</p>
+                        <p className="text-text-primary text-base leading-relaxed">{skill.explainer.what_it_is}</p>
                       </div>
                       {skill.explainer.use_case_example && (
                         <div className="p-4 bg-teal-500/5 border border-teal-500/30 rounded-md">
                           <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">Real use case example</div>
-                          <p className="text-slate-100 italic">"{skill.explainer.use_case_example}"</p>
+                          <p className="text-text-primary italic">"{skill.explainer.use_case_example}"</p>
                         </div>
                       )}
                       {Array.isArray(skill.explainer.best_with_tools) && skill.explainer.best_with_tools.length > 0 && (
@@ -161,13 +179,13 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                         {skill.explainer.what_you_can_make && (
                           <div>
                             <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">What you can make with it</div>
-                            <p className="text-slate-200">{skill.explainer.what_you_can_make}</p>
+                            <p className="text-text-secondary">{skill.explainer.what_you_can_make}</p>
                           </div>
                         )}
                         {skill.explainer.how_it_helps && (
                           <div>
                             <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">How it helps</div>
-                            <p className="text-slate-200">{skill.explainer.how_it_helps}</p>
+                            <p className="text-text-secondary">{skill.explainer.how_it_helps}</p>
                           </div>
                         )}
                         {(skill.explainer.for_novice || skill.explainer.for_pro) && (
@@ -175,13 +193,13 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                             {skill.explainer.for_novice && (
                               <div className="p-3 bg-emerald-500/5 border border-emerald-500/30 rounded-md">
                                 <div className="text-emerald-300 font-semibold uppercase tracking-wide text-xs mb-1">If you're new</div>
-                                <p className="text-slate-200 text-sm">{skill.explainer.for_novice}</p>
+                                <p className="text-text-secondary text-sm">{skill.explainer.for_novice}</p>
                               </div>
                             )}
                             {skill.explainer.for_pro && (
                               <div className="p-3 bg-violet-500/5 border border-violet-500/30 rounded-md">
                                 <div className="text-violet-300 font-semibold uppercase tracking-wide text-xs mb-1">If you're senior</div>
-                                <p className="text-slate-200 text-sm">{skill.explainer.for_pro}</p>
+                                <p className="text-text-secondary text-sm">{skill.explainer.for_pro}</p>
                               </div>
                             )}
                           </div>
@@ -189,7 +207,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                         {skill.explainer.common_confusions && (
                           <div className="p-3 bg-amber-500/5 border border-amber-500/30 rounded-md">
                             <div className="text-amber-300 font-semibold uppercase tracking-wide text-xs mb-1">Common confusion cleared up</div>
-                            <p className="text-slate-200 text-sm">{skill.explainer.common_confusions}</p>
+                            <p className="text-text-secondary text-sm">{skill.explainer.common_confusions}</p>
                           </div>
                         )}
                         {Array.isArray(skill.explainer.works_well_with) && skill.explainer.works_well_with.length > 0 && (
@@ -197,14 +215,14 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                             <div className="text-teal-300 font-semibold uppercase tracking-wide text-xs mb-1.5">Pairs with</div>
                             <div className="flex flex-wrap gap-2">
                               {skill.explainer.works_well_with.map((w, i) => (
-                                <span key={i} className="px-2.5 py-1 bg-slate-700/40 border border-slate-700 rounded text-slate-200 text-sm">{w}</span>
+                                <span key={i} className="px-2.5 py-1 bg-slate-700/40 border border-slate-700 rounded text-text-secondary text-sm">{w}</span>
                               ))}
                             </div>
                           </div>
                         )}
                         {skill.explainer.why_its_here && (
-                          <div className="text-slate-400 text-xs pt-2 border-t border-slate-700/40">
-                            <span className="text-slate-300 font-medium">Why we list it on WorkflowStacks:</span> {skill.explainer.why_its_here}
+                          <div className="text-text-muted text-xs pt-2 border-t border-slate-700/40">
+                            <span className="text-text-secondary font-medium">Why we list it on WorkflowStacks:</span> {skill.explainer.why_its_here}
                           </div>
                         )}
                       </Disclosure>
@@ -219,7 +237,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                     {guide.whatItDoes && !skill.explainer?.what_it_is && (
                       <div className="bg-slate-800/40 rounded-lg p-4 border border-slate-700/50">
                         <div className="flex items-center gap-2 text-teal-300 font-semibold mb-1"><Lightbulb className="w-4 h-4" />What it does</div>
-                        <p className="text-slate-200">{guide.whatItDoes}</p>
+                        <p className="text-text-secondary">{guide.whatItDoes}</p>
                       </div>
                     )}
                     {guide.whenToUse?.length > 0 && (
@@ -227,7 +245,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                         <div className="flex items-center gap-2 text-white font-semibold mb-2"><ListChecks className="w-4 h-4 text-teal-400" />When to use it</div>
                         <ul className="space-y-1.5">
                           {guide.whenToUse.map((w, i) => (
-                            <li key={i} className="flex items-start gap-2 text-slate-300"><span className="text-teal-400 mt-1">•</span>{w}</li>
+                            <li key={i} className="flex items-start gap-2 text-text-secondary"><span className="text-teal-400 mt-1">•</span>{w}</li>
                           ))}
                         </ul>
                       </div>
@@ -248,7 +266,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                             <div className="flex items-center gap-2 text-white font-semibold mb-3"><PlayCircle className="w-4 h-4 text-teal-400" />Quick start</div>
                             <ol className="space-y-2">
                               {guide.quickStart.map((s, i) => (
-                                <li key={i} className="flex items-start gap-3 text-slate-300">
+                                <li key={i} className="flex items-start gap-3 text-text-secondary">
                                   <span className="flex-shrink-0 w-6 h-6 rounded-full bg-teal-500/15 text-teal-300 text-sm flex items-center justify-center font-semibold">{i + 1}</span>
                                   <span className="pt-0.5">{s}</span>
                                 </li>
@@ -267,14 +285,14 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                           </Button>
                         </div>
                         <div className="bg-slate-950/60 rounded-lg p-4 border border-slate-800">
-                          <pre className="text-slate-300 whitespace-pre-wrap font-mono text-sm">{guide.examplePrompt}</pre>
+                          <pre className="text-text-secondary whitespace-pre-wrap font-mono text-sm">{guide.examplePrompt}</pre>
                         </div>
                       </div>
                     )}
                     {guide.gotcha && (
                       <div className="flex items-start gap-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg p-4">
                         <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
-                        <div><span className="text-amber-300 font-semibold">Heads up: </span><span className="text-slate-300">{guide.gotcha}</span></div>
+                        <div><span className="text-amber-300 font-semibold">Heads up: </span><span className="text-text-secondary">{guide.gotcha}</span></div>
                       </div>
                     )}
                     {/* Reactions — lightweight social signal, no auth required */}
@@ -282,12 +300,12 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                       <button
                         onClick={handleReact}
                         disabled={reacted}
-                        className={`flex items-center gap-1.5 text-sm transition-all ${reacted ? 'text-rose-400 cursor-default' : 'text-slate-400 hover:text-rose-400'}`}
+                        className={`flex items-center gap-1.5 text-sm transition-all ${reacted ? 'text-rose-400 cursor-default' : 'text-text-muted hover:text-rose-400'}`}
                       >
                         <span className="text-base">{reacted ? '❤️' : '🤍'}</span>
                         <span>{reactionCount > 0 ? reactionCount : ''} {reacted ? 'Liked' : 'Like this skill'}</span>
                       </button>
-                      <span className="text-slate-600 text-xs">Saves to your device</span>
+                      <span className="text-text-muted text-xs">Saves to your device</span>
                     </div>
                   </div>
                 ) : (
@@ -295,10 +313,10 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                     <h2 className="text-xl font-semibold text-white mb-4">About this skill</h2>
                     {skill.readme_preview ? (
                       <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50">
-                        <pre className="text-slate-300 whitespace-pre-wrap font-mono text-sm">{skill.readme_preview}</pre>
+                        <pre className="text-text-secondary whitespace-pre-wrap font-mono text-sm">{skill.readme_preview}</pre>
                       </div>
                     ) : (
-                      <p className="text-slate-400">{skill.description_human || skill.description || 'No additional information available.'}</p>
+                      <p className="text-text-muted">{skill.description_human || skill.description || 'No additional information available.'}</p>
                     )}
                   </div>
                 )}
@@ -306,7 +324,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                   <Disclosure title={`Topics (${skill.github_topics.length})`}>
                     <div className="flex flex-wrap gap-2">
                       {skill.github_topics.map((topic, idx) => (
-                        <Badge key={idx} variant="outline" className="border-slate-600 text-slate-300">{topic}</Badge>
+                        <Badge key={idx} variant="outline" className="border-slate-600 text-text-secondary">{topic}</Badge>
                       ))}
                     </div>
                   </Disclosure>
@@ -331,31 +349,31 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                     <h2 className="text-2xl font-semibold leading-none tracking-tight text-white flex items-center gap-2"><Eye className="w-5 h-5 text-teal-400" />What's inside — free to inspect</h2>
                     <Badge className="bg-emerald-500/10 text-emerald-300 border-emerald-500/30 border text-xs">No purchase needed</Badge>
                   </div>
-                  <p className="text-slate-400 text-sm mt-1">Read the entire source before you build — unlike paid marketplaces that hide it behind a buy button.</p>
+                  <p className="text-text-muted text-sm mt-1">Read the entire source before you build — unlike paid marketplaces that hide it behind a buy button.</p>
                 </CardHeader>
                 <CardContent className="space-y-5">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50">
                       <div className="text-2xl font-bold text-white">{sourceSpec.fileCount}</div>
-                      <div className="text-xs text-slate-400">top-level files</div>
+                      <div className="text-xs text-text-muted">top-level files</div>
                     </div>
                     <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50">
                       <div className="text-2xl font-bold text-white">{sourceSpec.dirCount}</div>
-                      <div className="text-xs text-slate-400">folders</div>
+                      <div className="text-xs text-text-muted">folders</div>
                     </div>
                     <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50">
                       <div className="text-2xl font-bold text-white">{sourceSpec.sizeKB >= 1024 ? (sourceSpec.sizeKB / 1024).toFixed(1) + 'M' : sourceSpec.sizeKB + 'K'}</div>
-                      <div className="text-xs text-slate-400">source size</div>
+                      <div className="text-xs text-text-muted">source size</div>
                     </div>
                     <div className="bg-slate-800/40 rounded-lg p-3 border border-slate-700/50">
                       <div className="text-2xl font-bold text-white truncate">{sourceSpec.license || '—'}</div>
-                      <div className="text-xs text-slate-400">license</div>
+                      <div className="text-xs text-text-muted">license</div>
                     </div>
                   </div>
 
                   {sourceSpec.notable?.length > 0 && (
                     <div>
-                      <div className="text-sm text-slate-400 mb-2">Key files</div>
+                      <div className="text-sm text-text-muted mb-2">Key files</div>
                       <div className="flex flex-wrap gap-2">
                         {sourceSpec.notable.map((f, i) => (
                           <Badge key={i} className="bg-teal-500/10 text-teal-300 border-teal-500/20 border text-xs"><FileText className="w-3 h-3 mr-1" />{f}</Badge>
@@ -365,13 +383,13 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                   )}
 
                   <div>
-                    <div className="text-sm text-slate-400 mb-2 flex items-center gap-1.5"><FolderTree className="w-4 h-4" />File tree</div>
+                    <div className="text-sm text-text-muted mb-2 flex items-center gap-1.5"><FolderTree className="w-4 h-4" />File tree</div>
                     <div className="bg-slate-950/60 rounded-lg p-3 border border-slate-800 max-h-64 overflow-auto font-mono text-sm">
                       {sourceSpec.tree.map((t, i) => (
-                        <div key={i} className="flex items-center gap-2 text-slate-300 py-0.5">
+                        <div key={i} className="flex items-center gap-2 text-text-secondary py-0.5">
                           {t.type === 'dir'
                             ? <Folder className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                            : <FileText className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />}
+                            : <FileText className="w-3.5 h-3.5 text-text-muted flex-shrink-0" />}
                           <span className={t.type === 'dir' ? 'text-amber-300' : ''}>{t.name}{t.type === 'dir' ? '/' : ''}</span>
                         </div>
                       ))}
@@ -379,7 +397,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                   </div>
 
                   <a href={`${sourceSpec.htmlUrl}`} target="_blank" rel="noopener noreferrer" className="block">
-                    <Button variant="outline" className="w-full border-slate-600 text-slate-200 hover:bg-white/5">
+                    <Button variant="outline" className="w-full border-slate-600 text-text-secondary hover:bg-white/5">
                       <Github className="w-4 h-4 mr-2" />Read the full source on GitHub
                     </Button>
                   </a>
@@ -409,7 +427,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                   </Button>
                 </Link>
                 {skill.github_url && (
-                  <Button variant="outline" className="w-full border-slate-600 text-slate-200 hover:bg-white/5" onClick={() => window.open(skill.github_url, '_blank')}>
+                  <Button variant="outline" className="w-full border-slate-600 text-text-secondary hover:bg-white/5" onClick={() => window.open(skill.github_url, '_blank')}>
                     <Github className="w-4 h-4 mr-2" />View on GitHub
                   </Button>
                 )}
@@ -419,15 +437,30 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
             <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
               <CardHeader><CardTitle className="text-white">Details</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex items-start gap-3"><User className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Creator</div><div className="text-white font-medium">{skill.creator}</div></div></div>
-                {skill.language && <div className="flex items-start gap-3"><Code2 className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Language</div><div className="text-white font-medium">{skill.language}</div></div></div>}
-                <div className="flex items-start gap-3"><Package className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Category</div><div className="text-white font-medium">{skill.category}</div></div></div>
-                {skill.created_at && <div className="flex items-start gap-3"><Calendar className="w-5 h-5 text-slate-400 mt-0.5" /><div><div className="text-sm text-slate-500">Published</div><div className="text-white font-medium">{new Date(skill.created_at).toLocaleDateString('en-US')}</div></div></div>}
+                <div className="flex items-start gap-3"><User className="w-5 h-5 text-text-muted mt-0.5" /><div><div className="text-sm text-text-muted">Creator</div><div className="text-white font-medium">{skill.creator}</div></div></div>
+                {skill.language && <div className="flex items-start gap-3"><Code2 className="w-5 h-5 text-text-muted mt-0.5" /><div><div className="text-sm text-text-muted">Language</div><div className="text-white font-medium">{skill.language}</div></div></div>}
+                <div className="flex items-start gap-3"><Package className="w-5 h-5 text-text-muted mt-0.5" /><div><div className="text-sm text-text-muted">Category</div><div className="text-white font-medium">{skill.category}</div></div></div>
+                {skill.created_at && <div className="flex items-start gap-3"><Calendar className="w-5 h-5 text-text-muted mt-0.5" /><div><div className="text-sm text-text-muted">Published</div><div className="text-white font-medium">{new Date(skill.created_at).toLocaleDateString('en-US')}</div></div></div>}
                 <div className="mt-4 p-3 bg-teal-500/5 border border-teal-500/15 rounded-lg">
-                  <p className="text-slate-400 text-xs">Are you the creator of this tool? <Link href="/submit" className="text-teal-300 hover:text-teal-200">Claim your listing →</Link> and earn 85% of every sale.</p>
+                  <p className="text-text-muted text-xs">Are you the creator of this tool? <Link href="/submit" className="text-teal-300 hover:text-teal-200">Claim your listing →</Link> and earn 85% of every sale.</p>
+                  <div className="mt-3 border-t border-teal-500/15 pt-3">
+                    <p className="text-text-muted text-xs mb-2">Show it off in your README:</p>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/api/badge/${skill.slug || skill.id}.svg`} alt="Featured on WorkflowStacks" height={20} className="h-5 mb-2" />
+                    <div className="flex items-start gap-2">
+                      <code className="flex-1 min-w-0 break-all rounded bg-slate-950/70 border border-slate-700/60 px-2 py-1.5 text-[10.5px] leading-snug text-emerald-300">{badgeMd}</code>
+                      <button type="button" onClick={copyBadge} aria-label="Copy badge markdown" className="shrink-0 rounded border border-slate-600 px-2 py-1.5 text-[11px] text-text-secondary hover:bg-white/5">{copiedBadge ? 'Copied' : 'Copy'}</button>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
+
+            <NewsletterSignup
+              source="skill-page"
+              headline="Skills like this, every Monday."
+              sub="The five fastest-growing open-source AI skills, ranked by GitHub star growth. One email a week, unsubscribe anytime."
+            />
           </motion.div>
         </div>
 
@@ -436,17 +469,17 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
         {related.length > 0 && (
           <div className="mt-12 border-t border-slate-700/50 pt-10">
             <h2 className="text-2xl font-bold text-white mb-1">Related skills</h2>
-            <p className="text-slate-400 text-sm mb-6">More {skill.category} tools founders pair with this one.</p>
+            <p className="text-text-muted text-sm mb-6">More {skill.category} tools founders pair with this one.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {related.map((r) => (
                 <Link key={r.id} href={`/skills/${r.slug || r.id}`} className="block group">
                   <div className="h-full rounded-xl border border-slate-700/50 bg-slate-900/60 p-4 hover:border-teal-500/40 transition-all">
                     <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs text-slate-500">{r.category}</span>
+                      <span className="text-xs text-text-muted">{r.category}</span>
                       {r.github_stars > 0 && <span className="text-xs text-amber-400">★ {r.github_stars.toLocaleString('en-US')}</span>}
                     </div>
                     <div className="text-white font-semibold group-hover:text-teal-300 transition-colors line-clamp-1">{r.title_human || r.name}</div>
-                    <div className="text-slate-400 text-sm mt-1 line-clamp-2">{r.description_human || r.description}</div>
+                    <div className="text-text-muted text-sm mt-1 line-clamp-2">{r.description_human || r.description}</div>
                   </div>
                 </Link>
               ))}
@@ -454,6 +487,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
           </div>
         )}
       </div>
+      <ExitIntentSignup source="exit-intent" />
     </div>
   )
 }

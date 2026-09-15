@@ -33,8 +33,8 @@ export default function Toc({ toc }) {
             href={`#${t.id}`}
             className={`block border-l-2 py-1 pl-3 text-[13px] leading-snug no-underline transition-colors ${
               active === t.id
-                ? 'border-[#C6F24E] text-[#ECEFEA]'
-                : 'border-[#262B2D] text-[#8A938D] hover:text-[#ECEFEA]'
+                ? 'border-[#C6F24E] text-text-primary'
+                : 'border-[#262B2D] text-text-muted hover:text-text-primary'
             }`}
           >
             {t.text}
@@ -47,11 +47,11 @@ export default function Toc({ toc }) {
   return (
     <>
       <nav aria-label="Contents" className="hidden lg:block">
-        <div className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-[#6E7772]">Contents</div>
+        <div className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-text-muted">Contents</div>
         {list}
       </nav>
       <details className="lg:hidden rounded-lg border border-[#262B2D] bg-[#101314] p-3">
-        <summary className="cursor-pointer text-[13px] font-semibold text-[#ECEFEA]">Contents</summary>
+        <summary className="cursor-pointer text-[13px] font-semibold text-text-primary">Contents</summary>
         <div className="mt-2">{list}</div>
       </details>
     </>

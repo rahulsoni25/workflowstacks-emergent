@@ -3,6 +3,7 @@ import { ArrowLeft, KeyRound, Check, Plug } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { MCP_SERVERS } from '@/lib/mcp-servers'
+import { itemListSchema, breadcrumbSchema } from '@/lib/schema'
 
 export const metadata = {
   title: 'MCP Servers for Claude Desktop — Copy-Paste Configs | WorkflowStacks',
@@ -15,12 +16,28 @@ export default function McpIndexPage() {
   const servers = Object.values(MCP_SERVERS)
   const categories = [...new Set(servers.map((s) => s.category))]
 
+  // ItemList lets a crawler read an index page as the catalog it is, rather
+  // than as a wall of link text — and it is what makes the page eligible to be
+  // quoted back as a list by answer engines.
+  const list = itemListSchema({
+    name: 'MCP servers for Claude Desktop',
+    description: 'Verified, copy-paste MCP server configurations for Claude Desktop.',
+    url: '/mcp',
+    items: servers.map((s) => ({ name: s.title || s.name, url: `https://workflowstacks.com/mcp/${s.slug}` })),
+  })
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'MCP servers', path: '/mcp' },
+  ])
+
   return (
     <div className="min-h-screen bg-neptune">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(list) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
@@ -32,13 +49,13 @@ export default function McpIndexPage() {
           <Plug className="w-8 h-8 text-[#C6F24E]" />
           <h1 className="text-4xl md:text-5xl font-bold text-white text-center">MCP servers for Claude Desktop</h1>
         </div>
-        <p className="text-lg text-slate-300 text-center mb-12 max-w-2xl mx-auto">
+        <p className="text-lg text-text-secondary text-center mb-12 max-w-2xl mx-auto">
           Give Claude real tools — files, web search, GitHub, databases. Each one is a verified, copy-paste config. Connected in under a minute.
         </p>
 
         {categories.map((cat) => (
           <div key={cat} className="mb-10">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">{cat}</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted mb-3">{cat}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {servers.filter((s) => s.category === cat).map((s) => (
                 <Link key={s.slug} href={`/mcp/${s.slug}`}>
@@ -50,7 +67,7 @@ export default function McpIndexPage() {
                           ? <span title="Needs an API key"><KeyRound className="w-4 h-4 text-amber-300/70 shrink-0" /></span>
                           : <span title="No key needed"><Check className="w-4 h-4 text-[#C6F24E]/70 shrink-0" /></span>}
                       </div>
-                      <p className="text-slate-400 text-sm leading-relaxed">{s.blurb}</p>
+                      <p className="text-text-muted text-sm leading-relaxed">{s.blurb}</p>
                     </CardContent>
                   </Card>
                 </Link>
@@ -59,7 +76,7 @@ export default function McpIndexPage() {
           </div>
         ))}
 
-        <p className="text-sm text-slate-500 text-center mt-6">
+        <p className="text-sm text-text-muted text-center mt-6">
           New to MCP? It’s the standard way to connect tools to Claude.{' '}
           <Link href="/learn/mcp" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">Learn how it works</Link>.
         </p>

@@ -2,9 +2,9 @@ name: Weekly SEO/AEO/GEO hygiene
 
 # Runs every Monday 09:00 UTC. Checks the live site's SEO/AEO/GEO health and
 # opens a GitHub issue if anything high-severity regresses.
+# The Monday schedule moved into weekly-seo-review.yml (which runs this same
+# audit and folds the score into the weekly report). Kept for manual runs.
 on:
-  schedule:
-    - cron: '0 9 * * 1'
   workflow_dispatch: {}
 
 env:

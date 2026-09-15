@@ -18,6 +18,10 @@ module.exports = {
     	},
     	extend: {
     		colors: {
+    			// Text contrast tiers — values live in app/globals.css (:root --text-*)
+    			'text-primary': 'var(--text-primary)',
+    			'text-secondary': 'var(--text-secondary)',
+    			'text-muted': 'var(--text-muted)',
     			border: 'hsl(var(--border))',
     			input: 'hsl(var(--input))',
     			ring: 'hsl(var(--ring))',

@@ -71,7 +71,7 @@ export default function PricingPage() {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
@@ -83,7 +83,7 @@ export default function PricingPage() {
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center leading-tight">
           Start free. Pay only for what ships.
         </h1>
-        <p className="text-lg text-slate-300 text-center mb-14 max-w-xl mx-auto">
+        <p className="text-lg text-text-secondary text-center mb-14 max-w-xl mx-auto">
           The catalog, builder, and templates are free. Premium tools are one-time purchases — no subscriptions.
         </p>
 
@@ -94,12 +94,12 @@ export default function PricingPage() {
                 <h2 className="text-white font-bold text-lg mb-1">{tier.name}</h2>
                 <div className="mb-3">
                   <span className="text-3xl font-extrabold text-white">{tier.price}</span>
-                  {tier.priceNote && <span className="text-slate-400 text-sm"> {tier.priceNote}</span>}
+                  {tier.priceNote && <span className="text-text-muted text-sm"> {tier.priceNote}</span>}
                 </div>
-                <p className="text-slate-400 text-sm mb-5">{tier.blurb}</p>
+                <p className="text-text-muted text-sm mb-5">{tier.blurb}</p>
                 <ul className="space-y-2.5 mb-7 flex-1">
                   {tier.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2.5 text-sm text-slate-300">
+                    <li key={f} className="flex items-start gap-2.5 text-sm text-text-secondary">
                       <Check className="w-4 h-4 text-[#C6F24E] flex-shrink-0 mt-0.5" />{f}
                     </li>
                   ))}
@@ -114,7 +114,7 @@ export default function PricingPage() {
           ))}
         </div>
 
-        <p className="text-center text-sm text-slate-500 mt-12">
+        <p className="text-center text-sm text-text-muted mt-12">
           Questions? <Link href="/help" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">We're happy to help</Link>.
         </p>
       </div>

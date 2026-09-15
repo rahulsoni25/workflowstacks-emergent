@@ -65,7 +65,7 @@ export default function McpServerPage({ params }) {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/mcp">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />All MCP servers
             </Button>
           </Link>
@@ -75,10 +75,10 @@ export default function McpServerPage({ params }) {
       <div className="container mx-auto px-4 py-16 max-w-2xl">
         <p className="text-xs tracking-widest uppercase text-[#C6F24E] font-semibold mb-3">Claude Desktop · MCP</p>
         <h1 className="text-4xl font-bold text-white mb-3 leading-tight">Add {server.name} to Claude Desktop</h1>
-        <p className="text-lg text-slate-300 mb-6">{server.blurb}</p>
+        <p className="text-lg text-text-secondary mb-6">{server.blurb}</p>
 
         <div className="flex flex-wrap items-center gap-3 mb-8 text-sm">
-          <span className="text-slate-400">{server.category}</span>
+          <span className="text-text-muted">{server.category}</span>
           {server.needs_key ? (
             <span className="flex items-center gap-1.5 text-amber-300"><KeyRound className="w-4 h-4" />Needs an API key</span>
           ) : (
@@ -97,7 +97,7 @@ export default function McpServerPage({ params }) {
             </Button>
           </a>
           <CopyConfig code={claudeAddJson} />
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-text-muted">
             The Cursor button installs it instantly; the command does the same for Claude Code.
             {server.needs_key ? ' Fill in the placeholder API key afterwards.' : ''}
           </p>
@@ -106,7 +106,7 @@ export default function McpServerPage({ params }) {
         <h2 className="text-white font-bold text-lg mt-8 mb-3">Claude Desktop config (manual)</h2>
         <CopyConfig code={block} />
         {server.note && (
-          <p className="text-sm text-slate-400 mt-3 flex items-start gap-2">
+          <p className="text-sm text-text-muted mt-3 flex items-start gap-2">
             <span className="text-[#C6F24E] font-bold">›</span>{server.note}
           </p>
         )}
@@ -117,19 +117,19 @@ export default function McpServerPage({ params }) {
             <Card key={i} className="bg-slate-900/60 border-slate-700/50">
               <CardContent className="py-3.5 flex items-start gap-3">
                 <span className="text-[#C6F24E] font-bold text-sm leading-none mt-0.5">{String(i + 1).padStart(2, '0')}</span>
-                <p className="text-slate-300 text-sm leading-relaxed">{s}</p>
+                <p className="text-text-secondary text-sm leading-relaxed">{s}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <p className="text-xs text-slate-500 mb-8">
+        <p className="text-xs text-text-muted mb-8">
           The linked repo is the source of truth — if the package name ever changes, it’ll be current there.
         </p>
 
         <Card className="bg-gradient-to-br from-[#C6F24E]/10 to-transparent border-[#C6F24E]/25">
           <CardContent className="py-5 flex flex-wrap items-center justify-between gap-4">
-            <p className="text-slate-300 text-sm">Want a whole automation, not just one tool? <span className="text-white font-semibold">Grab a working workflow template.</span></p>
+            <p className="text-text-secondary text-sm">Want a whole automation, not just one tool? <span className="text-white font-semibold">Grab a working workflow template.</span></p>
             <Link href="/templates"><Button className="bg-white/5 hover:bg-white/10 text-white border border-[#323A3C]">Browse templates</Button></Link>
           </CardContent>
         </Card>

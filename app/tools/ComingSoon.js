@@ -36,10 +36,10 @@ function ComingCard({ tool }) {
     <Card className="bg-[#0d100f] border border-dashed border-[#323A3C] h-full">
       <CardContent className="py-6 flex flex-col h-full">
         <div className="flex items-baseline justify-between gap-2 mb-1">
-          <h3 className="text-lg font-bold text-slate-200">{tool.title}</h3>
-          <span className="text-[10px] uppercase tracking-wide text-slate-500 border border-slate-700 rounded px-1.5 py-0.5">Soon</span>
+          <h3 className="text-lg font-bold text-text-secondary">{tool.title}</h3>
+          <span className="text-[10px] uppercase tracking-wide text-text-muted border border-slate-700 rounded px-1.5 py-0.5">Soon</span>
         </div>
-        <p className="text-slate-400 text-sm leading-relaxed flex-1 mb-4">{tool.blurb}</p>
+        <p className="text-text-muted text-sm leading-relaxed flex-1 mb-4">{tool.blurb}</p>
         {state === 'done' ? (
           <p className="text-sm text-[#C6F24E] flex items-center gap-1.5"><Check className="w-4 h-4" />You’re on the list — we’ll email you.</p>
         ) : (

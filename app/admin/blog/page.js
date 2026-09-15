@@ -8,13 +8,13 @@ import Link from 'next/link'
 
 const CARD = 'rounded-xl border border-[#262B2D] bg-[#101314]'
 const BTN = 'rounded-lg bg-[#C6F24E] px-3 py-1.5 text-[12.5px] font-semibold text-[#0A0C0D] hover:bg-[#A6D62E] disabled:opacity-40'
-const BTN2 = 'rounded-lg border border-[#323A3C] px-3 py-1.5 text-[12.5px] text-[#ECEFEA] hover:bg-white/5 disabled:opacity-40'
-const INPUT = 'w-full rounded-lg border border-[#262B2D] bg-[#0A0C0D] px-3 py-2 text-[13.5px] text-[#ECEFEA] focus:border-[#C6F24E] focus:outline-none'
+const BTN2 = 'rounded-lg border border-[#323A3C] px-3 py-1.5 text-[12.5px] text-text-primary hover:bg-white/5 disabled:opacity-40'
+const INPUT = 'w-full rounded-lg border border-[#262B2D] bg-[#0A0C0D] px-3 py-2 text-[13.5px] text-text-primary focus:border-[#C6F24E] focus:outline-none'
 
 const STATUS_COLOR = {
   published: 'text-[#6FD79A]', judged: 'text-[#C6F24E]', styled: 'text-[#C6F24E]', held: 'text-[#F27C74]',
   drafted: 'text-[#F0B35C]', drafting: 'text-[#F0B35C]', edited: 'text-[#F0B35C]',
-  briefed: 'text-[#8AB0F0]', archived: 'text-[#6E7772]',
+  briefed: 'text-[#8AB0F0]', archived: 'text-text-muted',
 }
 
 export default function BlogAdmin() {
@@ -90,7 +90,7 @@ export default function BlogAdmin() {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#0A0C0D] px-4">
         <div className={`${CARD} w-full max-w-sm p-6`}>
-          <h1 className="text-lg font-semibold text-[#ECEFEA]">Blog admin</h1>
+          <h1 className="text-lg font-semibold text-text-primary">Blog admin</h1>
           <input type="password" value={secret} onChange={(e) => setSecret(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && unlock()} placeholder="Admin secret" className={`${INPUT} mt-4`} />
           <button onClick={unlock} className={`${BTN} mt-3 w-full py-2`}>Unlock</button>
           {msg && <div className="mt-3 text-[12.5px] text-[#F27C74]">{msg}</div>}
@@ -103,7 +103,7 @@ export default function BlogAdmin() {
     <div className="min-h-screen bg-[#0A0C0D] px-4 py-8">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-bold text-[#ECEFEA]">Blog <span className="text-[#6E7772]">· {posts.length} posts</span></h1>
+          <h1 className="text-xl font-bold text-text-primary">Blog <span className="text-text-muted">· {posts.length} posts</span></h1>
           <div className="flex flex-wrap gap-2">
             <Link href="/admin" className={BTN2}>← Admin</Link>
             <button disabled={!!busy} onClick={() => pipeline('rank')} className={BTN2}>{busy === 'rank' ? '…' : 'Check rankings'}</button>
@@ -127,17 +127,17 @@ export default function BlogAdmin() {
               <button key={p.slug} onClick={() => openPost(p.slug)} className={`block w-full px-4 py-3 text-left hover:bg-white/[0.03] ${sel?.slug === p.slug ? 'bg-white/[0.05]' : ''}`}>
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="truncate text-[13.5px] font-medium text-[#ECEFEA]">{p.title}</div>
-                    <div className="mt-0.5 text-[11.5px] text-[#6E7772]">
+                    <div className="truncate text-[13.5px] font-medium text-text-primary">{p.title}</div>
+                    <div className="mt-0.5 text-[11.5px] text-text-muted">
                       /{p.slug} · {p.word_count || 0}w · SEO {p.seo_report?.score ?? '—'} · style {p.style_report?.score ?? '—'} · judge {p.judge?.score ?? '—'} · rank {p.rank ? (p.rank.position ?? '>20') : '—'}
                       {p.published_at ? ` · ${new Date(p.published_at).toISOString().slice(0, 10)}` : ''}
                     </div>
                   </div>
-                  <span className={`shrink-0 text-[11px] font-semibold uppercase ${STATUS_COLOR[p.status] || 'text-[#8A938D]'}`}>{p.status}</span>
+                  <span className={`shrink-0 text-[11px] font-semibold uppercase ${STATUS_COLOR[p.status] || 'text-text-muted'}`}>{p.status}</span>
                 </div>
               </button>
             ))}
-            {posts.length === 0 && <div className="px-4 py-8 text-center text-[13px] text-[#6E7772]">Nothing here.</div>}
+            {posts.length === 0 && <div className="px-4 py-8 text-center text-[13px] text-text-muted">Nothing here.</div>}
           </div>
 
           {sel ? (
@@ -158,16 +158,16 @@ export default function BlogAdmin() {
                 </div>
               </div>
 
-              <label className="mt-4 block text-[11px] font-semibold uppercase tracking-widest text-[#6E7772]">Title ({(sel.title || '').length}/60)</label>
+              <label className="mt-4 block text-[11px] font-semibold uppercase tracking-widest text-text-muted">Title ({(sel.title || '').length}/60)</label>
               <input className={`${INPUT} mt-1`} value={sel.title || ''} onChange={(e) => setSel({ ...sel, title: e.target.value })} />
-              <label className="mt-3 block text-[11px] font-semibold uppercase tracking-widest text-[#6E7772]">Meta description ({(sel.meta_description || '').length}/155)</label>
+              <label className="mt-3 block text-[11px] font-semibold uppercase tracking-widest text-text-muted">Meta description ({(sel.meta_description || '').length}/155)</label>
               <textarea rows={2} className={`${INPUT} mt-1`} value={sel.meta_description || ''} onChange={(e) => setSel({ ...sel, meta_description: e.target.value })} />
-              <label className="mt-3 block text-[11px] font-semibold uppercase tracking-widest text-[#6E7772]">Answer block (40–60 words)</label>
+              <label className="mt-3 block text-[11px] font-semibold uppercase tracking-widest text-text-muted">Answer block (40–60 words)</label>
               <textarea rows={3} className={`${INPUT} mt-1`} value={sel.answer || ''} onChange={(e) => setSel({ ...sel, answer: e.target.value })} />
 
               {sel.seo_report && (
                 <div className="mt-4 rounded-lg border border-[#262B2D] bg-[#0A0C0D] p-3">
-                  <div className="text-[12px] font-semibold text-[#ECEFEA]">
+                  <div className="text-[12px] font-semibold text-text-primary">
                     SEO {sel.seo_report.score}/100
                     {sel.style_report ? ` · Style ${sel.style_report.score}/100` : ''}
                     {sel.judge ? ` · Judge ${sel.judge.score}/10` : ''}
@@ -186,11 +186,11 @@ export default function BlogAdmin() {
                 </div>
               )}
 
-              <label className="mt-4 block text-[11px] font-semibold uppercase tracking-widest text-[#6E7772]">Sections</label>
+              <label className="mt-4 block text-[11px] font-semibold uppercase tracking-widest text-text-muted">Sections</label>
               <div className="mt-1 space-y-3">
                 {(sel.sections || []).map((s, i) => (
                   <details key={i} className="rounded-lg border border-[#262B2D] bg-[#0A0C0D]">
-                    <summary className="cursor-pointer px-3 py-2 text-[13px] font-medium text-[#ECEFEA]">{i + 1}. {s.h2}</summary>
+                    <summary className="cursor-pointer px-3 py-2 text-[13px] font-medium text-text-primary">{i + 1}. {s.h2}</summary>
                     <div className="p-3 pt-0">
                       <input className={`${INPUT} mb-2`} value={s.h2} onChange={(e) => { const secs = [...sel.sections]; secs[i] = { ...s, h2: e.target.value }; setSel({ ...sel, sections: secs }) }} />
                       <textarea rows={10} className={`${INPUT} font-mono text-[12px]`} value={s.md} onChange={(e) => { const secs = [...sel.sections]; secs[i] = { ...s, md: e.target.value }; setSel({ ...sel, sections: secs }) }} />
@@ -205,7 +205,7 @@ export default function BlogAdmin() {
               </div>
             </div>
           ) : (
-            <div className={`${CARD} flex items-center justify-center p-10 text-[13px] text-[#6E7772]`}>Select a post to edit.</div>
+            <div className={`${CARD} flex items-center justify-center p-10 text-[13px] text-text-muted`}>Select a post to edit.</div>
           )}
         </div>
       </div>

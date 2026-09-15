@@ -25,7 +25,7 @@ export default function LearnHubPage() {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
@@ -34,7 +34,7 @@ export default function LearnHubPage() {
 
       <div className="container mx-auto px-4 py-16 max-w-5xl">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center">Learn WorkflowStacks</h1>
-        <p className="text-xl text-slate-300 text-center mb-16 max-w-2xl mx-auto">
+        <p className="text-xl text-text-secondary text-center mb-16 max-w-2xl mx-auto">
           Everything you need to discover, combine, and deploy AI skills as a founder.
         </p>
 
@@ -47,7 +47,7 @@ export default function LearnHubPage() {
                   <CardContent className="py-6">
                     <Icon className="w-8 h-8 text-teal-400 mb-4" />
                     <h2 className="text-xl font-bold text-white mb-2 group-hover:text-teal-300 transition-colors">{t.title}</h2>
-                    <p className="text-slate-400 text-sm leading-relaxed">{t.desc}</p>
+                    <p className="text-text-muted text-sm leading-relaxed">{t.desc}</p>
                   </CardContent>
                 </Card>
               </Link>

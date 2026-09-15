@@ -13,7 +13,7 @@ export default function HelpPage() {
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Button>
@@ -27,14 +27,14 @@ export default function HelpPage() {
             <Play className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">How to Use WorkflowStacks</h1>
-          <p className="text-xl text-slate-300">Complete guide for non-technical users — No coding required!</p>
+          <p className="text-xl text-text-secondary">Complete guide for non-technical users — No coding required!</p>
         </motion.div>
 
         {/* Quick Start */}
         <Card className="bg-gradient-to-br from-teal-500/10 to-cyan-500/10 border-teal-500/30 backdrop-blur-xl mb-8">
           <CardHeader>
             <CardTitle className="text-white text-2xl">⚡ Quick Start (2 Minutes)</CardTitle>
-            <CardDescription className="text-slate-300 text-lg">The fastest way to get your AI agent working</CardDescription>
+            <CardDescription className="text-text-secondary text-lg">The fastest way to get your AI agent working</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {['Click "Playbooks" in the menu', 'Click "Create This Agent"', 'Copy the generated text', 'Paste into ChatGPT or Claude'].map((step, i) => (
@@ -42,7 +42,7 @@ export default function HelpPage() {
                 <div className="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-sm">{i + 1}</div>
                 <div>
                   <h3 className="text-white font-semibold mb-1">{step}</h3>
-                  <p className="text-slate-300 text-sm">{['Pick a ready-made solution like "Validate a New Offer in 48 Hours"', 'We\'ll automatically combine the best skills for you', 'Click the "Copy" button — we\'ve created your agent prompt!', 'Open ChatGPT, Claude, or Gemini and paste it in. Done!'][i]}</p>
+                  <p className="text-text-secondary text-sm">{['Pick a ready-made solution like "Validate a New Offer in 48 Hours"', 'We\'ll automatically combine the best skills for you', 'Click the "Copy" button — we\'ve created your agent prompt!', 'Open ChatGPT, Claude, or Gemini and paste it in. Done!'][i]}</p>
                 </div>
               </div>
             ))}
@@ -66,7 +66,7 @@ export default function HelpPage() {
                 <method.icon className={`w-6 h-6 text-${method.color}-400`} />
                 <CardTitle className="text-white text-2xl">{method.title}</CardTitle>
               </div>
-              <CardDescription className="text-slate-400">{method.desc}</CardDescription>
+              <CardDescription className="text-text-muted">{method.desc}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3">
@@ -92,7 +92,7 @@ export default function HelpPage() {
         <Card className="bg-gradient-to-br from-teal-500/10 to-cyan-500/10 border-teal-500/30 backdrop-blur-xl mb-8">
           <CardHeader>
             <CardTitle className="text-white text-2xl">💬 How to Use Your Agent</CardTitle>
-            <CardDescription className="text-slate-300 text-lg">Once you've copied your agent blueprint:</CardDescription>
+            <CardDescription className="text-text-secondary text-lg">Once you've copied your agent blueprint:</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             {[
@@ -104,7 +104,7 @@ export default function HelpPage() {
                 <h3 className="text-white font-semibold mb-3 flex items-center gap-2">
                   <span className="text-2xl">{tool.emoji}</span> For {tool.name}
                 </h3>
-                <ol className="space-y-1 text-slate-300 list-decimal list-inside text-sm">
+                <ol className="space-y-1 text-text-secondary list-decimal list-inside text-sm">
                   {tool.steps.map((s, j) => <li key={j}>{s}</li>)}
                 </ol>
               </div>
@@ -127,7 +127,7 @@ export default function HelpPage() {
                   <div className="text-2xl">{tip.emoji}</div>
                   <div>
                     <h3 className="text-white font-semibold">{tip.title}</h3>
-                    <p className="text-slate-400">{tip.desc}</p>
+                    <p className="text-text-muted">{tip.desc}</p>
                   </div>
                 </div>
               ))}

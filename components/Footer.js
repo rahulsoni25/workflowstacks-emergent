@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Sparkles } from 'lucide-react'
 import WsMark from '@/components/WsMark'
+import NewsletterSignup from '@/components/NewsletterSignup'
 
 // The footer is the full site map; components/SiteHeader.js carries a
 // deliberately shorter three-group version for first-time visitors. Every
@@ -14,13 +15,15 @@ const footerLinks = {
       { label: 'MCP Configs', href: '/mcp' },
       { label: 'Slash Commands', href: '/commands' },
       { label: 'Premium Tools', href: '/tools' },
-      { label: 'Bundles', href: '/bundles' },
     ]
   },
   browse: {
     title: 'Browse',
     links: [
+      { label: 'Hot this week', href: '/hot' },
+      { label: 'Best by category', href: '/best' },
       { label: 'Journal', href: '/blog' },
+      { label: 'Newsletter', href: '/newsletter' },
       { label: 'All Skills', href: '/skills' },
       { label: 'Discover', href: '/discover' },
       { label: 'Personas', href: '/personas' },
@@ -87,18 +90,26 @@ export default function Footer() {
             </div>
             <span className="wm text-xl text-white">workflow<span className="s" style={{ color: '#C6F24E' }}>stacks</span></span>
           </Link>
-          <p className="mt-4 text-sm text-slate-400 leading-relaxed">
+          <p className="mt-4 text-sm text-text-muted leading-relaxed">
             The marketplace for AI skills that launch offers, rank in AI search, and automate operations. No coding required.
           </p>
+          <NewsletterSignup
+            variant="inline"
+            source="footer"
+            headline="Hot skills, every Monday"
+            sub="The five fastest-growing open-source AI skills, ranked by GitHub star growth."
+            cta="Subscribe"
+            className="mt-6"
+          />
           <div className="flex items-center gap-3 mt-6">
             <a href="https://twitter.com/workflowstacks" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-[#101314] hover:bg-[#C6F24E]/15 border border-[#262B2D] hover:border-[#C6F24E]/30 flex items-center justify-center transition-all" aria-label="Twitter">
-              <span className="text-slate-400 text-sm">𝕏</span>
+              <span className="text-text-muted text-sm">𝕏</span>
             </a>
             <a href="https://github.com/workflowstacks" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-[#101314] hover:bg-[#C6F24E]/15 border border-[#262B2D] hover:border-[#C6F24E]/30 flex items-center justify-center transition-all" aria-label="GitHub">
-              <span className="text-slate-400 text-sm">⚡</span>
+              <span className="text-text-muted text-sm">⚡</span>
             </a>
             <a href="https://discord.gg/workflowstacks" target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-full bg-[#101314] hover:bg-[#C6F24E]/15 border border-[#262B2D] hover:border-[#C6F24E]/30 flex items-center justify-center transition-all" aria-label="Discord">
-              <span className="text-slate-400 text-sm">💬</span>
+              <span className="text-text-muted text-sm">💬</span>
             </a>
           </div>
         </div>
@@ -107,13 +118,13 @@ export default function Footer() {
         <nav className="grid flex-1 gap-8 text-sm sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5" aria-label="Footer navigation">
           {Object.values(footerLinks).map((section) => (
             <div key={section.title}>
-              <h4 className="mb-4 text-[#8B928D] font-mono text-xs uppercase tracking-wider">
+              <h4 className="mb-4 text-text-muted font-mono text-xs uppercase tracking-wider">
                 {section.title}
               </h4>
               <ul className="space-y-2.5">
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    <Link href={link.href} className="text-slate-400 transition-colors hover:text-[#C6F24E]">
+                    <Link href={link.href} className="text-text-muted transition-colors hover:text-[#C6F24E]">
                       {link.label}
                     </Link>
                   </li>
@@ -127,15 +138,15 @@ export default function Footer() {
       {/* Compatible Tools */}
       <div className="border-t border-[#262B2D]">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-6">
-          <span className="text-[#8B928D] font-mono text-xs uppercase tracking-wider">Compatible with</span>
+          <span className="text-text-muted font-mono text-xs uppercase tracking-wider">Compatible with</span>
           <div className="flex flex-wrap items-center gap-2">
             {compatibleTools.map((tool) => (
               <div key={tool.name} className="flex h-10 px-3 items-center gap-1.5 rounded-lg border border-[#262B2D] bg-[#101314] hover:border-[#C6F24E]/40 transition-all" title={tool.name}>
                 <span className="text-lg">{tool.icon}</span>
-                <span className="text-xs text-slate-400">{tool.name}</span>
+                <span className="text-xs text-text-muted">{tool.name}</span>
               </div>
             ))}
-            <span className="rounded-full border border-[#262B2D] px-3 py-1.5 text-xs text-[#5A615D]">+50 more</span>
+            <span className="rounded-full border border-[#262B2D] px-3 py-1.5 text-xs text-text-muted">+50 more</span>
             <Link href="/submit" className="rounded-full border border-[#C6F24E]/30 bg-[#C6F24E]/10 px-3 py-1.5 text-xs text-[#C6F24E] hover:bg-[#C6F24E]/20 hover:border-[#C6F24E]/50 transition-all">
               Creator program →
             </Link>
@@ -146,7 +157,7 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-[#262B2D]">
         <div className="mx-auto max-w-7xl px-4 py-5">
-          <div className="flex flex-col gap-3 text-center text-xs text-[#5A615D] md:flex-row md:justify-between md:text-left">
+          <div className="flex flex-col gap-3 text-center text-xs text-text-muted md:flex-row md:justify-between md:text-left">
             <p>&copy; {new Date().getFullYear()} WorkflowStacks. All rights reserved.</p>
             <div className="flex justify-center gap-6">
               <Link href="/terms" className="hover:text-[#C6F24E] transition-colors">Terms</Link>

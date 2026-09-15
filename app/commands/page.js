@@ -3,6 +3,7 @@ import { ArrowLeft, Terminal, Lightbulb } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { SLASH_COMMANDS } from '@/lib/commands'
+import { itemListSchema, breadcrumbSchema } from '@/lib/schema'
 
 function starsOf(s) {
   const m = /^([\d,]+)★/.exec(s || '')
@@ -20,12 +21,25 @@ export default function CommandsIndexPage() {
   const categories = [...new Set(commands.map((c) => c.category))]
   const totalStars = commands.reduce((n, c) => n + starsOf(c.stat), 0)
 
+  const list = itemListSchema({
+    name: 'Claude Code slash commands',
+    description: 'Verified, copy-paste Claude Code slash commands.',
+    url: '/commands',
+    items: commands.map((c) => ({ name: c.title || c.name, url: `https://workflowstacks.com/commands/${c.slug}` })),
+  })
+  const crumbs = breadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Slash commands', path: '/commands' },
+  ])
+
   return (
     <div className="min-h-screen bg-neptune">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(list) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Home
             </Button>
           </Link>
@@ -37,11 +51,11 @@ export default function CommandsIndexPage() {
           <Terminal className="w-8 h-8 text-[#C6F24E]" />
           <h1 className="text-4xl md:text-5xl font-bold text-white text-center">Claude Code slash commands</h1>
         </div>
-        <p className="text-lg text-slate-300 text-center mb-6 max-w-2xl mx-auto">
+        <p className="text-lg text-text-secondary text-center mb-6 max-w-2xl mx-auto">
           The actual command file, not a description of one — hand-verified, copy-paste into <code className="text-[#C6F24E]">.claude/commands/</code>.
         </p>
 
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-12 text-sm text-slate-500">
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-12 text-sm text-text-muted">
           <span>{commands.length} commands</span>
           <span>·</span>
           <span>{categories.length} categories</span>
@@ -51,7 +65,7 @@ export default function CommandsIndexPage() {
 
         {categories.map((cat) => (
           <div key={cat} className="mb-10">
-            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-500 mb-3">{cat}</h2>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-text-muted mb-3">{cat}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {commands.filter((c) => c.category === cat).map((c) => (
                 <Link key={c.slug} href={`/commands/${c.slug}`}>
@@ -59,13 +73,13 @@ export default function CommandsIndexPage() {
                     <CardContent className="py-4">
                       <div className="flex items-center justify-between gap-2 mb-1">
                         <h3 className="text-white font-semibold font-mono">{c.name}</h3>
-                        <span className="text-[10px] font-mono text-slate-600 bg-slate-950/60 border border-slate-800 rounded px-1.5 py-0.5 shrink-0">{c.license}</span>
+                        <span className="text-[10px] font-mono text-text-muted bg-slate-950/60 border border-slate-800 rounded px-1.5 py-0.5 shrink-0">{c.license}</span>
                       </div>
-                      <p className="text-slate-400 text-sm leading-relaxed mb-2">{c.blurb}</p>
+                      <p className="text-text-muted text-sm leading-relaxed mb-2">{c.blurb}</p>
                       {c.idea && (
-                        <p className="text-xs text-slate-500 flex items-start gap-1.5">
+                        <p className="text-xs text-text-muted flex items-start gap-1.5">
                           <Lightbulb className="w-3.5 h-3.5 text-[#C6F24E]/70 shrink-0 mt-0.5" />
-                          <span><span className="text-slate-400">Try it for:</span> {c.idea}</span>
+                          <span><span className="text-text-muted">Try it for:</span> {c.idea}</span>
                         </p>
                       )}
                     </CardContent>
@@ -76,7 +90,7 @@ export default function CommandsIndexPage() {
           </div>
         ))}
 
-        <p className="text-sm text-slate-500 text-center mt-6">
+        <p className="text-sm text-text-muted text-center mt-6">
           New to Claude Code slash commands? <a href="https://docs.anthropic.com/en/docs/claude-code" target="_blank" rel="noopener noreferrer" className="text-[#C6F24E] hover:text-[#A6D62E] underline underline-offset-2">Read the official docs</a>.
         </p>
       </div>

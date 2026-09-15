@@ -8,7 +8,7 @@ export default function NotFound() {
       <div className="text-center max-w-md">
         <div className="text-7xl font-extrabold text-gradient-neptune mb-4">404</div>
         <h1 className="text-2xl font-bold text-white mb-3">This page wandered off</h1>
-        <p className="text-slate-400 mb-8">
+        <p className="text-text-muted mb-8">
           The page or skill you're looking for doesn't exist or may have been moved.
         </p>
         <div className="flex gap-3 justify-center">
@@ -18,7 +18,7 @@ export default function NotFound() {
             </span>
           </Link>
           <Link href="/skills">
-            <span className="inline-block px-5 py-2.5 rounded-lg border border-slate-700 text-slate-200">
+            <span className="inline-block px-5 py-2.5 rounded-lg border border-slate-700 text-text-secondary">
               Browse Skills
             </span>
           </Link>

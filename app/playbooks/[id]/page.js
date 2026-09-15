@@ -1,10 +1,11 @@
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { ArrowLeft, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { resolveItem, slugifyName } from '@/lib/collections'
 
 export const revalidate = 86400
 
@@ -19,13 +20,25 @@ async function getPlaybook(id) {
   }
 }
 
+// The path segment used to be a raw UUID and nothing else. Both forms now
+// resolve — already-indexed and externally linked UUID URLs keep working — but
+// only the slug is canonical, and the page permanently redirects the UUID to
+// it so a single URL accumulates the signal.
+async function load(param) {
+  const hit = await resolveItem('playbooks', param)
+  if (!hit) return null
+  const data = await getPlaybook(hit.item.id)
+  if (!data) return null
+  return { ...data, slug: hit.item._slug, matchedBy: hit.matchedBy }
+}
+
 export async function generateMetadata({ params }) {
-  const data = await getPlaybook(params.id)
+  const data = await load(params.id)
   if (!data) return { title: 'Playbook not found | WorkflowStacks', robots: { index: false, follow: false } }
   const p = data.playbook
   const title = `${p.title} | WorkflowStacks Playbook`
   const description = (p.description || p.outcome || '').slice(0, 160)
-  const url = `/playbooks/${p.id}`
+  const url = `/playbooks/${data.slug || p.id}`
   return {
     title,
     description,
@@ -35,8 +48,11 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function PlaybookDetailPage({ params }) {
-  const data = await getPlaybook(params.id)
+  const data = await load(params.id)
   if (!data) notFound()
+  if (data.matchedBy === 'id' && data.slug && data.slug !== params.id) {
+    permanentRedirect(`/playbooks/${data.slug}`)
+  }
   const { playbook, skills } = data
   const builderHref = `/builder?skillIds=${(playbook.skillIds || []).join(',')}&goal=${encodeURIComponent(playbook.title)}`
 
@@ -58,7 +74,7 @@ export default async function PlaybookDetailPage({ params }) {
       <header className="border-b border-slate-700/50 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/playbooks">
-            <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/5">
+            <Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5">
               <ArrowLeft className="w-4 h-4 mr-2" />Back to Playbooks
             </Button>
           </Link>
@@ -68,26 +84,26 @@ export default async function PlaybookDetailPage({ params }) {
       <div className="container mx-auto px-4 py-12 max-w-6xl">
         <div className="mb-10">
           <h1 className="text-4xl font-bold text-white mb-3">{playbook.title}</h1>
-          <p className="text-xl text-slate-300 mb-5">{playbook.description}</p>
+          <p className="text-xl text-text-secondary mb-5">{playbook.description}</p>
           <div className="flex flex-wrap items-center gap-3 mb-6">
             {playbook.timeEstimate && (
-              <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-200">⏱️ {playbook.timeEstimate}</span>
+              <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-text-secondary">⏱️ {playbook.timeEstimate}</span>
             )}
             {playbook.skillIds?.length > 0 && (
-              <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-slate-200">🧩 {playbook.skillIds.length} skills</span>
+              <span className="flex items-center gap-1.5 text-sm bg-slate-800/60 border border-slate-700/50 rounded-full px-3 py-1 text-text-secondary">🧩 {playbook.skillIds.length} skills</span>
             )}
             <span className="flex items-center gap-1.5 text-sm bg-emerald-500/10 border border-emerald-500/30 rounded-full px-3 py-1 text-emerald-300">100% free</span>
           </div>
           {playbook.outcome && (
             <div className="bg-teal-500/10 border border-teal-500/20 rounded-lg p-4 mb-4">
               <h3 className="text-teal-300 font-semibold mb-1">What you'll have at the end:</h3>
-              <p className="text-slate-200">{playbook.outcome}</p>
+              <p className="text-text-secondary">{playbook.outcome}</p>
             </div>
           )}
           {playbook.problem && (
             <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-4 mb-6">
               <h3 className="text-orange-400 font-semibold mb-1">Problem this solves:</h3>
-              <p className="text-slate-300">{playbook.problem}</p>
+              <p className="text-text-secondary">{playbook.problem}</p>
             </div>
           )}
           <Link href={builderHref}>
@@ -109,7 +125,7 @@ export default async function PlaybookDetailPage({ params }) {
                       <h3 className="text-lg font-semibold text-white">{step.title}</h3>
                       {step.skill && <Badge className="bg-teal-500/10 text-teal-300 border-teal-500/20 border text-xs">{step.skill}</Badge>}
                     </div>
-                    <p className="text-slate-300">{step.detail}</p>
+                    <p className="text-text-secondary">{step.detail}</p>
                   </div>
                 </div>
               ))}
@@ -125,7 +141,7 @@ export default async function PlaybookDetailPage({ params }) {
                 <Card key={skill.id} className="bg-slate-900/60 border-slate-700/50 backdrop-blur-xl">
                   <CardHeader>
                     <CardTitle className="text-white">{skill.title_human || skill.name}</CardTitle>
-                    <CardDescription className="text-slate-400 line-clamp-2">{skill.description_human || skill.description}</CardDescription>
+                    <CardDescription className="text-text-muted line-clamp-2">{skill.description_human || skill.description}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Link href={`/skills/${skill.slug || skill.id}`}>

@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge'
 
 const CARD = 'bg-[#101314] border-[#262B2D]'
 const LIME = 'bg-[#C6F24E] text-[#0A0C0D] hover:bg-[#A6D62E]'
-const SECONDARY = 'border border-[#323A3C] text-[#ECEFEA] hover:bg-white/5 bg-transparent'
+const SECONDARY = 'border border-[#323A3C] text-text-primary hover:bg-white/5 bg-transparent'
 
 function relTime(iso) {
   if (!iso) return '—'
@@ -99,9 +99,9 @@ export default function AdminPage() {
         <Card className={`${CARD} w-full max-w-sm`}>
           <CardContent className="py-8 text-center">
             <Lock className="w-10 h-10 text-[#C6F24E] mx-auto mb-4" />
-            <p className="text-xs uppercase tracking-widest text-[#7A8487] mb-1">// BACKEND</p>
+            <p className="text-xs uppercase tracking-widest text-text-muted mb-1">// BACKEND</p>
             <h1 className="text-xl font-bold text-white mb-1">Admin Control</h1>
-            <p className="text-[#7A8487] text-sm mb-6">Enter your admin secret to continue.</p>
+            <p className="text-text-muted text-sm mb-6">Enter your admin secret to continue.</p>
             <Input
               type="password"
               value={secret}
@@ -146,7 +146,7 @@ export default function AdminPage() {
               <Key className="w-5 h-5 text-[#C6F24E]" />
               <h2 className="text-white font-semibold">API key for {apiKeyModal.name}</h2>
             </div>
-            <p className="text-[#7A8487] text-xs mb-2">Share this key with the creator. It won&apos;t be shown again.</p>
+            <p className="text-text-muted text-xs mb-2">Share this key with the creator. It won&apos;t be shown again.</p>
             <div className="bg-[#0A0C0D] border border-[#262B2D] rounded-lg px-3 py-2 font-mono text-sm text-[#C6F24E] break-all mb-4">{apiKeyModal.key}</div>
             <div className="flex gap-2 justify-end">
               <Button onClick={() => { navigator.clipboard.writeText(apiKeyModal.key); showToast('Copied!') }} size="sm" className={SECONDARY}><Copy className="w-3.5 h-3.5 mr-1" />Copy</Button>
@@ -161,7 +161,7 @@ export default function AdminPage() {
         <div className="container mx-auto px-4 pt-5 pb-3 max-w-7xl">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#7A8487] mb-0.5">// BACKEND</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-text-muted mb-0.5">// BACKEND</p>
               <h1 className="text-white font-bold text-xl leading-none">Admin Control</h1>
             </div>
             <Button onClick={lock} size="sm" className={SECONDARY}><Lock className="w-3.5 h-3.5 mr-1.5" />Lock</Button>
@@ -175,7 +175,7 @@ export default function AdminPage() {
                   key={t.id}
                   onClick={() => setActiveTab(t.id)}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-                    active ? 'bg-[#C6F24E]/15 text-[#C6F24E]' : 'text-[#7A8487] hover:text-[#ECEFEA] hover:bg-white/5'
+                    active ? 'bg-[#C6F24E]/15 text-[#C6F24E]' : 'text-text-muted hover:text-text-primary hover:bg-white/5'
                   }`}
                 >
                   <Icon className="w-4 h-4" />{t.label}
@@ -266,7 +266,7 @@ function OverviewTab({ hdr, showToast, busy, setBusy }) {
         {CARDS.map((c) => (
           <Card key={c.key} className={CARD}>
             <CardContent className="p-4">
-              <div className="text-[11px] uppercase tracking-wider text-[#7A8487] mb-1">{c.label}</div>
+              <div className="text-[11px] uppercase tracking-wider text-text-muted mb-1">{c.label}</div>
               {loading ? (
                 <Skeleton className="h-7 w-16" />
               ) : (
@@ -309,11 +309,11 @@ function OverviewTab({ hdr, showToast, busy, setBusy }) {
         </CardHeader>
         <CardContent>
           {searchTrends.length === 0 ? (
-            <p className="text-slate-500 text-sm">No searches yet. They'll appear as users start using the site.</p>
+            <p className="text-text-muted text-sm">No searches yet. They'll appear as users start using the site.</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {searchTrends.slice(0, 20).map((t) => (
-                <span key={t._id} className="inline-flex items-center gap-2 bg-[#0A0C0D] border border-[#262B2D] rounded-full px-3 py-1 text-sm text-slate-200">
+                <span key={t._id} className="inline-flex items-center gap-2 bg-[#0A0C0D] border border-[#262B2D] rounded-full px-3 py-1 text-sm text-text-secondary">
                   {t._id}
                   <span className="text-[#C6F24E] font-mono text-xs">{t.count}</span>
                 </span>
@@ -417,7 +417,7 @@ function SkillsTab({ hdr, jhdr, showToast }) {
           <form onSubmit={submitEdit} className={`${CARD} rounded-xl p-6 max-w-lg w-full border max-h-[90vh] overflow-y-auto`}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-white font-semibold flex items-center gap-2"><Edit className="w-4 h-4 text-[#C6F24E]" />Edit skill</h2>
-              <button type="button" onClick={() => setEditing(null)} className="text-[#7A8487] hover:text-white"><X className="w-4 h-4" /></button>
+              <button type="button" onClick={() => setEditing(null)} className="text-text-muted hover:text-white"><X className="w-4 h-4" /></button>
             </div>
             <div className="space-y-3">
               <Field label="Title">
@@ -433,10 +433,10 @@ function SkillsTab({ hdr, jhdr, showToast }) {
                 <Input name="price" type="number" step="0.01" defaultValue={editing.price ?? ''} className="bg-[#0A0C0D] border-[#262B2D] text-white" />
               </Field>
               <div className="flex gap-6 pt-2">
-                <label className="flex items-center gap-2 text-sm text-[#ECEFEA]">
+                <label className="flex items-center gap-2 text-sm text-text-primary">
                   <input type="checkbox" name="published" defaultChecked={!!editing.published} className="accent-[#C6F24E]" /> Published
                 </label>
-                <label className="flex items-center gap-2 text-sm text-[#ECEFEA]">
+                <label className="flex items-center gap-2 text-sm text-text-primary">
                   <input type="checkbox" name="is_premium" defaultChecked={!!editing.is_premium} className="accent-[#C6F24E]" /> Premium
                 </label>
               </div>
@@ -454,14 +454,14 @@ function SkillsTab({ hdr, jhdr, showToast }) {
       <Card className={CARD}>
         <CardContent className="p-4 flex flex-wrap items-center gap-3">
           <div className="flex-1 min-w-[200px] relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#7A8487]" />
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search name or description…" className="bg-[#0A0C0D] border-[#262B2D] text-white pl-9" />
           </div>
           <select value={cat} onChange={(e) => setCat(e.target.value)} className="bg-[#0A0C0D] border border-[#262B2D] text-white text-sm rounded-md px-3 py-2">
             <option value="">All categories</option>
             {categories.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
-          <label className="flex items-center gap-2 text-sm text-[#ECEFEA]">
+          <label className="flex items-center gap-2 text-sm text-text-primary">
             <input type="checkbox" checked={showUnpub} onChange={(e) => setShowUnpub(e.target.checked)} className="accent-[#C6F24E]" /> Show unpublished
           </label>
           <Button onClick={load} size="sm" className={SECONDARY}><RefreshCw className="w-3.5 h-3.5 mr-1.5" />Refresh</Button>
@@ -471,18 +471,18 @@ function SkillsTab({ hdr, jhdr, showToast }) {
       <Card className={CARD}>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-white text-base">Skills ({filtered.length})</CardTitle>
-          <div className="text-xs text-[#7A8487]">Page {page + 1} / {pageCount}</div>
+          <div className="text-xs text-text-muted">Page {page + 1} / {pageCount}</div>
         </CardHeader>
         <CardContent>
           {loading ? (
             <div className="space-y-2">{Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-12" />)}</div>
           ) : pageItems.length === 0 ? (
-            <p className="text-[#7A8487] text-sm">No skills match.</p>
+            <p className="text-text-muted text-sm">No skills match.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[#7A8487] border-b border-[#262B2D]">
+                  <tr className="text-text-muted border-b border-[#262B2D]">
                     <th className="text-left font-medium pb-2 pr-3">Name</th>
                     <th className="text-left font-medium pb-2 pr-3">Category</th>
                     <th className="text-left font-medium pb-2 pr-3">Stars</th>
@@ -492,12 +492,12 @@ function SkillsTab({ hdr, jhdr, showToast }) {
                 </thead>
                 <tbody className="divide-y divide-[#262B2D]">
                   {pageItems.map((s) => (
-                    <tr key={s.id} className="text-[#ECEFEA] hover:bg-white/5">
+                    <tr key={s.id} className="text-text-primary hover:bg-white/5">
                       <td className="py-2 pr-3 font-medium text-white max-w-xs truncate" title={s.title_human || s.name}>{s.title_human || s.name || '—'}</td>
-                      <td className="py-2 pr-3"><Badge className="bg-[#0A0C0D] border-[#262B2D] border text-[#ECEFEA]">{s.category || '—'}</Badge></td>
-                      <td className="py-2 pr-3 text-[#7A8487]">{s.github_stars ?? s.stars ?? '—'}</td>
+                      <td className="py-2 pr-3"><Badge className="bg-[#0A0C0D] border-[#262B2D] border text-text-primary">{s.category || '—'}</Badge></td>
+                      <td className="py-2 pr-3 text-text-muted">{s.github_stars ?? s.stars ?? '—'}</td>
                       <td className="py-2 pr-3">
-                        <button onClick={() => togglePublished(s)} disabled={savingId === s.id} className={`text-xs px-2 py-0.5 rounded-full border ${s.published ? 'bg-[#C6F24E]/15 text-[#C6F24E] border-[#C6F24E]/30' : 'bg-white/5 text-[#7A8487] border-[#323A3C]'}`}>
+                        <button onClick={() => togglePublished(s)} disabled={savingId === s.id} className={`text-xs px-2 py-0.5 rounded-full border ${s.published ? 'bg-[#C6F24E]/15 text-[#C6F24E] border-[#C6F24E]/30' : 'bg-white/5 text-text-muted border-[#323A3C]'}`}>
                           {s.published ? 'published' : 'draft'}
                         </button>
                       </td>
@@ -506,7 +506,7 @@ function SkillsTab({ hdr, jhdr, showToast }) {
                           <a href={`/skills/${s.slug || s.id}`} target="_blank" rel="noreferrer" className="inline-flex items-center text-xs text-[#C6F24E] hover:underline px-2 py-1">
                             <Eye className="w-3.5 h-3.5 mr-1" />View
                           </a>
-                          <button onClick={() => setEditing(s)} className="inline-flex items-center text-xs text-[#ECEFEA] hover:bg-white/5 px-2 py-1 rounded border border-[#323A3C]">
+                          <button onClick={() => setEditing(s)} className="inline-flex items-center text-xs text-text-primary hover:bg-white/5 px-2 py-1 rounded border border-[#323A3C]">
                             <Edit className="w-3.5 h-3.5 mr-1" />Edit
                           </button>
                         </div>
@@ -521,7 +521,7 @@ function SkillsTab({ hdr, jhdr, showToast }) {
           {pageCount > 1 && (
             <div className="flex justify-between items-center mt-4">
               <Button onClick={() => setPage((p) => Math.max(0, p - 1))} disabled={page === 0} size="sm" className={SECONDARY}>Prev</Button>
-              <div className="text-xs text-[#7A8487]">{page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}</div>
+              <div className="text-xs text-text-muted">{page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}</div>
               <Button onClick={() => setPage((p) => Math.min(pageCount - 1, p + 1))} disabled={page >= pageCount - 1} size="sm" className={SECONDARY}>Next</Button>
             </div>
           )}
@@ -534,7 +534,7 @@ function SkillsTab({ hdr, jhdr, showToast }) {
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="text-xs uppercase tracking-wider text-[#7A8487] mb-1 block">{label}</span>
+      <span className="text-xs uppercase tracking-wider text-text-muted mb-1 block">{label}</span>
       {children}
     </label>
   )
@@ -662,7 +662,7 @@ WorkflowStacks`
       case 'replied':   return 'bg-purple-500/15 text-purple-300 border-purple-500/30'
       case 'declined':  return 'bg-red-500/15 text-red-300 border-red-500/30'
       case 'converted': return 'bg-[#C6F24E]/15 text-[#C6F24E] border-[#C6F24E]/30'
-      default:          return 'bg-white/5 text-[#7A8487] border-[#323A3C]'
+      default:          return 'bg-white/5 text-text-muted border-[#323A3C]'
     }
   }
 
@@ -674,11 +674,11 @@ WorkflowStacks`
           <div className={`${CARD} rounded-xl p-6 max-w-2xl w-full border max-h-[92vh] overflow-y-auto`}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-white font-semibold flex items-center gap-2"><Send className="w-4 h-4 text-[#C6F24E]" />Send outreach</h2>
-              <button onClick={() => setOutreach(null)} className="text-[#7A8487] hover:text-white"><X className="w-4 h-4" /></button>
+              <button onClick={() => setOutreach(null)} className="text-text-muted hover:text-white"><X className="w-4 h-4" /></button>
             </div>
             <div className="space-y-3 text-sm">
-              <div className="text-[#7A8487]"><span className="text-[#ECEFEA]">To:</span> {outreach.lead.email}</div>
-              <div className="text-[#7A8487]"><span className="text-[#ECEFEA]">Re:</span> {outreach.lead.skill_name}</div>
+              <div className="text-text-muted"><span className="text-text-primary">To:</span> {outreach.lead.email}</div>
+              <div className="text-text-muted"><span className="text-text-primary">Re:</span> {outreach.lead.skill_name}</div>
               <Field label="Subject">
                 <Input value={outreach.subject} onChange={(e) => setOutreach({ ...outreach, subject: e.target.value })} className="bg-[#0A0C0D] border-[#262B2D] text-white" />
               </Field>
@@ -707,12 +707,12 @@ WorkflowStacks`
           {loading ? (
             <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10" />)}</div>
           ) : apps.length === 0 ? (
-            <p className="text-[#7A8487] text-sm">No applications yet.</p>
+            <p className="text-text-muted text-sm">No applications yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[#7A8487] border-b border-[#262B2D]">
+                  <tr className="text-text-muted border-b border-[#262B2D]">
                     <th className="text-left font-medium pb-2 pr-3">Name</th>
                     <th className="text-left font-medium pb-2 pr-3">Email</th>
                     <th className="text-left font-medium pb-2 pr-3">GitHub</th>
@@ -727,13 +727,13 @@ WorkflowStacks`
                     const listing = a.listing_description || a.what_to_list || a.description || '—'
                     const status = a.status || 'pending'
                     return (
-                      <tr key={a.id} className="text-[#ECEFEA] hover:bg-white/5">
+                      <tr key={a.id} className="text-text-primary hover:bg-white/5">
                         <td className="py-2 pr-3 font-medium text-white">{a.name || '—'}</td>
-                        <td className="py-2 pr-3 text-[#7A8487]">{a.email || '—'}</td>
+                        <td className="py-2 pr-3 text-text-muted">{a.email || '—'}</td>
                         <td className="py-2 pr-3">
                           {a.github ? <a href={`https://github.com/${a.github.replace(/^@/, '')}`} target="_blank" rel="noreferrer" className="text-[#C6F24E] hover:underline">{a.github}</a> : '—'}
                         </td>
-                        <td className="py-2 pr-3 text-[#7A8487] max-w-xs" title={listing}>{truncate(listing, 80)}</td>
+                        <td className="py-2 pr-3 text-text-muted max-w-xs" title={listing}>{truncate(listing, 80)}</td>
                         <td className="py-2 pr-3">
                           <Badge className={
                             status === 'approved' ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 border' :
@@ -741,7 +741,7 @@ WorkflowStacks`
                             'bg-amber-500/15 text-amber-400 border-amber-500/30 border'
                           }>{status}</Badge>
                         </td>
-                        <td className="py-2 pr-3 text-[#7A8487]">{a.created_at ? new Date(a.created_at).toLocaleDateString() : '—'}</td>
+                        <td className="py-2 pr-3 text-text-muted">{a.created_at ? new Date(a.created_at).toLocaleDateString() : '—'}</td>
                         <td className="py-2">
                           {status === 'pending' && (
                             <Button onClick={() => approveCreator(a)} disabled={busy === `creator-${a.id}`} size="sm" className={LIME}>
@@ -773,7 +773,7 @@ WorkflowStacks`
               { id: 'emailed', label: 'Emailed' },
               { id: 'replied', label: 'Replied' },
             ].map((f) => (
-              <button key={f.id} onClick={() => setFilter(f.id)} className={`text-xs px-2.5 py-1 rounded-md border ${filter === f.id ? 'bg-[#C6F24E]/15 text-[#C6F24E] border-[#C6F24E]/30' : 'text-[#7A8487] border-[#323A3C] hover:text-[#ECEFEA]'}`}>
+              <button key={f.id} onClick={() => setFilter(f.id)} className={`text-xs px-2.5 py-1 rounded-md border ${filter === f.id ? 'bg-[#C6F24E]/15 text-[#C6F24E] border-[#C6F24E]/30' : 'text-text-muted border-[#323A3C] hover:text-text-primary'}`}>
                 {f.label}
               </button>
             ))}
@@ -787,12 +787,12 @@ WorkflowStacks`
           {loading ? (
             <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10" />)}</div>
           ) : filteredLeads.length === 0 ? (
-            <p className="text-[#7A8487] text-sm">No leads.</p>
+            <p className="text-text-muted text-sm">No leads.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[#7A8487] border-b border-[#262B2D]">
+                  <tr className="text-text-muted border-b border-[#262B2D]">
                     <th className="text-left font-medium pb-2 pr-3">Username</th>
                     <th className="text-left font-medium pb-2 pr-3">Email</th>
                     <th className="text-left font-medium pb-2 pr-3">Skill</th>
@@ -806,21 +806,21 @@ WorkflowStacks`
                   {filteredLeads.map((l, idx) => {
                     const status = l.status || 'discovered'
                     return (
-                      <tr key={l.id || l.creator_username || idx} className="text-[#ECEFEA] hover:bg-white/5">
+                      <tr key={l.id || l.creator_username || idx} className="text-text-primary hover:bg-white/5">
                         <td className="py-2 pr-3 font-medium text-white">@{l.creator_username || '—'}</td>
-                        <td className="py-2 pr-3 text-[#7A8487]">{l.email || <span className="italic opacity-60">no email</span>}</td>
+                        <td className="py-2 pr-3 text-text-muted">{l.email || <span className="italic opacity-60">no email</span>}</td>
                         <td className="py-2 pr-3 max-w-xs truncate" title={l.skill_name}>{l.skill_name || '—'}</td>
-                        <td className="py-2 pr-3 text-[#7A8487]">{l.stars ?? '—'}</td>
+                        <td className="py-2 pr-3 text-text-muted">{l.stars ?? '—'}</td>
                         <td className="py-2 pr-3">
                           <div className="flex flex-wrap gap-1">
                             {STATUS_OPTIONS.map((opt) => (
-                              <button key={opt} onClick={() => updateLeadStatus(l, opt)} className={`text-[10px] px-1.5 py-0.5 rounded border ${status === opt ? statusClass(opt) : 'border-[#262B2D] text-[#7A8487]/60 hover:text-[#ECEFEA]'}`}>
+                              <button key={opt} onClick={() => updateLeadStatus(l, opt)} className={`text-[10px] px-1.5 py-0.5 rounded border ${status === opt ? statusClass(opt) : 'border-[#262B2D] opacity-60 text-text-muted hover:text-text-primary'}`}>
                                 {opt}
                               </button>
                             ))}
                           </div>
                         </td>
-                        <td className="py-2 pr-3 text-[#7A8487]">{relTime(l.last_touched_at || l.updated_at || l.created_at)}</td>
+                        <td className="py-2 pr-3 text-text-muted">{relTime(l.last_touched_at || l.updated_at || l.created_at)}</td>
                         <td className="py-2">
                           {l.email && (
                             <Button onClick={() => openOutreach(l)} size="sm" className={LIME}>
@@ -916,20 +916,20 @@ function NewsletterTab({ hdr, showToast, busy, setBusy }) {
           {loading ? (
             <Skeleton className="h-24" />
           ) : !pick ? (
-            <p className="text-[#7A8487] text-sm">No pick available.</p>
+            <p className="text-text-muted text-sm">No pick available.</p>
           ) : (
             <div className="space-y-3">
               <div>
                 <div className="text-white font-semibold text-lg">{pick.title_human || pick.name}</div>
-                <div className="text-xs text-[#7A8487] mt-0.5">{pick.category || '—'} · {pick.github_stars ?? pick.stars ?? 0}★</div>
-                <p className="text-sm text-[#ECEFEA] mt-2">{pick.description_human || pick.description || '—'}</p>
+                <div className="text-xs text-text-muted mt-0.5">{pick.category || '—'} · {pick.github_stars ?? pick.stars ?? 0}★</div>
+                <p className="text-sm text-text-primary mt-2">{pick.description_human || pick.description || '—'}</p>
               </div>
               {alts.length > 0 && (
                 <div className="pt-2 border-t border-[#262B2D]">
-                  <div className="text-xs uppercase tracking-wider text-[#7A8487] mb-2">Alternates</div>
+                  <div className="text-xs uppercase tracking-wider text-text-muted mb-2">Alternates</div>
                   <ul className="text-sm space-y-1">
                     {alts.slice(0, 4).map((a, i) => (
-                      <li key={i} className="text-[#ECEFEA]">• {a.title_human || a.name} <span className="text-[#7A8487]">— {a.github_stars ?? a.stars ?? 0}★</span></li>
+                      <li key={i} className="text-text-primary">• {a.title_human || a.name} <span className="text-text-muted">— {a.github_stars ?? a.stars ?? 0}★</span></li>
                     ))}
                   </ul>
                 </div>
@@ -956,12 +956,12 @@ function NewsletterTab({ hdr, showToast, busy, setBusy }) {
           {loading ? (
             <Skeleton className="h-20" />
           ) : sends.length === 0 ? (
-            <p className="text-[#7A8487] text-sm">No sends yet.</p>
+            <p className="text-text-muted text-sm">No sends yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[#7A8487] border-b border-[#262B2D]">
+                  <tr className="text-text-muted border-b border-[#262B2D]">
                     <th className="text-left font-medium pb-2 pr-3">Skill</th>
                     <th className="text-left font-medium pb-2 pr-3">Sent at</th>
                     <th className="text-left font-medium pb-2 pr-3">Recipients</th>
@@ -969,9 +969,9 @@ function NewsletterTab({ hdr, showToast, busy, setBusy }) {
                 </thead>
                 <tbody className="divide-y divide-[#262B2D]">
                   {sends.map((s, i) => (
-                    <tr key={s.id || i} className="text-[#ECEFEA]">
+                    <tr key={s.id || i} className="text-text-primary">
                       <td className="py-2 pr-3">{s.skill_name || s.title_human || s.skill_id || '—'}</td>
-                      <td className="py-2 pr-3 text-[#7A8487]">{s.sent_at ? new Date(s.sent_at).toLocaleString() : '—'}</td>
+                      <td className="py-2 pr-3 text-text-muted">{s.sent_at ? new Date(s.sent_at).toLocaleString() : '—'}</td>
                       <td className="py-2 pr-3">{s.recipient_count ?? s.recipients ?? '—'}</td>
                     </tr>
                   ))}
@@ -995,19 +995,19 @@ function NewsletterTab({ hdr, showToast, busy, setBusy }) {
         {showSubs && (
           <CardContent>
             {subscribers.length === 0 ? (
-              <p className="text-[#7A8487] text-sm">No subscribers.</p>
+              <p className="text-text-muted text-sm">No subscribers.</p>
             ) : (
               <>
                 <ul className="text-sm space-y-1">
                   {subsPageItems.map((s, i) => {
                     const email = typeof s === 'string' ? s : (s.email || '—')
-                    return <li key={i} className="text-[#ECEFEA] font-mono text-xs">{email}</li>
+                    return <li key={i} className="text-text-primary font-mono text-xs">{email}</li>
                   })}
                 </ul>
                 {subsPageCount > 1 && (
                   <div className="flex justify-between items-center mt-4">
                     <Button onClick={() => setSubsPage((p) => Math.max(0, p - 1))} disabled={subsPage === 0} size="sm" className={SECONDARY}>Prev</Button>
-                    <div className="text-xs text-[#7A8487]">Page {subsPage + 1} / {subsPageCount}</div>
+                    <div className="text-xs text-text-muted">Page {subsPage + 1} / {subsPageCount}</div>
                     <Button onClick={() => setSubsPage((p) => Math.min(subsPageCount - 1, p + 1))} disabled={subsPage >= subsPageCount - 1} size="sm" className={SECONDARY}>Next</Button>
                   </div>
                 )}
@@ -1089,25 +1089,25 @@ function DfyTab({ hdr, jhdr, showToast }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Card className={CARD}>
           <CardContent className="p-4">
-            <div className="text-[11px] uppercase tracking-wider text-[#7A8487] mb-1">Total revenue</div>
+            <div className="text-[11px] uppercase tracking-wider text-text-muted mb-1">Total revenue</div>
             <div className="text-2xl font-bold text-[#C6F24E]">${stats?.totalPaidUsd ?? 0}</div>
           </CardContent>
         </Card>
         <Card className={CARD}>
           <CardContent className="p-4">
-            <div className="text-[11px] uppercase tracking-wider text-[#7A8487] mb-1"># paid</div>
+            <div className="text-[11px] uppercase tracking-wider text-text-muted mb-1"># paid</div>
             <div className="text-2xl font-bold text-white">{stats?.paid ?? 0}</div>
           </CardContent>
         </Card>
         <Card className={CARD}>
           <CardContent className="p-4">
-            <div className="text-[11px] uppercase tracking-wider text-[#7A8487] mb-1"># in pipeline</div>
+            <div className="text-[11px] uppercase tracking-wider text-text-muted mb-1"># in pipeline</div>
             <div className="text-2xl font-bold text-white">{inPipeline}</div>
           </CardContent>
         </Card>
         <Card className={CARD}>
           <CardContent className="p-4">
-            <div className="text-[11px] uppercase tracking-wider text-[#7A8487] mb-1"># delivered</div>
+            <div className="text-[11px] uppercase tracking-wider text-text-muted mb-1"># delivered</div>
             <div className="text-2xl font-bold text-white">{stats?.delivered ?? 0}</div>
           </CardContent>
         </Card>
@@ -1126,7 +1126,7 @@ function DfyTab({ hdr, jhdr, showToast }) {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
           {DFY_COLUMNS.map((col) => (
             <div key={col.id} className="space-y-2">
-              <div className="text-xs uppercase tracking-wider text-[#7A8487] flex items-center justify-between px-1">
+              <div className="text-xs uppercase tracking-wider text-text-muted flex items-center justify-between px-1">
                 <span>{col.label}</span>
                 <span className="text-[#C6F24E] font-mono">{grouped[col.id]?.length || 0}</span>
               </div>
@@ -1139,26 +1139,26 @@ function DfyTab({ hdr, jhdr, showToast }) {
                     <div key={r.id} className={`${CARD} border rounded-lg p-3 text-sm`}>
                       <div onClick={() => setExpanded(isOpen ? null : r.id)} className="cursor-pointer">
                         <div className="font-semibold text-white truncate" title={r.email}>{r.name || r.email}</div>
-                        <div className="text-[#7A8487] text-xs truncate">{r.email}</div>
-                        <div className="text-[#ECEFEA] text-xs mt-1.5 line-clamp-2">{r.agent_goal || <span className="italic opacity-60">(no goal)</span>}</div>
+                        <div className="text-text-muted text-xs truncate">{r.email}</div>
+                        <div className="text-text-primary text-xs mt-1.5 line-clamp-2">{r.agent_goal || <span className="italic opacity-60">(no goal)</span>}</div>
                         <div className="flex items-center justify-between mt-2">
                           <Badge className="bg-[#0A0C0D] border border-[#262B2D] text-[#C6F24E]">{r.tier || 'starter'} · ${tierPrice}</Badge>
-                          <span className="text-[10px] text-[#7A8487]">{relTime(r.created_at)}</span>
+                          <span className="text-[10px] text-text-muted">{relTime(r.created_at)}</span>
                         </div>
                       </div>
                       {isOpen && (
                         <div className="mt-3 pt-3 border-t border-[#262B2D] space-y-2 text-xs">
                           {r.preferred_contact_time && (
-                            <div><span className="text-[#7A8487]">Contact time:</span> <span className="text-[#ECEFEA]">{r.preferred_contact_time}</span></div>
+                            <div><span className="text-text-muted">Contact time:</span> <span className="text-text-primary">{r.preferred_contact_time}</span></div>
                           )}
                           {r.skill_ids?.length > 0 && (
                             <div>
-                              <span className="text-[#7A8487]">Skills:</span>{' '}
-                              <span className="text-[#ECEFEA]">{r.skill_ids.length} selected</span>
+                              <span className="text-text-muted">Skills:</span>{' '}
+                              <span className="text-text-primary">{r.skill_ids.length} selected</span>
                             </div>
                           )}
                           <div>
-                            <span className="text-[#7A8487] block mb-1">Notes:</span>
+                            <span className="text-text-muted block mb-1">Notes:</span>
                             <textarea
                               defaultValue={r.notes || ''}
                               onBlur={(e) => {
@@ -1191,7 +1191,7 @@ function DfyTab({ hdr, jhdr, showToast }) {
                   )
                 })}
                 {(grouped[col.id] || []).length === 0 && (
-                  <div className="text-[#7A8487] text-xs italic px-1 py-2">empty</div>
+                  <div className="text-text-muted text-xs italic px-1 py-2">empty</div>
                 )}
               </div>
             </div>
@@ -1204,7 +1204,7 @@ function DfyTab({ hdr, jhdr, showToast }) {
           <CardHeader>
             <CardTitle className="text-white text-sm">Declined ({grouped.declined.length})</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1 text-xs text-[#7A8487]">
+          <CardContent className="space-y-1 text-xs text-text-muted">
             {grouped.declined.map((r) => (
               <div key={r.id}>{r.email} — {truncate(r.agent_goal, 80)}</div>
             ))}
@@ -1249,7 +1249,7 @@ const ROADMAP = [
 function statusBadge(status) {
   if (status === 'live') return 'bg-[#C6F24E]/15 text-[#C6F24E] border-[#C6F24E]/30'
   if (status === 'in-progress') return 'bg-amber-500/15 text-amber-300 border-amber-500/30'
-  return 'bg-white/5 text-[#7A8487] border-[#323A3C]'
+  return 'bg-white/5 text-text-muted border-[#323A3C]'
 }
 
 function RoadmapTab() {
@@ -1257,8 +1257,8 @@ function RoadmapTab() {
     <div className="space-y-6">
       <Card className={CARD}>
         <CardContent className="p-4">
-          <p className="text-sm text-[#ECEFEA]">
-            <span className="text-[#7A8487]">Current revenue surface:</span> Done-for-You. <span className="text-[#7A8487]">Total runway:</span> $0 / mo so far. <span className="text-[#C6F24E]">Target: $1k MRR by August.</span>
+          <p className="text-sm text-text-primary">
+            <span className="text-text-muted">Current revenue surface:</span> Done-for-You. <span className="text-text-muted">Total runway:</span> $0 / mo so far. <span className="text-[#C6F24E]">Target: $1k MRR by August.</span>
           </p>
         </CardContent>
       </Card>
@@ -1274,8 +1274,8 @@ function RoadmapTab() {
                     <h3 className="text-white font-semibold text-sm leading-snug">{item.title}</h3>
                     <Badge className={`${statusBadge(item.status)} border text-[10px] shrink-0`}>{item.status}</Badge>
                   </div>
-                  <p className="text-xs text-[#ECEFEA] leading-relaxed">{item.desc}</p>
-                  <div className="text-[11px] uppercase tracking-wider text-[#7A8487] pt-1 border-t border-[#262B2D]">
+                  <p className="text-xs text-text-primary leading-relaxed">{item.desc}</p>
+                  <div className="text-[11px] uppercase tracking-wider text-text-muted pt-1 border-t border-[#262B2D]">
                     MRR: <span className="text-[#C6F24E] normal-case tracking-normal font-mono">{item.mrr}</span>
                   </div>
                 </CardContent>
@@ -1344,12 +1344,12 @@ function AuditTab({ hdr, showToast }) {
           {loading ? (
             <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-8" />)}</div>
           ) : filtered.length === 0 ? (
-            <p className="text-[#7A8487] text-sm">No audit entries.</p>
+            <p className="text-text-muted text-sm">No audit entries.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="text-[#7A8487] border-b border-[#262B2D]">
+                  <tr className="text-text-muted border-b border-[#262B2D]">
                     <th className="text-left font-medium pb-2 pr-3">Action</th>
                     <th className="text-left font-medium pb-2 pr-3">IP</th>
                     <th className="text-left font-medium pb-2 pr-3">User-agent</th>
@@ -1358,11 +1358,11 @@ function AuditTab({ hdr, showToast }) {
                 </thead>
                 <tbody className="divide-y divide-[#262B2D]">
                   {filtered.map((e, i) => (
-                    <tr key={e.id || i} className="text-[#ECEFEA]">
+                    <tr key={e.id || i} className="text-text-primary">
                       <td className="py-1.5 pr-3 font-mono text-xs text-white">{e.path || e.action || '—'}</td>
-                      <td className="py-1.5 pr-3 text-[#7A8487] font-mono text-xs">{e.ip || '—'}</td>
-                      <td className="py-1.5 pr-3 text-[#7A8487] text-xs" title={e.user_agent || e.ua}>{truncate(e.user_agent || e.ua, 60)}</td>
-                      <td className="py-1.5 pr-3 text-[#7A8487]">{relTime(e.created_at || e.at || e.timestamp)}</td>
+                      <td className="py-1.5 pr-3 text-text-muted font-mono text-xs">{e.ip || '—'}</td>
+                      <td className="py-1.5 pr-3 text-text-muted text-xs" title={e.user_agent || e.ua}>{truncate(e.user_agent || e.ua, 60)}</td>
+                      <td className="py-1.5 pr-3 text-text-muted">{relTime(e.created_at || e.at || e.timestamp)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -1379,7 +1379,7 @@ function AuditTab({ hdr, showToast }) {
             {POSTURE.map((p, i) => (
               <li key={i} className="flex items-start gap-2 text-sm">
                 {p.ok ? <Check className="w-4 h-4 text-[#C6F24E] shrink-0 mt-0.5" /> : <span className="text-amber-400 shrink-0">⚠️</span>}
-                <span className={p.ok ? 'text-[#ECEFEA]' : 'text-amber-200'}>
+                <span className={p.ok ? 'text-text-primary' : 'text-amber-200'}>
                   {p.label}
                   {p.link && <> <a href={p.link} target="_blank" rel="noreferrer" className="inline-flex items-center text-[#C6F24E] hover:underline ml-1">open <ExternalLink className="w-3 h-3 ml-0.5" /></a></>}
                 </span>

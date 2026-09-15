@@ -7,11 +7,36 @@ import Link from 'next/link'
 export default function UnsubscribePage() {
   const searchParams = useSearchParams()
   const email = searchParams.get('email')
-  const [status, setStatus] = useState('loading') // 'loading' | 'success' | 'error' | 'no-email'
+  const mode = searchParams.get('mode') // 'weekly' switches the daily send off instead of unsubscribing
+  const [status, setStatus] = useState('loading') // 'loading' | 'success' | 'weekly' | 'error' | 'no-email'
+
+  function switchToWeekly() {
+    setStatus('loading')
+    fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, frequency: 'weekly', source: 'switch-weekly' }),
+    })
+      .then((res) => res.json())
+      .then((data) => setStatus(data.success ? 'weekly' : 'error'))
+      .catch(() => setStatus('error'))
+  }
 
   useEffect(() => {
     if (!email) {
       setStatus('no-email')
+      return
+    }
+
+    if (mode === 'weekly') {
+      fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, frequency: 'weekly', source: 'switch-weekly' }),
+      })
+        .then((res) => res.json())
+        .then((data) => setStatus(data.success ? 'weekly' : 'error'))
+        .catch(() => setStatus('error'))
       return
     }
 
@@ -26,7 +51,7 @@ export default function UnsubscribePage() {
         else setStatus('error')
       })
       .catch(() => setStatus('error'))
-  }, [email])
+  }, [email, mode])
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-4">
@@ -44,7 +69,7 @@ export default function UnsubscribePage() {
               <div className="flex justify-center mb-5">
                 <div className="w-10 h-10 border-2 border-teal-400/30 border-t-teal-400 rounded-full animate-spin" />
               </div>
-              <p className="text-white/60 text-sm">Processing your request…</p>
+              <p className="text-text-muted text-sm">Processing your request…</p>
             </>
           )}
 
@@ -58,8 +83,31 @@ export default function UnsubscribePage() {
                 </div>
               </div>
               <h1 className="text-white text-xl font-semibold mb-3">You've been unsubscribed</h1>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <p className="text-text-muted text-sm leading-relaxed">
                 You've been unsubscribed from WorkflowStacks emails. You can resubscribe anytime on the homepage.
+              </p>
+              <button
+                type="button"
+                onClick={switchToWeekly}
+                className="mt-5 rounded-md border border-[#262B2D] px-4 py-2 text-sm text-text-secondary hover:border-[#C6F24E]/50 hover:text-white"
+              >
+                Too much email? Get the Monday digest only instead
+              </button>
+            </>
+          )}
+
+          {status === 'weekly' && (
+            <>
+              <div className="flex justify-center mb-5">
+                <div className="w-12 h-12 rounded-full bg-teal-400/10 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              </div>
+              <h1 className="text-white text-xl font-semibold mb-3">Monday digest only</h1>
+              <p className="text-text-muted text-sm leading-relaxed">
+                Done. You'll get the weekly Hot / Top / Rising list and nothing daily. Change your mind anytime from the footer of any email.
               </p>
             </>
           )}
@@ -74,7 +122,7 @@ export default function UnsubscribePage() {
                 </div>
               </div>
               <h1 className="text-white text-xl font-semibold mb-3">Something went wrong</h1>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <p className="text-text-muted text-sm leading-relaxed">
                 We couldn't process your request. Please try again or contact us if the issue persists.
               </p>
             </>
@@ -84,13 +132,13 @@ export default function UnsubscribePage() {
             <>
               <div className="flex justify-center mb-5">
                 <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-6 h-6 text-text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                 </div>
               </div>
               <h1 className="text-white text-xl font-semibold mb-3">No email specified</h1>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <p className="text-text-muted text-sm leading-relaxed">
                 This link appears to be invalid. Please use the unsubscribe link from one of our emails.
               </p>
             </>
@@ -99,7 +147,7 @@ export default function UnsubscribePage() {
 
         <Link
           href="/"
-          className="inline-block mt-6 text-sm text-white/40 hover:text-teal-400 transition-colors"
+          className="inline-block mt-6 text-sm text-text-muted hover:text-teal-400 transition-colors"
         >
           ← Back to WorkflowStacks
         </Link>

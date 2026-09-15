@@ -65,17 +65,17 @@ export default function LaunchInTools({ getPrompt, repoUrl = '', label = 'Open i
 
   return (
     <div className={className}>
-      <div className="flex items-center gap-1.5 text-sm text-slate-300 font-medium mb-2">
+      <div className="flex items-center gap-1.5 text-sm text-text-secondary font-medium mb-2">
         <MousePointerClick className="w-4 h-4 text-teal-400" />{label}
       </div>
       <div className={`grid ${gridClass} gap-2`}>
         {tools.map((tool) => (
-          <Button key={tool.name} onClick={() => launch(tool)} variant="outline" className="border-slate-600 text-slate-200 hover:bg-white/5 hover:border-teal-500/40">
+          <Button key={tool.name} onClick={() => launch(tool)} variant="outline" className="border-slate-600 text-text-secondary hover:bg-white/5 hover:border-teal-500/40">
             {tool.name}
           </Button>
         ))}
       </div>
-      <p className="text-xs text-slate-500 mt-2">
+      <p className="text-xs text-text-muted mt-2">
         {hint
           ? `The prompt is copied to your clipboard — if ${hint} didn't open, paste it into its agent chat.`
           : `Opens the app${repoUrl ? ' with this repo' : ''} with the prompt ready to go — no copy-paste needed.`}

@@ -35,16 +35,40 @@ jobs:
 
       - name: Start the best open topic
         run: |
-          curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
-            "$BASE_URL/api/blog/pipeline?action=start" | tee /tmp/start.json
-          echo
+          # No -f: a failed start (e.g. a throttled free model) used to print
+          # nothing and the run went green having begun no article.
+          CODE=$(curl -s -o /tmp/start.json -w '%{http_code}' -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/blog/pipeline?action=start")
+          echo "start (HTTP $CODE): $(cat /tmp/start.json)"
+          if [ "$CODE" -ge 400 ]; then echo "### start failed (HTTP $CODE)" >> $GITHUB_STEP_SUMMARY; cat /tmp/start.json >> $GITHUB_STEP_SUMMARY; fi
 
-      - name: Advance until done (sections → edit → judge → schedule)
+      - name: Advance until done (sections → edit → judge → revise → schedule)
         run: |
-          for i in $(seq 1 22); do
-            R=$(curl -sf -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
-              "$BASE_URL/api/blog/pipeline?action=advance") || break
-            echo "step $i: $R"
+          # 48: a judge score under the gate sends the article back for up to two
+          # revisions, and a revision now rewrites ONE section per advance (that is
+          # what fits Groq's 8k tokens-per-minute free tier). Worst case is 8 writes
+          # + edit/humanize/judge + 2 x (8 sections + humanize + judge) = 31, plus
+          # a retry or two. 30 would have cut a revising article off mid-loop.
+          for i in $(seq 1 48); do
+            # No -f: a non-2xx used to make curl exit silently and `|| break` ended
+            # the loop with zero output — on 8 Sept the run went green having
+            # written nothing, and the error body was never seen. Capture the
+            # status and body, print both, then stop on failure.
+            CODE=$(curl -s -o /tmp/adv.json -w '%{http_code}' -X POST -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/blog/pipeline?action=advance")
+            R=$(cat /tmp/adv.json)
+            echo "step $i (HTTP $CODE): $R"
+            # A failed advance is almost always Groq's per-minute budget, spent
+            # seconds earlier by `start`. Each pipeline step is idempotent, so
+            # wait and retry rather than end the day's run on the first 429/5xx;
+            # give up only after three consecutive failures. 8 and 9 Sept both
+            # went green with zero sections written because the loop broke here.
+            if [ "$CODE" -ge 400 ] || [ "$CODE" -lt 200 ]; then
+              FAILS=$((${FAILS:-0}+1)); echo "ADVANCE FAILED — HTTP $CODE ($FAILS/3)"
+              if [ "$FAILS" -ge 3 ]; then echo "### advance failed 3x (HTTP $CODE)" >> $GITHUB_STEP_SUMMARY; echo "$R" >> $GITHUB_STEP_SUMMARY; break; fi
+              sleep 60; continue
+            fi
+            FAILS=0
             echo "$R" | jq -e '.idle == true' >/dev/null && break
             echo "$R" | jq -e '.step == "scheduled"' >/dev/null && break
             echo "$R" | jq -e '.status == "held"' >/dev/null && { echo "HELD"; break; }
