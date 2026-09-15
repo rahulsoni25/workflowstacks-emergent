@@ -26,7 +26,7 @@ function getCategoryColor(cat) {
   return colors[cat] || 'bg-slate-500/10 text-text-muted border-slate-500/20'
 }
 
-export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [], bundle = null }) {
+export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, related = [], bundle = null, assets = [] }) {
   const [copied, setCopied] = useState(false)
   const [copiedBadge, setCopiedBadge] = useState(false)
   const [reacted, setReacted] = useState(false)
@@ -135,8 +135,17 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                     </span>
                   )}
                   {score !== null && (
-                    <span className="flex items-center gap-1.5 text-sm bg-teal-500/10 border border-teal-500/30 rounded-full px-3 py-1 text-teal-300">
-                      <CheckCircle2 className="w-4 h-4" />Guide quality {score}/10
+                    <span className="flex items-center gap-1.5 text-sm bg-teal-500/10 border border-teal-500/30 rounded-full px-3 py-1 text-teal-300" title="Our own usage guide for this skill, scored by a separate reviewer model against a fixed rubric; entries under 8 are not published.">
+                      <CheckCircle2 className="w-4 h-4" />Guide quality {score}/10{skill.rewritten_at ? ` · reviewed ${new Date(skill.rewritten_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
+                    </span>
+                  )}
+                  {/* Real evidence, not a repo statistic: a weekly job runs the
+                      documented install command in a clean runner and records
+                      the result. Shown only when we have a passing run; a
+                      failed or missing run is simply not claimed. */}
+                  {skill.verified_install?.ok && (
+                    <span className="flex items-center gap-1.5 text-sm bg-emerald-500/10 border border-emerald-500/30 rounded-full px-3 py-1 text-emerald-300" title={skill.verified_install.method ? `We ran: ${skill.verified_install.method}` : 'Install verified in a clean runner'}>
+                      <CheckCircle2 className="w-4 h-4" />Install verified{skill.verified_install.at ? ` ${new Date(skill.verified_install.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
                     </span>
                   )}
                   {skill.last_updated && (
@@ -464,6 +473,23 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
           </motion.div>
         </div>
 
+        {assets.length > 0 && (
+          <section className="mt-10 mb-2" aria-labelledby="do-this-heading">
+            <h2 id="do-this-heading" className="text-2xl font-bold text-white mb-1">Do this with a working workflow</h2>
+            <p className="text-text-secondary text-sm mb-4">Pages we wrote and tested that put a skill like this to work — importable n8n templates, outcome guides and Claude Desktop configs.</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {assets.map((a) => (
+                <Link key={a.path} href={a.path} className="block rounded-[14px] border border-[#262B2D] bg-[#101314] p-5 transition-[transform,border-color] duration-200 hover:-translate-y-0.5 hover:border-[#C6F24E]">
+                  <span className="text-[11px] uppercase tracking-wide text-[#C6F24E] font-semibold">
+                    {a.kind === 'template' ? 'Free n8n template' : a.kind === 'outcome' ? 'Outcome guide' : 'MCP config'}
+                  </span>
+                  <h3 className="text-white font-semibold mt-1.5 mb-1 leading-snug">{a.title}</h3>
+                  {a.blurb && <p className="text-text-muted text-sm leading-relaxed line-clamp-3">{a.blurb}</p>}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
         <RelatedBundleCard bundle={bundle} skill={skill} />
 
         {related.length > 0 && (
