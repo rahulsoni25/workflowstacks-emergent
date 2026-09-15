@@ -11,7 +11,7 @@ on:
     inputs:
       limit:
         description: 'Max skills to verify'
-        default: '10'
+        default: '40'
         required: false
 
 permissions:
@@ -32,5 +32,8 @@ jobs:
       - name: Run install verification
         env:
           ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
-          VERIFY_LIMIT: ${{ github.event.inputs.limit || '10' }}
+          # 40, not 10: at 10 a week the ~350 gated skills take most of a year to
+          # cover once. The badge is the one quality signal on a page that is
+          # ours rather than GitHub's, so cover the catalog in about two months.
+          VERIFY_LIMIT: ${{ github.event.inputs.limit || '40' }}
         run: node scripts/verify-installs.mjs
