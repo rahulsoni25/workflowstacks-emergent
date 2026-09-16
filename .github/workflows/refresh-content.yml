@@ -108,10 +108,23 @@ jobs:
             "$BASE_URL/api/auto-discover-from-searches?limit=10" | tee /tmp/discover.json
           echo
 
-      - name: Refresh live GitHub star/fork counts (rotates through catalog)
+      - name: Refresh live GitHub star/fork counts (published first, then the rest)
+        # velocity_7d (the Hot list) needs a fresh snapshot per repo at least
+        # weekly. A single 80-repo pass cycles the 2,000+ catalog in ~25 days,
+        # so: up to five passes over published listings (each takes the 80
+        # least-recently refreshed, ~30s per call, under Vercel's 60s ceiling),
+        # then one pass over everything else. A failed call ends the loop but
+        # never fails the job — the Monday digest step below must still run.
         run: |
+          for i in 1 2 3 4 5; do
+            curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/refresh-stars?max=80&scope=published" | tee /tmp/stars.json \
+              || { echo "refresh-stars pass $i failed — stopping"; break; }
+            echo
+            grep -q '"considered":80' /tmp/stars.json || break
+          done
           curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
-            "$BASE_URL/api/refresh-stars?max=80" | tee /tmp/stars.json
+            "$BASE_URL/api/refresh-stars?max=80" | tee /tmp/stars-all.json || true
           echo
 
       - name: Weekly Hot / Top / Rising digest + creator notices (Mondays only)
