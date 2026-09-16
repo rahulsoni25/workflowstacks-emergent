@@ -18,6 +18,7 @@ import { styleCheck, overlapWithCorpus, OVERLAP_LIMIT } from '@/lib/blog/style-c
 import { serpSearch, rankFor } from '@/lib/blog/serp'
 import { suggestLinks, linkUniverse } from '@/lib/blog/links'
 import { getDb } from '@/lib/mongo'
+import { submitUrls } from '@/lib/indexnow'
 
 export const dynamic = 'force-dynamic'
 // 300, not 60: a judge or writer call on a free-tier model can take 60-90s
@@ -514,8 +515,12 @@ async function advance() {
       return { slug: post.slug, step: 'autopublish disabled — post waiting in judged for admin' }
     }
     const when = await nextFreeSlot(col)
+    // Tell Bing the moment a post is scheduled (ChatGPT search and Copilot
+    // read Bing's index). Best-effort: a failure here must never unpublish.
+    const base = process.env.NEXT_PUBLIC_BASE_URL || 'https://workflowstacks.com'
+    const indexnow = await submitUrls([`${base}/blog/${post.slug}`, `${base}/blog`, `${base}/blog/rss.xml`]).catch(() => ({ status: 0 }))
     await col.updateOne({ slug: post.slug }, {
-      $set: { status: 'published', published_at: when, scheduled_for: when, updated_at: now },
+      $set: { status: 'published', published_at: when, scheduled_for: when, updated_at: now, indexnow_status: indexnow.status },
       $push: { history: { at: now, status: 'published', by: 'pipeline', note: `scheduled for ${when.toISOString()}` } },
     })
     return { slug: post.slug, step: 'scheduled', publishes_at: when.toISOString() }

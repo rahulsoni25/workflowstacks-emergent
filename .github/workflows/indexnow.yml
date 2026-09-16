@@ -1,0 +1,33 @@
+name: IndexNow (Bing)
+
+# Push the whole sitemap to IndexNow weekly, after the Monday collector has
+# run. Bing, Yandex, Seznam and Naver read from the same endpoint; ChatGPT
+# search and Copilot answer from Bing's index. New blog posts are pushed the
+# moment they are scheduled by the pipeline (lib/indexnow.js); this catches
+# everything else — new catalog pages, changed pages, the pagination chain.
+on:
+  schedule:
+    - cron: '45 5 * * 1' # Monday 05:45 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Fetch and batch but do not submit'
+        required: false
+        default: 'false'
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+permissions:
+  contents: read
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Submit sitemap URLs
+        run: node scripts/indexnow-submit.mjs ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}

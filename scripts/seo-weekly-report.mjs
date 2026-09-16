@@ -31,7 +31,7 @@ const delta = (a, b) => (typeof a === 'number' && typeof b === 'number') ? (b ==
 
 const ov7 = load('gsc-overview-7.json'), ov28 = load('gsc-overview-28.json')
 const q7 = load('gsc-queries-7.json'), p7 = load('gsc-pages-7.json'), p28 = load('gsc-pages-28.json')
-const crawl = load('crawl.json'), posts = load('blog-posts.json'), bstatus = load('blog-status.json'), bruns = load('blog-runs.json'), audit = load('audit.json')
+const crawl = load('crawl.json'), posts = load('blog-posts.json'), bstatus = load('blog-status.json'), bruns = load('blog-runs.json'), audit = load('audit.json'), cwv = load('cwv.json')
 
 // previous report for deltas
 mkdirSync(OUT, { recursive: true })
@@ -67,6 +67,7 @@ const json = {
   },
   crawl: crawl?.crawl || null, sitemap: crawl?.sitemap || null, llms_top10: crawl?.llms_top10 || null, inspect: crawl?.inspect || null,
   audit: audit ? { score: audit.score ?? null, high_failures: audit.high_failures ?? null } : null,
+  cwv: cwv?.pages || null,
   blog: {
     published_last_7d: publishedWeek.map((p) => ({ slug: p.slug, at: p.published_at, score: p.judge?.score ?? null })),
     last_published: lastPublished ? { slug: lastPublished.slug, at: lastPublished.published_at } : null,
@@ -138,6 +139,20 @@ if (crawl?.inspect && !crawl.inspect.skipped) {
   L.push('| page | verdict | coverage | last crawl |', '|---|---|---|---|')
   for (const [u, v] of Object.entries(crawl.inspect)) L.push(`| ${u} | ${v.verdict || v.error || '—'} | ${v.coverage || v.message || '—'} | ${v.last_crawl ? v.last_crawl.slice(0, 10) : '—'} |`)
 } else L.push(`Skipped: ${crawl?.inspect?.skipped || 'no data'}.`)
+
+h('Core Web Vitals (PageSpeed Insights, mobile lab; field data where Chrome has enough traffic)')
+if (cwv?.pages) {
+  L.push('| page | perf | LCP | CLS | TBT | TTFB | field LCP / INP | last report perf |', '|---|---|---|---|---|---|---|---|')
+  for (const [u, v] of Object.entries(cwv.pages)) {
+    const m = v.mobile || {}
+    const pm = prev?.cwv?.[u]?.mobile
+    if (m.error) { L.push(`| ${u} | error: ${m.error} | | | | | | |`); continue }
+    const lab = m.lab || {}
+    const f = m.field
+    L.push(`| ${u} | **${m.score ?? '—'}** | ${lab.lcp_ms != null ? (lab.lcp_ms / 1000).toFixed(1) + 's' : '—'} | ${lab.cls ?? '—'} | ${lab.tbt_ms ?? '—'}ms | ${lab.ttfb_ms ?? '—'}ms | ${f ? `${f.lcp_ms != null ? (f.lcp_ms / 1000).toFixed(1) + 's' : '—'} / ${f.inp_ms ?? '—'}ms (${f.category || '—'})` : 'no field data'} | ${pm?.score ?? '—'} |`)
+  }
+  L.push('', 'Good thresholds: LCP ≤ 2.5s, CLS ≤ 0.1, INP ≤ 200ms, TBT ≤ 200ms. "No field data" means Chrome has not seen enough real visits to that URL — expected at current traffic.')
+} else L.push('Not measured (PageSpeed call failed or was skipped).')
 
 h('Scored audit (scripts/seo-check.mjs)')
 L.push(audit ? `Score **${audit.score ?? '—'}/10**, high-severity failures: **${audit.high_failures ?? '—'}** (last report: ${prev?.audit?.score ?? '—'}/10).` : 'Audit did not run.')

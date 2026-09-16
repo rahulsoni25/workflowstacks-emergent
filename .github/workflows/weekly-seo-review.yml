@@ -59,6 +59,12 @@ jobs:
           ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
         run: node scripts/seo-crawl.mjs > /tmp/seo/crawl.json && head -c 600 /tmp/seo/crawl.json
 
+      - name: Core Web Vitals (PageSpeed Insights)
+        continue-on-error: true
+        env:
+          PSI_API_KEY: ${{ secrets.PSI_API_KEY }}
+        run: node scripts/seo-cwv.mjs > /tmp/seo/cwv.json && head -c 400 /tmp/seo/cwv.json
+
       - name: Blog pipeline state
         env:
           GH_TOKEN: ${{ github.token }}
