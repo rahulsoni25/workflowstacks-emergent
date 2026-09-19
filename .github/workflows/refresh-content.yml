@@ -114,9 +114,9 @@ jobs:
         # so: up to ten passes over published listings (each takes the 80
         # least-recently refreshed, ~30s per call, under Vercel's 60s ceiling),
         # then one pass over everything else. A failed call ends the loop but
+        # never fails the job — the Monday digest step below must still run.
         # The job token goes along because the deployment has no GITHUB_TOKEN:
         # unauthenticated calls hit GitHub's 60/hour cap and left /hot empty.
-        # never fails the job — the Monday digest step below must still run.
         run: |
           for i in 1 2 3 4 5 6 7 8 9 10; do
             curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" -H "x-github-token: ${{ github.token }}" \
