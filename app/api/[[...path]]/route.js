@@ -254,13 +254,13 @@ function tooLong(obj, limits = { email: 254, default: 2000 }) {
 }
 
 // Build GitHub API headers (token optional — works on free unauthenticated tier)
-function ghHeaders(accept = 'application/vnd.github+json') {
+function ghHeaders(accept = 'application/vnd.github+json', token = process.env.GITHUB_TOKEN) {
   const headers = {
     'Accept': accept,
     'User-Agent': 'WorkflowStacks'
   };
-  if (process.env.GITHUB_TOKEN) {
-    headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
+  if (token) {
+    headers['Authorization'] = `token ${token}`;
   }
   return headers;
 }
@@ -1586,6 +1586,13 @@ export async function GET(request) {
     if (path === '/refresh-stars') {
       const { searchParams } = new URL(request.url);
       const max = Math.min(120, parseInt(searchParams.get('max') || '60', 10));
+      // Unauthenticated GitHub calls share 60/hour per Vercel egress IP, which
+      // the enrichment steps earlier in the same workflow use up — most repos
+      // were skipped and never got the second snapshot velocity_7d needs, so
+      // /hot stayed empty. The workflow passes its own job-scoped token here
+      // (admin-authenticated route, HTTPS, never stored) when the deployment
+      // has no GITHUB_TOKEN of its own.
+      const ghToken = process.env.GITHUB_TOKEN || request.headers.get('x-github-token') || undefined;
       // ?scope=published narrows the rotation to browsable listings — the ones
       // the Hot list, the /best pages and the Monday digest rank. velocity_7d
       // needs a snapshot per repo at least weekly; one 80-repo pass a day over
@@ -1600,14 +1607,17 @@ export async function GET(request) {
         .limit(max)
         .toArray();
 
-      let refreshed = 0, skipped = 0, changed = 0, hidden = 0;
+      let refreshed = 0, skipped = 0, changed = 0, hidden = 0, rateLimited = false;
       for (const s of skills) {
         const m = (s.github_url || '').match(/github\.com\/([^/]+)\/([^/#?]+)/i);
         if (!m) { skipped++; continue; }
         const owner = m[1];
         const repo = m[2].replace(/\.git$/, '');
         try {
-          const r = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: ghHeaders() });
+          const r = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: ghHeaders(undefined, ghToken) });
+          // Out of quota: every further call fails the same way, so stop
+          // instead of sleeping through the rest of the batch.
+          if ((r.status === 403 || r.status === 429) && r.headers.get('x-ratelimit-remaining') === '0') { rateLimited = true; break; }
           // Repo deleted/renamed → hide from the catalog (reversible) so we never show a dead link.
           if (r.status === 404) {
             await database.collection('skills').updateOne(
@@ -1647,13 +1657,13 @@ export async function GET(request) {
           );
           refreshed++;
         } catch { skipped++; }
-        await new Promise((res) => setTimeout(res, process.env.GITHUB_TOKEN ? 120 : 800));
+        await new Promise((res) => setTimeout(res, ghToken ? 120 : 800));
       }
 
       return Response.json({
         success: true,
-        message: `Refreshed ${refreshed} skill(s); ${changed} changed; hid ${hidden} dead repo(s).`,
-        refreshed, changed, hidden, skipped, considered: skills.length,
+        message: `Refreshed ${refreshed} skill(s); ${changed} changed; hid ${hidden} dead repo(s).${rateLimited ? ' Stopped: GitHub rate limit.' : ''}`,
+        refreshed, changed, hidden, skipped, considered: skills.length, rate_limited: rateLimited, github_token: !!ghToken,
       });
     }
 
