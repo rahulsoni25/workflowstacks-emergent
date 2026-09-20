@@ -1,9 +1,17 @@
 name: Enrich Catalog
-# Hits the Vercel cron endpoint every 15 minutes to keep the LLM enrichment
-# moving until 100% coverage is reached. Survives any local session reset.
+# Daily LLM enrichment pass (explainer + best_with_tools) over skills that
+# still lack them. Idempotent: once coverage is complete it is a near no-op.
 # Free (GitHub Actions free tier: 2,000 min/month, we use ~3 min/month).
 #
-# Required secret: CRON_SECRET (same value set in Vercel env vars).
+# Calls /api/enrich-skills directly — twice, same as the old
+# /api/cron/enrich-batch wrapper did — instead of going through the wrapper.
+# The wrapper was a third Vercel function invocation that sat idle for the
+# whole duration of the two real calls (billed wall-clock as provisioned
+# memory) purely to forward them. The same endpoint was also on Vercel's own
+# cron schedule (vercel.json) at 04:00, so the enrichment ran twice a day;
+# that cron entry is gone and this workflow is the only schedule.
+#
+# Required secret: ADMIN_SECRET (same value set in Vercel env vars).
 
 on:
   schedule:
@@ -13,26 +21,33 @@ on:
     - cron: '17 5 * * *'
   workflow_dispatch: {}  # allow manual trigger from the Actions tab
 
+env:
+  BASE_URL: https://workflowstacks.com
+
 jobs:
-  trigger-enrich:
+  enrich:
+    # Emergency brake for Vercel usage: set the repository variable
+    # PIPELINES_PAUSED=true (Settings → Secrets and variables → Actions →
+    # Variables) and every scheduled pipeline that runs on Vercel functions
+    # stops until it is unset. Manual "Run workflow" still works.
+    if: ${{ github.event_name != 'schedule' || vars.PIPELINES_PAUSED != 'true' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - name: Call enrich-batch
-        env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      - name: Pass 1 — enrich skills that have nothing yet
         run: |
-          if [ -z "$CRON_SECRET" ]; then
-            echo "::error::CRON_SECRET not set in repo secrets"
-            exit 1
-          fi
-          RESP=$(curl -sSL --max-time 60 \
-            -H "Authorization: Bearer $CRON_SECRET" \
-            "https://www.workflowstacks.com/api/cron/enrich-batch?limit=20")
-          echo "Response: $RESP"
-          # Don't fail the workflow on rate-limit errors — next run picks up
-          echo "$RESP" | grep -qE '"pass1_enrichNew"|"pass2_refillBestWith"' && echo "OK" || echo "::warning::Endpoint did not return expected shape"
+          curl -sS --max-time 120 -X POST \
+            -H "Content-Type: application/json" -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            -d '{"limit":20}' \
+            "$BASE_URL/api/enrich-skills" | head -c 600; echo
+
+      - name: Pass 2 — refill best_with_tools on legacy-prompt skills
+        run: |
+          curl -sS --max-time 120 -X POST \
+            -H "Content-Type: application/json" -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            -d '{"limit":20,"needsBestWithTools":true}' \
+            "$BASE_URL/api/enrich-skills" | head -c 600; echo
 
       - name: Show coverage
         run: |
-          curl -sSL "https://www.workflowstacks.com/api/enrich-skills" -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" 2>&1 | head -c 400 || true
+          curl -sS --max-time 60 "$BASE_URL/api/enrich-skills" -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" 2>&1 | head -c 400 || true

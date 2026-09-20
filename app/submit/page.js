@@ -1,13 +1,11 @@
 import SubmitClient from './SubmitClient'
-import { SITE_URL as BASE } from '@/lib/site-url'
+import { getStats as readStats } from '@/lib/skills-data'
 
 export const revalidate = 1800
 
 async function getStats() {
   try {
-    const res = await fetch(`${BASE}/api/stats`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
-    return await res.json()
+    return await readStats({ revalidate: 1800 })
   } catch {
     return null
   }

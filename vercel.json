@@ -1,18 +1,11 @@
 {
   "crons": [
     {
-      "path": "/api/cron/refresh-skills",
-      "schedule": "0 6 * * *"
-    },
-    {
       "path": "/api/cron/security-monitor",
       "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/enrich-batch",
-      "schedule": "0 4 * * *"
     }
   ],
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude)reports' ':(exclude)docs' ':(exclude).github' ':(exclude)test_reports' ':(exclude)tests' ':(exclude)memory' ':(exclude)scripts' ':(exclude)cli' ':(exclude)plugins' ':(exclude).claude' ':(exclude).claude-plugin' ':(exclude).emergent' ':(exclude)backend_test.py' ':(exclude)test_result.md'",
   "headers": [
     {
       "source": "/api/(skills|packs|personas|playbooks)/([^/]+)",

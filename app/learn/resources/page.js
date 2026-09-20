@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { ArrowLeft, BookOpen, Star, GitFork } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { SITE_URL as BASE } from '@/lib/site-url'
+import { listSkills } from '@/lib/skills-data'
 
 // Learning resources shelf — the famous mega-repos (awesome-lists, courses,
 // books) that are genuinely useful but aren't AI skills. They used to top the
@@ -16,11 +16,14 @@ export const metadata = {
   alternates: { canonical: '/learn/resources' },
 }
 
+// Hourly ISR. Previously implied by the self-fetch's `next.revalidate`; now
+// that the read is a direct Mongo query (lib/skills-data.js) it has to be
+// declared, or the page would be built once and never refreshed.
+export const revalidate = 3600
+
 async function getResources() {
   try {
-    const res = await fetch(`${BASE}/api/skills?type=resource`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return []
-    const data = await res.json()
+    const data = await listSkills({ type: 'resource' }, { revalidate: 3600 })
     return (data.skills || []).sort((a, b) => (b.github_stars || 0) - (a.github_stars || 0))
   } catch {
     return []

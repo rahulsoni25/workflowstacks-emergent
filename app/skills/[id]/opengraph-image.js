@@ -2,21 +2,22 @@
 // site-wide /opengraph-image, so a share of any listing rendered an identical
 // generic card with no skill name, category or stars — thousands of URLs, one
 // preview. This renders the actual listing.
+//
+// Reads Mongo directly (lib/skills-data.js) instead of fetching the site's
+// own API: one function invocation per card instead of two, and no
+// data-cache write for the API response. Rendered on demand, then served
+// from the ISR cache for a day (same window as the page it belongs to).
 import { ImageResponse } from 'next/og'
-import { SITE_URL } from '@/lib/site-url'
+import { getSkillByKey } from '@/lib/skills-data'
 
 export const alt = 'WorkflowStacks skill'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
+export const revalidate = 86400
 
 async function getSkill(id) {
   try {
-    const res = await fetch(`${SITE_URL}/api/skills/${encodeURIComponent(id)}`, {
-      next: { revalidate: 86400 },
-      signal: AbortSignal.timeout(8_000),
-    })
-    if (!res.ok) return null
-    return (await res.json()).skill || null
+    return await getSkillByKey(id, { revalidate: 86400 })
   } catch {
     return null
   }

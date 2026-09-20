@@ -6,6 +6,7 @@ import { KITS, kitItemCount } from '@/lib/kits'
 import { SLASH_COMMANDS } from '@/lib/commands'
 import { SITE_URL } from '@/lib/schema'
 import { isAiRelevant, qualityRank } from '@/lib/skill-relevance'
+import { listSkills } from '@/lib/skills-data'
 
 export const revalidate = 86400
 
@@ -32,12 +33,7 @@ async function topSkills(limit = 40) {
     // founders" — roughly half of the old top 40. An engine deciding whether to
     // cite this site as an authority on AI tooling reads exactly that list, so
     // it has to be both on-topic and our best work, not merely popular.
-    const res = await fetch(`${SITE_URL}/api/skills?sort=popular&limit=400`, {
-      next: { revalidate: 86400 },
-      signal: AbortSignal.timeout(10_000),
-    })
-    if (!res.ok) return []
-    const all = (await res.json()).skills || []
+    const all = (await listSkills({ sort: 'popular', limit: 400 }, { revalidate: 86400 }))?.skills || []
     return all
       .filter((s) => !s.dead_repo && isAiRelevant(s))
       .sort((a, b) => qualityRank(b) - qualityRank(a))

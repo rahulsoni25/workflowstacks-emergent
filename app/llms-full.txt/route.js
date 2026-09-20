@@ -5,17 +5,14 @@
 // directly.
 
 import { SITE_URL } from '@/lib/schema'
+import { listSkills } from '@/lib/skills-data'
 
 export const revalidate = 86400
 
 async function topSkills() {
   try {
-    const res = await fetch(`${SITE_URL}/api/skills?sort=popular&limit=300`, {
-      next: { revalidate: 86400 },
-      signal: AbortSignal.timeout(15_000),
-    })
-    if (!res.ok) return []
-    const data = await res.json()
+    // Direct Mongo read (lib/skills-data.js) — no self-call to /api/skills.
+    const data = await listSkills({ sort: 'popular', limit: 300 }, { revalidate: 86400 })
     return data.skills || []
   } catch {
     return []

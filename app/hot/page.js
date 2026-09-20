@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { getHotLists } from '@/lib/skills-data'
 import { breadcrumbSchema } from '@/lib/schema'
 import { TYPE_CATEGORIES, FOR_CATEGORIES } from '@/lib/skill-display'
 import NewsletterSignup from '@/components/NewsletterSignup'
@@ -18,11 +19,10 @@ export const metadata = {
   alternates: { canonical: '/hot' },
 }
 
+// Same lists /api/hot serves, read from Mongo in-process (lib/skills-data.js).
 async function getHot() {
   try {
-    const res = await fetch(`${BASE}/api/hot`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
-    return await res.json()
+    return await getHotLists({ revalidate: 1800 })
   } catch {
     return null
   }

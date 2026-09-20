@@ -28,6 +28,11 @@ concurrency:
 
 jobs:
   review:
+    # Emergency brake for Vercel usage: set the repository variable
+    # PIPELINES_PAUSED=true (Settings → Secrets and variables → Actions →
+    # Variables) and every scheduled pipeline that runs on Vercel functions
+    # stops until it is unset. Manual "Run workflow" still works.
+    if: ${{ github.event_name != 'schedule' || vars.PIPELINES_PAUSED != 'true' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

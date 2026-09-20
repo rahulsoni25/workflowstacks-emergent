@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft, ArrowRight, Star, Github } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { SITE_URL as BASE } from '@/lib/site-url'
+import { listSkills } from '@/lib/skills-data'
 
 export const metadata = {
   title: 'Discover AI Skills — Trending, Newest, Top Quality | WorkflowStacks',
@@ -22,17 +22,14 @@ const SECTIONS = [
   { key: 'gems', label: '💎 Hidden Gems', hint: 'High quality, still under the radar' },
 ]
 
-// One small, sorted fetch per section instead of pulling the whole catalog
+// One small, sorted query per section instead of pulling the whole catalog
 // (2,000+ skills) and sorting six ways in memory — that used to take 90s+
 // and blow past the fetch timeout, silently rendering every section empty.
+// Direct Mongo reads (lib/skills-data.js): six self-calls to /api/skills per
+// regeneration were six extra function invocations.
 async function getSection(sortKey) {
   try {
-    const res = await fetch(`${BASE}/api/skills?sort=${sortKey}&limit=8`, {
-      next: { revalidate: 1800 },
-      signal: AbortSignal.timeout(10_000),
-    })
-    if (!res.ok) return []
-    const d = await res.json()
+    const d = await listSkills({ sort: sortKey, limit: 8 }, { revalidate: 1800 })
     return d.skills || []
   } catch {
     return []

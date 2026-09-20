@@ -3,6 +3,7 @@ import SkillDetailClient from './SkillDetailClient'
 import { relatedBundle } from '@/lib/bundles'
 import { relatedAssets } from '@/lib/related-assets'
 import { buildCodeflow, summarize } from '@/lib/codeflow'
+import { getSkillByKey, listSkills } from '@/lib/skills-data'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
 // Note: invalid skill IDs render the not-found UI with HTTP 200 (a Next.js 14
@@ -15,10 +16,28 @@ import { SITE_URL as BASE } from '@/lib/site-url'
 // EVERY request (verified live 2026-08-17: Cache-Control private/no-store,
 // X-Vercel-Cache MISS on repeat GETs) — the 2026-08-11 CPU/transfer overage
 // assumed ISR was in effect; it wasn't. An empty param list + revalidate makes
-// each slug render on first hit, then serve from the edge cache for an hour.
+// each slug render on first hit, then serve from the edge cache for a day.
 export const revalidate = 86400
 export const dynamicParams = true
 export function generateStaticParams() { return [] }
+
+// Vercel usage: this page reads Mongo directly (lib/skills-data.js). It used
+// to fetch its own public API three times per render — the skill, then two
+// "related" queries — and each of those was a second function invocation, an
+// origin-transfer hop and an ISR data-cache write. Over a ~2,000-page catalog
+// that crawlers re-request daily, the self-calls were the largest single line
+// in the Hobby-plan Fluid CPU / ISR-write / origin-transfer budgets.
+
+// Live GitHub work during a render (the Codeflow tree build, or the smaller
+// "source spec" fallback) is opt-in. Both fetch the upstream repo on the
+// Vercel function — the recursive tree alone is often 1–2 MB and is then
+// analysed with regexes, so it is the most CPU-expensive thing a page render
+// can do, and every GitHub response it cached was another ISR write. The
+// daily codeflow job (refresh-content.yml → /api/codeflow) stores the result
+// on the skill document, star-sorted so the pages with traffic fill first;
+// pages the job has not reached yet simply render without the section until
+// it does. Set CODEFLOW_LIVE_BUILD=1 in Vercel env to restore live builds.
+const LIVE_GITHUB_ON_RENDER = process.env.CODEFLOW_LIVE_BUILD === '1'
 
 // Sibling skills in the same category, for the "Related skills" cross-link module.
 // Related = 3 most-starred in the category + 3 "neighbours" picked from the
@@ -33,21 +52,33 @@ function stableHash(str) {
   for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) }
   return h >>> 0
 }
+
+// Only what the related-skills cards render. Everything handed to the client
+// component is serialised into the page HTML, and a full listing (use_guide,
+// explainer, topics…) is several KB — six of them per page, times the whole
+// catalog, is real origin/data transfer for nothing the cards show.
+function relatedCard(s) {
+  return {
+    id: s.id, slug: s.slug, name: s.name, title_human: s.title_human,
+    description: s.description, description_human: s.description_human,
+    category: s.category, github_stars: s.github_stars, language: s.language,
+    rewrite_score: s.rewrite_score,
+  }
+}
+
 async function getRelated(skill) {
-  const cat = encodeURIComponent(skill.category || '')
-  const get = async (qs) => {
+  const category = skill.category || ''
+  const get = async (params) => {
     try {
-      const res = await fetch(`${BASE}/api/skills?${qs}`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
-      if (!res.ok) return []
-      const data = await res.json()
-      return data.skills || []
+      const out = await listSkills({ category, ...params }, { revalidate: 86400 })
+      return out.skills || []
     } catch {
       return []
     }
   }
   const [popular, recent] = await Promise.all([
-    get(`category=${cat}&sort=popular&limit=6`),
-    get(`category=${cat}&sort=updated&limit=60`),
+    get({ sort: 'popular', limit: 6 }),
+    get({ sort: 'updated', limit: 60 }),
   ])
   const picked = []
   const seen = new Set([skill.id])
@@ -68,21 +99,12 @@ async function getRelated(skill) {
     if (picked.length >= 6) break
     if (!seen.has(s.id)) { seen.add(s.id); picked.push(s) }
   }
-  return picked
+  return picked.map(relatedCard)
 }
 
 async function getSkill(id) {
   try {
-    // Content only actually changes once/day (06:00 UTC refresh-content.yml cron),
-    // so a 5 min window bought no real freshness — it just forced this page to
-    // regenerate on almost every crawler/bot visit, which was the direct cause of
-    // a 0% edge-cache-hit rate and blew past the Vercel Hobby Fast Origin
-    // Transfer / Fluid Active CPU limits (2026-08-11). 1h keeps pages reasonably
-    // fresh while cutting regeneration frequency ~12x.
-    const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
-    const data = await res.json()
-    return data.skill || null
+    return await getSkillByKey(id, { revalidate: 86400 })
   } catch {
     return null
   }
@@ -140,9 +162,9 @@ async function getSourceSpec(githubUrl) {
   }
 }
 
-// Codeflow ("How it works"): prefer the stored, LLM-enriched version written by
-// /api/codeflow (daily Action). Fall back to a live deterministic build so
-// every page has it before the backfill finishes. GitHub responses cached 24h.
+// Codeflow ("How it works"): the stored, LLM-enriched version written by
+// /api/codeflow (daily Action). A live deterministic build only when
+// CODEFLOW_LIVE_BUILD=1 (see LIVE_GITHUB_ON_RENDER above).
 async function getCodeflow(skill) {
   const name = skill.title_human || skill.name
   const stored = skill.codeflow
@@ -151,6 +173,7 @@ async function getCodeflow(skill) {
   if (stored && typeof stored === 'object' && stored.size?.files > 0 && stored.version >= 1) {
     return { ...stored, summary: summarize(stored, name) || stored.summary || null }
   }
+  if (!LIVE_GITHUB_ON_RENDER) return null
   if (!skill.github_url) return null
   // The job already tried and failed (dead/private/empty repo) → don't retry
   // on every render. Long tail (<50★) waits for the job too: no traffic, and
@@ -162,6 +185,14 @@ async function getCodeflow(skill) {
   const cf = await buildCodeflow(skill.github_url, { category: skill.category, installHint: skill.use_guide?.install, maxSizeKB: 60_000, fetchOpts: { next: { revalidate: 86400 } } })
   if (!cf) return null
   return { ...cf, summary: summarize(cf, name) }
+}
+
+// The client component gets the listing minus the fields it never renders.
+// `codeflow` travels as its own prop; `stars_history` (up to 90 snapshots)
+// only feeds /refresh-stars. Both were being serialised into every page.
+function clientSkill(skill) {
+  const { codeflow, stars_history, _id, ...rest } = skill
+  return rest
 }
 
 // Trim to a clean snippet. Prefer ending on a complete sentence; otherwise cut on
@@ -211,7 +242,8 @@ export default async function SkillDetailPage({ params }) {
   }
   const [codeflow, related] = await Promise.all([getCodeflow(skill), getRelated(skill)])
   // Legacy spec sheet only when Codeflow could not be built (rate-limit etc.)
-  const sourceSpec = codeflow ? null : await getSourceSpec(skill.github_url)
+  // — and only when live GitHub work on render is enabled at all.
+  const sourceSpec = codeflow || !LIVE_GITHUB_ON_RENDER ? null : await getSourceSpec(skill.github_url)
 
   // Structured data for rich results
   const jsonLd = {
@@ -257,7 +289,7 @@ export default async function SkillDetailPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
-      <SkillDetailClient skill={skill} sourceSpec={sourceSpec} codeflow={codeflow} related={related} bundle={relatedBundle(skill)} assets={relatedAssets(skill)} />
+      <SkillDetailClient skill={clientSkill(skill)} sourceSpec={sourceSpec} codeflow={codeflow} related={related} bundle={relatedBundle(skill)} assets={relatedAssets(skill)} />
     </>
   )
 }

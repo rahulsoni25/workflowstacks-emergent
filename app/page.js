@@ -1,7 +1,7 @@
 import HomeClient from './HomeClient'
 import { homeFaqs } from '@/lib/home-faqs'
-import { SITE_URL as BASE } from '@/lib/site-url'
 import { isAiRelevant, qualityRank } from '@/lib/skill-relevance'
+import { listSkills, getStats, getHotLists } from '@/lib/skills-data'
 
 // The root layout no longer sets alternates.canonical — it silently applied
 // '/' to every route that forgot to declare one, so /help, /join and
@@ -13,11 +13,13 @@ export const metadata = {
 
 export const revalidate = 1800
 
-async function getJson(path) {
+// Every read below goes straight to Mongo (lib/skills-data.js). The three
+// self-fetches of /api/skills, /api/stats and /api/hot this page used to make
+// were three extra function invocations and three data-cache writes on every
+// 30-minute regeneration.
+async function safe(promise) {
   try {
-    const res = await fetch(`${BASE}${path}`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
-    return await res.json()
+    return await promise
   } catch {
     return null
   }
@@ -74,8 +76,12 @@ export default async function HomePage() {
   // and OBS Studio — `popularity_score` is raw GitHub reach, and the stored
   // `category` that might have caught them files all three as `ai-agent`.
   // Ask for a wider slice, then pick on topical relevance and our own rewrite
-  // quality. Still one request. See lib/skill-relevance.js.
-  const [skillsData, statsData, hotData] = await Promise.all([getJson('/api/skills?sort=trending&limit=60'), getJson('/api/stats'), getJson('/api/hot')])
+  // quality. Still one query. See lib/skill-relevance.js.
+  const [skillsData, statsData, hotData] = await Promise.all([
+    safe(listSkills({ sort: 'trending', limit: 60 }, { revalidate: 1800 })),
+    safe(getStats({ revalidate: 1800 })),
+    safe(getHotLists({ revalidate: 1800 })),
+  ])
   const featured = (skillsData?.skills || [])
     .filter((s) => s.slug && !s.dead_repo && isAiRelevant(s, { strict: true }))
     .sort((a, b) => qualityRank(b) - qualityRank(a))
@@ -83,8 +89,8 @@ export default async function HomePage() {
     .map(trimSkill)
 
   // Single source of truth for the headline count: the real number of
-  // published, browsable listings from /api/stats (a countDocuments(), not a
-  // full fetch). HomeClient floors it to the nearest 10 so "N+" is always true.
+  // published, browsable listings (a countDocuments(), not a full fetch).
+  // HomeClient floors it to the nearest 10 so "N+" is always true.
   const stats = {
     totalSkills: statsData?.totalSkills || 0,
     publishedSkills: statsData?.publishedSkills || statsData?.totalSkills || 0,

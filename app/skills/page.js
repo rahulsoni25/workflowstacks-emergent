@@ -1,6 +1,7 @@
 import SkillsCatalogClient from './SkillsCatalogClient'
 import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { listSkills } from '@/lib/skills-data'
 
 export const metadata = {
   title: 'Marketplace — AI Agents, Skills & MCP Servers | WorkflowStacks',
@@ -25,14 +26,11 @@ export const revalidate = 1800
 // visitor interacts.
 export const PAGE_SIZE = 48
 
+// Direct Mongo read (lib/skills-data.js) — the same query GET /api/skills
+// runs, without the extra function invocation of calling our own API.
 async function getSkills() {
   try {
-    const res = await fetch(`${BASE}/api/skills?sort=trending&limit=${PAGE_SIZE}`, {
-      next: { revalidate: 1800 },
-      signal: AbortSignal.timeout(10_000),
-    })
-    if (!res.ok) return { skills: [], total: 0, hasMore: false }
-    const data = await res.json()
+    const data = await listSkills({ sort: 'trending', limit: PAGE_SIZE }, { revalidate: 1800 })
     return { skills: data.skills || [], total: data.total || 0, hasMore: !!data.hasMore }
   } catch {
     return { skills: [], total: 0, hasMore: false }

@@ -7,6 +7,7 @@ import { KITS } from '../lib/kits'
 import { SLASH_COMMANDS } from '../lib/commands'
 import { isAiRelevant, guideRichness } from '../lib/skill-relevance'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { listSkills, getNewsletterIssues } from '@/lib/skills-data'
 
 // --- Why this file gates skill pages -----------------------------------
 // Google Search Console (2026-07-29) reported 1,450 URLs "Discovered –
@@ -151,14 +152,15 @@ export default async function sitemap() {
     // to static-only. guideRichness still needs a JS check (it reads a
     // structured sub-object the DB filter can't easily express), so this is
     // a coarse pre-filter, not a full replacement of passesSkillGate.
-    const gateParams = `minScore=${SKILL_SITEMAP_GATE.minRewriteScore}&minStars=${SKILL_SITEMAP_GATE.minStars}`
-    const [toolsRes, resourcesRes] = await Promise.all([
-      fetch(`${BASE}/api/skills?${gateParams}&limit=2000`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(15_000) }),
-      fetch(`${BASE}/api/skills?type=resource&${gateParams}&limit=2000`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(15_000) }),
+    // Direct Mongo reads (lib/skills-data.js): the two 2,000-row API
+    // responses this used to pull through the edge were the single largest
+    // self-transfer on the site.
+    const gate = { minScore: SKILL_SITEMAP_GATE.minRewriteScore, minStars: SKILL_SITEMAP_GATE.minStars, limit: 2000 }
+    const [tools, resources] = await Promise.all([
+      listSkills(gate, { revalidate: 86400 }),
+      listSkills({ ...gate, type: 'resource' }, { revalidate: 86400 }),
     ])
-    const docs = []
-    if (toolsRes.ok) docs.push(...((await toolsRes.json()).skills || []))
-    if (resourcesRes.ok) docs.push(...((await resourcesRes.json()).skills || []))
+    const docs = [...(tools?.skills || []), ...(resources?.skills || [])]
     skillEntries = docs.filter(passesSkillGate).map((s) => ({
       url: `${BASE}/skills/${s.slug || s.id}`,
       lastModified: s.last_updated ? new Date(s.last_updated) : now,
@@ -214,17 +216,14 @@ export default async function sitemap() {
   // just tells Google the chain exists. Count comes from the API's `total`.
   let pageEntries = []
   try {
-    const res = await fetch(`${BASE}/api/skills?limit=1`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
-    if (res.ok) {
-      const total = (await res.json()).total || 0
-      const pages = Math.ceil(total / 48)
-      pageEntries = Array.from({ length: Math.max(0, pages - 1) }, (_, i) => ({
-        url: `${BASE}/skills/page/${i + 2}`,
-        lastModified: now,
-        changeFrequency: 'weekly',
-        priority: 0.4,
-      }))
-    }
+    const total = (await listSkills({ limit: 1 }, { revalidate: 86400 }))?.total || 0
+    const pages = Math.ceil(total / 48)
+    pageEntries = Array.from({ length: Math.max(0, pages - 1) }, (_, i) => ({
+      url: `${BASE}/skills/page/${i + 2}`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.4,
+    }))
   } catch (e) {
     console.error('[sitemap] catalog page entries unavailable:', e?.message || e)
   }
@@ -233,16 +232,13 @@ export default async function sitemap() {
   // ranked skills — they rank for the skill names they carry.
   let issueEntries = []
   try {
-    const res = await fetch(`${BASE}/api/newsletter/issues`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
-    if (res.ok) {
-      const issues = (await res.json()).issues || []
-      issueEntries = issues.map((it) => ({
-        url: `${BASE}/newsletter/${it.issue}`,
-        lastModified: it.sent_at ? new Date(it.sent_at) : now,
-        changeFrequency: 'monthly',
-        priority: 0.6,
-      }))
-    }
+    const issues = (await getNewsletterIssues({ revalidate: 86400 })) || []
+    issueEntries = issues.map((it) => ({
+      url: `${BASE}/newsletter/${it.issue}`,
+      lastModified: it.sent_at ? new Date(it.sent_at) : now,
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    }))
   } catch (e) {
     console.error('[sitemap] newsletter issue entries unavailable:', e?.message || e)
   }

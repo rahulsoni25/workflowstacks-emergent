@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { listSkills } from '@/lib/skills-data'
 import { breadcrumbSchema } from '@/lib/schema'
 
 // Crawlable pagination for the catalog.
@@ -25,15 +26,11 @@ export const revalidate = 1800
 export const dynamicParams = true
 export function generateStaticParams() { return [] }
 
+// Direct Mongo read (lib/skills-data.js), not a self-call to /api/skills.
 async function getPage(n) {
   const offset = (n - 1) * PAGE_SIZE
   try {
-    const res = await fetch(`${BASE}/api/skills?sort=newest&limit=${PAGE_SIZE}&offset=${offset}`, {
-      next: { revalidate: 1800 },
-      signal: AbortSignal.timeout(10_000),
-    })
-    if (!res.ok) return null
-    const data = await res.json()
+    const data = await listSkills({ sort: 'newest', limit: PAGE_SIZE, offset }, { revalidate: 1800 })
     return { skills: data.skills || [], total: data.total || 0 }
   } catch {
     return null

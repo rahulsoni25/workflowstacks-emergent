@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { getStats } from '@/lib/skills-data'
 import { breadcrumbSchema } from '@/lib/schema'
 import { TYPE_CATEGORIES, FOR_CATEGORIES } from '@/lib/skill-display'
 import NewsletterSignup from '@/components/NewsletterSignup'
@@ -15,9 +16,7 @@ export const metadata = {
 
 async function getCounts() {
   try {
-    const res = await fetch(`${BASE}/api/stats`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return {}
-    return (await res.json()).categories || {}
+    return (await getStats({ revalidate: 86400 }))?.categories || {}
   } catch {
     return {}
   }

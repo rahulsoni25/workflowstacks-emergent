@@ -140,7 +140,19 @@ export async function middleware(request) {
   }
 }
 
-// Only run the middleware for these paths — every other request skips it.
+// Only run the middleware where it can do something — every other request
+// skips it entirely. Each run is a billable Edge Middleware invocation, and
+// the previous `/skills/:path*` matcher fired on every catalog page view,
+// the index and the pagination chain, only to fall through on all of them:
+// the UUID redirect can only apply to a UUID-shaped id, and the static-
+// registry 404 check only to exactly one slug segment under those six types.
+// (Next.js reads `config` statically, so the patterns must be literals.)
 export const config = {
-  matcher: ['/skills/:path*', '/packs/:path*', '/playbooks/:path*', '/personas/:path*', '/automate/:path*', '/mcp/:path*', '/templates/:path*', '/commands/:path*', '/bundles/:path*', '/kits/:path*'],
+  matcher: [
+    '/(skills|packs|playbooks|personas)/:id([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})',
+    // Explicit pattern on purpose: Next appends "(.json)?" to every matcher
+    // for its data routes, and a bare ":slug" would swallow that as its own
+    // pattern and match nothing.
+    '/(automate|mcp|templates|commands|bundles|kits)/:slug([^/]+)',
+  ],
 }

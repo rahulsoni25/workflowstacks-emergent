@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { listSkills, getHotLists } from '@/lib/skills-data'
 import { breadcrumbSchema } from '@/lib/schema'
 import { TYPE_CATEGORIES, FOR_CATEGORIES } from '@/lib/skill-display'
 import NewsletterSignup from '@/components/NewsletterSignup'
@@ -17,11 +18,11 @@ export function generateStaticParams() { return [] }
 const ALL = [...TYPE_CATEGORIES, ...FOR_CATEGORIES]
 const LABELS = Object.fromEntries(ALL)
 
-async function getJson(path) {
+// Direct Mongo reads (lib/skills-data.js) — no self-calls to /api/skills
+// and /api/hot on each daily regeneration.
+async function safe(promise) {
   try {
-    const res = await fetch(`${BASE}${path}`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
-    return await res.json()
+    return await promise
   } catch {
     return null
   }
@@ -47,8 +48,8 @@ export default async function BestCategoryPage({ params }) {
   if (!label) notFound()
 
   const [list, hotData] = await Promise.all([
-    getJson(`/api/skills?category=${encodeURIComponent(category)}&sort=popular&limit=20`),
-    getJson(`/api/hot?category=${encodeURIComponent(category)}`),
+    safe(listSkills({ category, sort: 'popular', limit: 20 }, { revalidate: 86400 })),
+    safe(getHotLists({ category, revalidate: 86400 })),
   ])
   const top = (list?.skills || []).filter((s) => !s.dead_repo)
   const hot = (hotData?.hot || []).slice(0, 5)
