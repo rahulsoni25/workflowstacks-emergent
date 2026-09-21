@@ -1,0 +1,2265 @@
+{
+  "date": "2026-09-21",
+  "generated_at": "2026-09-21T10:44:15.023Z",
+  "previous_report": "2026-09-16.json",
+  "gsc": {
+    "week": {
+      "window": {
+        "startDate": "2026-09-13",
+        "endDate": "2026-09-19"
+      },
+      "clicks": 1,
+      "impressions": 20,
+      "ctr": 5,
+      "position": 5.8,
+      "change_pct": {
+        "clicks": -80,
+        "impressions": -33.3,
+        "ctr": -70,
+        "position": -19.4
+      }
+    },
+    "month": {
+      "window": {
+        "startDate": "2026-08-23",
+        "endDate": "2026-09-19"
+      },
+      "clicks": 6,
+      "impressions": 150,
+      "ctr": 4,
+      "position": 35.4,
+      "change_pct": {
+        "clicks": -84.2,
+        "impressions": -96.8,
+        "ctr": 388.5,
+        "position": -117.8
+      }
+    },
+    "daily_28": [
+      {
+        "date": "2026-08-23",
+        "clicks": 0,
+        "impressions": 11,
+        "ctr": 0,
+        "position": 59.5
+      },
+      {
+        "date": "2026-08-24",
+        "clicks": 0,
+        "impressions": 7,
+        "ctr": 0,
+        "position": 65.7
+      },
+      {
+        "date": "2026-08-25",
+        "clicks": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 31.1
+      },
+      {
+        "date": "2026-08-26",
+        "clicks": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 54.3
+      },
+      {
+        "date": "2026-08-27",
+        "clicks": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 59.8
+      },
+      {
+        "date": "2026-08-28",
+        "clicks": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 67
+      },
+      {
+        "date": "2026-08-29",
+        "clicks": 0,
+        "impressions": 20,
+        "ctr": 0,
+        "position": 58.8
+      },
+      {
+        "date": "2026-08-30",
+        "clicks": 0,
+        "impressions": 11,
+        "ctr": 0,
+        "position": 60.5
+      },
+      {
+        "date": "2026-08-31",
+        "clicks": 0,
+        "impressions": 8,
+        "ctr": 0,
+        "position": 76.3
+      },
+      {
+        "date": "2026-09-01",
+        "clicks": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 7.4
+      },
+      {
+        "date": "2026-09-02",
+        "clicks": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "date": "2026-09-03",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 6.5
+      },
+      {
+        "date": "2026-09-04",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 4.5
+      },
+      {
+        "date": "2026-09-05",
+        "clicks": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 5.5
+      },
+      {
+        "date": "2026-09-06",
+        "clicks": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 3.6
+      },
+      {
+        "date": "2026-09-07",
+        "clicks": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "date": "2026-09-08",
+        "clicks": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "date": "2026-09-09",
+        "clicks": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 3.3
+      },
+      {
+        "date": "2026-09-10",
+        "clicks": 1,
+        "impressions": 6,
+        "ctr": 16.67,
+        "position": 5
+      },
+      {
+        "date": "2026-09-11",
+        "clicks": 2,
+        "impressions": 5,
+        "ctr": 40,
+        "position": 7
+      },
+      {
+        "date": "2026-09-12",
+        "clicks": 2,
+        "impressions": 3,
+        "ctr": 66.67,
+        "position": 3.7
+      },
+      {
+        "date": "2026-09-13",
+        "clicks": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 7.7
+      },
+      {
+        "date": "2026-09-14",
+        "clicks": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "date": "2026-09-15",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      },
+      {
+        "date": "2026-09-16",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 5.5
+      },
+      {
+        "date": "2026-09-17",
+        "clicks": 0,
+        "impressions": 6,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "date": "2026-09-18",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "date": "2026-09-19",
+        "clicks": 1,
+        "impressions": 1,
+        "ctr": 100,
+        "position": 2
+      }
+    ],
+    "sections_7d": [
+      [
+        "/skills",
+        {
+          "clicks": 0,
+          "impressions": 24
+        }
+      ],
+      [
+        "/",
+        {
+          "clicks": 1,
+          "impressions": 4
+        }
+      ],
+      [
+        "/templates",
+        {
+          "clicks": 0,
+          "impressions": 2
+        }
+      ]
+    ],
+    "sections_28d": [
+      [
+        "/skills",
+        {
+          "clicks": 4,
+          "impressions": 162
+        }
+      ],
+      [
+        "/",
+        {
+          "clicks": 2,
+          "impressions": 16
+        }
+      ],
+      [
+        "/templates",
+        {
+          "clicks": 0,
+          "impressions": 9
+        }
+      ]
+    ],
+    "top_queries_7d": [
+      {
+        "key": "ingarodriguez/openapis",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 4.5
+      }
+    ],
+    "top_pages_7d": [
+      {
+        "key": "https://workflowstacks.com/",
+        "clicks": 1,
+        "impressions": 4,
+        "ctr": 25,
+        "position": 1.3
+      },
+      {
+        "key": "https://workflowstacks.com/skills/cherry-studio",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "key": "https://workflowstacks.com/skills/deep-live-cam",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "key": "https://workflowstacks.com/skills/hyperfine",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 2
+      },
+      {
+        "key": "https://workflowstacks.com/skills/hypervisor-crack-audit",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "key": "https://workflowstacks.com/skills/miscoshorts-ai",
+        "clicks": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "key": "https://workflowstacks.com/skills/ollama",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      },
+      {
+        "key": "https://workflowstacks.com/skills/open-webui",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 3
+      },
+      {
+        "key": "https://workflowstacks.com/skills/openapis",
+        "clicks": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "key": "https://workflowstacks.com/skills/pi-mcp-adapter",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "key": "https://workflowstacks.com/skills/references",
+        "clicks": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "key": "https://workflowstacks.com/skills/sma-outfits",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "key": "https://workflowstacks.com/skills/sucker-punch",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "key": "https://workflowstacks.com/templates/content-repurposer",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 3
+      },
+      {
+        "key": "https://workflowstacks.com/templates/meeting-noshow-reducer",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "key": "https://www.workflowstacks.com/skills/96b2b7a4-f3e6-4652-ad81-eed4eb5fcf2c",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "key": "https://www.workflowstacks.com/skills/ebd35081-0e07-4bc7-93d2-7ea30017283a",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "key": "https://www.workflowstacks.com/skills/lookml-generator",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 6
+      }
+    ],
+    "top_pages_28d": [
+      {
+        "key": "https://www.workflowstacks.com/skills/96b2b7a4-f3e6-4652-ad81-eed4eb5fcf2c",
+        "clicks": 3,
+        "impressions": 7,
+        "ctr": 42.86,
+        "position": 3.7
+      },
+      {
+        "key": "https://workflowstacks.com/",
+        "clicks": 2,
+        "impressions": 16,
+        "ctr": 12.5,
+        "position": 23.8
+      },
+      {
+        "key": "https://workflowstacks.com/skills/hyperfine",
+        "clicks": 1,
+        "impressions": 3,
+        "ctr": 33.33,
+        "position": 2
+      },
+      {
+        "key": "https://workflowstacks.com/skills/0d22bfb5-6245-4b51-81a7-8ca9d3794ada",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      },
+      {
+        "key": "https://workflowstacks.com/skills/207730c1-65b8-4eb1-9fe4-d56025a3f38a",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 3
+      },
+      {
+        "key": "https://workflowstacks.com/skills/236751c6-269f-45f4-b9f8-47c1a11b65e5",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "key": "https://workflowstacks.com/skills/6c9d29d4-ecfa-41b1-81ec-38bd26833c64",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 8
+      },
+      {
+        "key": "https://workflowstacks.com/skills/9c6908d3-ae67-450c-b186-b4aab016ee8f",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 99
+      },
+      {
+        "key": "https://workflowstacks.com/skills/agriculture-knowledgegraph",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 10
+      },
+      {
+        "key": "https://workflowstacks.com/skills/ai-devkit",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 3
+      },
+      {
+        "key": "https://workflowstacks.com/skills/ai-trader",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 13
+      },
+      {
+        "key": "https://workflowstacks.com/skills/android-opus-codec",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 55
+      },
+      {
+        "key": "https://workflowstacks.com/skills/android-video-trimmer",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 63.5
+      },
+      {
+        "key": "https://workflowstacks.com/skills/attrition-insights-engineering",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 97
+      },
+      {
+        "key": "https://workflowstacks.com/skills/b17c0a65-fd02-4801-b56e-6788e19fb1da",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 71
+      },
+      {
+        "key": "https://workflowstacks.com/skills/calibre-web-automated",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 63.5
+      },
+      {
+        "key": "https://workflowstacks.com/skills/cherry-studio",
+        "clicks": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "key": "https://workflowstacks.com/skills/claude-code-via-antigravity",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 11
+      },
+      {
+        "key": "https://workflowstacks.com/skills/clippy",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 2
+      },
+      {
+        "key": "https://workflowstacks.com/skills/cmux",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "key": "https://workflowstacks.com/skills/dbatools",
+        "clicks": 0,
+        "impressions": 3,
+        "ctr": 0,
+        "position": 72.3
+      },
+      {
+        "key": "https://workflowstacks.com/skills/deep-live-cam",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 9
+      },
+      {
+        "key": "https://workflowstacks.com/skills/e173a9f9-eea2-4bdb-8cf9-899dcdfd95b0",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 75
+      },
+      {
+        "key": "https://workflowstacks.com/skills/e1d7aa66-f0db-45f2-93e5-3af6dc432530",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "key": "https://workflowstacks.com/skills/ead083b5-21b7-46e6-9f29-003cfc83766f",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 2
+      },
+      {
+        "key": "https://workflowstacks.com/skills/f7a9f60f-f231-4742-a075-41ef2b045493",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 3.5
+      },
+      {
+        "key": "https://workflowstacks.com/skills/fabric-js",
+        "clicks": 0,
+        "impressions": 16,
+        "ctr": 0,
+        "position": 72
+      },
+      {
+        "key": "https://workflowstacks.com/skills/finrl-trading",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 69
+      },
+      {
+        "key": "https://workflowstacks.com/skills/flowbite-svelte",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 60.5
+      },
+      {
+        "key": "https://workflowstacks.com/skills/follow-builders",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "key": "https://workflowstacks.com/skills/forge",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 42
+      },
+      {
+        "key": "https://workflowstacks.com/skills/google-type",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 74
+      },
+      {
+        "key": "https://workflowstacks.com/skills/grapesjs",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 3.5
+      },
+      {
+        "key": "https://workflowstacks.com/skills/growchief",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      },
+      {
+        "key": "https://workflowstacks.com/skills/hypervisor-crack-audit",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "key": "https://workflowstacks.com/skills/infer",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 76
+      },
+      {
+        "key": "https://workflowstacks.com/skills/inferno",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 79
+      },
+      {
+        "key": "https://workflowstacks.com/skills/infisical",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 6.5
+      },
+      {
+        "key": "https://workflowstacks.com/skills/influence-maximization",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 2
+      },
+      {
+        "key": "https://workflowstacks.com/skills/kindle2notion",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 66
+      },
+      {
+        "key": "https://workflowstacks.com/skills/kingofbugbountytips",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 4
+      },
+      {
+        "key": "https://workflowstacks.com/skills/langflow",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 2
+      },
+      {
+        "key": "https://workflowstacks.com/skills/linkedin-skills",
+        "clicks": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 68.5
+      },
+      {
+        "key": "https://workflowstacks.com/skills/markdown-here",
+        "clicks": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 60.4
+      },
+      {
+        "key": "https://workflowstacks.com/skills/miscoshorts-ai",
+        "clicks": 0,
+        "impressions": 4,
+        "ctr": 0,
+        "position": 7
+      },
+      {
+        "key": "https://workflowstacks.com/skills/module-federation-examples",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 60
+      },
+      {
+        "key": "https://workflowstacks.com/skills/mosaico",
+        "clicks": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "position": 7.8
+      },
+      {
+        "key": "https://workflowstacks.com/skills/moyin-creator",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 6
+      },
+      {
+        "key": "https://workflowstacks.com/skills/mui-theme-creator",
+        "clicks": 0,
+        "impressions": 2,
+        "ctr": 0,
+        "position": 73
+      },
+      {
+        "key": "https://workflowstacks.com/skills/ollama",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "position": 1
+      }
+    ]
+  },
+  "crawl": {
+    "pages_crawled": 400,
+    "depth_distribution": {
+      "0": 1,
+      "1": 41,
+      "2": 207,
+      "3": 151
+    },
+    "max_depth": 3,
+    "non_200_linked": [],
+    "weak_inbound": [
+      {
+        "url": "/skills/mcp-toolbox",
+        "inbound": 1,
+        "depth": 1
+      },
+      {
+        "url": "/skills/hyper",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/slick",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/clip",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/clipboard-js",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/hyprland",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/web-check",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/eips",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/wagtail",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/bips",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/ai-trader",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/nemoclaw",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/slidingmenu",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/orb-slam2",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/watchtower",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/cocoapods",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/pytube",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/orb-slam3",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/page/49",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/7a2344ae-71ba-47b4-bde3-e9945b7365d2",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/2ee35816-ac85-4206-869b-3a9f25e51b4a",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/148d40d5-d967-43ef-9c6c-1eefc77f5440",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/homelab",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/universal-intel-wifi-bt-updater",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/ai-assistant-reactive-ui",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/magda-core",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/site",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/orbit",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/hal-9000",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/bundles/ecommerce-pro-pack",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/personas/growth-marketer",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/personas/indie-hacker",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/personas/sales-closer",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/personas/solo-founder",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/commands/todo",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/blog/how-to-automate-lead-generation-with-n8n",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/a/77fdcc6f-639f-4fbd-982b-85c5c7c52841",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/a/574584bf-fc2c-4a28-a32f-0670c2429f26",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/a/9950557c-be8b-4f6c-a3c3-71a0819637c4",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/a/2e561d53-7e73-4322-85d1-5deab1de31f6",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/a/c83f3631-4a9b-4827-9a97-81292d61be1e",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/partner",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/packs/founder-launch-pack",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/packs/developer-productivity-pack",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/packs/outbound-sales-pack",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/packs/content-and-marketing-pack",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/join",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/playbooks/validate-a-new-offer-in-48-hours",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/playbooks/idea-validation-with-market-research",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/playbooks/warm-outreach-for-b2b-leads",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/playbooks/ship-your-mvp-in-a-weekend",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/opencodex",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/velobase-harness",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/readykit",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/osaurus",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/vmux",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/multipoolminer",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/deepeval",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/extension-gen-ai",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/openlinkhub",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/devoxxgenieideaplugin",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/voiceblender",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/6a7be774-444d-48a7-8f5a-9b09b2d3d71a",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/f3e7d49b-94ab-4600-ade8-6ce81b70c7a5",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/64d7fcbe-4694-43df-8920-b1571672690a",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/4ac5a28d-2393-4831-998f-1d8ee1052212",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/b0fe163e-8466-49b2-a1ed-1b6fba65f0f1",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/c39e271c-5430-4015-bb57-6ca36d780f54",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/d655997d-35f2-4f00-8b74-83613c9d9f0d",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/0600c0f6-0cc4-4f03-a649-22f263d20e79",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/ce04a540-9d0d-4c86-8458-6a8ce2099867",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/20b2db0f-6d92-4e14-82c0-cbd660afde84",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/1c38677e-c8b4-40ed-b7ec-462aff034d82",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/63b998c9-bde5-4d0a-b1bc-a6a9ecdff8b8",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/liger-kernel",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/school-of-sre",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/linkedin-skill-assessments-quizzes",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/nestjs-rbac",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/launchstack",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/vinyl-to-essence",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/electron-mcp-server",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/tiktok-skills",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/x-skills",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/telegram-channel-saver",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/clippit",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/telegram-monet",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/moneta",
+        "inbound": 1,
+        "depth": 3
+      },
+      {
+        "url": "/skills/p-ai",
+        "inbound": 1,
+        "depth": 3
+      }
+    ],
+    "uuid_urls_linked": [
+      "/skills/7a2344ae-71ba-47b4-bde3-e9945b7365d2",
+      "/skills/f6dd2500-bcc3-49a6-a406-6ad2b671e54d",
+      "/skills/3b18e2fa-9326-4a6e-80f9-6e9e3e3bd2df",
+      "/skills/0b65aa38-4557-4390-83d7-68d5f98e88d5",
+      "/skills/b6f9e687-9063-4c15-93f2-40d0497f571a",
+      "/skills/2ee35816-ac85-4206-869b-3a9f25e51b4a",
+      "/skills/765b9d5a-af1d-4271-912c-bf038eacb6f7",
+      "/skills/148d40d5-d967-43ef-9c6c-1eefc77f5440",
+      "/skills/bc8656fa-e2bf-47cf-b5aa-d2ab87b87086",
+      "/a/77fdcc6f-639f-4fbd-982b-85c5c7c52841",
+      "/a/574584bf-fc2c-4a28-a32f-0670c2429f26",
+      "/a/9950557c-be8b-4f6c-a3c3-71a0819637c4",
+      "/a/2e561d53-7e73-4322-85d1-5deab1de31f6",
+      "/a/c83f3631-4a9b-4827-9a97-81292d61be1e",
+      "/skills/0d662ad1-da84-4d03-9142-d69e62617e4c",
+      "/skills/6a7be774-444d-48a7-8f5a-9b09b2d3d71a",
+      "/skills/c77bc46f-38e3-4a3a-a400-a3e2f4c9a081",
+      "/skills/f3e7d49b-94ab-4600-ade8-6ce81b70c7a5",
+      "/skills/64d7fcbe-4694-43df-8920-b1571672690a",
+      "/skills/4ac5a28d-2393-4831-998f-1d8ee1052212",
+      "/skills/e7392fc5-7a5c-4a24-a871-98e918c3f283",
+      "/skills/6cbfa468-d3f1-4247-8e8b-c4e65216f11c",
+      "/skills/b0fe163e-8466-49b2-a1ed-1b6fba65f0f1",
+      "/skills/c39e271c-5430-4015-bb57-6ca36d780f54",
+      "/skills/251c180d-d63b-4c7a-b8e3-0f6f179cc766",
+      "/skills/f962af88-339a-44a5-861f-628f5959ee5a",
+      "/skills/d655997d-35f2-4f00-8b74-83613c9d9f0d",
+      "/skills/0600c0f6-0cc4-4f03-a649-22f263d20e79",
+      "/skills/804e4aca-66ea-4dba-840a-c4a67f2109e1",
+      "/skills/ce04a540-9d0d-4c86-8458-6a8ce2099867",
+      "/skills/20b2db0f-6d92-4e14-82c0-cbd660afde84",
+      "/skills/52d1969a-5d60-4c35-93e4-427f4fa771c4",
+      "/skills/1fbb5e5f-4973-41a2-b5ed-f036e7136d66",
+      "/skills/a33a9d91-3fee-4e4e-b622-89da7f57cc7e",
+      "/skills/1defa081-bc79-45ce-a6f6-445b597142b6",
+      "/skills/71ee928c-3df2-4052-aeaa-6a5244f68fa0",
+      "/skills/e1dbb611-def9-48c2-878e-501dd7406b7b",
+      "/skills/1c38677e-c8b4-40ed-b7ec-462aff034d82",
+      "/skills/63b998c9-bde5-4d0a-b1bc-a6a9ecdff8b8"
+    ],
+    "sections": [
+      [
+        "/skills",
+        267
+      ],
+      [
+        "/best",
+        19
+      ],
+      [
+        "/blog",
+        17
+      ],
+      [
+        "/templates",
+        13
+      ],
+      [
+        "/mcp",
+        13
+      ],
+      [
+        "/automate",
+        9
+      ],
+      [
+        "/commands",
+        7
+      ],
+      [
+        "/learn",
+        6
+      ],
+      [
+        "/personas",
+        5
+      ],
+      [
+        "/packs",
+        5
+      ],
+      [
+        "/playbooks",
+        5
+      ],
+      [
+        "/bundles",
+        5
+      ],
+      [
+        "/a",
+        5
+      ],
+      [
+        "/kits",
+        2
+      ],
+      [
+        "/",
+        1
+      ],
+      [
+        "/pricing",
+        1
+      ],
+      [
+        "/builder",
+        1
+      ],
+      [
+        "/hot",
+        1
+      ],
+      [
+        "/discover",
+        1
+      ],
+      [
+        "/build-for-me",
+        1
+      ],
+      [
+        "/help",
+        1
+      ],
+      [
+        "/submit",
+        1
+      ],
+      [
+        "/tools",
+        1
+      ],
+      [
+        "/newsletter",
+        1
+      ],
+      [
+        "/library",
+        1
+      ],
+      [
+        "/problems",
+        1
+      ],
+      [
+        "/deals",
+        1
+      ],
+      [
+        "/community",
+        1
+      ],
+      [
+        "/members",
+        1
+      ],
+      [
+        "/about",
+        1
+      ],
+      [
+        "/enterprise",
+        1
+      ],
+      [
+        "/docs",
+        1
+      ],
+      [
+        "/terms",
+        1
+      ],
+      [
+        "/privacy",
+        1
+      ],
+      [
+        "/partner",
+        1
+      ],
+      [
+        "/join",
+        1
+      ]
+    ],
+    "skills_index_anchor_count": 48,
+    "skills_page2_status": 200,
+    "skills_page2_anchor_count": 48,
+    "homepage_skill_links": [
+      "cliproxyapi",
+      "applied-ml",
+      "hyperframes",
+      "mcp-toolbox",
+      "nofx",
+      "gemini-cli"
+    ],
+    "schema_by_section": {
+      "/": {
+        "sample": "/",
+        "types": [
+          "Answer",
+          "EntryPoint",
+          "FAQPage",
+          "Organization",
+          "Question",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/pricing": {
+        "sample": "/pricing",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/learn": {
+        "sample": "/learn/creators",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/builder": {
+        "sample": "/builder",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/skills": {
+        "sample": "/skills",
+        "types": [
+          "EntryPoint",
+          "ItemList",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/hot": {
+        "sample": "/hot",
+        "types": [
+          "BreadcrumbList",
+          "EntryPoint",
+          "ItemList",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/discover": {
+        "sample": "/discover",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/build-for-me": {
+        "sample": "/build-for-me",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/help": {
+        "sample": "/help",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/submit": {
+        "sample": "/submit",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/templates": {
+        "sample": "/templates",
+        "types": [
+          "BreadcrumbList",
+          "EntryPoint",
+          "ItemList",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/kits": {
+        "sample": "/kits",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/mcp": {
+        "sample": "/mcp",
+        "types": [
+          "BreadcrumbList",
+          "EntryPoint",
+          "ItemList",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/commands": {
+        "sample": "/commands",
+        "types": [
+          "BreadcrumbList",
+          "EntryPoint",
+          "ItemList",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/tools": {
+        "sample": "/tools",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/best": {
+        "sample": "/best",
+        "types": [
+          "BreadcrumbList",
+          "EntryPoint",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/blog": {
+        "sample": "/blog",
+        "types": [
+          "BreadcrumbList",
+          "EntryPoint",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/newsletter": {
+        "sample": "/newsletter",
+        "types": [
+          "BreadcrumbList",
+          "EntryPoint",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/personas": {
+        "sample": "/personas",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/packs": {
+        "sample": "/packs",
+        "types": [
+          "EntryPoint",
+          "ItemList",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/playbooks": {
+        "sample": "/playbooks",
+        "types": [
+          "EntryPoint",
+          "ItemList",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/library": {
+        "sample": "/library",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/problems": {
+        "sample": "/problems",
+        "types": [
+          "EntryPoint",
+          "ItemList",
+          "ListItem",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/deals": {
+        "sample": "/deals",
+        "types": [
+          "EntryPoint",
+          "ItemList",
+          "ListItem",
+          "Offer",
+          "Organization",
+          "Product",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/community": {
+        "sample": "/community",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/members": {
+        "sample": "/members",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/about": {
+        "sample": "/about",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/enterprise": {
+        "sample": "/enterprise",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/docs": {
+        "sample": "/docs",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/terms": {
+        "sample": "/terms",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/privacy": {
+        "sample": "/privacy",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/automate": {
+        "sample": "/automate/automate-product-descriptions",
+        "types": [
+          "Answer",
+          "BreadcrumbList",
+          "EntryPoint",
+          "FAQPage",
+          "ListItem",
+          "Organization",
+          "Question",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/bundles": {
+        "sample": "/bundles/lead-finder",
+        "types": [
+          "Brand",
+          "BreadcrumbList",
+          "EntryPoint",
+          "ListItem",
+          "Offer",
+          "Organization",
+          "Product",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/a": {
+        "sample": "/a/77fdcc6f-639f-4fbd-982b-85c5c7c52841",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/partner": {
+        "sample": "/partner",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      },
+      "/join": {
+        "sample": "/join",
+        "types": [
+          "EntryPoint",
+          "Organization",
+          "SearchAction",
+          "WebSite"
+        ]
+      }
+    }
+  },
+  "sitemap": {
+    "count": 664,
+    "uuid_urls": 0,
+    "by_section": {
+      "/": 1,
+      "/skills": 524,
+      "/discover": 1,
+      "/problems": 1,
+      "/deals": 1,
+      "/partner": 1,
+      "/members": 1,
+      "/join": 1,
+      "/community": 1,
+      "/packs": 5,
+      "/playbooks": 5,
+      "/personas": 5,
+      "/builder": 1,
+      "/upload": 1,
+      "/build-for-me": 1,
+      "/templates": 13,
+      "/tools": 1,
+      "/bundles": 5,
+      "/collections": 1,
+      "/automate": 17,
+      "/kits": 2,
+      "/mcp": 13,
+      "/commands": 7,
+      "/blog": 17,
+      "/hot": 1,
+      "/newsletter": 1,
+      "/best": 19,
+      "/learn": 8,
+      "/about": 1,
+      "/docs": 1,
+      "/help": 1,
+      "/enterprise": 1,
+      "/founder-launch": 1,
+      "/pricing": 1,
+      "/privacy": 1,
+      "/terms": 1,
+      "/submit": 1
+    },
+    "has_pagination": 48
+  },
+  "llms_top10": [
+    "litellm",
+    "system-prompts-and-models-of-ai-tools",
+    "open-webui",
+    "ecc",
+    "openclaw",
+    "milvus",
+    "nanobot",
+    "browser-use",
+    "pi",
+    "generative-ai-for-beginners"
+  ],
+  "inspect": {
+    "/": {
+      "verdict": "PASS",
+      "coverage": "Submitted and indexed",
+      "last_crawl": "2026-09-06T03:38:48Z",
+      "indexing_state": "INDEXING_ALLOWED",
+      "canonical_google": "https://workflowstacks.com/",
+      "robots": "ALLOWED"
+    },
+    "/skills": {
+      "verdict": "NEUTRAL",
+      "coverage": "URL is unknown to Google",
+      "last_crawl": null,
+      "indexing_state": "INDEXING_STATE_UNSPECIFIED",
+      "canonical_google": null,
+      "robots": "ROBOTS_TXT_STATE_UNSPECIFIED"
+    },
+    "/skills/page/2": {
+      "verdict": "NEUTRAL",
+      "coverage": "Discovered - currently not indexed",
+      "last_crawl": null,
+      "indexing_state": "INDEXING_STATE_UNSPECIFIED",
+      "canonical_google": null,
+      "robots": "ROBOTS_TXT_STATE_UNSPECIFIED"
+    },
+    "/templates/cold-email-personalizer": {
+      "verdict": "PASS",
+      "coverage": "Submitted and indexed",
+      "last_crawl": "2026-07-25T16:04:26Z",
+      "indexing_state": "INDEXING_ALLOWED",
+      "canonical_google": "https://workflowstacks.com/templates/cold-email-personalizer",
+      "robots": "ALLOWED"
+    },
+    "/automate/triage-your-inbox": {
+      "verdict": "NEUTRAL",
+      "coverage": "Crawled - currently not indexed",
+      "last_crawl": "2026-07-23T20:42:17Z",
+      "indexing_state": "INDEXING_ALLOWED",
+      "canonical_google": "https://workflowstacks.com/automate/triage-your-inbox",
+      "robots": "ALLOWED"
+    },
+    "/mcp/filesystem": {
+      "verdict": "NEUTRAL",
+      "coverage": "Crawled - currently not indexed",
+      "last_crawl": "2026-08-18T16:57:13Z",
+      "indexing_state": "INDEXING_ALLOWED",
+      "canonical_google": "https://workflowstacks.com/mcp/filesystem",
+      "robots": "ALLOWED"
+    },
+    "/bundles/lead-finder": {
+      "verdict": "NEUTRAL",
+      "coverage": "URL is unknown to Google",
+      "last_crawl": null,
+      "indexing_state": "INDEXING_STATE_UNSPECIFIED",
+      "canonical_google": null,
+      "robots": "ROBOTS_TXT_STATE_UNSPECIFIED"
+    },
+    "/blog/best-mcp-servers-claude-desktop": {
+      "verdict": "NEUTRAL",
+      "coverage": "URL is unknown to Google",
+      "last_crawl": null,
+      "indexing_state": "INDEXING_STATE_UNSPECIFIED",
+      "canonical_google": null,
+      "robots": "ROBOTS_TXT_STATE_UNSPECIFIED"
+    },
+    "/skills/ogcode": {
+      "verdict": "NEUTRAL",
+      "coverage": "Crawled - currently not indexed",
+      "last_crawl": "2026-07-26T23:58:57Z",
+      "indexing_state": "INDEXING_ALLOWED",
+      "canonical_google": "https://workflowstacks.com/skills/ogcode",
+      "robots": "ALLOWED"
+    },
+    "/skills/browser-use": {
+      "verdict": "NEUTRAL",
+      "coverage": "Discovered - currently not indexed",
+      "last_crawl": null,
+      "indexing_state": "INDEXING_STATE_UNSPECIFIED",
+      "canonical_google": null,
+      "robots": "ROBOTS_TXT_STATE_UNSPECIFIED"
+    },
+    "/collections": {
+      "verdict": "NEUTRAL",
+      "coverage": "Discovered - currently not indexed",
+      "last_crawl": null,
+      "indexing_state": "INDEXING_STATE_UNSPECIFIED",
+      "canonical_google": null,
+      "robots": "ROBOTS_TXT_STATE_UNSPECIFIED"
+    }
+  },
+  "audit": {
+    "score": 8.9,
+    "high_failures": 0
+  },
+  "cwv": {
+    "/": {
+      "mobile": {
+        "source": "lighthouse",
+        "score": 83,
+        "lab": {
+          "lcp_ms": 2718,
+          "cls": 0,
+          "tbt_ms": 407,
+          "fcp_ms": 1761,
+          "ttfb_ms": 25,
+          "speed_index_ms": 4459
+        },
+        "field": null
+      },
+      "desktop": {
+        "source": "lighthouse",
+        "score": 100,
+        "lab": {
+          "lcp_ms": 719,
+          "cls": 0,
+          "tbt_ms": 0,
+          "fcp_ms": 473,
+          "ttfb_ms": 24,
+          "speed_index_ms": 516
+        },
+        "field": null
+      }
+    },
+    "/skills": {
+      "mobile": {
+        "source": "lighthouse",
+        "score": 95,
+        "lab": {
+          "lcp_ms": 2622,
+          "cls": 0,
+          "tbt_ms": 35,
+          "fcp_ms": 1833,
+          "ttfb_ms": 24,
+          "speed_index_ms": 2610
+        },
+        "field": null
+      },
+      "desktop": {
+        "source": "lighthouse",
+        "score": 100,
+        "lab": {
+          "lcp_ms": 610,
+          "cls": 0,
+          "tbt_ms": 0,
+          "fcp_ms": 535,
+          "ttfb_ms": 24,
+          "speed_index_ms": 535
+        },
+        "field": null
+      }
+    },
+    "/skills/ogcode": {
+      "mobile": {
+        "source": "lighthouse",
+        "score": 92,
+        "lab": {
+          "lcp_ms": 3062,
+          "cls": 0,
+          "tbt_ms": 50,
+          "fcp_ms": 2003,
+          "ttfb_ms": 19,
+          "speed_index_ms": 2121
+        },
+        "field": null
+      },
+      "desktop": {
+        "source": "lighthouse",
+        "score": 100,
+        "lab": {
+          "lcp_ms": 731,
+          "cls": 0,
+          "tbt_ms": 0,
+          "fcp_ms": 497,
+          "ttfb_ms": 24,
+          "speed_index_ms": 601
+        },
+        "field": null
+      }
+    },
+    "/skills/page/2": {
+      "mobile": {
+        "source": "lighthouse",
+        "score": 96,
+        "lab": {
+          "lcp_ms": 2506,
+          "cls": 0,
+          "tbt_ms": 14,
+          "fcp_ms": 1711,
+          "ttfb_ms": 24,
+          "speed_index_ms": 2529
+        },
+        "field": null
+      }
+    },
+    "/templates/cold-email-personalizer": {
+      "mobile": {
+        "source": "lighthouse",
+        "score": 96,
+        "lab": {
+          "lcp_ms": 2438,
+          "cls": 0.064,
+          "tbt_ms": 29,
+          "fcp_ms": 1681,
+          "ttfb_ms": 19,
+          "speed_index_ms": 2525
+        },
+        "field": null
+      }
+    },
+    "/automate/triage-your-inbox": {
+      "mobile": {
+        "source": "lighthouse",
+        "score": 97,
+        "lab": {
+          "lcp_ms": 2310,
+          "cls": 0,
+          "tbt_ms": 7,
+          "fcp_ms": 1688,
+          "ttfb_ms": 24,
+          "speed_index_ms": 2740
+        },
+        "field": null
+      }
+    },
+    "/mcp/filesystem": {
+      "mobile": {
+        "source": "lighthouse",
+        "score": 97,
+        "lab": {
+          "lcp_ms": 2439,
+          "cls": 0,
+          "tbt_ms": 22,
+          "fcp_ms": 1681,
+          "ttfb_ms": 19,
+          "speed_index_ms": 1681
+        },
+        "field": null
+      }
+    },
+    "/blog/seo-brief-n8n-claude": {
+      "mobile": {
+        "source": "lighthouse",
+        "score": 96,
+        "lab": {
+          "lcp_ms": 2613,
+          "cls": 0,
+          "tbt_ms": 16,
+          "fcp_ms": 1829,
+          "ttfb_ms": 22,
+          "speed_index_ms": 1829
+        },
+        "field": null
+      }
+    },
+    "/collections": {
+      "mobile": {
+        "source": "lighthouse",
+        "score": 97,
+        "lab": {
+          "lcp_ms": 2361,
+          "cls": 0,
+          "tbt_ms": 30,
+          "fcp_ms": 1750,
+          "ttfb_ms": 24,
+          "speed_index_ms": 2650
+        },
+        "field": null
+      }
+    }
+  },
+  "blog": {
+    "published_last_7d": [
+      {
+        "slug": "ai-support-ticket-auto-reply",
+        "at": "2026-09-20T07:00:00.000Z",
+        "score": 7
+      },
+      {
+        "slug": "lead-qualification-auto-booking",
+        "at": "2026-09-18T07:00:00.000Z",
+        "score": 7
+      },
+      {
+        "slug": "claude-code-github-mcp",
+        "at": "2026-09-17T07:00:00.000Z",
+        "score": 8
+      },
+      {
+        "slug": "score-leads-icp-fit",
+        "at": "2026-09-16T07:00:00.000Z",
+        "score": 7.8
+      },
+      {
+        "slug": "blog-to-linkedin-x-n8n",
+        "at": "2026-09-15T07:00:00.000Z",
+        "score": 8
+      }
+    ],
+    "last_published": {
+      "slug": "ai-support-ticket-auto-reply",
+      "at": "2026-09-20T07:00:00.000Z"
+    },
+    "held": [
+      {
+        "slug": "shopify-review-sentiment",
+        "score": 5
+      },
+      {
+        "slug": "n8n-lead-qualification",
+        "score": 6
+      },
+      {
+        "slug": "n8n-lead-qualification-auto-schedule",
+        "score": null
+      },
+      {
+        "slug": "meeting-notes-n8n",
+        "score": null
+      },
+      {
+        "slug": "shopify-review-reply-claude",
+        "score": null
+      },
+      {
+        "slug": "shopify-review-automation",
+        "score": 5.6
+      },
+      {
+        "slug": "cold-email-automation-claude",
+        "score": 6
+      },
+      {
+        "slug": "cold-email-n8n-guide",
+        "score": 6.5
+      },
+      {
+        "slug": "blog-to-linkedin-x",
+        "score": null
+      },
+      {
+        "slug": "content-repurposer-blog-linkedin-x",
+        "score": 6
+      },
+      {
+        "slug": "auto-reply-shopify-reviews-n8n",
+        "score": 7
+      }
+    ],
+    "in_flight": [],
+    "recent_judge_scores": [
+      {
+        "slug": "ai-support-ticket-auto-reply",
+        "score": 7,
+        "status": "published"
+      },
+      {
+        "slug": "shopify-review-sentiment",
+        "score": 5,
+        "status": "held"
+      },
+      {
+        "slug": "lead-qualification-auto-booking",
+        "score": 7,
+        "status": "published"
+      },
+      {
+        "slug": "claude-code-github-mcp",
+        "score": 8,
+        "status": "published"
+      },
+      {
+        "slug": "score-leads-icp-fit",
+        "score": 7.8,
+        "status": "published"
+      }
+    ],
+    "counts": {
+      "published": 16,
+      "held": 11
+    },
+    "providers": {
+      "openrouter": true,
+      "groq": true,
+      "anthropic": false,
+      "gemini": false
+    },
+    "daily_runs_last_7": [
+      {
+        "at": "2026-09-20T09:59:23Z",
+        "conclusion": "success"
+      },
+      {
+        "at": "2026-09-19T09:40:41Z",
+        "conclusion": "success"
+      },
+      {
+        "at": "2026-09-18T09:58:43Z",
+        "conclusion": "success"
+      },
+      {
+        "at": "2026-09-17T10:17:22Z",
+        "conclusion": "success"
+      },
+      {
+        "at": "2026-09-16T10:12:39Z",
+        "conclusion": "success"
+      },
+      {
+        "at": "2026-09-15T10:18:51Z",
+        "conclusion": "success"
+      },
+      {
+        "at": "2026-09-14T10:54:36Z",
+        "conclusion": "success"
+      }
+    ]
+  }
+}
