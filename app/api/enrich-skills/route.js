@@ -4,6 +4,7 @@
 // cost, and companion skills. Stored as skill.explainer.
 
 import { MongoClient } from 'mongodb';
+import { revalidateSkill } from '@/lib/revalidate';
 
 const client = new MongoClient(process.env.MONGO_URL);
 let db;
@@ -238,6 +239,7 @@ export async function POST(request) {
         out.samples.push({ id: skill.id, name: skill.title_human || skill.name, explainer });
       } else {
         await skills.updateOne({ id: skill.id }, { $set: { explainer } });
+        revalidateSkill(skill);
         if (out.samples.length < 3) out.samples.push({ id: skill.id, name: skill.title_human || skill.name, explainer });
       }
       out.enriched++;

@@ -20,6 +20,18 @@ export default function robots() {
         allow: '/',
         disallow: ['/api/', '/admin', '/earnings'],
       },
+      {
+        // Third-party SEO-tool and scraper crawlers. They send no visitors, but
+        // each crawl of the ~2.7k-page catalog costs ISR writes and function CPU
+        // on a capped Hobby plan. The polite ones stop here; the rest are denied
+        // at the firewall (vercel.json -> routes[].mitigate, same list).
+        userAgent: [
+          'AhrefsBot', 'SemrushBot', 'MJ12bot', 'DotBot', 'Bytespider',
+          'DataForSeoBot', 'BLEXBot', 'PetalBot', 'serpstatbot', 'MegaIndex',
+          'SeekportBot', 'Barkrowler', 'ZoominfoBot',
+        ],
+        disallow: '/',
+      },
     ],
     sitemap: `${BASE}/sitemap.xml`,
     host: BASE,

@@ -15,8 +15,16 @@ import { SITE_URL as BASE } from '@/lib/site-url'
 // EVERY request (verified live 2026-08-17: Cache-Control private/no-store,
 // X-Vercel-Cache MISS on repeat GETs) — the 2026-08-11 CPU/transfer overage
 // assumed ISR was in effect; it wasn't. An empty param list + revalidate makes
-// each slug render on first hit, then serve from the edge cache for an hour.
-export const revalidate = 86400
+// each slug render on first hit, then serve from the edge cache.
+//
+// 7 days, not 1 (2026-09-21): with ~2.7k skill pages and crawlers touching most
+// of them daily, a 24h window meant ~2.7k regenerations a day — each one an ISR
+// write plus this page's GitHub/codeflow work — and put ISR Writes (287K/200K)
+// and Fluid Active CPU (5h18m/4h) over the Hobby caps. Real content edits don't
+// wait for the timer: the write endpoints call revalidateSkill()
+// (lib/revalidate.js). Only star counts can lag, by up to a week.
+export const revalidate = 604800
+const WEEK = 604800
 export const dynamicParams = true
 export function generateStaticParams() { return [] }
 
@@ -37,7 +45,7 @@ async function getRelated(skill) {
   const cat = encodeURIComponent(skill.category || '')
   const get = async (qs) => {
     try {
-      const res = await fetch(`${BASE}/api/skills?${qs}`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
+      const res = await fetch(`${BASE}/api/skills?${qs}`, { next: { revalidate: WEEK }, signal: AbortSignal.timeout(10_000) })
       if (!res.ok) return []
       const data = await res.json()
       return data.skills || []
@@ -79,7 +87,12 @@ async function getSkill(id) {
     // a 0% edge-cache-hit rate and blew past the Vercel Hobby Fast Origin
     // Transfer / Fluid Active CPU limits (2026-08-11). 1h keeps pages reasonably
     // fresh while cutting regeneration frequency ~12x.
-    const res = await fetch(`${BASE}/api/skills/${id}`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
+    //
+    // ?isr=1 opts this request out of the CDN Cache-Control rule in vercel.json.
+    // Without it, a regeneration triggered by revalidateSkill() right after a
+    // rewrite could be handed the CDN's pre-rewrite JSON (s-maxage + SWR) and
+    // bake it into the page for a week. Next's data cache still dedupes it.
+    const res = await fetch(`${BASE}/api/skills/${id}?isr=1`, { next: { revalidate: WEEK }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     const data = await res.json()
     return data.skill || null
@@ -105,8 +118,8 @@ async function getSourceSpec(githubUrl) {
   const repo = m[2].replace(/\.git$/, '')
   try {
     const [metaRes, contentsRes] = await Promise.all([
-      fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: ghHeaders(), next: { revalidate: 86400 } }),
-      fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, { headers: ghHeaders(), next: { revalidate: 86400 } }),
+      fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: ghHeaders(), next: { revalidate: WEEK } }),
+      fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, { headers: ghHeaders(), next: { revalidate: WEEK } }),
     ])
     if (!metaRes.ok || !contentsRes.ok) return null
     const meta = await metaRes.json()
@@ -159,7 +172,7 @@ async function getCodeflow(skill) {
   if ((skill.github_stars || 0) < 50) return null
   // Live build (page not yet backfilled). Trees over ~2MB can't enter Next's
   // data cache, so very large repos (>60MB) wait for the stored version too.
-  const cf = await buildCodeflow(skill.github_url, { category: skill.category, installHint: skill.use_guide?.install, maxSizeKB: 60_000, fetchOpts: { next: { revalidate: 86400 } } })
+  const cf = await buildCodeflow(skill.github_url, { category: skill.category, installHint: skill.use_guide?.install, maxSizeKB: 60_000, fetchOpts: { next: { revalidate: WEEK } } })
   if (!cf) return null
   return { ...cf, summary: summarize(cf, name) }
 }

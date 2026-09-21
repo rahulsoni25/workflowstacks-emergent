@@ -1,5 +1,6 @@
 import { timingSafeEqual } from 'crypto'
 import { getDb } from '@/lib/mongo'
+import { revalidateSkill } from '@/lib/revalidate'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
@@ -176,6 +177,7 @@ export async function POST(request) {
     for (const a of actions) {
       if (!a.set) continue
       await col.updateOne({ id: a.id }, { $set: { ...a.set, seo_optimized_at: new Date() } })
+      revalidateSkill(a)
       updated++
     }
   }

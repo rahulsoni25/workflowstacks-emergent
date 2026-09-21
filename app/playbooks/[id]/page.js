@@ -8,6 +8,10 @@ import { SITE_URL as BASE } from '@/lib/site-url'
 import { resolveItem, slugifyName } from '@/lib/collections'
 
 export const revalidate = 86400
+// Without generateStaticParams the segment is rendered on every request (no
+// edge cache) despite `revalidate` — same fix as app/skills/[id]/page.js.
+export const dynamicParams = true
+export function generateStaticParams() { return [] }
 
 async function getPlaybook(id) {
   try {
