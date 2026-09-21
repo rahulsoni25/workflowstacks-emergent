@@ -129,7 +129,7 @@ export default async function PersonaDetailPage({ params }) {
                           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />{skill.github_stars.toLocaleString()}
                         </span>
                       )}
-                      <Link href={`/skills/${skill.slug || skill.id}`}>
+                      <Link prefetch={false} href={`/skills/${skill.slug || skill.id}`}>
                         <Button variant="outline" size="sm" className="border-slate-700 text-text-secondary hover:text-teal-300">View</Button>
                       </Link>
                     </div>

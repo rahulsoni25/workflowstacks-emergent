@@ -348,6 +348,7 @@ async function scrapeGitHub(topicQueries, opts = {}) {
           github_topics: repo.topics || [],
           popularity_score: parseFloat(popularityScore.toFixed(2)),
           creator: repo.owner.login,
+          creator_type: repo.owner.type,
           creator_avatar: repo.owner.avatar_url,
           is_premium: false,
           readme_preview: readmePreview,
@@ -892,6 +893,7 @@ export async function GET(request) {
               github_topics: repo.topics || [],
               popularity_score: repo.stargazers_count + repo.forks_count * 5,
               creator: repo.owner?.login,
+              creator_type: repo.owner?.type,
               creator_avatar: repo.owner?.avatar_url,
               is_premium: false,
               readme_preview: repo.description || '',
@@ -992,6 +994,7 @@ export async function GET(request) {
               github_forks: repo.forks_count,
               github_topics: repo.topics || [],
               creator: repo.owner?.login,
+              creator_type: repo.owner?.type,
               creator_avatar: repo.owner?.avatar_url,
               language: repo.language,
               last_updated: repo.pushed_at,
@@ -3123,6 +3126,9 @@ export async function POST(request) {
       }
       if (body.blueprint) skill.blueprint = String(body.blueprint).slice(0, 6000);
       if (body.use_case) skill.use_case = String(body.use_case).slice(0, 60);
+      // Invite credit: the GitHub handle from a creator's /creators?invite= link.
+      const inviteRef = String(body.ref || '').trim().toLowerCase();
+      if (/^[a-z\d](?:[a-z\d-]{0,38})$/.test(inviteRef) && inviteRef !== creator.toLowerCase()) skill.ref = inviteRef;
 
       // Content-safety screen (prompt injection / XSS / obfuscated payloads / LLM
       // fallback). A flagged skill is stored blocked — never published — but the

@@ -453,7 +453,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                           collapsing ~97% the week that shipped. Google needs
                           an href; the click-to-panel UX stays for people. */}
                       <h3 className="m-0 text-[19px] font-bold tracking-[-0.02em]">
-                        <Link href={`/skills/${skillKey(s)}`} className="hover:text-[#C6F24E]">{skillTitle(s)}</Link>
+                        <Link prefetch={false} href={`/skills/${skillKey(s)}`} className="hover:text-[#C6F24E]">{skillTitle(s)}</Link>
                       </h3>
                       <button type="button" onClick={() => openPanel(s, false)} className="flex min-w-0 flex-col gap-3 border-0 bg-transparent p-0 text-left text-inherit">
                         <div className="t-mono flex w-full items-center justify-between gap-2 text-[11px] text-text-muted">
@@ -479,7 +479,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                           {s.installs > 0 && <span className="whitespace-nowrap">↓ {fmt(s.installs)}</span>}
                         </span>
                         {paid ? (
-                          <Link href={`/skills/${skillKey(s)}`} className="whitespace-nowrap rounded-md bg-[#ECEFEA] px-[13px] py-2 text-[13px] font-bold text-[#0A0C0D] hover:bg-[#C6F24E]">
+                          <Link prefetch={false} href={`/skills/${skillKey(s)}`} className="whitespace-nowrap rounded-md bg-[#ECEFEA] px-[13px] py-2 text-[13px] font-bold text-[#0A0C0D] hover:bg-[#C6F24E]">
                             View
                           </Link>
                         ) : (
@@ -591,7 +591,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                     </span>
                     <span className="text-[22px] font-bold">${Number(sel.price)}</span>
                   </div>
-                  <Link href={`/skills/${selKey}`} className="rounded-lg bg-[#C6F24E] p-3.5 text-center text-[15px] font-bold text-[#0A0C0D] hover:bg-[#A6D62E]">
+                  <Link prefetch={false} href={`/skills/${selKey}`} className="rounded-lg bg-[#C6F24E] p-3.5 text-center text-[15px] font-bold text-[#0A0C0D] hover:bg-[#A6D62E]">
                     View listing →
                   </Link>
                 </>
@@ -647,7 +647,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                     <button type="button" onClick={() => setShowBp((v) => !v)} className="border-0 bg-transparent p-0 text-[11px] text-text-muted hover:text-text-primary">
                       {showBp ? '▾ Hide blueprint' : '▸ Preview blueprint'}
                     </button>
-                    <Link href={`/skills/${selKey}`} className="text-text-secondary underline hover:text-[#C6F24E]">
+                    <Link prefetch={false} href={`/skills/${selKey}`} className="text-text-secondary underline hover:text-[#C6F24E]">
                       Full report ↗
                     </Link>
                   </div>

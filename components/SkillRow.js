@@ -12,7 +12,7 @@ export default function SkillRow({ skill: s, rank = null, showVelocity = false }
       {rank !== null && <span className="t-mono mt-0.5 w-6 shrink-0 text-sm text-text-muted">{rank}</span>}
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <Link href={href} className="text-[16px] font-semibold text-text-primary hover:text-[#C6F24E]">{s.title_human || s.name}</Link>
+          <Link prefetch={false} href={href} className="text-[16px] font-semibold text-text-primary hover:text-[#C6F24E]">{s.title_human || s.name}</Link>
           {showVelocity && s.velocity_7d > 0 && (
             <span className="t-mono rounded-full border border-[#C6F24E]/30 bg-[#C6F24E]/10 px-2 py-0.5 text-[11px] text-[#C6F24E]">
               +{Number(s.velocity_7d).toLocaleString('en-US')}★ this week{s.velocity_provisional ? ' · early data' : ''}

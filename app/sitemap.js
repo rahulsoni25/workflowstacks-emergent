@@ -101,7 +101,7 @@ const STATIC_ROUTES = [
   '/blog',
   // Growth surfaces: the public Hot list, the digest archive, and one
   // "best of" roundup per catalog category (each links 20+ skill pages).
-  '/hot', '/newsletter', '/best',
+  '/hot', '/newsletter', '/best', '/creators',
   ...[...TYPE_CATEGORIES, ...FOR_CATEGORIES].map(([slug]) => `/best/${slug}`),
   '/learn', '/learn/how-it-works', '/learn/agents', '/learn/skills',
   '/learn/mcp', '/learn/creators', '/learn/security', '/learn/resources',

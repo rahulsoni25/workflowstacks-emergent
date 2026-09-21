@@ -41,7 +41,7 @@ async function getSection(sortKey) {
 
 function MiniCard({ skill }) {
   return (
-    <Link href={`/skills/${skill.slug || skill.id}`} className="block group">
+    <Link prefetch={false} href={`/skills/${skill.slug || skill.id}`} className="block group">
       <div className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-4 h-full hover:border-teal-500/40 transition-all">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-text-muted">{skill.category}</span>

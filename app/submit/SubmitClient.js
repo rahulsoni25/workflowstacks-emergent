@@ -11,6 +11,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { FOR_CATEGORIES, TARGETS, fmt } from '@/lib/skill-display'
+import InviteCapture, { readInvite } from '@/components/creators/InviteCapture'
 
 const TYPES = [
   ['Skill', 'claude-skill'],
@@ -152,6 +153,7 @@ export default function SubmitClient({ publishedCount = 0 }) {
           email: email.trim(),
           works_with: works,
           blueprint: paid ? bp.trim() : '',
+          ref: readInvite(),
         }),
       })
       const j = await res.json()
@@ -187,6 +189,7 @@ export default function SubmitClient({ publishedCount = 0 }) {
 
   return (
     <div className="min-h-screen bg-[#0A0C0D] text-text-primary">
+      <InviteCapture />
       <div className="mx-auto grid max-w-[1200px] grid-cols-1 items-start gap-10 px-5 pb-24 pt-14 sm:px-10 lg:grid-cols-[1fr_440px] lg:gap-16">
         {/* ---------------- left: form ---------------- */}
         <div className="flex min-w-0 flex-col gap-8">
@@ -264,7 +267,7 @@ export default function SubmitClient({ publishedCount = 0 }) {
                     {check.listed && (
                       <Mono className="text-xs text-text-muted">
                         Already in the catalog as{' '}
-                        <Link href={`/skills/${check.listed.slug}`} className="text-[#C6F24E] underline">
+                        <Link prefetch={false} href={`/skills/${check.listed.slug}`} className="text-[#C6F24E] underline">
                           {check.listed.title}
                         </Link>
                         {check.listed.published ? '.' : ' (in review).'} Submitting again will not create a duplicate listing.

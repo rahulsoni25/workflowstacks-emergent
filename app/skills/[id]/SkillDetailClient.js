@@ -451,7 +451,13 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                 <div className="flex items-start gap-3"><Package className="w-5 h-5 text-text-muted mt-0.5" /><div><div className="text-sm text-text-muted">Category</div><div className="text-white font-medium">{skill.category}</div></div></div>
                 {skill.created_at && <div className="flex items-start gap-3"><Calendar className="w-5 h-5 text-text-muted mt-0.5" /><div><div className="text-sm text-text-muted">Published</div><div className="text-white font-medium">{new Date(skill.created_at).toLocaleDateString('en-US')}</div></div></div>}
                 <div className="mt-4 p-3 bg-teal-500/5 border border-teal-500/15 rounded-lg">
-                  <p className="text-text-muted text-xs">Are you the creator of this tool? <Link href="/submit" className="text-teal-300 hover:text-teal-200">Claim your listing →</Link> and earn 85% of every sale.</p>
+                  <p className="text-text-muted text-xs">Are you the creator of this tool? {/^[a-z\d](?:[a-z\d-]{0,38})$/i.test(skill.creator || '') && skill.github_url ? (
+                    // A button, not a link: crawlers must not be handed ~2k
+                    // on-demand creator pages to generate. People click; bots don't.
+                    <button type="button" onClick={() => { window.location.href = `/creators/${String(skill.creator).toLowerCase()}` }} className="text-teal-300 hover:text-teal-200">Claim your creator page →</button>
+                  ) : (
+                    <Link href="/submit" className="text-teal-300 hover:text-teal-200">Claim your listing →</Link>
+                  )} and earn 85% of every sale.</p>
                   <div className="mt-3 border-t border-teal-500/15 pt-3">
                     <p className="text-text-muted text-xs mb-2">Show it off in your README:</p>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -498,7 +504,7 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
             <p className="text-text-muted text-sm mb-6">More {skill.category} tools founders pair with this one.</p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {related.map((r) => (
-                <Link key={r.id} href={`/skills/${r.slug || r.id}`} className="block group">
+                <Link prefetch={false} key={r.id} href={`/skills/${r.slug || r.id}`} className="block group">
                   <div className="h-full rounded-xl border border-slate-700/50 bg-slate-900/60 p-4 hover:border-teal-500/40 transition-all">
                     <div className="flex items-center justify-between mb-1.5">
                       <span className="text-xs text-text-muted">{r.category}</span>

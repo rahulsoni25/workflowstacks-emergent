@@ -103,7 +103,7 @@ export default async function SkillsPageN({ params }) {
             const desc = (s.description_human || s.description || '').replace(/\s+/g, ' ').slice(0, 160)
             return (
               <li key={key} className="py-3.5">
-                <Link href={`/skills/${key}`} className="text-white font-semibold hover:text-[#C6F24E] transition-colors">
+                <Link prefetch={false} href={`/skills/${key}`} className="text-white font-semibold hover:text-[#C6F24E] transition-colors">
                   {s.title_human || s.name}
                 </Link>
                 {s.github_stars > 0 && (

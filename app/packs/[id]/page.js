@@ -115,7 +115,7 @@ export default async function PackDetailPage({ params }) {
                       )}
                       {skill.language && <span className="text-text-muted">{skill.language}</span>}
                     </div>
-                    <Link href={`/skills/${skill.slug || skill.id}`}>
+                    <Link prefetch={false} href={`/skills/${skill.slug || skill.id}`}>
                       <Button variant="outline" className="w-full border-white/20 text-text-secondary hover:text-white hover:bg-white/5">View Details</Button>
                     </Link>
                   </CardContent>

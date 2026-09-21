@@ -22,6 +22,7 @@ const NAV_GROUPS = [
       { href: '/skills', label: 'All Skills', note: 'The open-source catalog' },
       { href: '/hot', label: 'Hot this week', note: 'Fastest-growing skills, by GitHub star growth' },
       { href: '/mcp', label: 'MCP Servers', note: 'Add tools to Claude Desktop' },
+      { href: '/creators', label: 'Creators', note: 'The builders behind the catalog' },
       // One slot, not three. Packs, playbooks and personas hold four items
       // each; giving twelve items three of the nav's strongest positions
       // starved the hubs that can actually rank, and made the site harder to

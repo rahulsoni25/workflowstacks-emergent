@@ -762,7 +762,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null, ho
                     >
                       Open {target} ↗
                     </a>
-                    <Link href={`/skills/${agentKey}`} className="whitespace-nowrap rounded-lg border border-[#323A3C] px-[18px] py-3 text-sm font-semibold hover:border-[#C6F24E]">
+                    <Link prefetch={false} href={`/skills/${agentKey}`} className="whitespace-nowrap rounded-lg border border-[#323A3C] px-[18px] py-3 text-sm font-semibold hover:border-[#C6F24E]">
                       Full report
                     </Link>
                     <Link href="/skills" className="whitespace-nowrap rounded-lg border border-[#323A3C] px-[18px] py-3 text-sm font-semibold hover:border-[#C6F24E]">
@@ -806,7 +806,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null, ho
                   </div>
                   <div className="flex flex-col gap-2">
                     <h3 className="m-0 text-[22px] font-bold tracking-[-0.02em] sm:text-2xl">
-                      <Link href={`/skills/${skillKey(s)}`} className="hover:text-[#C6F24E]">
+                      <Link prefetch={false} href={`/skills/${skillKey(s)}`} className="hover:text-[#C6F24E]">
                         {skillTitle(s)}
                       </Link>
                     </h3>
@@ -850,7 +850,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null, ho
                   <li key={skillKey(s)} className="flex items-center gap-4 px-5 py-4">
                     <span className="t-mono w-6 shrink-0 text-sm text-text-muted">{i + 1}</span>
                     <div className="min-w-0 flex-1">
-                      <Link href={`/skills/${skillKey(s)}`} className="block truncate text-[16px] font-semibold text-text-primary hover:text-[#C6F24E]">{skillTitle(s)}</Link>
+                      <Link prefetch={false} href={`/skills/${skillKey(s)}`} className="block truncate text-[16px] font-semibold text-text-primary hover:text-[#C6F24E]">{skillTitle(s)}</Link>
                       <div className="t-mono mt-0.5 text-xs text-text-muted">{categoryLabel(s.category)} · ★ {fmt(s.github_stars)}</div>
                     </div>
                     <span className="t-mono shrink-0 rounded-full border border-[#C6F24E]/30 bg-[#C6F24E]/10 px-2.5 py-1 text-xs text-[#C6F24E]">
