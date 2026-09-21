@@ -1,4 +1,4 @@
-import { GscError, authMode, isConfigured, siteUrl, listSites, overview, topRows, inspect, getAccessToken } from '@/lib/gsc'
+import { GscError, authMode, isConfigured, siteUrl, listSites, overview, topRows, inspect, listSitemaps, getAccessToken } from '@/lib/gsc'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,6 +67,8 @@ export async function GET(request) {
       })
     }
 
+    if (action === 'sitemaps') return Response.json({ site_url: siteUrl(), sitemaps: await listSitemaps() })
+
     if (action === 'overview') return Response.json(await overview(days))
 
     if (DIMENSIONS[action]) return Response.json(await topRows(DIMENSIONS[action], { days, limit }))
@@ -79,7 +81,7 @@ export async function GET(request) {
 
     return Response.json({
       error: `Unknown action "${action}"`,
-      actions: ['status', 'sites', 'overview', 'queries', 'pages', 'countries', 'devices', 'inspect'],
+      actions: ['status', 'sites', 'overview', 'queries', 'pages', 'countries', 'devices', 'inspect', 'sitemaps'],
     }, { status: 400 })
   } catch (e) {
     if (e instanceof GscError) {
