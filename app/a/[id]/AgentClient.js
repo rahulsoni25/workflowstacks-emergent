@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import LaunchInTools from '@/components/LaunchInTools'
+import { trackEvent } from '@/lib/analytics'
 
 export default function AgentClient({ agent, skills }) {
   const router = useRouter()
@@ -21,6 +22,7 @@ export default function AgentClient({ agent, skills }) {
   const buy = async () => {
     setBuying(true)
     try {
+      trackEvent('checkout_start', { agent: agent.id, value: agent.price, currency: 'USD', content_name: agent.id, content_category: 'agent' })
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

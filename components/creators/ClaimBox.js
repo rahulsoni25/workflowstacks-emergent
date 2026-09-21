@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { BadgeCheck, Loader2 } from 'lucide-react'
 import CopyLine from './CopyLine'
 import { readInvite } from './InviteCapture'
+import { trackEvent } from '@/lib/analytics'
 
 // Claim = prove you control a listed repo by adding our badge (or any link to
 // workflowstacks.com) to its README. No account, no password.
@@ -25,6 +26,7 @@ export default function ClaimBox({ handle, badgeMd, foundingLeft }) {
       const j = await res.json().catch(() => ({}))
       if (res.ok && j.success) {
         setState('ok')
+        trackEvent('creator_claim', { handle, founding: !!j.founding, content_name: handle })
         setMsg(j.founding ? 'Verified — and you are a Founding Creator.' : 'Verified. Welcome aboard.')
         router.refresh()
       } else {

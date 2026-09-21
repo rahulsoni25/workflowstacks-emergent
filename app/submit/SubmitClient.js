@@ -12,6 +12,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { FOR_CATEGORIES, TARGETS, fmt } from '@/lib/skill-display'
 import InviteCapture, { readInvite } from '@/components/creators/InviteCapture'
+import { trackEvent } from '@/lib/analytics'
 
 const TYPES = [
   ['Skill', 'claude-skill'],
@@ -157,7 +158,10 @@ export default function SubmitClient({ publishedCount = 0 }) {
         }),
       })
       const j = await res.json()
-      if (res.ok && j.success) setSent({ id: j.skill?.id || '' })
+      if (res.ok && j.success) {
+        setSent({ id: j.skill?.id || '' })
+        trackEvent('skill_submit', { content_category: typeSlug, paid: !!paid })
+      }
       else setSubmitError(j.error || 'Something went wrong — please try again.')
     } catch {
       setSubmitError('Network error — please check your connection and try again.')
