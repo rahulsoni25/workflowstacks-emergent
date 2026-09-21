@@ -1,4 +1,5 @@
 import { MongoClient } from 'mongodb';
+import { revalidateSkill } from '@/lib/revalidate';
 
 const client = new MongoClient(process.env.MONGO_URL);
 let db;
@@ -359,6 +360,7 @@ async function handle(request) {
       try {
         const guide = await enrichSkillGuide(skill);
         await database.collection('skills').updateOne({ id: skill.id }, { $set: { use_guide: guide } });
+        revalidateSkill(skill);
         done++;
       } catch (e) {
         if (errs.length < 5) errs.push(`${skill.name}: ${e.message}`);
@@ -504,6 +506,7 @@ async function handle(request) {
           }
         }
       );
+      revalidateSkill(skill);
       updated++;
       scoreboard.push({
         skill: skill.name_original || skill.name,
@@ -604,6 +607,7 @@ async function handle(request) {
         }
       }
     );
+    revalidateSkill(skill);
     updated++;
   });
 

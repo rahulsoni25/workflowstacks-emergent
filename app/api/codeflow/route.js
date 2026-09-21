@@ -1,5 +1,6 @@
 import { timingSafeEqual } from 'crypto'
 import { getDb } from '@/lib/mongo'
+import { revalidateSkill } from '@/lib/revalidate'
 import { parseGithubUrl, fetchRepoFacts, analyzeRepo, validateFlow, ghHeaders, CODEFLOW_VERSION } from '@/lib/codeflow'
 
 export const dynamic = 'force-dynamic'
@@ -194,6 +195,7 @@ export async function GET(request) {
         if (flowError && /http|no-provider|bad-json|timeout|abort/i.test(flowError)) set.codeflow_flow_error = flowError
         else unset.codeflow_flow_error = ''
         await col.updateOne({ _id: s._id }, { $set: set, $unset: unset })
+        revalidateSkill(s)
       }
       ok++
       results.push({ slug: s.slug || s.id, ok: true, tier: cf.size.tier, loc: cf.size.loc_human, setup: cf.setup.level, provider, flow: cf.flow, flow_error: flowError, ...(dry ? { codeflow: cf } : {}) })

@@ -1,4 +1,6 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "bash scripts/vercel-ignore-build.sh",
   "crons": [
     {
       "path": "/api/cron/refresh-skills",
@@ -13,6 +15,21 @@
       "schedule": "0 4 * * *"
     }
   ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(AhrefsBot|SemrushBot|MJ12bot|DotBot|Bytespider|DataForSeoBot|BLEXBot|PetalBot|serpstatbot|MegaIndex|SeekportBot|Barkrowler|ZoominfoBot).*"
+        }
+      ],
+      "mitigate": {
+        "action": "deny"
+      }
+    }
+  ],
   "headers": [
     {
       "source": "/api/(skills|packs|personas|playbooks)/([^/]+)",
@@ -20,6 +37,12 @@
         {
           "key": "Cache-Control",
           "value": "public, s-maxage=3600, stale-while-revalidate=86400"
+        }
+      ],
+      "missing": [
+        {
+          "type": "query",
+          "key": "isr"
         }
       ]
     },
