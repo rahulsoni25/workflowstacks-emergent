@@ -9,7 +9,9 @@ import InviteCapture from '@/components/creators/InviteCapture'
 // The people behind the catalog. Built from the GitHub owner already stored on
 // every skill, so it grows with the daily ingest. Reads Mongo directly rather
 // than self-fetching the API (one function invocation per regen, not two).
-export const revalidate = 3600
+// Daily is enough: the catalog ingests once a day, and a successful claim
+// revalidates this path on demand.
+export const revalidate = 86400
 
 export const metadata = {
   title: 'Creators — the builders behind the open-source AI skills catalog | WorkflowStacks',
@@ -32,7 +34,8 @@ async function getData() {
 export default async function CreatorsPage() {
   const { creators, total, verified } = await getData()
   const verifiedList = creators.filter((c) => c.verified)
-  const initial = creators.filter((c) => !c.verified).slice(0, INITIAL)
+  const rest = creators.filter((c) => !c.verified)
+  const initial = rest.slice(0, INITIAL)
   const crumbs = breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Creators', path: '/creators' }])
   const itemList = itemListSchema({
     name: 'Creators on WorkflowStacks',
@@ -82,7 +85,7 @@ export default async function CreatorsPage() {
           <h2 className="text-xl font-semibold text-text-primary">Everyone in the catalog</h2>
           <p className="mt-1 text-sm text-text-muted">Sorted by number of listed projects, then GitHub stars.</p>
           <div className="mt-5">
-            <CreatorsBrowser initial={initial} total={total - verifiedList.length} />
+            <CreatorsBrowser initial={initial} total={rest.length} />
           </div>
         </section>
 

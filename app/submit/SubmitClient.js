@@ -267,7 +267,7 @@ export default function SubmitClient({ publishedCount = 0 }) {
                     {check.listed && (
                       <Mono className="text-xs text-text-muted">
                         Already in the catalog as{' '}
-                        <Link href={`/skills/${check.listed.slug}`} className="text-[#C6F24E] underline">
+                        <Link prefetch={false} href={`/skills/${check.listed.slug}`} className="text-[#C6F24E] underline">
                           {check.listed.title}
                         </Link>
                         {check.listed.published ? '.' : ' (in review).'} Submitting again will not create a duplicate listing.

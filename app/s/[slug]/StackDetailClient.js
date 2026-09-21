@@ -116,7 +116,7 @@ export default function StackDetailClient({ stack, skills }) {
                     {s.explainer?.time_to_setup && <span>⏱ {s.explainer.time_to_setup}</span>}
                     {s.explainer?.cost_to_run && <span>💵 {s.explainer.cost_to_run}</span>}
                   </div>
-                  <Link href={`/skills/${s.slug || s.id}`} className="text-teal-400 hover:text-teal-300 inline-flex items-center gap-1 font-medium">
+                  <Link prefetch={false} href={`/skills/${s.slug || s.id}`} className="text-teal-400 hover:text-teal-300 inline-flex items-center gap-1 font-medium">
                     Details <ExternalLink className="w-3 h-3" />
                   </Link>
                 </div>

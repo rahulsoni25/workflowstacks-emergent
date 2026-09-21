@@ -68,7 +68,7 @@ export default async function LearningResourcesPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {resources.map((r) => (
-              <Link key={r.id} href={`/skills/${r.slug || r.id}`}>
+              <Link prefetch={false} key={r.id} href={`/skills/${r.slug || r.id}`}>
                 <Card className="bg-slate-900/60 border-slate-700/50 hover:border-teal-500/40 transition-all duration-300 h-full group cursor-pointer">
                   <CardContent className="py-5">
                     <h2 className="text-lg font-bold text-white mb-1 group-hover:text-teal-300 transition-colors">

@@ -1,10 +1,10 @@
 import { timingSafeEqual } from 'crypto'
 import { revalidatePath } from 'next/cache'
 import { rateLimit } from '@/lib/rate-limit'
-import { listCreators, getCreator, verifyClaim, referralReport, foundingSlotsLeft, normHandle, backfillCreatorTypes } from '@/lib/creators'
+import { listCreators, verifyClaim, referralReport, normHandle } from '@/lib/creators'
 
 export const dynamic = 'force-dynamic'
-export const maxDuration = 30
+export const maxDuration = 15
 
 // Header only (no ?secret= — query strings end up in logs), constant-time compare.
 function requireAdmin(request) {
@@ -16,12 +16,15 @@ function requireAdmin(request) {
   return null
 }
 
-const CDN = { 'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400' }
+// The list changes once a day (daily ingest) or when someone claims. Six hours
+// at the CDN means the function behind this runs a handful of times a day no
+// matter how many people search; a week of stale-while-revalidate keeps it
+// instant. A fresh claim shows on the page itself at once (revalidatePath) and
+// in this JSON within six hours.
+const CDN = { 'Cache-Control': 'public, s-maxage=21600, stale-while-revalidate=604800' }
 
-// GET /api/creator-directory            → the whole directory (CDN-cached)
-// GET /api/creator-directory?handle=x   → one creator + their listed skills
+// GET /api/creator-directory                   → the whole directory, compact JSON
 // GET /api/creator-directory?report=referrals  (admin) → who referred whom
-// GET /api/creator-directory?backfill=types&limit=40  (admin) → fill User/Organization
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
   try {
@@ -30,27 +33,23 @@ export async function GET(request) {
       if (denied) return denied
       return Response.json({ referrals: await referralReport() }, { headers: { 'Cache-Control': 'no-store' } })
     }
-    if (searchParams.get('backfill') === 'types') {
-      const denied = requireAdmin(request)
-      if (denied) return denied
-      return Response.json(await backfillCreatorTypes(searchParams.get('limit')), { headers: { 'Cache-Control': 'no-store' } })
+    // Any other query string is a different CDN cache key for the same data —
+    // send it to the one cacheable URL instead of running the aggregation again.
+    if ([...searchParams.keys()].length) {
+      return new Response(null, { status: 308, headers: { Location: '/api/creator-directory', 'Cache-Control': 'public, s-maxage=86400' } })
     }
-    const handle = searchParams.get('handle')
-    if (handle !== null) {
-      if (!normHandle(handle)) return Response.json({ error: 'Invalid handle' }, { status: 400 })
-      const creator = await getCreator(handle)
-      if (!creator) return Response.json({ error: 'Not found' }, { status: 404 })
-      const founding_left = creator.verified ? null : await foundingSlotsLeft()
-      // ?isr=1 = the profile page's own regeneration fetch; never CDN-cache that
-      // or a 7-day page would bake in a stale JSON copy.
-      return Response.json({ creator, founding_left }, { headers: searchParams.has('isr') ? { 'Cache-Control': 'no-store' } : CDN })
-    }
-    return Response.json(await listCreators(), { headers: searchParams.has('isr') ? { 'Cache-Control': 'no-store' } : CDN })
+    const rl = rateLimit(request, 20, 60_000)
+    if (rl) return rl
+    return Response.json(await listCreators({ compact: true }), { headers: CDN })
   } catch (e) {
     console.error('creator-directory GET', e)
     return Response.json({ error: 'Server error' }, { status: 500 })
   }
 }
+
+// One README check per handle per 30s per instance: stops a button-masher (or
+// a script) from spending the GitHub budget and function time.
+const _cooldown = new Map()
 
 // POST /api/creator-directory  { handle, ref? } → check the README, mark verified
 export async function POST(request) {
@@ -60,6 +59,13 @@ export async function POST(request) {
     const body = await request.json().catch(() => ({}))
     const handle = normHandle(body.handle)
     if (!handle) return Response.json({ success: false, error: 'Enter a valid GitHub username.' }, { status: 400 })
+    const now = Date.now()
+    if ((_cooldown.get(handle) || 0) > now) {
+      return Response.json({ success: false, error: 'Just checked — give GitHub half a minute, then try again.' }, { status: 429 })
+    }
+    if (_cooldown.size > 500) _cooldown.clear()
+    _cooldown.set(handle, now + 30_000)
+
     const result = await verifyClaim(handle, body.ref)
     if (!result.ok) return Response.json({ success: false, error: result.error }, { status: result.status || 400 })
     try {

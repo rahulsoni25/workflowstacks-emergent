@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { BadgeCheck, Github, Globe, MapPin, Star, Twitter } from 'lucide-react'
@@ -18,14 +19,15 @@ export function generateStaticParams() {
 
 const fmt = (n) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k` : String(n || 0))
 
-async function load(handle) {
+// cache(): generateMetadata and the page share one Mongo read per render.
+const load = cache(async (handle) => {
   try {
     return await getCreator(handle)
   } catch (e) {
     console.error('creator page', e)
     return null
   }
-}
+})
 
 export async function generateMetadata({ params }) {
   const key = normHandle(params.handle)
@@ -72,7 +74,7 @@ export default async function CreatorPage({ params }) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(crumbs) }} />
       {profileLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(profileLd) }} />}
       <div className="container mx-auto max-w-4xl px-4 py-12">
-        <nav className="t-mono text-xs text-text-muted"><Link href="/creators" className="text-text-muted hover:text-[#C6F24E]">← All creators</Link></nav>
+        <nav className="t-mono text-xs text-text-muted"><Link prefetch={false} href="/creators" className="text-text-muted hover:text-[#C6F24E]">← All creators</Link></nav>
 
         <header className="mt-5 flex items-start gap-5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -104,7 +106,7 @@ export default async function CreatorPage({ params }) {
           <ul className="mt-4 space-y-3">
             {c.skills.map((s) => (
               <li key={s.slug}>
-                <Link href={`/skills/${s.slug}`} className="group block rounded-xl border border-[#262B2D] bg-[#101314] p-4 no-underline transition-colors hover:border-[#C6F24E]/40">
+                <Link prefetch={false} href={`/skills/${s.slug}`} className="group block rounded-xl border border-[#262B2D] bg-[#101314] p-4 no-underline transition-colors hover:border-[#C6F24E]/40">
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold text-text-primary group-hover:text-[#C6F24E]">{s.name}</span>
                     <span className="inline-flex shrink-0 items-center gap-1 text-xs text-text-muted"><Star className="h-3.5 w-3.5" />{fmt(s.stars)}</span>

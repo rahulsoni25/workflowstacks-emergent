@@ -34,7 +34,7 @@ export default function LibraryClient({ initialItems = [] }) {
     <div className="space-y-3">
       {items.map((item) => (
         <div key={item.skill_id} className="flex items-center justify-between gap-3 border border-slate-700/50 rounded-lg bg-slate-900/50 px-4 py-3">
-          <Link href={`/skills/${item.slug}`} className="min-w-0">
+          <Link prefetch={false} href={`/skills/${item.slug}`} className="min-w-0">
             <div className="text-white font-medium hover:text-teal-300 transition-colors truncate">{item.name}</div>
             <div className="text-xs text-text-muted">{item.category || 'skill'} · saved {item.added_at ? new Date(item.added_at).toLocaleDateString('en-US') : ''}</div>
           </Link>
