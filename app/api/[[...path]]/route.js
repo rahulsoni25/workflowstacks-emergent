@@ -5,6 +5,7 @@ import { tokenize as tokenizeSearch } from '../../../lib/search-tokens';
 import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 import { screenSubmission } from '../../../lib/content-safety';
+import { pickDailyFromDb } from '../../../lib/newsletter-pick';
 
 // Explicit timeouts so a slow/unreachable Atlas connection fails fast with a
 // clear error instead of hanging the serverless function (and, at build
@@ -594,6 +595,47 @@ function emailFooter(email, { campaign, shareText, shareUrl, readOnlineUrl = nul
 const EMAIL_H2 = 'color:#fff;font-size:16px;margin:28px 0 4px;text-transform:uppercase;letter-spacing:0.5px;';
 const EMAIL_HEAD = '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
 const EMAIL_BODY = 'margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;color:#e5e5e5;';
+
+// The daily email. Everything in it comes from the guide we already wrote for
+// the skill page, so there is nothing generated at send time to get wrong.
+function dailyEmailHtml(skill, reason, email) {
+  const g = skill.use_guide || {};
+  const name = skillLabel(skill);
+  const what = g.whatItDoes || skill.description_human || skill.description || '';
+  const when = (Array.isArray(g.whenToUse) ? g.whenToUse : []).filter((x) => typeof x === 'string' && x.trim()).slice(0, 3);
+  const guideUrl = withUtm(skillPath(skill), 'daily', 'guide');
+  const ctaUrl = `https://claude.ai/new?q=${encodeURIComponent('Act as ' + name + '. ' + what)}`;
+  const block = (label, body) => `
+      <p style="margin:24px 0 6px;font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;">${label}</p>
+      ${body}`;
+  const code = (text) => `<div style="background:#0f0f0f;border-radius:8px;padding:14px 16px;"><code style="font-family:monospace;font-size:13px;color:#6ee7b7;white-space:pre-wrap;word-break:break-word;">${escapeHtml(text)}</code></div>`;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>${EMAIL_HEAD}<title>WorkflowStacks</title></head>
+<body style="${EMAIL_BODY}">
+  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <tr><td style="text-align:center;padding-bottom:32px;">
+      <span style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.5px;">WorkflowStacks</span>
+    </td></tr>
+    <tr><td style="background:#1a1a1a;border-radius:12px;padding:32px;">
+      <p style="margin:0 0 8px;font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Today&rsquo;s AI skill</p>
+      <h1 style="margin:0 0 12px;font-size:28px;font-weight:700;color:#fff;line-height:1.2;">${escapeHtml(name)}</h1>
+      <p style="margin:0 0 16px;font-size:13px;color:#C6F24E;line-height:1.5;"><strong>Why today:</strong> ${escapeHtml(reason)}</p>
+      <p style="margin:0;font-size:16px;color:#ccc;line-height:1.6;">${escapeHtml(what)}</p>
+      ${when.length ? block('Use it when', `<ul style="margin:0;padding-left:18px;font-size:15px;color:#ccc;line-height:1.6;">${when.map((w) => `<li>${escapeHtml(w)}</li>`).join('')}</ul>`) : ''}
+      ${g.install ? block('Install', code(g.install)) : ''}
+      ${g.examplePrompt ? block('Try this prompt', code(g.examplePrompt)) : ''}
+      ${g.gotcha ? block('Watch out for', `<p style="margin:0;font-size:15px;color:#ccc;line-height:1.6;">${escapeHtml(g.gotcha)}</p>`) : ''}
+      <p style="margin:24px 0;font-size:14px;color:#888;">⭐ ${(skill.github_stars || 0).toLocaleString('en-US')} stars on GitHub</p>
+      <a href="${ctaUrl}" style="display:inline-block;background:#7c3aed;color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 28px;border-radius:8px;margin-bottom:12px;">Open in Claude →</a>
+      <br>
+      <a href="${guideUrl}" style="display:inline-block;margin-top:8px;font-size:14px;color:#888;text-decoration:underline;">View full guide</a>
+    </td></tr>
+    ${emailFooter(email, { campaign: 'daily', shareText: `${name} — today's open-source AI skill on WorkflowStacks`, shareUrl: skillPath(skill) })}
+  </table>
+</body>
+</html>`;
+}
 
 function hotRowHtml(s, i, campaign) {
   const badge = `#${i + 1} · +${s.velocity_7d}★ this week${s.velocity_provisional ? ' (early data)' : ''}`;
@@ -2159,17 +2201,17 @@ export async function GET(request) {
     }
 
     if (path === '/newsletter/preview') {
-      const sevenDaysAgo = new Date(Date.now() - 7*24*60*60*1000)
-      const recentSends = await database.collection('newsletter_sends').find({ sent_at: { $gte: sevenDaysAgo } }).toArray()
-      const recentIds = new Set(recentSends.map(s => s.skill_id))
-      const candidates = await database.collection('skills')
-        .find({ published: { $ne: false }, id: { $nin: [...recentIds] } })
-        .sort({ github_stars: -1 })
-        .limit(5)
-        .toArray()
-      const pick = candidates[0] || (await database.collection('skills').findOne({ published: { $ne: false } }, { sort: { github_stars: -1 } }))
+      // Same picker the send uses, so the admin screen shows tomorrow's email
+      // and why, not a separate guess.
+      const picked = await pickDailyFromDb(database)
+      const view = (c) => ({ ...c.skill, pick_score: Number(c.score.toFixed(3)), pick_reason: c.reason, pick_parts: c.parts })
       const subCount = await database.collection('subscribers').countDocuments()
-      return Response.json({ pick, candidates: candidates.slice(0, 5), subscriberCount: subCount })
+      return Response.json({
+        pick: picked.pick ? view(picked.pick) : null,
+        candidates: picked.candidates.map(view),
+        poolSize: picked.poolSize, recycled: picked.recycled, excludedRecent: picked.excludedRecent,
+        subscriberCount: subCount,
+      })
     }
 
     if (path === '/newsletter/sends') {
@@ -2186,97 +2228,65 @@ export async function GET(request) {
       return Response.json({ applications });
     }
 
-    // Admin: send skill-of-the-day newsletter via Resend
+    // Admin: send skill-of-the-day newsletter via Resend. `?dry=true` returns
+    // the pick and the rendered email without sending or logging anything.
     if (path === '/newsletter/send') {
       const denied = requireAdmin(request);
       if (denied) return denied;
+      const dry = new URL(request.url).searchParams.get('dry') === 'true';
+      if (!dry && !process.env.RESEND_API_KEY) {
+        return Response.json({ ok: false, error: 'RESEND_API_KEY not set' }, { status: 500 });
+      }
       // Subscribers who chose the Monday digest only are skipped here.
       const subscribers = await database.collection('subscribers').find({ frequency: { $ne: 'weekly' } }).toArray();
-      if (subscribers.length === 0) {
+      if (!dry && subscribers.length === 0) {
         return Response.json({ ok: false, message: 'No subscribers yet.' });
       }
 
-      // Pick a skill not sent in last 7 days, prefer highest stars
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      const recentSends = await database.collection('newsletter_sends')
-        .find({ sent_at: { $gte: sevenDaysAgo } })
-        .toArray();
-      const recentSkillIds = recentSends.map((s) => s.skill_id);
-
-      let skill = await database.collection('skills').findOne(
-        { published: { $ne: false }, id: { $nin: recentSkillIds } },
-        { sort: { github_stars: -1 } }
-      );
-      // Fallback: all have been sent recently — pick the most-starred overall
-      if (!skill) {
-        skill = await database.collection('skills').findOne(
-          { published: { $ne: false } },
-          { sort: { github_stars: -1 } }
-        );
+      const picked = await pickDailyFromDb(database);
+      if (!picked.pick) {
+        // Nothing on-topic with a real guide is left. Skipping a day costs
+        // nothing; mailing an off-topic repo costs subscribers.
+        return Response.json({ ok: false, skipped: true, message: 'No eligible skill to feature today.', poolSize: picked.poolSize });
       }
-      if (!skill) {
-        return Response.json({ ok: false, message: 'No published skills found.' });
-      }
+      const { skill, reason, score, parts } = picked.pick;
+      const subject = `🔧 Skill of the Day: ${skillLabel(skill)}`;
+      const candidates = picked.candidates.map((c) => ({ name: c.skill.name, score: Number(c.score.toFixed(3)) }));
 
-      const skillName = skill.title_human || skill.name;
-      const whatItDoes = (skill.use_guide && skill.use_guide.whatItDoes) || skill.description_human || skill.description || '';
-      const installCmd = (skill.use_guide && skill.use_guide.install) ? skill.use_guide.install : null;
-      const stars = skill.github_stars || 0;
-      const ctaUrl = `https://claude.ai/new?q=${encodeURIComponent('Act as ' + skillName + '. ' + whatItDoes)}`;
-      const guideUrl = withUtm(skillPath(skill), 'daily', 'guide');
+      if (dry) {
+        return Response.json({
+          ok: true, dry: true, skill: skill.name, subject, reason, score: Number(score.toFixed(3)), parts,
+          candidates, poolSize: picked.poolSize, recycled: picked.recycled, wouldSendTo: subscribers.length,
+          html: dailyEmailHtml(skill, reason, 'preview@example.com'),
+        });
+      }
 
       let sentCount = 0;
+      const failures = [];
       for (const sub of subscribers) {
-        const html = `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WorkflowStacks</title></head>
-<body style="margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e5e5e5;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;padding:40px 20px;">
-    <tr><td style="text-align:center;padding-bottom:32px;">
-      <span style="font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.5px;">WorkflowStacks</span>
-    </td></tr>
-    <tr><td style="background:#1a1a1a;border-radius:12px;padding:32px;">
-      <p style="margin:0 0 8px;font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Today's top AI skill</p>
-      <h1 style="margin:0 0 16px;font-size:28px;font-weight:700;color:#fff;line-height:1.2;">${skillName}</h1>
-      <p style="margin:0 0 24px;font-size:16px;color:#ccc;line-height:1.6;">${whatItDoes}</p>
-      ${installCmd ? `<div style="background:#0f0f0f;border-radius:8px;padding:14px 16px;margin-bottom:24px;"><code style="font-family:monospace;font-size:13px;color:#6ee7b7;">${installCmd}</code></div>` : ''}
-      <p style="margin:0 0 24px;font-size:14px;color:#888;">⭐ ${stars.toLocaleString()} stars on GitHub</p>
-      <a href="${ctaUrl}" style="display:inline-block;background:#7c3aed;color:#fff;text-decoration:none;font-weight:600;font-size:15px;padding:14px 28px;border-radius:8px;margin-bottom:12px;">Open in Claude →</a>
-      <br>
-      <a href="${guideUrl}" style="display:inline-block;margin-top:8px;font-size:14px;color:#888;text-decoration:underline;">View full guide</a>
-    </td></tr>
-    ${emailFooter(sub.email, { campaign: 'daily', shareText: `${skillName} — today's top open-source AI skill on WorkflowStacks`, shareUrl: skillPath(skill) })}
-  </table>
-</body>
-</html>`;
-
-        try {
-          await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-            },
-            body: JSON.stringify({
-              from: 'WorkflowStacks <newsletter@workflowstacks.com>',
-              to: sub.email,
-              subject: `🔧 Skill of the Day: ${skillName}`,
-              html,
-            }),
-          });
-          sentCount++;
-        } catch (e) {
-          console.error('Resend error for', sub.email, e.message);
-        }
+        const r = await sendEmail({ to: sub.email, subject, html: dailyEmailHtml(skill, reason, sub.email) });
+        if (r.ok) sentCount++;
+        else failures.push(r.error);
       }
 
       await database.collection('newsletter_sends').insertOne({
+        type: 'daily',
         skill_id: skill.id,
+        skill_slug: skill.slug || null,
+        skill_name: skill.name,
+        reason,
+        score: Number(score.toFixed(3)),
+        parts,
         sent_at: new Date(),
         recipient_count: sentCount,
+        failed_count: failures.length,
       });
 
-      return Response.json({ ok: true, sent: sentCount, skill: skill.name });
+      return Response.json({
+        ok: failures.length === 0, sent: sentCount, failed: failures.length,
+        ...(failures.length ? { errors: [...new Set(failures)].slice(0, 3) } : {}),
+        skill: skill.name, reason, recycled: picked.recycled,
+      });
     }
 
     // Admin: weekly digest — email the whole list the newest working templates

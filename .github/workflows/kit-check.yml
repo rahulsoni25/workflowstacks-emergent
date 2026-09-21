@@ -1,0 +1,27 @@
+name: Kit key check
+
+# Confirms the KIT_API_KEY secret is valid. Read-only: one GET to the account
+# endpoint. Prints the HTTP status and plan only, never the key or an address.
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - '.github/workflows/kit-check.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Kit account endpoint
+        env:
+          KIT_API_KEY: ${{ secrets.KIT_API_KEY }}
+        run: |
+          if [ -z "$KIT_API_KEY" ]; then echo "::error::KIT_API_KEY secret is empty or missing"; exit 1; fi
+          STATUS=$(curl -sS -o body.json -w '%{http_code}' --max-time 30 \
+            -H "X-Kit-Api-Key: $KIT_API_KEY" -H 'Accept: application/json' \
+            https://api.kit.com/v4/account)
+          PLAN=$(jq -r '.account.plan_type // "unknown"' body.json 2>/dev/null || echo unknown)
+          rm -f body.json
+          echo "HTTP $STATUS, plan: $PLAN"
+          echo "Kit key check: HTTP $STATUS, plan: $PLAN" >> "$GITHUB_STEP_SUMMARY"
+          [ "$STATUS" = "200" ] || { echo "::error::Kit rejected the key (HTTP $STATUS)"; exit 1; }

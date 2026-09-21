@@ -3,7 +3,12 @@ name: Daily newsletter
 on:
   schedule:
     - cron: '0 8 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      dry:
+        description: 'Dry run: show the pick, send nothing'
+        type: boolean
+        default: false
 
 env:
   BASE_URL: https://workflowstacks.com
@@ -14,11 +19,24 @@ jobs:
     steps:
       - name: Send skill of the day
         run: |
-          RESULT=$(curl -sf \
-            -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
-            "$BASE_URL/api/newsletter/send")
-          echo "Result: $RESULT"
-          echo "## Daily Newsletter" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "$RESULT" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          URL="$BASE_URL/api/newsletter/send"
+          if [ "${{ inputs.dry }}" = "true" ]; then URL="$URL?dry=true"; fi
+          RESULT=$(curl -sS --max-time 120 \
+            -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" "$URL")
+          # The rendered email is large and carries nothing the summary needs.
+          SUMMARY=$(echo "$RESULT" | jq -c 'del(.html)' 2>/dev/null || echo "$RESULT")
+          echo "Result: $SUMMARY"
+          {
+            echo "## Daily Newsletter"
+            echo '```'
+            echo "$SUMMARY"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          # A 200 with ok:false used to leave this job green while nothing was
+          # delivered. A deliberate skip (no eligible skill) is not a failure.
+          OK=$(echo "$RESULT" | jq -r '.ok // false' 2>/dev/null || echo false)
+          SKIPPED=$(echo "$RESULT" | jq -r '.skipped // false' 2>/dev/null || echo false)
+          if [ "$OK" != "true" ] && [ "$SKIPPED" != "true" ]; then
+            echo "::error::Newsletter send did not succeed"
+            exit 1
+          fi

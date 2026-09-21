@@ -895,7 +895,9 @@ function NewsletterTab({ hdr, showToast, busy, setBusy }) {
     URL.revokeObjectURL(url)
   }
 
-  const pick = preview?.pick || preview?.chosen || preview
+  // `pick` is null when the picker found nothing eligible; do not fall back to
+  // the response envelope, which would render as an empty skill.
+  const pick = preview && 'pick' in preview ? preview.pick : (preview?.chosen || preview)
   const alts = preview?.alternates || preview?.candidates || []
   const subCount = subscribers.length
 
@@ -923,6 +925,9 @@ function NewsletterTab({ hdr, showToast, busy, setBusy }) {
                 <div className="text-white font-semibold text-lg">{pick.title_human || pick.name}</div>
                 <div className="text-xs text-text-muted mt-0.5">{pick.category || '—'} · {pick.github_stars ?? pick.stars ?? 0}★</div>
                 <p className="text-sm text-text-primary mt-2">{pick.description_human || pick.description || '—'}</p>
+                {pick.pick_reason && (
+                  <p className="text-xs text-[#C6F24E] mt-2">Why today: {pick.pick_reason} <span className="text-text-muted">(score {pick.pick_score})</span></p>
+                )}
               </div>
               {alts.length > 0 && (
                 <div className="pt-2 border-t border-[#262B2D]">
