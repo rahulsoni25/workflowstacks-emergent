@@ -1,0 +1,37 @@
+name: Refresh stars (Hot list)
+
+# The Hot list ranks by velocity_7d, which needs at least two star snapshots
+# per repo. The daily content refresh manages ~800 repos a run against a
+# published catalog of 3,000+, so a second snapshot took four days to arrive
+# and /hot sat empty. This runs the same rotation every three hours: ~800 per
+# run stays under the job token's 1,000 requests/hour, and the whole published
+# catalog gets a snapshot roughly twice a day.
+on:
+  schedule:
+    - cron: '20 */3 * * *'
+  workflow_dispatch: {}
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+permissions:
+  contents: read
+
+jobs:
+  stars:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Snapshot stars for the least-recently refreshed published repos
+        run: |
+          total=0
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            curl -sf --max-time 90 -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" -H "x-github-token: ${{ github.token }}" \
+              "$BASE_URL/api/refresh-stars?max=80&scope=published" | tee /tmp/stars.json \
+              || { echo "pass $i failed — stopping"; break; }
+            echo
+            n=$(jq -r '.refreshed // 0' /tmp/stars.json); total=$((total + n))
+            grep -q '"rate_limited":true' /tmp/stars.json && break
+            grep -q '"considered":80' /tmp/stars.json || break
+          done
+          echo "### Stars refreshed: $total" >> $GITHUB_STEP_SUMMARY
+          curl -s "$BASE_URL/api/hot" | jq -r '"Hot list entries: \(.hot | length)"' >> $GITHUB_STEP_SUMMARY || true
