@@ -39,6 +39,7 @@ const footerLinks = {
       { label: 'Deals', href: '/deals' },
       { label: 'Community Gallery', href: '/community' },
       { label: 'Members', href: '/members' },
+      { label: 'Creators Directory', href: '/creators' },
     ]
   },
   learn: {
