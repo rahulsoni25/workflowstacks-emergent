@@ -1,0 +1,16 @@
+{
+  "name": "five-agent-assembly",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Scout -> Architect -> Builder/Tester/Shipper, run by a file-triggered conductor (JEV Engineering).",
+  "type": "module",
+  "bin": { "five-agent-assembly": "./run.mjs" },
+  "scripts": {
+    "start": "node run.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "0.128.0"
+  }
+}
