@@ -46,6 +46,28 @@ function formatStars(stars) {
   return `${stars} GitHub stars`;
 }
 
+// First 3 words of a description, normalized -- the "opener". With no
+// constraint, cheap free models converge on 3-4 sentence templates
+// ("Get X with Y, for founders...") and repeat them across hundreds of
+// listings; that reads as programmatically generated content to search
+// engines at catalog scale, even though each page is individually true.
+function opener(text) {
+  return (text || '').trim().split(/\s+/).slice(0, 3).join(' ').toLowerCase().replace(/[^a-z0-9 ]/g, '');
+}
+
+// Sample of openers already in use, to steer the model away from repeats.
+// Best-effort: called once per batch, never blocks a rewrite on failure.
+async function recentOpeners(database, sampleSize = 40) {
+  try {
+    const rows = await database.collection('skills')
+      .find({ description_human: { $exists: true } }, { projection: { description_human: 1 } })
+      .sort({ _id: -1 }).limit(sampleSize).toArray();
+    return [...new Set(rows.map((r) => opener(r.description_human)).filter(Boolean))];
+  } catch {
+    return [];
+  }
+}
+
 // Call the chosen LLM provider with a system + user prompt, return raw text.
 // modelOverride lets the compare mode test a specific model via OpenRouter.
 async function callLLM(system, user, modelOverride, maxTokens = 300) {
@@ -121,7 +143,7 @@ async function callLLM(system, user, modelOverride, maxTokens = 300) {
 }
 
 // ---- LLM-powered rewrite (OpenRouter or Anthropic) ----------------------
-async function rewriteWithLLM(skill, modelOverride) {
+async function rewriteWithLLM(skill, modelOverride, bannedOpeners = []) {
   const stars = skill.github_stars || 0;
   const topics = (skill.github_topics || []).join(', ');
 
@@ -131,10 +153,15 @@ async function rewriteWithLLM(skill, modelOverride) {
     'across every niche. Be compelling but STRICTLY truthful: never invent statistics, ' +
     'percentages, user counts, or claims not supported by the input. You may use the real ' +
     'GitHub star count provided. Lead with the concrete value/outcome for a founder. ' +
+    'Vary your sentence structure every time -- this copy runs across hundreds of listings ' +
+    'and repeating the same opening pattern (e.g. always "Get X with Y" or "Build X with Y") ' +
+    'makes the whole catalog look machine-generated to search engines. Open with the tool name, ' +
+    'the outcome, an action verb, a question, or a comparison -- mix it up. ' +
     'Respond with ONLY a JSON object, no prose, no code fences.';
 
   // README (when a GitHub token is configured) gives far richer context
   const readme = (skill.readme_preview || '').slice(0, 500);
+  const banned = bannedOpeners.slice(0, 15);
   const user =
     `Rewrite this listing.\n\n` +
     `Name: ${skill.name}\n` +
@@ -144,6 +171,9 @@ async function rewriteWithLLM(skill, modelOverride) {
     `GitHub stars: ${stars}\n` +
     `Language: ${skill.language || 'n/a'}\n` +
     `Topics: ${topics || 'n/a'}\n\n` +
+    (banned.length
+      ? `Do NOT start the description with any of these phrasings already used elsewhere in the catalog: ${banned.map((o) => `"${o}..."`).join(', ')}.\n\n`
+      : '') +
     `Return JSON: {"title": "...", "description": "..."}\n` +
     `Rules:\n` +
     `- title: a benefit-driven headline, max ~65 chars, no clickbait lies. Keep the real tool name in it.\n` +
@@ -151,9 +181,18 @@ async function rewriteWithLLM(skill, modelOverride) {
     `- Only mention the star count if it is >= 1000, phrased as "${formatStars(stars) || 'N/A'}".\n` +
     `- No emojis. No invented metrics.`;
 
-  const parsed = parseJsonObject(await callLLM(system, user, modelOverride));
+  let parsed = parseJsonObject(await callLLM(system, user, modelOverride));
   if (!parsed.title || !parsed.description) {
     throw new Error('LLM returned incomplete JSON');
+  }
+  // One retry if the model ignored the ban list and reused a known opener --
+  // cheap free models drift back to their default template under pressure.
+  if (banned.includes(opener(parsed.description))) {
+    const retryUser = user + `\n\nYour previous attempt started with a banned phrasing. Use a genuinely different sentence structure this time.`;
+    try {
+      const retry = parseJsonObject(await callLLM(system, retryUser, modelOverride));
+      if (retry.title && retry.description) parsed = retry;
+    } catch { /* keep the first attempt */ }
   }
   return { title: parsed.title.trim(), description: parsed.description.trim() };
 }
@@ -557,13 +596,16 @@ async function handle(request) {
   let fellBack = 0;
   let publishedCount = 0;
   const errors = [];
+  // Openers already in the catalog, so this batch doesn't add to a pile-up
+  // of "Get X with Y" listings that reads as templated at catalog scale.
+  const bannedOpeners = useLLM ? await recentOpeners(database) : [];
 
   await pool(skills, useLLM ? 4 : 20, async (skill) => {
     let result;
     let by = 'heuristic';
     if (useLLM) {
       try {
-        result = await rewriteWithLLM(skill);
+        result = await rewriteWithLLM(skill, undefined, bannedOpeners);
         by = PROVIDER.name;
         llmOk++;
       } catch (e) {
