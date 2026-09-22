@@ -45,6 +45,14 @@ jobs:
             "$BASE_URL/api/gsc?action=sites" | tee -a $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
+      - name: Sitemaps Google holds
+        run: |
+          echo '### sitemaps' >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          curl -s -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/gsc?action=sitemaps" | tee -a $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
       - name: Totals and trend
         run: |
           echo '### overview' >> $GITHUB_STEP_SUMMARY
