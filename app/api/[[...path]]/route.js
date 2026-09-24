@@ -7,6 +7,15 @@ import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 import { screenSubmission } from '../../../lib/content-safety';
 import { pickDailyFromDb } from '../../../lib/newsletter-pick';
 
+// Next 14 caches every fetch() in a route handler by default ("auto cache"),
+// including the GitHub, Groq and Resend calls below. Each cache miss is a
+// write to Vercel's ISR store (billed per 8 KB), and these calls almost never
+// hit: the star-refresh job sends a per-run GitHub token (new cache key every
+// run) and the LLM calls carry unique bodies. That was most of the Hobby-plan
+// ISR-write overage (usage window Aug 25 -> Sep 24, 2026). Nothing here needs
+// caching, so default fetch() to no-store; an explicit cache option still wins.
+export const fetchCache = 'default-no-store';
+
 // Explicit timeouts so a slow/unreachable Atlas connection fails fast with a
 // clear error instead of hanging the serverless function (and, at build
 // time, hanging Next.js static generation) indefinitely.

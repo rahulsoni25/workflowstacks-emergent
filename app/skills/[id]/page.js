@@ -4,6 +4,7 @@ import { relatedBundle } from '@/lib/bundles'
 import { relatedAssets } from '@/lib/related-assets'
 import { buildCodeflow, summarize } from '@/lib/codeflow'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { rawFetch } from '@/lib/raw-fetch'
 
 // Note: invalid skill IDs render the not-found UI with HTTP 200 (a Next.js 14
 // App Router limitation — notFound() doesn't emit a 404 status under ISR, and
@@ -109,7 +110,9 @@ function ghHeaders() {
 
 // "Read the source" spec sheet — fetch the repo's file tree + facts so visitors
 // can fully inspect what's inside, FREE (vs rivals' pay-to-inspect black box).
-// Cached 24h via ISR; degrades gracefully on rate-limit/failure.
+// Fetched fresh on each 7-day regeneration via rawFetch — see lib/raw-fetch.js
+// for why these must not go through Next's data cache. Degrades gracefully on
+// rate-limit/failure.
 async function getSourceSpec(githubUrl) {
   if (!githubUrl) return null
   const m = githubUrl.match(/github\.com\/([^/]+)\/([^/#?]+)/i)
@@ -118,8 +121,8 @@ async function getSourceSpec(githubUrl) {
   const repo = m[2].replace(/\.git$/, '')
   try {
     const [metaRes, contentsRes] = await Promise.all([
-      fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: ghHeaders(), next: { revalidate: WEEK } }),
-      fetch(`https://api.github.com/repos/${owner}/${repo}/contents`, { headers: ghHeaders(), next: { revalidate: WEEK } }),
+      rawFetch(`https://api.github.com/repos/${owner}/${repo}`, { headers: ghHeaders(), signal: AbortSignal.timeout(8000) }),
+      rawFetch(`https://api.github.com/repos/${owner}/${repo}/contents`, { headers: ghHeaders(), signal: AbortSignal.timeout(8000) }),
     ])
     if (!metaRes.ok || !contentsRes.ok) return null
     const meta = await metaRes.json()
@@ -170,9 +173,9 @@ async function getCodeflow(skill) {
   // it protects the GitHub budget for pages people actually open.
   if (skill.codeflow_at && !stored) return null
   if ((skill.github_stars || 0) < 50) return null
-  // Live build (page not yet backfilled). Trees over ~2MB can't enter Next's
-  // data cache, so very large repos (>60MB) wait for the stored version too.
-  const cf = await buildCodeflow(skill.github_url, { category: skill.category, installHint: skill.use_guide?.install, maxSizeKB: 60_000, fetchOpts: { next: { revalidate: WEEK } } })
+  // Live build (page not yet backfilled). Very large repos (>60MB) wait for the
+  // stored version.
+  const cf = await buildCodeflow(skill.github_url, { category: skill.category, installHint: skill.use_guide?.install, maxSizeKB: 60_000 })
   if (!cf) return null
   return { ...cf, summary: summarize(cf, name) }
 }

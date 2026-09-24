@@ -3,12 +3,14 @@ name: Refresh stars (Hot list)
 # The Hot list ranks by velocity_7d, which needs at least two star snapshots
 # per repo. The daily content refresh manages ~800 repos a run against a
 # published catalog of 3,000+, so a second snapshot took four days to arrive
-# and /hot sat empty. This runs the same rotation every three hours: ~800 per
+# and /hot sat empty. This runs the same rotation every six hours: ~800 per
 # run stays under the job token's 1,000 requests/hour, and the whole published
-# catalog gets a snapshot roughly twice a day.
+# catalog gets a snapshot roughly once a day — plenty for a 7-day velocity.
+# (Was every three hours; halved 2026-09-24 because each pass is ~40 s of a
+# Vercel function on a Hobby plan that is over its Active CPU cap.)
 on:
   schedule:
-    - cron: '20 */3 * * *'
+    - cron: '20 */6 * * *'
   workflow_dispatch: {}
 
 env:
