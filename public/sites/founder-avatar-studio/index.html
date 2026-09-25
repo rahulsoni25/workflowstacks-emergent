@@ -25,29 +25,39 @@
 <meta name="twitter:image" content="https://founder-avatar.workflowstacks.com/cinematic.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"></noscript>
 <style>
   :root{
     color-scheme: dark;
     --ground:#14111C; --surface:#1E1927; --surface2:#271F33;
     --line:rgba(244,238,230,.13); --line-strong:rgba(244,238,230,.26);
-    --text:#F4EEE6; --muted:#A99DB4; --dim:#7C7288;
+    --text:#F4EEE6; --muted:#A99DB4; --dim:#8B8296; /* 5.09:1 on ground, 4.68:1 on surface */
     --tally:#FF4A1C; --amber:#F2A65A; --mint:#7FD1B9;
-    --maxw:1180px;
+    --maxw:1180px; --bar-h:69px; --t:160ms;
+    /* breakpoints: sm 560 · md 720 · lg 900 · xl 960 */
     --fd:"Instrument Serif",Georgia,serif;
     --fb:"Archivo","Helvetica Neue",Arial,sans-serif;
     --fm:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   }
   *{box-sizing:border-box}
+  html{scroll-padding-top:calc(var(--bar-h) + 12px + env(safe-area-inset-top,0px))}
+  @media(prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
   body{
     margin:0; background:var(--ground); color:var(--text);
     font-family:var(--fb); font-size:17px; line-height:1.6;
     -webkit-font-smoothing:antialiased;
   }
-  .wrap{width:100%; max-width:var(--maxw); margin:0 auto; padding-inline:20px}
+  .wrap{width:100%; max-width:var(--maxw); margin:0 auto;
+    padding-left:max(clamp(20px,3.5vw,36px), env(safe-area-inset-left,0px)); padding-right:max(clamp(20px,3.5vw,36px), env(safe-area-inset-right,0px))}
   h1,h2,h3{text-wrap:balance; margin:0}
+  figure{margin:0}
+  p,li,figcaption{text-wrap:pretty}
+  .skip{position:absolute; left:16px; top:-100px; z-index:60; background:var(--text); color:var(--ground); font-weight:600; padding:10px 14px; border-radius:2px; text-decoration:none}
+  .skip:focus{top:12px}
   a{color:inherit}
-  .eyebrow{font-family:var(--fm); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--amber); margin:0}
+  .eyebrow{font-family:var(--fm); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--amber); margin:0; text-wrap:balance}
   .serif{font-family:var(--fd); font-weight:400; letter-spacing:-.01em; line-height:1.04}
   .em{font-style:italic; color:var(--amber)}
 
@@ -60,19 +70,27 @@
   /* display is owned by .hide-sm below — a `display:flex` here would outrank
      it (.bar nav beats .hide-sm) and keep the nav visible on phones. */
   .bar nav{align-items:center; gap:22px; font-size:14px; color:var(--muted)}
+  .bar nav a{display:inline-block; padding:11px 0; text-decoration:none; border-bottom:1px solid transparent; transition:color var(--t) ease}
   .bar nav a:hover{color:var(--text)}
+  .bar nav a[aria-current="true"]{color:var(--text); border-bottom-color:var(--amber)}
   .hide-sm{display:none}
-  @media(min-width:860px){ .hide-sm{display:flex} }
+  @media(min-width:720px){ .hide-sm{display:flex} }
 
   .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px;
     font-family:var(--fb); font-weight:600; font-size:15px; line-height:1;
-    padding:13px 20px; border-radius:2px; border:1px solid transparent; cursor:pointer; text-decoration:none;
-    transition:transform .12s ease, background .12s ease, border-color .12s ease}
+    padding:13px 20px; min-height:44px; border-radius:2px; border:1px solid transparent; cursor:pointer; text-decoration:none;
+    transition:transform var(--t) ease, background-color var(--t) ease, border-color var(--t) ease, filter var(--t) ease}
   .btn-primary{background:var(--tally); color:#170B06; border-color:var(--tally)}
-  .btn-primary:hover{transform:translateY(-1px); background:#FF5F35}
   .btn-ghost{background:transparent; color:var(--text); border-color:var(--line-strong)}
-  .btn-ghost:hover{border-color:var(--text)}
+  @media(hover:hover){
+    .btn-primary:hover{transform:translateY(-1px); background:#FF5F35}
+    .btn-ghost:hover{border-color:var(--text)}
+  }
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn-primary:active{filter:brightness(.92)}
+  .btn-ghost:active{background:rgba(244,238,230,.08)}
   .btn-sm{padding:10px 15px; font-size:14px}
+  .btn,.switch button,summary,input,select,textarea,.bar nav a,.contact a{touch-action:manipulation}
   :focus-visible{outline:2px solid var(--amber); outline-offset:3px}
 
   /* hero */
@@ -89,11 +107,14 @@
   .form-note{color:var(--dim); font-size:13.5px; margin:6px 0 18px}
   .fields{display:grid; gap:12px; grid-template-columns:1fr}
   @media(min-width:560px){ .fields{grid-template-columns:1fr 1fr} .span2{grid-column:1/-1} }
-  label{display:block; font-family:var(--fm); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:6px}
-  input,select,textarea{width:100%; font-family:var(--fb); font-size:15.5px; color:var(--text);
-    background:var(--ground); border:1px solid var(--line-strong); border-radius:2px; padding:12px 13px}
+  label{display:block; font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:6px}
+  input,select,textarea{width:100%; font-family:var(--fb); font-size:16px; color:var(--text); min-height:44px;
+    background:var(--ground); border:1px solid rgba(244,238,230,.40); border-radius:2px; padding:12px 13px; transition:border-color var(--t) ease}
   textarea{resize:vertical; min-height:74px}
-  input:focus,select:focus,textarea:focus{border-color:var(--amber); outline:none}
+  input[aria-invalid="true"]{border-color:var(--tally)}
+  input:focus,select:focus,textarea:focus{border-color:var(--amber)}
+  .opt{text-transform:none; letter-spacing:0}
+  .ferr{color:var(--tally); font-size:13.5px; margin:6px 0 0}
   .hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden}
   .err{color:var(--tally); font-size:13.5px; margin-top:10px; min-height:1px}
   .submit-row{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:18px}
@@ -103,23 +124,28 @@
   .sent h3{font-family:var(--fb); font-size:17px; font-weight:600}
   .sent p{color:var(--muted); font-size:15px; margin:8px 0 0}
   .msg-box{font-family:var(--fm); font-size:13px; color:var(--muted); background:var(--ground);
-    border:1px solid var(--line); border-radius:2px; padding:14px; margin-top:14px; white-space:pre-wrap; max-height:190px; overflow:auto}
+    border:1px solid var(--line); border-radius:2px; padding:14px; margin-top:14px; white-space:pre-wrap; overflow-wrap:anywhere}
   .sent-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px}
+  #copy{min-width:144px}
 
   /* phone / video */
   .stage{position:relative; justify-self:center; width:min(300px,78vw)}
+  @media(min-width:960px){ .stage{position:sticky; top:calc(var(--bar-h) + 24px)} }
+  @media(min-width:1200px){ .stage{width:min(340px,78vw)} }
   .phone{position:relative; border:1px solid var(--line-strong); border-radius:22px; padding:9px; background:var(--surface2)}
   .phone video,.phone img{display:block; width:100%; aspect-ratio:9/16; object-fit:cover; border-radius:14px; background:#000}
   .rec{position:absolute; top:20px; left:20px; display:flex; align-items:center; gap:7px;
     font-family:var(--fm); font-size:11px; letter-spacing:.12em; color:#fff; background:rgba(0,0,0,.45);
     padding:5px 9px; border-radius:2px; backdrop-filter:blur(4px)}
   .rec i{width:7px; height:7px; border-radius:50%; background:var(--tally); animation:blink 1.6s steps(1,end) infinite}
+  .vid-toggle{position:absolute; right:16px; bottom:16px; min-width:76px; min-height:44px; padding:0 12px; font-family:var(--fm); font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+    color:#fff; background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.35); border-radius:2px; cursor:pointer; backdrop-filter:blur(4px)}
   @keyframes blink{50%{opacity:.25}}
   .slate{display:flex; justify-content:space-between; gap:12px; font-family:var(--fm); font-size:11.5px;
     letter-spacing:.08em; color:var(--dim); margin-top:12px; text-transform:uppercase}
   .stage figcaption{color:var(--muted); font-size:14px; margin-top:12px; text-align:center}
   .stage figcaption b{color:var(--text); font-weight:600}
-  @media(prefers-reduced-motion:reduce){ .rec i{animation:none} .btn:hover{transform:none} }
+  @media(prefers-reduced-motion:reduce){ .rec i{animation:none} .btn:hover,.btn:active{transform:none} }
 
   /* generic sections */
   section{padding-block:clamp(52px,7vw,88px); border-bottom:1px solid var(--line)}
@@ -127,40 +153,44 @@
   .said{color:var(--muted); max-width:56ch; margin-top:18px}
 
   .facts{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; grid-template-columns:1fr}
-  @media(min-width:720px){ .facts{grid-template-columns:repeat(3,1fr)} }
+  @media(min-width:900px){ .facts{grid-template-columns:repeat(3,1fr)} }
   .fact{background:var(--ground); padding:26px 22px}
-  .fact .n{font-family:var(--fd); font-size:40px; line-height:1; color:var(--amber)}
+  .fact .n{font-family:var(--fd); font-size:clamp(28px,3.4vw,40px); line-height:1; color:var(--amber)}
   .fact p{color:var(--muted); font-size:15px; margin:10px 0 0}
 
   .samples{display:grid; gap:18px; grid-template-columns:1fr; margin-top:34px}
-  @media(min-width:760px){ .samples{grid-template-columns:repeat(3,1fr)} }
+  @media(min-width:720px){ .samples{grid-template-columns:repeat(3,1fr)} }
   .sample{background:var(--surface); border:1px solid var(--line); border-radius:3px; overflow:hidden; display:flex; flex-direction:column}
   .sample img{display:block; width:100%; object-fit:cover; aspect-ratio:4/5}
   .sample .cap{padding:16px 18px}
   .sample .cap h3{font-family:var(--fb); font-size:16px; font-weight:600}
   .sample .cap p{color:var(--muted); font-size:14px; margin:6px 0 0}
-  .tag{font-family:var(--fm); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim)}
+  .tag{font-family:var(--fm); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim)}
 
   .steps{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; grid-template-columns:1fr}
-  @media(min-width:760px){ .steps{grid-template-columns:repeat(3,1fr)} }
+  @media(min-width:900px){ .steps{grid-template-columns:repeat(3,1fr)} }
   .step{background:var(--ground); padding:28px 24px}
-  .step .k{font-family:var(--fm); font-size:12px; letter-spacing:.16em; color:var(--tally)}
+  .step .k{font-family:var(--fm); font-size:12px; letter-spacing:.16em; color:var(--amber)}
   .step h3{font-family:var(--fb); font-size:19px; font-weight:600; margin-top:12px}
   .step p{color:var(--muted); font-size:15px; margin:8px 0 0}
 
   /* pricing */
-  .switch{display:inline-flex; margin-top:28px; border:1px solid var(--line-strong); border-radius:2px; overflow:hidden; flex-wrap:wrap}
+  .switch{display:inline-flex; margin-top:28px; border:1px solid var(--line-strong); border-radius:2px; flex-wrap:wrap}
   .switch button{background:transparent; border:0; color:var(--muted); font-family:var(--fb); font-weight:600; font-size:14px;
-    padding:11px 17px; cursor:pointer; border-right:1px solid var(--line)}
+    padding:0 17px; min-height:44px; cursor:pointer; border-right:1px solid var(--line); transition:background-color var(--t) ease, color var(--t) ease}
   .switch button:last-child{border-right:0}
+  .switch button:hover:not([aria-selected="true"]){color:var(--text); background:var(--surface2)}
+  .switch button:active{background:var(--surface)}
   .switch button[aria-selected="true"]{background:var(--text); color:var(--ground)}
+  @media(max-width:419px){ .switch{display:flex; width:100%} .switch button{flex:1 1 0; padding-inline:8px; white-space:nowrap} }
   .plans{display:grid; gap:16px; grid-template-columns:1fr; margin-top:26px}
-  @media(min-width:820px){ .plans{grid-template-columns:repeat(3,1fr)} }
+  @media(min-width:900px){ .plans{grid-template-columns:repeat(3,1fr)} }
   .plan{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:26px 24px; display:flex; flex-direction:column; gap:14px}
   .plan.feature{border-color:var(--amber)}
+  .plan .flag{font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ground); background:var(--amber); padding:4px 8px; border-radius:2px; align-self:flex-start; margin-bottom:-6px}
   .plan .name{font-family:var(--fm); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber)}
   .plan .price{font-family:var(--fd); font-size:44px; line-height:1; letter-spacing:-.01em; font-variant-numeric:tabular-nums}
-  .plan .price span{font-family:var(--fb); font-size:14px; color:var(--dim); letter-spacing:0}
+  .plan .unit{font-family:var(--fb); font-size:14px; letter-spacing:0; text-transform:none; color:var(--muted)}
   .plan ul{list-style:none; margin:0; padding:0; display:grid; gap:9px}
   .plan li{color:var(--muted); font-size:15px; padding-left:18px; position:relative}
   .plan li::before{content:"—"; position:absolute; left:0; color:var(--dim)}
@@ -174,25 +204,33 @@
   .flow h3{font-family:var(--fb); font-size:16px; font-weight:600}
   .flow p{color:var(--muted); font-size:14.5px; margin:8px 0 0}
 
-  details{border-bottom:1px solid var(--line); padding:18px 0}
-  details summary{cursor:pointer; font-weight:600; font-size:17px; list-style:none; display:flex; justify-content:space-between; gap:16px}
+  details{border-bottom:1px solid var(--line); padding:0}
+  details summary{cursor:pointer; font-weight:600; font-size:17px; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:18px 0; min-height:44px; transition:color var(--t) ease}
+  details summary:hover,details summary:active{color:var(--amber)}
   details summary::-webkit-details-marker{display:none}
-  details summary::after{content:"+"; color:var(--amber); font-family:var(--fm)}
-  details[open] summary::after{content:"–"}
-  details p{color:var(--muted); font-size:15.5px; margin:12px 0 0; max-width:66ch}
+  details summary::after{content:"+" / ""; color:var(--amber); font-family:var(--fm)}
+  details summary:hover::after{color:var(--text)}
+  details[open] summary::after{content:"–" / ""}
+  details p{color:var(--muted); font-size:15.5px; margin:0 0 18px; max-width:66ch}
+  .section-body{margin-top:28px}
+  section.last{border-bottom:0}
 
   .close-grid{display:grid; gap:34px; grid-template-columns:1fr; align-items:start}
   @media(min-width:900px){ .close-grid{grid-template-columns:1fr 1fr} }
   .contact{display:grid; gap:14px; margin-top:26px}
-  .contact div{border-top:1px solid var(--line); padding-top:14px}
-  .contact .k{font-family:var(--fm); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim)}
+  .contact > div{border-top:1px solid var(--line); padding-top:14px}
+  .contact .k{font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim)}
   .contact .v{font-size:17px; margin-top:4px; user-select:all}
-  footer{padding-block:30px; color:var(--dim); font-size:13.5px}
+  .contact a.v{display:inline-block; text-decoration:none; padding:9px 0; margin:-5px 0; min-height:44px; transition:color var(--t) ease}
+  .contact a.v:hover{color:var(--amber)}
+  @media(max-width:719px){ .fact p,.sample .cap p,.step p,.plan li,.flow p,.sent p{font-size:16px} }
+  footer{border-top:1px solid var(--line); padding-block:30px; color:var(--dim); font-size:13.5px}
   footer .wrap{display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between}
 </style>
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://founder-avatar.workflowstacks.com/#organization","name":"FluoDigital","url":"https://founder-avatar.workflowstacks.com/","telephone":"+971522086253","founder":{"@type":"Person","name":"Rahul Soni","jobTitle":"Founder & Director"},"location":[{"@type":"Place","name":"Dubai Silicon Oasis","address":{"@type":"PostalAddress","addressLocality":"Dubai","addressCountry":"AE"}},{"@type":"Place","name":"Mumbai","address":{"@type":"PostalAddress","addressLocality":"Mumbai","addressCountry":"IN"}}]},{"@type":"Service","@id":"https://founder-avatar.workflowstacks.com/#service","name":"Founder Avatar Studio","serviceType":"AI avatar video production and distribution","description":"We build a digital twin of you in seven days, then write, produce and publish your videos in English and Arabic — and put paid media behind the ones that work. One 45-minute capture session is all you ever sit through.","url":"https://founder-avatar.workflowstacks.com/","provider":{"@id":"https://founder-avatar.workflowstacks.com/#organization"},"areaServed":[{"@type":"City","name":"Dubai"},{"@type":"City","name":"Mumbai"}],"availableLanguage":["English","Arabic"],"offers":[{"@type":"Offer","name":"Presence","price":"6000","priceCurrency":"AED","description":"8 videos up to 60 seconds a month, one language. Per month, excluding VAT, minimum three months."},{"@type":"Offer","name":"Authority","price":"11000","priceCurrency":"AED","description":"16 videos a month in English and Arabic. Per month, excluding VAT, minimum three months."},{"@type":"Offer","name":"Omnipresence","price":"18000","priceCurrency":"AED","description":"30 videos a month plus ad variations, 48-hour turnaround. Per month, excluding VAT, minimum three months."}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can't I just buy the software myself?","acceptedAnswer":{"@type":"Answer","text":"You can. A licence runs under AED 600 a month and you could have a twin by the weekend. The licence was never the hard part — writing scripts that sound like you, directing a capture that holds up in close-up, running Arabic and English from one approval, checking every lip-sync, and still shipping in the weeks you are too busy to think about it. That is where founders who buy the tool stop posting by week three."}},{"@type":"Question","name":"Will people know it's AI?","acceptedAnswer":{"@type":"Answer","text":"Some will, and we label it to each platform's policy rather than hiding it. What holds attention is whether you said something worth hearing. We don't pretend you were in a studio, and we won't put words in your mouth that you haven't approved."}},{"@type":"Question","name":"What if ad prices go up?","acceptedAnswer":{"@type":"Answer","text":"They move constantly — UAE Meta CPMs have swung by more than 2.5× inside a year. Your price is fixed for the term; what flexes is the reach we deliver, and we show you the auction data behind it. The media figure in a bundled package is a floor we spend, reported to the dirham."}},{"@type":"Question","name":"Who owns the avatar and the audience?","acceptedAnswer":{"@type":"Answer","text":"You do. The twin is built from your likeness under a scoped consent, and paid campaigns run in your own ad account, so the pixel, the audiences and everyone who watched stay with you — including on the day you stop working with us."}}]}]}</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 <header class="bar">
   <div class="wrap">
     <div class="mark"><span class="dot" aria-hidden="true"></span> FluoDigital</div>
@@ -205,7 +243,7 @@
   </div>
 </header>
 
-<main>
+<main id="main">
   <section class="hero">
     <div class="wrap hero-grid">
       <div>
@@ -218,20 +256,23 @@
           <p class="form-note">Tell us where to reach you. We reply the same working day, from Dubai.</p>
           <div class="fields">
             <div>
-              <label for="f-name">Your name</label>
-              <input id="f-name" name="name" autocomplete="name" placeholder="Full name">
+              <label for="f-name">Your name <span class="opt">(required)</span></label>
+              <input id="f-name" name="name" required aria-required="true" autocomplete="name" placeholder="Full name">
+              <p class="ferr" id="f-name-err" hidden></p>
             </div>
             <div>
-              <label for="f-co">Company</label>
+              <label for="f-co">Company <span class="opt">(optional)</span></label>
               <input id="f-co" name="company" autocomplete="organization" placeholder="Company name">
             </div>
             <div>
-              <label for="f-phone">WhatsApp number</label>
-              <input id="f-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="+971 …">
+              <label for="f-phone">WhatsApp number <span class="opt">(this or email)</span></label>
+              <input id="f-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+971 …">
+              <p class="ferr" id="f-phone-err" hidden></p>
             </div>
             <div>
-              <label for="f-email">Email</label>
+              <label for="f-email">Email <span class="opt">(this or WhatsApp)</span></label>
               <input id="f-email" name="email" type="email" autocomplete="email" placeholder="you@company.com">
+              <p class="ferr" id="f-email-err" hidden></p>
             </div>
             <div class="span2">
               <label for="f-need">What you need</label>
@@ -243,7 +284,7 @@
               </select>
             </div>
             <div class="span2">
-              <label for="f-note">Anything we should know <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+              <label for="f-note">Anything we should know <span class="opt">(optional)</span></label>
               <textarea id="f-note" name="note" placeholder="Audience, languages, launch date…"></textarea>
             </div>
           </div>
@@ -267,12 +308,13 @@
         </div>
       </div>
 
-      <figure class="stage" style="margin:0">
+      <figure class="stage">
         <div class="phone">
           <span class="rec"><i aria-hidden="true"></i> REC</span>
           <video id="hero-vid" poster="talking-head.jpg" muted loop playsinline preload="metadata" aria-label="A founder's AI avatar speaking to camera">
             <source src="hero.mp4" type="video/mp4">
           </video>
+          <button class="vid-toggle" id="vid-toggle" type="button" aria-label="Pause video">Pause</button>
         </div>
         <div class="slate"><span>Take 01</span><span>1080 × 1920</span><span>00:07</span></div>
         <figcaption><b>This is our founder's avatar.</b> No camera was involved in making it.</figcaption>
@@ -283,7 +325,7 @@
   <section id="why">
     <div class="wrap">
       <p class="eyebrow">The arithmetic</p>
-      <h2 class="lede">A three-day shoot in Dubai costs AED&nbsp;35,000–60,000. It buys you one day of your own time and one language.</h2>
+      <h2 class="lede">A three-day shoot in Dubai costs AED&nbsp;35,000–&#8288;60,000. It buys you one day of your own time and one language.</h2>
       <p class="said">Then the footage ages, the follow-up never gets filmed, and the next quarter starts from nothing. Your face is the asset. The camera is the bottleneck.</p>
       <div class="facts">
         <div class="fact"><div class="n">45 min</div><p>On camera, once. We direct the session, record your voice, and you are done.</p></div>
@@ -299,16 +341,16 @@
       <h2 class="lede">We built it on our own founder first.</h2>
       <p class="said">Every frame below is Rahul's twin — not a stock demo or a vendor showreel. Same avatar, three formats.</p>
       <div class="samples">
-        <figure class="sample" style="margin:0">
-          <img src="talking-head.jpg" alt="Vertical talking-head video of a founder's AI avatar">
+        <figure class="sample">
+          <img src="talking-head.jpg" width="576" height="1024" loading="lazy" decoding="async" alt="Vertical talking-head video of a founder's AI avatar">
           <figcaption class="cap"><span class="tag">9:16 · Social</span><h3>Weekly talking head</h3><p>The format that does the work: vertical, captioned, posted on LinkedIn and Instagram.</p></figcaption>
         </figure>
-        <figure class="sample" style="margin:0">
-          <img src="desk-set.jpg" alt="Seated desk-set avatar video with a laptop">
+        <figure class="sample">
+          <img src="desk-set.jpg" width="480" height="854" loading="lazy" decoding="async" alt="Seated desk-set avatar video with a laptop">
           <figcaption class="cap"><span class="tag">9:16 · Considered</span><h3>Desk set</h3><p>For announcements and explainers, where you should look like you sat down to say it.</p></figcaption>
         </figure>
-        <figure class="sample" style="margin:0">
-          <img src="cinematic.jpg" alt="Cinematic scene produced with AI video">
+        <figure class="sample">
+          <img src="cinematic.jpg" width="800" height="450" loading="lazy" decoding="async" alt="Cinematic scene produced with AI video">
           <figcaption class="cap"><span class="tag">16:9 · Brand film</span><h3>Cinematic scenes</h3><p>Full sets, lighting and cast, with no location, permit or shoot day. From the Signature build up.</p></figcaption>
         </figure>
       </div>
@@ -347,8 +389,8 @@
       <h2 class="lede">Buy the production, the media, or both.</h2>
       <div class="switch" role="tablist" aria-label="Pricing options">
         <button role="tab" id="tab-prod" aria-controls="panel" aria-selected="true" data-mode="prod">Production</button>
-        <button role="tab" id="tab-media" aria-controls="panel" aria-selected="false" data-mode="media">Media budget</button>
-        <button role="tab" id="tab-both" aria-controls="panel" aria-selected="false" data-mode="both">Both together</button>
+        <button role="tab" id="tab-media" aria-controls="panel" aria-selected="false" tabindex="-1" data-mode="media">Media budget</button>
+        <button role="tab" id="tab-both" aria-controls="panel" aria-selected="false" tabindex="-1" data-mode="both">Both together</button>
       </div>
       <div class="plans" id="panel" role="tabpanel" aria-labelledby="tab-prod"></div>
       <p class="fineprint" id="fine"></p>
@@ -371,7 +413,7 @@
     <div class="wrap">
       <p class="eyebrow">Straight answers</p>
       <h2 class="lede">The questions founders actually ask.</h2>
-      <div style="margin-top:28px">
+      <div class="section-body">
         <details><summary>Can't I just buy the software myself?</summary><p>You can. A licence runs under AED 600 a month and you could have a twin by the weekend. The licence was never the hard part — writing scripts that sound like you, directing a capture that holds up in close-up, running Arabic and English from one approval, checking every lip-sync, and still shipping in the weeks you are too busy to think about it. That is where founders who buy the tool stop posting by week three.</p></details>
         <details><summary>Will people know it's AI?</summary><p>Some will, and we label it to each platform's policy rather than hiding it. What holds attention is whether you said something worth hearing. We don't pretend you were in a studio, and we won't put words in your mouth that you haven't approved.</p></details>
         <details><summary>What if ad prices go up?</summary><p>They move constantly — UAE Meta CPMs have swung by more than 2.5× inside a year. Your price is fixed for the term; what flexes is the reach we deliver, and we show you the auction data behind it. The media figure in a bundled package is a floor we spend, reported to the dirham.</p></details>
@@ -380,19 +422,19 @@
     </div>
   </section>
 
-  <section id="close" style="border-bottom:0">
+  <section id="close" class="last">
     <div class="wrap close-grid">
       <div>
         <p class="eyebrow">Next step</p>
         <h2 class="lede">Book the capture. Your first four videos go out seven days later.</h2>
         <p class="said">If you would rather see more before you commit, ask for the full sample reel and we will send the three formats plus a script written in your voice.</p>
-        <p style="margin-top:26px"><a class="btn btn-primary" href="#book">Book a capture session</a></p>
+        <p class="section-body"><a class="btn btn-primary" href="#book">Book a capture session</a></p>
       </div>
       <div>
         <div class="contact">
-          <div><div class="k">WhatsApp / UAE</div><div class="v">+971 52 208 6253</div></div>
-          <div><div class="k">India</div><div class="v">+91 97697 20732</div></div>
-          <div><div class="k">Email</div><div class="v">rahulsoni25@gmail.com</div></div>
+          <div><div class="k">WhatsApp / UAE</div><a class="v" href="https://wa.me/971522086253" target="_blank" rel="noopener">+971 52 208 6253</a></div>
+          <div><div class="k">India</div><a class="v" href="tel:+919769720732">+91 97697 20732</a></div>
+          <div><div class="k">Email</div><a class="v" href="mailto:rahulsoni25@gmail.com">rahulsoni25@gmail.com</a></div>
           <div><div class="k">Studios</div><div class="v">Dubai Silicon Oasis · Mumbai</div></div>
         </div>
       </div>
@@ -412,10 +454,29 @@
   "use strict";
   var WA = "971522086253";
 
-  /* Hero video: autoplay only when motion is welcome */
-  var v = document.getElementById("hero-vid");
+  /* Hero video: autoplay only when motion and data are welcome; always pausable; paused off-screen */
+  var v = document.getElementById("hero-vid"), vt = document.getElementById("vid-toggle");
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  if (v && !reduce) { v.autoplay = true; var p = v.play(); if (p && p.catch) p.catch(function(){}); }
+  var saveData = !!(navigator.connection && navigator.connection.saveData), userPaused = false;
+  function tryPlay(){ var p = v.play(); if (p && p.catch) p.catch(function(){}); }
+  function syncVt(){ var paused = v.paused; vt.textContent = paused ? 'Play' : 'Pause'; vt.setAttribute('aria-label', paused ? 'Play video' : 'Pause video'); }
+  if (v && vt) {
+    if (!reduce && !saveData) { v.autoplay = true; tryPlay(); }
+    vt.addEventListener('click', function(){ if (v.paused) { userPaused = false; tryPlay(); } else { userPaused = true; v.pause(); } });
+    v.addEventListener('play', syncVt); v.addEventListener('pause', syncVt); syncVt();
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function(en){ var e = en[en.length - 1]; if (!e.isIntersecting) v.pause(); else if (!reduce && !saveData && !userPaused) tryPlay(); }, {threshold:.25}).observe(v);
+    }
+  }
+
+  /* Header nav: mark the section in view */
+  var navLinks = document.querySelectorAll('.bar nav a[href^="#"]');
+  if ('IntersectionObserver' in window && navLinks.length) {
+    var navIo = new IntersectionObserver(function(es){ es.forEach(function(e){ if (!e.isIntersecting) return;
+      Array.prototype.forEach.call(navLinks, function(a){ if (a.getAttribute('href') === '#' + e.target.id) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); }); }); },
+      {rootMargin:'-40% 0px -55% 0px'});
+    Array.prototype.forEach.call(navLinks, function(a){ var t = document.querySelector(a.getAttribute('href')); if (t) navIo.observe(t); });
+  }
 
   /* Pricing */
   var PLANS = {
@@ -449,23 +510,31 @@
     var set = PLANS[mode];
     panel.innerHTML = set.items.map(function(p){
       return '<div class="plan' + (p.feature ? ' feature' : '') + '">' +
-        '<div class="name">' + p.name + '</div>' +
+        (p.feature ? '<div class="flag">Recommended</div>' : '') +
+        '<h3 class="name">' + p.name + '</h3>' +
         '<div class="price">AED ' + p.price + '</div>' +
-        '<div class="tag">' + p.unit + '</div>' +
+        '<div class="unit">' + p.unit + '</div>' +
         '<ul>' + p.li.map(function(l){ return '<li>' + l + '</li>'; }).join('') + '</ul>' +
         '<a class="btn ' + (p.feature ? 'btn-primary' : 'btn-ghost') + '" href="#book">Start with ' + p.name + '</a>' +
       '</div>';
     }).join('');
     fine.textContent = set.fine;
   }
-  Array.prototype.forEach.call(document.querySelectorAll('.switch button'), function(b){
-    b.addEventListener('click', function(){
-      Array.prototype.forEach.call(document.querySelectorAll('.switch button'), function(x){ x.setAttribute('aria-selected', String(x === b)); });
-      panel.setAttribute('aria-labelledby', b.id);
-      render(b.dataset.mode);
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.switch [role="tab"]'));
+  function activate(b){
+    tabs.forEach(function(x){ var on = x === b; x.setAttribute('aria-selected', String(on)); x.tabIndex = on ? 0 : -1; });
+    panel.setAttribute('aria-labelledby', b.id);
+    render(b.dataset.mode);
+  }
+  tabs.forEach(function(b, i){
+    b.addEventListener('click', function(){ activate(b); });
+    b.addEventListener('keydown', function(e){
+      var j = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : null;
+      if (j === null) return;
+      e.preventDefault(); j = (j + tabs.length) % tabs.length; tabs[j].focus(); activate(tabs[j]);
     });
   });
-  render('prod');
+  activate(tabs[0]);
 
   /* Form */
   var form = document.getElementById('book'), sent = document.getElementById('sent'),
@@ -474,13 +543,35 @@
 
   function val(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; }
 
+  /* Inline validation: error text sits under its field and is tied to it with aria-describedby */
+  var FIELDS = ['f-name', 'f-phone', 'f-email'];
+  function setErr(id, msg){
+    var el = document.getElementById(id), slot = document.getElementById(id + '-err');
+    if (!el || !slot) return;
+    slot.textContent = msg; slot.hidden = !msg;
+    if (msg) { el.setAttribute('aria-invalid', 'true'); el.setAttribute('aria-describedby', id + '-err'); }
+    else { el.removeAttribute('aria-invalid'); el.removeAttribute('aria-describedby'); }
+  }
+  function check(id, submitting){
+    var el = document.getElementById(id), value = el.value.trim(), msg = '';
+    if (id === 'f-name' && !value && submitting) msg = 'Please add your name so we know who we are replying to.';
+    if (id === 'f-email' && value && !el.checkValidity()) msg = 'That email looks incomplete — check for a missing @ or domain.';
+    if (id === 'f-phone' && value && !/^\+?[\d\s().-]{8,}$/.test(value)) msg = 'Enter the number with country code, e.g. +971 52 208 6253.';
+    if (id === 'f-phone' && !value && !val('f-email') && submitting) msg = 'Add a WhatsApp number or an email — one of the two is enough.';
+    setErr(id, msg); return !msg;
+  }
+  FIELDS.forEach(function(id){ var el = document.getElementById(id);
+    el.addEventListener('blur', function(){ check(id, false); });
+    el.addEventListener('input', function(){ if (el.getAttribute('aria-invalid')) check(id, false); });
+  });
+
   form.addEventListener('submit', function(e){
     e.preventDefault();
-    if (val('f-web')) return;                    /* honeypot */
-    var name = val('f-name'), phone = val('f-phone'), email = val('f-email');
-    if (!name) { err.textContent = 'Please add your name so we know who we are replying to.'; document.getElementById('f-name').focus(); return; }
-    if (!phone && !email) { err.textContent = 'Add a WhatsApp number or an email — one of the two is enough.'; document.getElementById('f-phone').focus(); return; }
+    if (val('f-web')) { err.textContent = 'We could not prepare your message. Please WhatsApp us directly on +971 52 208 6253.'; return; }   /* honeypot */
+    var ok = FIELDS.map(function(id){ return check(id, true); }).every(Boolean);
+    if (!ok) { err.textContent = 'Please fix the highlighted field.'; form.querySelector('[aria-invalid="true"]').focus(); return; }
     err.textContent = '';
+    var name = val('f-name'), phone = val('f-phone'), email = val('f-email');
 
     var lines = [
       'Hi Rahul — I would like to book a capture session for the Founder Avatar Studio.',
@@ -509,7 +600,7 @@
     function select(){
       var r = document.createRange(); r.selectNodeContents(msgBox);
       var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
-      copy.textContent = 'Selected — press copy';
+      copy.textContent = 'Selected';
       setTimeout(function(){ copy.textContent = 'Copy message'; }, 2600);
     }
   });
