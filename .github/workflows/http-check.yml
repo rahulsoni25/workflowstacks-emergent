@@ -34,6 +34,7 @@ jobs:
             grep -iE '^(location|server|content-type|x-vercel-id|x-vercel-error|x-vercel-cache|x-matched-path|cache-control):' headers.txt || true
             echo "--- body, first 700 bytes ---"
             head -c 700 body.txt | tr -d '\r'; echo
+            echo "--- tag ids in body ---"; grep -oE 'GTM-[A-Z0-9]{4,12}|G-[A-Z0-9]{6,12}|fbq\(.init.,.[0-9]{8,20}' body.txt | sort -u || true
           done
       - name: DNS
         run: |

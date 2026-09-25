@@ -119,6 +119,9 @@
   .err{color:var(--tally); font-size:13.5px; margin-top:10px; min-height:1px}
   .submit-row{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:18px}
   .submit-row small{color:var(--dim); font-size:13px}
+  .privacy{color:var(--dim); font-size:13px; margin:14px 0 0}
+  .privacy a{color:var(--muted); text-decoration:underline; text-underline-offset:3px; transition:color var(--t) ease}
+  .privacy a:hover{color:var(--text)}
 
   .sent{border:1px solid var(--mint); background:rgba(127,209,185,.07); border-radius:3px; padding:22px; margin-top:30px}
   .sent h3{font-family:var(--fb); font-size:17px; font-weight:600}
@@ -294,6 +297,7 @@
             <button class="btn btn-primary" type="submit">Send on WhatsApp</button>
             <small>Goes straight to Rahul — no call centre, no drip sequence.</small>
           </div>
+          <p class="privacy">Your details are used only to reply to this enquiry. <a href="https://workflowstacks.com/privacy">Privacy policy</a></p>
         </form>
 
         <div class="sent" id="sent" hidden>
@@ -311,7 +315,7 @@
       <figure class="stage">
         <div class="phone">
           <span class="rec"><i aria-hidden="true"></i> REC</span>
-          <video id="hero-vid" poster="/sites/founder-avatar-studio/talking-head.jpg" muted loop playsinline preload="metadata" aria-label="A founder's AI avatar speaking to camera">
+          <video id="hero-vid" poster="/sites/founder-avatar-studio/talking-head.jpg" muted loop playsinline preload="none" aria-label="A founder's AI avatar speaking to camera">
             <source src="/sites/founder-avatar-studio/hero.mp4" type="video/mp4">
           </video>
           <button class="vid-toggle" id="vid-toggle" type="button" aria-label="Pause video">Pause</button>
@@ -454,20 +458,37 @@
   "use strict";
   var WA = "971522086253";
 
-  /* Hero video: autoplay only when motion and data are welcome; always pausable; paused off-screen */
+  /* Measurement: the same Google Tag Manager container as the main site (GA4, Meta Pixel
+     and anything else are configured inside GTM, not here). Empty GTM_ID loads nothing;
+     events still go to window.dataLayer. */
+  var GTM_ID = "";
+  window.dataLayer = window.dataLayer || [];
+  function track(name, params){ var o = { event: name }; if (params) for (var k in params) o[k] = params[k]; window.dataLayer.push(o); }
+  if (/^GTM-[A-Z0-9]{4,12}$/.test(GTM_ID)) {
+    (function(w,d,s,l,i){ w[l].push({'gtm.start': new Date().getTime(), event: 'gtm.js'}); var f = d.getElementsByTagName(s)[0], j = d.createElement(s); j.async = true; j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i; f.parentNode.insertBefore(j, f); })(window, document, 'script', 'dataLayer', GTM_ID);
+  }
+
+  /* Hero video: starts only once it scrolls into view — on phones it sits below the form, so
+     nothing is downloaded or decoded until then. Honours reduced motion and Save-Data, is
+     always pausable, and pauses again when scrolled away. */
   var v = document.getElementById("hero-vid"), vt = document.getElementById("vid-toggle");
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var saveData = !!(navigator.connection && navigator.connection.saveData), userPaused = false;
+  var wantsMotion = !reduce && !saveData;
   function tryPlay(){ var p = v.play(); if (p && p.catch) p.catch(function(){}); }
   function syncVt(){ var paused = v.paused; vt.textContent = paused ? 'Play' : 'Pause'; vt.setAttribute('aria-label', paused ? 'Play video' : 'Pause video'); }
   if (v && vt) {
-    if (!reduce && !saveData) { v.autoplay = true; tryPlay(); }
     vt.addEventListener('click', function(){ if (v.paused) { userPaused = false; tryPlay(); } else { userPaused = true; v.pause(); } });
     v.addEventListener('play', syncVt); v.addEventListener('pause', syncVt); syncVt();
     if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function(en){ var e = en[en.length - 1]; if (!e.isIntersecting) v.pause(); else if (!reduce && !saveData && !userPaused) tryPlay(); }, {threshold:.25}).observe(v);
-    }
+      new IntersectionObserver(function(en){ var e = en[en.length - 1]; if (!e.isIntersecting) v.pause(); else if (wantsMotion && !userPaused) tryPlay(); }, {threshold:.25}).observe(v);
+    } else if (wantsMotion) { tryPlay(); }
   }
+
+  /* Contact links: which channel people actually use */
+  Array.prototype.forEach.call(document.querySelectorAll('.contact a.v'), function(a){
+    a.addEventListener('click', function(){ var h = a.getAttribute('href') || ''; track('contact_click', { channel: h.indexOf('wa.me') > -1 ? 'whatsapp' : h.indexOf('tel:') === 0 ? 'phone' : 'email' }); });
+  });
 
   /* Header nav: mark the section in view */
   var navLinks = document.querySelectorAll('.bar nav a[href^="#"]');
@@ -587,10 +608,13 @@
 
     msgBox.textContent = text;
     wa.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+    track('generate_lead', { method: 'whatsapp', need: val('f-need'), has_phone: !!phone, has_email: !!email });
     form.hidden = true; sent.hidden = false;
     sent.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'center'});
     wa.focus();
   });
+
+  wa.addEventListener('click', function(){ track('whatsapp_open', { method: 'whatsapp' }); });
 
   copy.addEventListener('click', function(){
     var text = msgBox.textContent, done = function(){ copy.textContent = 'Copied'; setTimeout(function(){ copy.textContent = 'Copy message'; }, 1800); };
