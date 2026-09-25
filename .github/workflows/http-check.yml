@@ -1,0 +1,46 @@
+name: http-check
+
+# Probe one or more URLs (status, key headers, first bytes of the body) and
+# the DNS behind them, from GitHub's runners. Useful when a hostname is
+# being wired up (a new subdomain on Vercel) and the person debugging it
+# cannot reach the site from where they are working.
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: Space-separated URLs to probe
+        required: true
+        default: "https://founder-avatar.workflowstacks.com/ https://workflowstacks.com/sites/founder-avatar-studio/index.html"
+      hosts:
+        description: Space-separated hostnames to resolve
+        required: false
+        default: "workflowstacks.com founder-avatar.workflowstacks.com www.workflowstacks.com"
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      URLS: ${{ inputs.urls }}
+      HOSTS: ${{ inputs.hosts }}
+    steps:
+      - name: HTTP
+        run: |
+          for u in $URLS; do
+            echo "=================== $u"
+            code=$(curl -sS -o body.txt -D headers.txt --max-time 30 -w '%{http_code}' "$u") || echo "curl exit $?"
+            echo "status: $code"
+            grep -iE '^(location|server|content-type|x-vercel-id|x-vercel-error|x-vercel-cache|x-matched-path|cache-control):' headers.txt || true
+            echo "--- body, first 700 bytes ---"
+            head -c 700 body.txt | tr -d '\r'; echo
+          done
+      - name: DNS
+        run: |
+          for n in $HOSTS; do
+            echo "=================== $n"
+            dig +noall +answer "$n" A
+            dig +noall +answer "$n" CNAME
+          done
+          echo "=================== NS"
+          dig +noall +answer NS "$(echo $HOSTS | cut -d' ' -f1)"
