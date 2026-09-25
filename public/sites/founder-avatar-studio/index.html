@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Founder Avatar Studio — AI Avatar Videos for Founders | FluoDigital</title>
+<meta name="description" content="A digital twin of you in seven days, then weekly videos written, produced and published in English and Arabic. One 45-minute capture session — never film again.">
+<link rel="canonical" href="https://founder-avatar.workflowstacks.com/">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="theme-color" content="#14111C">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23FF4A1C'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FluoDigital">
+<meta property="og:locale" content="en_AE">
+<meta property="og:title" content="Founder Avatar Studio — Post every week. Never film again.">
+<meta property="og:description" content="A digital twin of you in seven days, then weekly videos written, produced and published in English and Arabic. One 45-minute capture session — never film again.">
+<meta property="og:url" content="https://founder-avatar.workflowstacks.com/">
+<meta property="og:image" content="https://founder-avatar.workflowstacks.com/cinematic.jpg">
+<meta property="og:image:width" content="800">
+<meta property="og:image:height" content="450">
+<meta property="og:image:alt" content="Cinematic scene produced with AI video">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Founder Avatar Studio — Post every week. Never film again.">
+<meta name="twitter:description" content="A digital twin of you in seven days, then weekly videos written, produced and published in English and Arabic. One 45-minute capture session — never film again.">
+<meta name="twitter:image" content="https://founder-avatar.workflowstacks.com/cinematic.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<style>
+  :root{
+    color-scheme: dark;
+    --ground:#14111C; --surface:#1E1927; --surface2:#271F33;
+    --line:rgba(244,238,230,.13); --line-strong:rgba(244,238,230,.26);
+    --text:#F4EEE6; --muted:#A99DB4; --dim:#7C7288;
+    --tally:#FF4A1C; --amber:#F2A65A; --mint:#7FD1B9;
+    --maxw:1180px;
+    --fd:"Instrument Serif",Georgia,serif;
+    --fb:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --fm:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--ground); color:var(--text);
+    font-family:var(--fb); font-size:17px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:100%; max-width:var(--maxw); margin:0 auto; padding-inline:20px}
+  h1,h2,h3{text-wrap:balance; margin:0}
+  a{color:inherit}
+  .eyebrow{font-family:var(--fm); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--amber); margin:0}
+  .serif{font-family:var(--fd); font-weight:400; letter-spacing:-.01em; line-height:1.04}
+  .em{font-style:italic; color:var(--amber)}
+
+  /* header */
+  header.bar{position:sticky; top:env(safe-area-inset-top,0px); z-index:50;
+    background:rgba(20,17,28,.86); backdrop-filter:blur(12px); border-bottom:1px solid var(--line)}
+  .bar .wrap{display:flex; align-items:center; gap:16px; justify-content:space-between; padding-block:12px}
+  .mark{display:flex; align-items:center; gap:10px; font-weight:600; letter-spacing:-.01em; font-size:16px}
+  .dot{width:9px; height:9px; border-radius:50%; background:var(--tally); box-shadow:0 0 0 4px rgba(255,74,28,.18)}
+  /* display is owned by .hide-sm below — a `display:flex` here would outrank
+     it (.bar nav beats .hide-sm) and keep the nav visible on phones. */
+  .bar nav{align-items:center; gap:22px; font-size:14px; color:var(--muted)}
+  .bar nav a:hover{color:var(--text)}
+  .hide-sm{display:none}
+  @media(min-width:860px){ .hide-sm{display:flex} }
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-family:var(--fb); font-weight:600; font-size:15px; line-height:1;
+    padding:13px 20px; border-radius:2px; border:1px solid transparent; cursor:pointer; text-decoration:none;
+    transition:transform .12s ease, background .12s ease, border-color .12s ease}
+  .btn-primary{background:var(--tally); color:#170B06; border-color:var(--tally)}
+  .btn-primary:hover{transform:translateY(-1px); background:#FF5F35}
+  .btn-ghost{background:transparent; color:var(--text); border-color:var(--line-strong)}
+  .btn-ghost:hover{border-color:var(--text)}
+  .btn-sm{padding:10px 15px; font-size:14px}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px}
+
+  /* hero */
+  .hero{padding-block:clamp(36px,6vw,72px) clamp(40px,6vw,80px); border-bottom:1px solid var(--line)}
+  .hero-grid{display:grid; gap:clamp(32px,5vw,56px); grid-template-columns:1fr; align-items:start}
+  @media(min-width:960px){ .hero-grid{grid-template-columns:1.08fr .92fr} }
+  h1.hook{font-family:var(--fd); font-weight:400; font-size:clamp(44px,7.2vw,78px); line-height:1.02; letter-spacing:-.015em; margin-top:18px}
+  .sub{color:var(--muted); font-size:clamp(17px,2vw,20px); max-width:33em; margin-top:20px}
+  .sub b{color:var(--text); font-weight:600}
+
+  /* form */
+  .form-card{margin-top:30px; background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:clamp(20px,3vw,28px)}
+  .form-card h2{font-family:var(--fb); font-size:17px; font-weight:600; letter-spacing:-.01em}
+  .form-note{color:var(--dim); font-size:13.5px; margin:6px 0 18px}
+  .fields{display:grid; gap:12px; grid-template-columns:1fr}
+  @media(min-width:560px){ .fields{grid-template-columns:1fr 1fr} .span2{grid-column:1/-1} }
+  label{display:block; font-family:var(--fm); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:6px}
+  input,select,textarea{width:100%; font-family:var(--fb); font-size:15.5px; color:var(--text);
+    background:var(--ground); border:1px solid var(--line-strong); border-radius:2px; padding:12px 13px}
+  textarea{resize:vertical; min-height:74px}
+  input:focus,select:focus,textarea:focus{border-color:var(--amber); outline:none}
+  .hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden}
+  .err{color:var(--tally); font-size:13.5px; margin-top:10px; min-height:1px}
+  .submit-row{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:18px}
+  .submit-row small{color:var(--dim); font-size:13px}
+
+  .sent{border:1px solid var(--mint); background:rgba(127,209,185,.07); border-radius:3px; padding:22px; margin-top:30px}
+  .sent h3{font-family:var(--fb); font-size:17px; font-weight:600}
+  .sent p{color:var(--muted); font-size:15px; margin:8px 0 0}
+  .msg-box{font-family:var(--fm); font-size:13px; color:var(--muted); background:var(--ground);
+    border:1px solid var(--line); border-radius:2px; padding:14px; margin-top:14px; white-space:pre-wrap; max-height:190px; overflow:auto}
+  .sent-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px}
+
+  /* phone / video */
+  .stage{position:relative; justify-self:center; width:min(300px,78vw)}
+  .phone{position:relative; border:1px solid var(--line-strong); border-radius:22px; padding:9px; background:var(--surface2)}
+  .phone video,.phone img{display:block; width:100%; aspect-ratio:9/16; object-fit:cover; border-radius:14px; background:#000}
+  .rec{position:absolute; top:20px; left:20px; display:flex; align-items:center; gap:7px;
+    font-family:var(--fm); font-size:11px; letter-spacing:.12em; color:#fff; background:rgba(0,0,0,.45);
+    padding:5px 9px; border-radius:2px; backdrop-filter:blur(4px)}
+  .rec i{width:7px; height:7px; border-radius:50%; background:var(--tally); animation:blink 1.6s steps(1,end) infinite}
+  @keyframes blink{50%{opacity:.25}}
+  .slate{display:flex; justify-content:space-between; gap:12px; font-family:var(--fm); font-size:11.5px;
+    letter-spacing:.08em; color:var(--dim); margin-top:12px; text-transform:uppercase}
+  .stage figcaption{color:var(--muted); font-size:14px; margin-top:12px; text-align:center}
+  .stage figcaption b{color:var(--text); font-weight:600}
+  @media(prefers-reduced-motion:reduce){ .rec i{animation:none} .btn:hover{transform:none} }
+
+  /* generic sections */
+  section{padding-block:clamp(52px,7vw,88px); border-bottom:1px solid var(--line)}
+  .lede{font-family:var(--fd); font-weight:400; font-size:clamp(30px,4.2vw,48px); line-height:1.08; letter-spacing:-.01em; margin-top:14px}
+  .said{color:var(--muted); max-width:56ch; margin-top:18px}
+
+  .facts{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; grid-template-columns:1fr}
+  @media(min-width:720px){ .facts{grid-template-columns:repeat(3,1fr)} }
+  .fact{background:var(--ground); padding:26px 22px}
+  .fact .n{font-family:var(--fd); font-size:40px; line-height:1; color:var(--amber)}
+  .fact p{color:var(--muted); font-size:15px; margin:10px 0 0}
+
+  .samples{display:grid; gap:18px; grid-template-columns:1fr; margin-top:34px}
+  @media(min-width:760px){ .samples{grid-template-columns:repeat(3,1fr)} }
+  .sample{background:var(--surface); border:1px solid var(--line); border-radius:3px; overflow:hidden; display:flex; flex-direction:column}
+  .sample img{display:block; width:100%; object-fit:cover; aspect-ratio:4/5}
+  .sample .cap{padding:16px 18px}
+  .sample .cap h3{font-family:var(--fb); font-size:16px; font-weight:600}
+  .sample .cap p{color:var(--muted); font-size:14px; margin:6px 0 0}
+  .tag{font-family:var(--fm); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim)}
+
+  .steps{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; grid-template-columns:1fr}
+  @media(min-width:760px){ .steps{grid-template-columns:repeat(3,1fr)} }
+  .step{background:var(--ground); padding:28px 24px}
+  .step .k{font-family:var(--fm); font-size:12px; letter-spacing:.16em; color:var(--tally)}
+  .step h3{font-family:var(--fb); font-size:19px; font-weight:600; margin-top:12px}
+  .step p{color:var(--muted); font-size:15px; margin:8px 0 0}
+
+  /* pricing */
+  .switch{display:inline-flex; margin-top:28px; border:1px solid var(--line-strong); border-radius:2px; overflow:hidden; flex-wrap:wrap}
+  .switch button{background:transparent; border:0; color:var(--muted); font-family:var(--fb); font-weight:600; font-size:14px;
+    padding:11px 17px; cursor:pointer; border-right:1px solid var(--line)}
+  .switch button:last-child{border-right:0}
+  .switch button[aria-selected="true"]{background:var(--text); color:var(--ground)}
+  .plans{display:grid; gap:16px; grid-template-columns:1fr; margin-top:26px}
+  @media(min-width:820px){ .plans{grid-template-columns:repeat(3,1fr)} }
+  .plan{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:26px 24px; display:flex; flex-direction:column; gap:14px}
+  .plan.feature{border-color:var(--amber)}
+  .plan .name{font-family:var(--fm); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber)}
+  .plan .price{font-family:var(--fd); font-size:44px; line-height:1; letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+  .plan .price span{font-family:var(--fb); font-size:14px; color:var(--dim); letter-spacing:0}
+  .plan ul{list-style:none; margin:0; padding:0; display:grid; gap:9px}
+  .plan li{color:var(--muted); font-size:15px; padding-left:18px; position:relative}
+  .plan li::before{content:"—"; position:absolute; left:0; color:var(--dim)}
+  .plan li b{color:var(--text); font-weight:600}
+  .fineprint{color:var(--dim); font-size:13.5px; margin-top:22px; max-width:70ch}
+
+  .flow{display:grid; gap:18px; grid-template-columns:1fr; margin-top:34px}
+  @media(min-width:900px){ .flow{grid-template-columns:repeat(4,1fr)} }
+  .flow div{border-top:2px solid var(--line-strong); padding-top:16px}
+  .flow div:first-child{border-top-color:var(--tally)}
+  .flow h3{font-family:var(--fb); font-size:16px; font-weight:600}
+  .flow p{color:var(--muted); font-size:14.5px; margin:8px 0 0}
+
+  details{border-bottom:1px solid var(--line); padding:18px 0}
+  details summary{cursor:pointer; font-weight:600; font-size:17px; list-style:none; display:flex; justify-content:space-between; gap:16px}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+"; color:var(--amber); font-family:var(--fm)}
+  details[open] summary::after{content:"–"}
+  details p{color:var(--muted); font-size:15.5px; margin:12px 0 0; max-width:66ch}
+
+  .close-grid{display:grid; gap:34px; grid-template-columns:1fr; align-items:start}
+  @media(min-width:900px){ .close-grid{grid-template-columns:1fr 1fr} }
+  .contact{display:grid; gap:14px; margin-top:26px}
+  .contact div{border-top:1px solid var(--line); padding-top:14px}
+  .contact .k{font-family:var(--fm); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim)}
+  .contact .v{font-size:17px; margin-top:4px; user-select:all}
+  footer{padding-block:30px; color:var(--dim); font-size:13.5px}
+  footer .wrap{display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://founder-avatar.workflowstacks.com/#organization","name":"FluoDigital","url":"https://founder-avatar.workflowstacks.com/","telephone":"+971522086253","founder":{"@type":"Person","name":"Rahul Soni","jobTitle":"Founder & Director"},"location":[{"@type":"Place","name":"Dubai Silicon Oasis","address":{"@type":"PostalAddress","addressLocality":"Dubai","addressCountry":"AE"}},{"@type":"Place","name":"Mumbai","address":{"@type":"PostalAddress","addressLocality":"Mumbai","addressCountry":"IN"}}]},{"@type":"Service","@id":"https://founder-avatar.workflowstacks.com/#service","name":"Founder Avatar Studio","serviceType":"AI avatar video production and distribution","description":"We build a digital twin of you in seven days, then write, produce and publish your videos in English and Arabic — and put paid media behind the ones that work. One 45-minute capture session is all you ever sit through.","url":"https://founder-avatar.workflowstacks.com/","provider":{"@id":"https://founder-avatar.workflowstacks.com/#organization"},"areaServed":[{"@type":"City","name":"Dubai"},{"@type":"City","name":"Mumbai"}],"availableLanguage":["English","Arabic"],"offers":[{"@type":"Offer","name":"Presence","price":"6000","priceCurrency":"AED","description":"8 videos up to 60 seconds a month, one language. Per month, excluding VAT, minimum three months."},{"@type":"Offer","name":"Authority","price":"11000","priceCurrency":"AED","description":"16 videos a month in English and Arabic. Per month, excluding VAT, minimum three months."},{"@type":"Offer","name":"Omnipresence","price":"18000","priceCurrency":"AED","description":"30 videos a month plus ad variations, 48-hour turnaround. Per month, excluding VAT, minimum three months."}]},{"@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Can't I just buy the software myself?","acceptedAnswer":{"@type":"Answer","text":"You can. A licence runs under AED 600 a month and you could have a twin by the weekend. The licence was never the hard part — writing scripts that sound like you, directing a capture that holds up in close-up, running Arabic and English from one approval, checking every lip-sync, and still shipping in the weeks you are too busy to think about it. That is where founders who buy the tool stop posting by week three."}},{"@type":"Question","name":"Will people know it's AI?","acceptedAnswer":{"@type":"Answer","text":"Some will, and we label it to each platform's policy rather than hiding it. What holds attention is whether you said something worth hearing. We don't pretend you were in a studio, and we won't put words in your mouth that you haven't approved."}},{"@type":"Question","name":"What if ad prices go up?","acceptedAnswer":{"@type":"Answer","text":"They move constantly — UAE Meta CPMs have swung by more than 2.5× inside a year. Your price is fixed for the term; what flexes is the reach we deliver, and we show you the auction data behind it. The media figure in a bundled package is a floor we spend, reported to the dirham."}},{"@type":"Question","name":"Who owns the avatar and the audience?","acceptedAnswer":{"@type":"Answer","text":"You do. The twin is built from your likeness under a scoped consent, and paid campaigns run in your own ad account, so the pixel, the audiences and everyone who watched stay with you — including on the day you stop working with us."}}]}]}</script>
+</head>
+<body>
+<header class="bar">
+  <div class="wrap">
+    <div class="mark"><span class="dot" aria-hidden="true"></span> FluoDigital</div>
+    <nav class="hide-sm">
+      <a href="#samples">Samples</a>
+      <a href="#how">How it works</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="#book">Book a capture</a>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Founder Avatar Studio · Dubai &amp; Mumbai</p>
+        <h1 class="hook">Post every week.<br>Never <span class="em">film</span> again.</h1>
+        <p class="sub">We build a digital twin of you in seven days, then write, produce and publish your videos in English and Arabic — and put paid media behind the ones that work. <b>One 45-minute capture session is all you ever sit through.</b></p>
+
+        <form class="form-card" id="book" novalidate>
+          <h2>Book your capture session</h2>
+          <p class="form-note">Tell us where to reach you. We reply the same working day, from Dubai.</p>
+          <div class="fields">
+            <div>
+              <label for="f-name">Your name</label>
+              <input id="f-name" name="name" autocomplete="name" placeholder="Full name">
+            </div>
+            <div>
+              <label for="f-co">Company</label>
+              <input id="f-co" name="company" autocomplete="organization" placeholder="Company name">
+            </div>
+            <div>
+              <label for="f-phone">WhatsApp number</label>
+              <input id="f-phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="+971 …">
+            </div>
+            <div>
+              <label for="f-email">Email</label>
+              <input id="f-email" name="email" type="email" autocomplete="email" placeholder="you@company.com">
+            </div>
+            <div class="span2">
+              <label for="f-need">What you need</label>
+              <select id="f-need" name="need">
+                <option>Avatar build and monthly videos</option>
+                <option>Avatar build only</option>
+                <option>Paid media for videos I already have</option>
+                <option>Not sure yet — talk it through</option>
+              </select>
+            </div>
+            <div class="span2">
+              <label for="f-note">Anything we should know <span style="text-transform:none;letter-spacing:0">(optional)</span></label>
+              <textarea id="f-note" name="note" placeholder="Audience, languages, launch date…"></textarea>
+            </div>
+          </div>
+          <div class="hp" aria-hidden="true"><label for="f-web">Website</label><input id="f-web" name="website" tabindex="-1" autocomplete="off"></div>
+          <p class="err" id="f-err" role="alert"></p>
+          <div class="submit-row">
+            <button class="btn btn-primary" type="submit">Send on WhatsApp</button>
+            <small>Goes straight to Rahul — no call centre, no drip sequence.</small>
+          </div>
+        </form>
+
+        <div class="sent" id="sent" hidden>
+          <h3>Your message is ready</h3>
+          <p>Tap the button to open WhatsApp with this filled in, or copy it and send however you like.</p>
+          <div class="msg-box" id="msg"></div>
+          <div class="sent-actions">
+            <a class="btn btn-primary" id="wa" href="#" target="_blank" rel="noopener">Open WhatsApp</a>
+            <button class="btn btn-ghost" id="copy" type="button">Copy message</button>
+            <button class="btn btn-ghost" id="edit" type="button">Edit details</button>
+          </div>
+        </div>
+      </div>
+
+      <figure class="stage" style="margin:0">
+        <div class="phone">
+          <span class="rec"><i aria-hidden="true"></i> REC</span>
+          <video id="hero-vid" poster="talking-head.jpg" muted loop playsinline preload="metadata" aria-label="A founder's AI avatar speaking to camera">
+            <source src="hero.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="slate"><span>Take 01</span><span>1080 × 1920</span><span>00:07</span></div>
+        <figcaption><b>This is our founder's avatar.</b> No camera was involved in making it.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="why">
+    <div class="wrap">
+      <p class="eyebrow">The arithmetic</p>
+      <h2 class="lede">A three-day shoot in Dubai costs AED&nbsp;35,000–60,000. It buys you one day of your own time and one language.</h2>
+      <p class="said">Then the footage ages, the follow-up never gets filmed, and the next quarter starts from nothing. Your face is the asset. The camera is the bottleneck.</p>
+      <div class="facts">
+        <div class="fact"><div class="n">45 min</div><p>On camera, once. We direct the session, record your voice, and you are done.</p></div>
+        <div class="fact"><div class="n">7 days</div><p>From capture to an approved twin and your first four videos scheduled.</p></div>
+        <div class="fact"><div class="n">2 languages</div><p>English and Arabic from one approval — no reshoot, no second booking.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="samples">
+    <div class="wrap">
+      <p class="eyebrow">Proof</p>
+      <h2 class="lede">We built it on our own founder first.</h2>
+      <p class="said">Every frame below is Rahul's twin — not a stock demo or a vendor showreel. Same avatar, three formats.</p>
+      <div class="samples">
+        <figure class="sample" style="margin:0">
+          <img src="talking-head.jpg" alt="Vertical talking-head video of a founder's AI avatar">
+          <figcaption class="cap"><span class="tag">9:16 · Social</span><h3>Weekly talking head</h3><p>The format that does the work: vertical, captioned, posted on LinkedIn and Instagram.</p></figcaption>
+        </figure>
+        <figure class="sample" style="margin:0">
+          <img src="desk-set.jpg" alt="Seated desk-set avatar video with a laptop">
+          <figcaption class="cap"><span class="tag">9:16 · Considered</span><h3>Desk set</h3><p>For announcements and explainers, where you should look like you sat down to say it.</p></figcaption>
+        </figure>
+        <figure class="sample" style="margin:0">
+          <img src="cinematic.jpg" alt="Cinematic scene produced with AI video">
+          <figcaption class="cap"><span class="tag">16:9 · Brand film</span><h3>Cinematic scenes</h3><p>Full sets, lighting and cast, with no location, permit or shoot day. From the Signature build up.</p></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2 class="lede">Three steps, then it runs without you.</h2>
+      <div class="steps">
+        <div class="step"><div class="k">STEP 01</div><h3>Capture</h3><p>Forty-five minutes in front of a camera. We direct it and record your voice in both languages.</p></div>
+        <div class="step"><div class="k">STEP 02</div><h3>Build</h3><p>Your face and voice twin is trained, quality-checked frame by frame, and signed off by you within seven days.</p></div>
+        <div class="step"><div class="k">STEP 03</div><h3>Publish</h3><p>We turn your ideas into scripts, produce every video and schedule it. You approve each one from your phone.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reach">
+    <div class="wrap">
+      <p class="eyebrow">Distribution</p>
+      <h2 class="lede">A video nobody sees is a video you didn't make.</h2>
+      <p class="said">Making the videos is half the job. Every month we put media budget behind the two or three that earn it, aimed at your buyers rather than at everyone.</p>
+      <div class="flow">
+        <div><h3>Create</h3><p>8, 16 or 30 videos a month from your avatar.</p></div>
+        <div><h3>Publish</h3><p>Posted organically first, so we can see what people actually watch.</p></div>
+        <div><h3>Amplify</h3><p>Budget goes behind the winners only, targeted by job title, interest and location.</p></div>
+        <div><h3>Compound</h3><p>Everyone who watched 25% becomes the audience for next month's videos.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="wrap">
+      <p class="eyebrow">Pricing</p>
+      <h2 class="lede">Buy the production, the media, or both.</h2>
+      <div class="switch" role="tablist" aria-label="Pricing options">
+        <button role="tab" id="tab-prod" aria-controls="panel" aria-selected="true" data-mode="prod">Production</button>
+        <button role="tab" id="tab-media" aria-controls="panel" aria-selected="false" data-mode="media">Media budget</button>
+        <button role="tab" id="tab-both" aria-controls="panel" aria-selected="false" data-mode="both">Both together</button>
+      </div>
+      <div class="plans" id="panel" role="tabpanel" aria-labelledby="tab-prod"></div>
+      <p class="fineprint" id="fine"></p>
+    </div>
+  </section>
+
+  <section id="control">
+    <div class="wrap">
+      <p class="eyebrow">Your likeness, your rules</p>
+      <h2 class="lede">It is your face. You keep the keys.</h2>
+      <div class="facts">
+        <div class="fact"><div class="n">Consent</div><p>Signed before the twin is built, naming the markets, channels and duration it may be used for.</p></div>
+        <div class="fact"><div class="n">Approval</div><p>Every script and every finished video waits for your yes. Nothing auto-posts.</p></div>
+        <div class="fact"><div class="n">Deletion</div><p>End the engagement and the model, voice and source footage are destroyed, confirmed in writing.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <p class="eyebrow">Straight answers</p>
+      <h2 class="lede">The questions founders actually ask.</h2>
+      <div style="margin-top:28px">
+        <details><summary>Can't I just buy the software myself?</summary><p>You can. A licence runs under AED 600 a month and you could have a twin by the weekend. The licence was never the hard part — writing scripts that sound like you, directing a capture that holds up in close-up, running Arabic and English from one approval, checking every lip-sync, and still shipping in the weeks you are too busy to think about it. That is where founders who buy the tool stop posting by week three.</p></details>
+        <details><summary>Will people know it's AI?</summary><p>Some will, and we label it to each platform's policy rather than hiding it. What holds attention is whether you said something worth hearing. We don't pretend you were in a studio, and we won't put words in your mouth that you haven't approved.</p></details>
+        <details><summary>What if ad prices go up?</summary><p>They move constantly — UAE Meta CPMs have swung by more than 2.5× inside a year. Your price is fixed for the term; what flexes is the reach we deliver, and we show you the auction data behind it. The media figure in a bundled package is a floor we spend, reported to the dirham.</p></details>
+        <details><summary>Who owns the avatar and the audience?</summary><p>You do. The twin is built from your likeness under a scoped consent, and paid campaigns run in your own ad account, so the pixel, the audiences and everyone who watched stay with you — including on the day you stop working with us.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section id="close" style="border-bottom:0">
+    <div class="wrap close-grid">
+      <div>
+        <p class="eyebrow">Next step</p>
+        <h2 class="lede">Book the capture. Your first four videos go out seven days later.</h2>
+        <p class="said">If you would rather see more before you commit, ask for the full sample reel and we will send the three formats plus a script written in your voice.</p>
+        <p style="margin-top:26px"><a class="btn btn-primary" href="#book">Book a capture session</a></p>
+      </div>
+      <div>
+        <div class="contact">
+          <div><div class="k">WhatsApp / UAE</div><div class="v">+971 52 208 6253</div></div>
+          <div><div class="k">India</div><div class="v">+91 97697 20732</div></div>
+          <div><div class="k">Email</div><div class="v">rahulsoni25@gmail.com</div></div>
+          <div><div class="k">Studios</div><div class="v">Dubai Silicon Oasis · Mumbai</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>FluoDigital — Founder Avatar Studio</span>
+    <span>Rahul Soni · Founder &amp; Director</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var WA = "971522086253";
+
+  /* Hero video: autoplay only when motion is welcome */
+  var v = document.getElementById("hero-vid");
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (v && !reduce) { v.autoplay = true; var p = v.play(); if (p && p.catch) p.catch(function(){}); }
+
+  /* Pricing */
+  var PLANS = {
+    prod: {
+      fine: "Prices in AED per month, excluding VAT. Minimum three months. Production only — reaching people beyond your own followers is a media question, priced separately.",
+      items: [
+        {name:"Presence", price:"6,000", unit:"per month · AED 750 a video", li:["<b>8 videos</b> up to 60 seconds","Scripts written from your ideas","Captions and platform cut-downs","One language"]},
+        {name:"Authority", price:"11,000", unit:"per month · AED 688 a video", feature:true, li:["<b>16 videos</b>, English and Arabic","Thumbnails and platform variants","Monthly content plan","Everything in Presence"]},
+        {name:"Omnipresence", price:"18,000", unit:"per month · AED 600 a video", li:["<b>30 videos</b> plus ad variations","48-hour turnaround","Monthly FLUO Insights report","Everything in Authority"]}
+      ]
+    },
+    media: {
+      fine: "Media is paid to the platforms from your own ad account, so you keep the pixel and the audiences. Volumes are planning estimates from published 2026 UAE benchmarks, not guarantees — month one calibrates against your real costs.",
+      items: [
+        {name:"Spark", price:"3,000", unit:"media + AED 1,500 management", li:["Instagram Reels and Stories","85,000–150,000 impressions","Only the videos that earn it get budget"]},
+        {name:"Reach", price:"8,000", unit:"media + AED 2,500 management", feature:true, li:["Meta and YouTube","155,000–275,000 impressions","20,000–60,000 video views"]},
+        {name:"Authority", price:"20,000", unit:"media + AED 4,500 management", li:["Meta, YouTube and LinkedIn by job title","310,000–550,000 impressions","45,000–90,000 LinkedIn impressions on your buyer list"]}
+      ]
+    },
+    both: {
+      fine: "One invoice. The media figure is a floor we spend every month and report to the dirham — every dirham above the separate prices goes into your ad spend, not our fee. If auction prices rise your price holds and the delivered reach flexes.",
+      items: [
+        {name:"Presence+", price:"11,000", unit:"8 videos · AED 3,500 of media", li:["Production, management and media in one price","Reels and Stories amplification","One language"]},
+        {name:"Authority+", price:"23,000", unit:"16 videos · AED 9,500 of media", feature:true, li:["English and Arabic","Meta and YouTube amplification","Monthly content plan and reporting"]},
+        {name:"Omnipresence+", price:"46,000", unit:"30 videos · AED 23,500 of media", li:["Meta, YouTube and LinkedIn","48-hour turnaround","Monthly FLUO Insights report"]}
+      ]
+    }
+  };
+  var panel = document.getElementById("panel"), fine = document.getElementById("fine");
+  function render(mode){
+    var set = PLANS[mode];
+    panel.innerHTML = set.items.map(function(p){
+      return '<div class="plan' + (p.feature ? ' feature' : '') + '">' +
+        '<div class="name">' + p.name + '</div>' +
+        '<div class="price">AED ' + p.price + '</div>' +
+        '<div class="tag">' + p.unit + '</div>' +
+        '<ul>' + p.li.map(function(l){ return '<li>' + l + '</li>'; }).join('') + '</ul>' +
+        '<a class="btn ' + (p.feature ? 'btn-primary' : 'btn-ghost') + '" href="#book">Start with ' + p.name + '</a>' +
+      '</div>';
+    }).join('');
+    fine.textContent = set.fine;
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.switch button'), function(b){
+    b.addEventListener('click', function(){
+      Array.prototype.forEach.call(document.querySelectorAll('.switch button'), function(x){ x.setAttribute('aria-selected', String(x === b)); });
+      panel.setAttribute('aria-labelledby', b.id);
+      render(b.dataset.mode);
+    });
+  });
+  render('prod');
+
+  /* Form */
+  var form = document.getElementById('book'), sent = document.getElementById('sent'),
+      err = document.getElementById('f-err'), msgBox = document.getElementById('msg'),
+      wa = document.getElementById('wa'), copy = document.getElementById('copy'), edit = document.getElementById('edit');
+
+  function val(id){ var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (val('f-web')) return;                    /* honeypot */
+    var name = val('f-name'), phone = val('f-phone'), email = val('f-email');
+    if (!name) { err.textContent = 'Please add your name so we know who we are replying to.'; document.getElementById('f-name').focus(); return; }
+    if (!phone && !email) { err.textContent = 'Add a WhatsApp number or an email — one of the two is enough.'; document.getElementById('f-phone').focus(); return; }
+    err.textContent = '';
+
+    var lines = [
+      'Hi Rahul — I would like to book a capture session for the Founder Avatar Studio.',
+      '',
+      'Name: ' + name,
+      val('f-co') ? 'Company: ' + val('f-co') : '',
+      phone ? 'WhatsApp: ' + phone : '',
+      email ? 'Email: ' + email : '',
+      'Looking for: ' + val('f-need'),
+      val('f-note') ? 'Notes: ' + val('f-note') : ''
+    ].filter(Boolean);
+    var text = lines.join('\n');
+
+    msgBox.textContent = text;
+    wa.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+    form.hidden = true; sent.hidden = false;
+    sent.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'center'});
+    wa.focus();
+  });
+
+  copy.addEventListener('click', function(){
+    var text = msgBox.textContent, done = function(){ copy.textContent = 'Copied'; setTimeout(function(){ copy.textContent = 'Copy message'; }, 1800); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, select);
+    } else { select(); }
+    function select(){
+      var r = document.createRange(); r.selectNodeContents(msgBox);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      copy.textContent = 'Selected — press copy';
+      setTimeout(function(){ copy.textContent = 'Copy message'; }, 2600);
+    }
+  });
+
+  edit.addEventListener('click', function(){
+    sent.hidden = true; form.hidden = false;
+    document.getElementById('f-name').focus();
+  });
+})();
+</script>
+</body>
+</html>
