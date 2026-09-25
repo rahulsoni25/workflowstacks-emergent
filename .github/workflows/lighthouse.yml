@@ -1,0 +1,53 @@
+name: lighthouse
+
+# Run Lighthouse against a live URL from a GitHub runner and print the category
+# scores, core metrics and failing audits. Mobile by default; pass preset=desktop
+# for the desktop profile.
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: URL to audit
+        required: true
+        default: "https://workflowstacks.com/ai-avatar"
+      preset:
+        description: mobile (default) or desktop
+        required: false
+        default: "mobile"
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      URL: ${{ inputs.url }}
+      PRESET: ${{ inputs.preset }}
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Lighthouse
+        run: |
+          EXTRA=""
+          if [ "$PRESET" = "desktop" ]; then EXTRA="--preset=desktop"; fi
+          npx -y lighthouse@12 "$URL" $EXTRA --output=json --output-path=./lh.json --quiet \
+            --chrome-flags="--headless=new --no-sandbox --disable-gpu" \
+            --only-categories=performance,accessibility,best-practices,seo
+      - name: Summary
+        run: |
+          node -e '
+            const r = require("./lh.json");
+            console.log("URL:", r.finalDisplayedUrl, "| profile:", process.env.PRESET);
+            for (const [k, c] of Object.entries(r.categories)) console.log(`${k}: ${Math.round(c.score * 100)}`);
+            const a = r.audits;
+            for (const id of ["largest-contentful-paint","first-contentful-paint","cumulative-layout-shift","total-blocking-time","speed-index","interactive"])
+              if (a[id]) console.log(`${id}: ${a[id].displayValue}`);
+            console.log("--- failing or partial audits (score < 1) ---");
+            for (const [k, c] of Object.entries(r.categories))
+              for (const ref of c.auditRefs) {
+                const au = a[ref.id];
+                if (au && au.score !== null && au.score < 1 && au.scoreDisplayMode !== "informative")
+                  console.log(`[${k}] ${ref.id} (${au.score}) — ${au.title}${au.displayValue ? " — " + au.displayValue : ""}`);
+              }
+          '
