@@ -50,4 +50,19 @@ jobs:
                 if (au && au.score !== null && au.score < 1 && au.scoreDisplayMode !== "informative")
                   console.log(`[${k}] ${ref.id} (${au.score}) — ${au.title}${au.displayValue ? " — " + au.displayValue : ""}`);
               }
+            // Where the main-thread time goes, so a low TBT score names its cause.
+            const items = (id) => ((a[id] && a[id].details && a[id].details.items) || []);
+            console.log("--- main-thread work by category ---");
+            for (const i of items("mainthread-work-breakdown")) console.log(`  ${i.groupLabel}: ${Math.round(i.duration)} ms`);
+            console.log("--- script boot-up time by URL ---");
+            for (const i of items("bootup-time")) console.log(`  ${i.url}: total ${Math.round(i.total)} ms, scripting ${Math.round(i.scripting)} ms`);
+            console.log("--- long tasks ---");
+            for (const i of items("long-tasks")) console.log(`  ${i.url}: ${Math.round(i.duration)} ms at ${Math.round(i.startTime)} ms`);
+            console.log("--- third parties ---");
+            for (const i of items("third-party-summary")) console.log(`  ${i.entity && (i.entity.text || i.entity)}: main-thread ${Math.round(i.mainThreadTime)} ms, blocking ${Math.round(i.blockingTime)} ms, ${Math.round(i.transferSize/1024)} KiB`);
+            console.log("--- LCP element ---");
+            for (const i of items("largest-contentful-paint-element")) console.log("  ", JSON.stringify(i).slice(0, 300));
+            console.log("--- image savings ---");
+            for (const id of ["uses-responsive-images","modern-image-formats"]) for (const i of items(id)) console.log(`  [${id}] ${i.url} — ${Math.round((i.wastedBytes||0)/1024)} KiB`);
+            const reqs = items("network-requests"); console.log(`--- ${reqs.length} requests, ${Math.round(reqs.reduce((s,i)=>s+(i.transferSize||0),0)/1024)} KiB transferred ---`);
           '
