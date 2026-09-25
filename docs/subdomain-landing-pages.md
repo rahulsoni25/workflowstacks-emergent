@@ -1,78 +1,80 @@
-# Subdomain landing pages
+# Standalone landing pages
 
-Standalone marketing pages that live on their own hostname but deploy with
-this repo. They are plain static sites — one folder of HTML, CSS, JS and
-media under `public/sites/<dir>/` — with none of the WorkflowStacks layout,
-header, footer or analytics.
+Marketing pages that deploy with this repo but share nothing with the
+WorkflowStacks app: one folder of plain HTML, CSS, JS and media under
+`public/sites/<dir>/`, with no Next layout, header, footer or analytics.
 
-## Live sites
+## Live pages
 
-| Hostname | Folder | Page |
+| Canonical URL | Hostname variant | Folder |
 | --- | --- | --- |
-| `founder-avatar.workflowstacks.com` | `public/sites/founder-avatar-studio/` | FluoDigital — Founder Avatar Studio |
+| `https://workflowstacks.com/ai-avatar` | `founder-avatar.workflowstacks.com` (once attached in Vercel) | `public/sites/founder-avatar-studio/` |
+
+## Why a path on the main site is canonical
+
+A path needs nothing outside the repo: merge, and Vercel serves it. A hostname
+also needs the domain attached to the Vercel project, a manual dashboard step
+that is easy to miss (an unattached hostname returns Vercel's own
+`404 DEPLOYMENT_NOT_FOUND`). So the page's canonical tag, share URLs,
+structured data and the sitemap entry all point at the path, and the hostname
+is an optional alias. If the hostname should become canonical later, swap the
+URLs in the page and add a redirect from the path; the routing already serves
+both.
+
+The slug is chosen for search: `ai-avatar` is the head term in the page's
+title ("AI Avatar Videos for Founders"), short enough to share, and the page's
+title, H1 and JSON-LD `Service` all describe the same thing.
 
 ## How a request is served
 
-Everything is driven by the `SUBDOMAIN_SITES` list at the top of
-`next.config.js`. For each entry:
+Everything is driven by `LANDING_PAGES` at the top of `next.config.js`. For
+each entry:
 
-- `rewrites().beforeFiles` maps `/` on the hostname to the folder's
-  `index.html`, and every other path (except `_next/` and `sites/`) to the
-  same-named file in the folder. So `https://<host>/hero.mp4` serves
-  `public/sites/<dir>/hero.mp4`. `beforeFiles` is what stops `/` from
-  falling through to the WorkflowStacks homepage.
-- `redirects()` keeps one URL per page: `/index.html` on the hostname folds
-  back to `/`, and the folder's real path on the apex
-  (`workflowstacks.com/sites/<dir>/…`) 308s to the hostname.
-- Vercel preview deployments (`*.vercel.app`) match neither host, so on a
-  preview you open the page at its real path:
-  `/sites/<dir>/index.html`.
-- Locally, `npm run dev` then open `http://founder-avatar.localhost:3001/`
-  (browsers resolve `*.localhost` to loopback; the host regex accepts it).
+- `rewrites().beforeFiles` maps `path` to the folder's `index.html`. Pages
+  link their media by absolute `/sites/<dir>/…` paths, which are ordinary
+  static files, so no per-asset rules are needed.
+- On the hostname, `/` maps to the same `index.html` and any other path
+  (except `_next/`, `sites/` and the canonical path) to the same-named file in
+  the folder, so `robots.txt` and `sitemap.xml` there come from the folder.
+- `redirects()` keeps one URL per page: the folder's real path and its
+  `index.html` 308 to the canonical path, and `/index.html` on the hostname
+  folds back to `/`.
+- Locally: `npm run dev`, then `http://127.0.0.1:3001/ai-avatar`
+  or `http://founder-avatar.localhost:3001/` (browsers resolve `*.localhost`
+  to loopback; the host regex accepts it).
 
-Unknown paths on the hostname return the normal 404 rather than the landing
-page, so the subdomain does not produce soft-404s.
+Unknown paths return the normal 404, so no soft-404s.
 
-## The one manual step: pointing the hostname at Vercel
+## Attaching the hostname (optional, manual)
 
-The repo cannot register the hostname. In the Vercel project:
+In the Vercel project `workflowstacks-emergent`: Settings → Domains → Add →
+`founder-avatar.workflowstacks.com`, environment **Production**. The zone is
+already on Vercel's nameservers, so no DNS record is needed and it verifies
+immediately. Until this is done the hostname shows Vercel's
+`DEPLOYMENT_NOT_FOUND` page; the path keeps working regardless.
 
-1. Settings → Domains → Add `founder-avatar.workflowstacks.com`.
-2. Vercel shows the DNS record to create (for a subdomain this is a CNAME;
-   use the exact target Vercel displays). Add it where the
-   `workflowstacks.com` DNS is managed.
-3. Once it verifies, Vercel issues the certificate and the rewrites above
-   take over. Nothing else to configure — no redirect rules in the Vercel UI.
-
-`vercel.json`'s bot firewall (`routes[].mitigate`) and the security headers
-in `next.config.js` already apply to the new hostname because they are
-project-wide.
+To check any URL from outside your own network, run the `http-check`
+workflow under Actions: it prints status, key headers, the first bytes of the
+body and the DNS records.
 
 ## Adding another landing page
 
-1. Put the site in `public/sites/<new-dir>/` with an `index.html`. Reference
-   its assets by bare relative name (`hero.mp4`, not `/sites/…/hero.mp4`) so
-   the same file works on the hostname and at the preview path. Give it its
-   own `robots.txt` and `sitemap.xml`; the apex ones are not served there.
-2. Add an entry to `SUBDOMAIN_SITES` in `next.config.js`:
+1. Put the site in `public/sites/<new-dir>/` with an `index.html`. Link media
+   as `/sites/<new-dir>/file.ext`. Give it a `<title>`, meta description,
+   canonical, Open Graph tags and JSON-LD of its own; nothing from
+   `app/layout.js` applies.
+2. Add an entry to `LANDING_PAGES` in `next.config.js`:
 
    ```js
-   {
-     host: 'new-name\\.(?:workflowstacks\\.com|localhost)',
-     canonicalHost: 'new-name.workflowstacks.com',
-     dir: 'new-dir',
-   }
+   { path: '/new-slug', dir: 'new-dir', host: 'new-name\\.(?:workflowstacks\\.com|localhost)' }
    ```
 
-3. Add the hostname in Vercel as above.
+3. Add `'/new-slug'` to `STATIC_ROUTES` in `app/sitemap.js`.
+4. Optionally attach the hostname in Vercel as above.
 
-## SEO notes for a page on a hostname
+## SEO notes
 
-- The page needs its own `<title>`, meta description, `<link rel="canonical">`
-  and Open Graph tags — nothing from `app/layout.js` applies to it.
-- Keep media as separate files rather than base64 inside the HTML; a
-  self-contained HTML export of a page can be several hundred KB before the
-  first byte of text renders.
-- The apex sitemap (`app/sitemap.js`) deliberately does not list subdomain
-  URLs; each hostname submits its own `sitemap.xml` to Search Console as a
-  separate property.
+- Keep media as separate files rather than base64 inside the HTML.
+- The site sitemap lists the canonical path; the folder's own `robots.txt`
+  and `sitemap.xml` are served only on the hostname variant and point at the
+  canonical URL.

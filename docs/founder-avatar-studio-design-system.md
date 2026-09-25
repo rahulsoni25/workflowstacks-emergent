@@ -1,7 +1,9 @@
 # Founder Avatar Studio — design system
 
 Page: `public/sites/founder-avatar-studio/index.html`, served at
-`founder-avatar.workflowstacks.com`. This document records the design system
+`https://workflowstacks.com/ai-avatar` (canonical) and, once the
+hostname is attached in Vercel, at `founder-avatar.workflowstacks.com` too.
+This document records the design system
 the page follows and how it was checked against the open-source
 [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
 design-intelligence skill (its rule set, `--design-system` generator and

@@ -11,7 +11,7 @@ on:
       urls:
         description: Space-separated URLs to probe
         required: true
-        default: "https://founder-avatar.workflowstacks.com/ https://workflowstacks.com/sites/founder-avatar-studio/index.html"
+        default: "https://workflowstacks.com/ai-avatar https://founder-avatar.workflowstacks.com/ https://workflowstacks.com/sites/founder-avatar-studio/index.html"
       hosts:
         description: Space-separated hostnames to resolve
         required: false
