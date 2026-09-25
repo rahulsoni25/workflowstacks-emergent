@@ -8,6 +8,10 @@
 
 import { MongoClient } from 'mongodb'
 import { TOOLS_ONLY } from '../../../lib/catalog-gates'
+// One tokenizer for every search surface (this route, /api/skills?search=,
+// the recommender): noise words, light stemming, and word-bounded short
+// tokens so "ui ux" is a real query instead of an empty one.
+import { tokenize, tokenPattern, tokenMatcher, phrasePattern, normalizeName } from '../../../lib/search-tokens'
 
 const client = new MongoClient(process.env.MONGO_URL)
 let db
@@ -18,35 +22,6 @@ async function connectDB() {
     db = client.db(process.env.DB_NAME || 'workflowstacks')
   }
   return db
-}
-
-// Tokenize + stem the query for fuzzier matching. Drops noise words and short
-// tokens, lowercases everything, and reduces "transcribed/transcribing/transcription"
-// to their shared root so all three forms hit the same skill.
-const NOISE = new Set([
-  'the','a','an','my','your','our','for','of','to','from','with','in','on','at',
-  'is','are','be','can','do','i','we','you','it','that','this','and','or','but',
-  'how','what','when','where','want','need','please','help','make','build','create',
-  'use','using','about','some','any','find','show','give','let','tell','best','top','good',
-])
-function lightStem(t) {
-  // Cheap suffix stripping — good enough for our domain
-  return t
-    .replace(/(ization|isation|ations|ation)$/i, 'ate')
-    .replace(/(ribed|ribing|ription)$/i, 'ribe')
-    .replace(/(ies)$/i, 'y')
-    .replace(/(ing|ed|es|s)$/i, '')
-}
-function tokenize(q) {
-  return Array.from(new Set(
-    String(q || '')
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, ' ')
-      .split(/\s+/)
-      .filter(t => t.length >= 3 && !NOISE.has(t))
-      .map(lightStem)
-      .filter(t => t.length >= 3)
-  ))
 }
 
 // Pick the best matched snippet to show the user WHY this hit. We look for the
@@ -96,7 +71,7 @@ export async function POST(request) {
 
   // Build an OR of regex matches (case-insensitive) against the candidate fields.
   // For 700-ish docs this is plenty fast and avoids text-index conflicts entirely.
-  const fieldRegexes = (field) => tokens.map(t => ({ [field]: { $regex: t, $options: 'i' } }))
+  const fieldRegexes = (field) => tokens.map(t => ({ [field]: { $regex: tokenPattern(t), $options: 'i' } }))
   const ors = [
     ...fieldRegexes('explainer.use_case_example'),
     ...fieldRegexes('explainer.what_you_can_make'),
@@ -117,12 +92,30 @@ export async function POST(request) {
     rewrite_score: 1, installs: 1, is_premium: 1, price: 1,
   }
 
+  // Listings whose name is the query itself are fetched separately and
+  // boosted below: the 150-candidate window is the most popular token
+  // matches, and a short token like "pro" matches most of the catalog, so an
+  // exact-name hit with modest stars never reached the ranker.
+  const baseFilter = { hidden: { $ne: true }, published: { $ne: false }, ...TOOLS_ONLY }
+  const phrase = phrasePattern(query)
   let candidates = []
   try {
-    candidates = await database.collection('skills')
-      .find({ $or: ors, hidden: { $ne: true }, published: { $ne: false }, ...TOOLS_ONLY }, { projection })
-      .limit(150) // pull a wider set, then rank in JS
-      .toArray()
+    const [byToken, byName] = await Promise.all([
+      database.collection('skills')
+        .find({ $or: ors, ...baseFilter }, { projection })
+        .sort({ github_stars: -1 })
+        .limit(150) // pull a wider set, then rank in JS
+        .toArray(),
+      phrase
+        ? database.collection('skills')
+          .find({ ...baseFilter, $or: ['name', 'slug', 'title_human'].map((f) => ({ [f]: { $regex: phrase, $options: 'i' } })) }, { projection })
+          .sort({ github_stars: -1 })
+          .limit(20)
+          .toArray()
+        : [],
+    ])
+    const seen = new Set(byToken.map((s) => String(s._id)))
+    candidates = byToken.concat(byName.filter((s) => !seen.has(String(s._id))))
   } catch (e) {
     return Response.json({ query, results: [], error: e.message }, { status: 500 })
   }
@@ -148,24 +141,37 @@ export async function POST(request) {
     if (Array.isArray(v)) return v.join(' ')
     return typeof v === 'string' ? v : ''
   }
+  const matchers = tokens.map((t) => tokenMatcher(t))
   function scoreOne(s) {
     let score = 0
     for (const [path, w] of Object.entries(WEIGHTS)) {
       const t = fieldText(s, path).toLowerCase()
       if (!t) continue
-      for (const tok of tokens) {
-        if (t.includes(tok)) score += w
+      for (const m of matchers) {
+        if (m(t)) score += w
       }
     }
     // Tiny tiebreaker: popular skills win when scores are close
     score += Math.log10(Math.max(1, s.github_stars || 0)) * 0.5
     return score
   }
+  // 2: the listing IS what was typed; 1: what was typed is in its name or
+  // title; 0: matched on tokens only. Ranked ahead of the field score so a
+  // listing named "ui-ux-pro-max" beats anything that merely mentions "max".
+  const phraseRe = phrase ? new RegExp(phrase, 'i') : null
+  const wanted = normalizeName(query)
+  function exactTier(s) {
+    const names = [s.name, s.slug, s.title_human].filter(Boolean)
+    if (names.some((n) => normalizeName(n) === wanted)) return 2
+    if (phraseRe && names.some((n) => phraseRe.test(n))) return 1
+    return 0
+  }
   const ranked = candidates
-    .map(s => ({ ...s, score: scoreOne(s) }))
-    .filter(s => s.score > 0)
-    .sort((a, b) => b.score - a.score)
+    .map((s) => ({ s, score: scoreOne(s), exact: exactTier(s) }))
+    .filter((x) => x.score > 0 || x.exact > 0)
+    .sort((a, b) => b.exact - a.exact || b.score - a.score)
     .slice(0, limit)
+    .map((x) => ({ ...x.s, score: x.score }))
 
   // Attach matched snippet for UI display
   for (const r of ranked) {

@@ -1,7 +1,9 @@
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalog-gates';
-import { tokenize as tokenizeSearch } from '../../../lib/search-tokens';
+import { tokenize as tokenizeSearch, tokenPattern, tokenMatcher, phrasePattern, normalizeName } from '../../../lib/search-tokens';
+import { uniqueSlug } from '../../../lib/slugs';
+import { ingestCuratedRepos } from '../../../lib/curated-repos';
 import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 import { screenSubmission } from '../../../lib/content-safety';
@@ -70,7 +72,7 @@ function requireAdmin(request) {
   return null;
 }
 
-const ADMIN_PATHS = ['/ingest', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/seed-affiliate-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs', '/dfy-requests', '/dfy-request/update', '/dfy-stats', '/deals/all', '/deal-update', '/security/dns-check', '/security/audit-summary', '/security/run-now', '/newsletter/send-hot', '/newsletter/notify-featured'];
+const ADMIN_PATHS = ['/ingest', '/ingest-curated', '/reclassify', '/dedupe', '/seed-packs', '/cleanup', '/seed-deals', '/seed-affiliate-deals', '/approve-deals', '/refresh-stars', '/creator-applications', '/creator-applications/approve', '/newsletter/send', '/find-creators', '/creator-leads', '/publish-category', '/add-skill', '/audit-log', '/admin-overview', '/skill-update', '/subscribers', '/newsletter/preview', '/newsletter/sends', '/creator-outreach/send', '/creator-leads/update', '/search-trends', '/auto-discover-from-searches', '/backfill-slugs', '/dfy-requests', '/dfy-request/update', '/dfy-stats', '/deals/all', '/deal-update', '/security/dns-check', '/security/audit-summary', '/security/run-now', '/newsletter/send-hot', '/newsletter/notify-featured'];
 
 // Audit log — capture every admin action for security visibility.
 // Append-only collection: audit_logs { id, path, method, ip, ua, at }
@@ -213,46 +215,8 @@ async function sendSecurityAlert(subject, body) {
   }
 }
 
-// Slug generation — Pattern C (name-first, owner-name on collision).
-// Lowercase, hyphens, no diacritics/emoji, max 60 chars on a word boundary.
-function slugify(raw) {
-  if (!raw) return ''
-  let s = String(raw).toLowerCase()
-    // Strip emoji and pictographs
-    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '')
-    // Replace non-alphanumeric with hyphens (keep dots+digits in things like llama.cpp -> llama-cpp)
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-  if (s.length <= 60) return s
-  // Truncate at a hyphen boundary so we never end mid-word
-  const cut = s.slice(0, 60)
-  const last = cut.lastIndexOf('-')
-  return last > 30 ? cut.slice(0, last) : cut
-}
-
-// Pick a unique slug for a skill, deferring to the DB to check collisions.
-// Order: name → owner-name → owner-name-2 → owner-name-3 …
-async function uniqueSlug(database, name, owner, currentId = null) {
-  const base = slugify(name)
-  if (!base) return slugify(owner + '-' + (currentId || 'skill')) || ('skill-' + Date.now())
-  // Try base first
-  const baseHit = await database.collection('skills').findOne({ slug: base, id: { $ne: currentId } })
-  if (!baseHit) return base
-  // Try owner-base
-  const ownerSlug = owner ? slugify(owner + '-' + name) : null
-  if (ownerSlug) {
-    const ownerHit = await database.collection('skills').findOne({ slug: ownerSlug, id: { $ne: currentId } })
-    if (!ownerHit) return ownerSlug
-    // Try owner-base-2, -3, …
-    for (let i = 2; i < 50; i++) {
-      const candidate = ownerSlug + '-' + i
-      const hit = await database.collection('skills').findOne({ slug: candidate, id: { $ne: currentId } })
-      if (!hit) return candidate
-    }
-  }
-  // Last resort fallback
-  return base + '-' + Date.now().toString(36).slice(-4)
-}
+// Slug generation (slugify / uniqueSlug) lives in lib/slugs.js so the
+// curated-repo ingest and the refresh-skills cron assign slugs the same way.
 
 function tooLong(obj, limits = { email: 254, default: 2000 }) {
   for (const [k, v] of Object.entries(obj || {})) {
@@ -1073,8 +1037,10 @@ export async function GET(request) {
         const tokens = tokenizeSearch(search);
         const fields = ['name', 'title_human', 'description', 'description_human', 'category', 'github_topics'];
         if (tokens.length) {
+          // tokenPattern word-bounds short tokens: "ui" must not match every
+          // "build" and "guide" in the catalog. Tokens are alphanumeric.
           query.$or = tokens.flatMap((t) => {
-            const re = escapeRegex(t);
+            const re = tokenPattern(t);
             return fields.map((f) => ({ [f]: { $regex: re, $options: 'i' } }));
           });
         } else {
@@ -1171,23 +1137,50 @@ export async function GET(request) {
           // by how many distinct tokens each doc matches (name/title/slug
           // count most), then fall back to the requested sort.
           const window = Math.min(offset + limit + 150, 400);
-          const [candidates, count] = await Promise.all([
+          // Listings whose NAME is the query ("ui-ux-pro-max") are fetched on
+          // their own and ranked first. The window above holds the 400 most
+          // popular matches for ANY token, and "pro" alone matches every
+          // "prompt" and "project" in the catalog, so a listing named exactly
+          // what was typed could sit outside the window and never reach the
+          // re-ranker — a live search for ui-ux-pro-max returned a crypto miner.
+          const phrase = phrasePattern(search);
+          const { $or: _tokenOr, ...baseQuery } = query;
+          const nameQuery = phrase
+            ? { ...baseQuery, $or: ['name', 'slug', 'title_human'].map((f) => ({ [f]: { $regex: phrase, $options: 'i' } })) }
+            : null;
+          const [candidates, count, named] = await Promise.all([
             col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).limit(window).toArray(),
             col.countDocuments(query),
+            nameQuery ? col.find(nameQuery, { projection: LIST_PROJECTION }).sort({ github_stars: -1 }).limit(30).toArray() : [],
           ]);
+          const seenIds = new Set(candidates.map((s) => String(s._id)));
+          for (const s of named) {
+            if (seenIds.has(String(s._id))) continue;
+            seenIds.add(String(s._id));
+            candidates.push(s);
+          }
+          const phraseRe = phrase ? new RegExp(phrase, 'i') : null;
+          const wanted = normalizeName(search);
+          const matchers = searchTokens.map((t) => tokenMatcher(t));
           const scored = candidates.map((s, idx) => {
             const strong = `${s.name || ''} ${s.title_human || ''} ${s.slug || ''}`.toLowerCase();
             const mid = `${s.category || ''} ${(s.github_topics || []).join(' ')}`.toLowerCase();
             const weak = `${s.description || ''} ${s.description_human || ''}`.toLowerCase();
             let matched = 0, weight = 0;
-            for (const t of searchTokens) {
-              const inStrong = strong.includes(t), inMid = mid.includes(t), inWeak = weak.includes(t);
+            for (const m of matchers) {
+              const inStrong = m(strong), inMid = m(mid), inWeak = m(weak);
               if (inStrong || inMid || inWeak) matched++;
               weight += inStrong ? 3 : inMid ? 2 : inWeak ? 1 : 0;
             }
-            return { s, matched, weight, idx };
+            // 2: the listing IS what was typed; 1: what was typed is in its
+            // name or title; 0: matched on tokens only.
+            const names = [s.name, s.slug, s.title_human].filter(Boolean);
+            const exact = names.some((n) => normalizeName(n) === wanted) ? 2
+              : phraseRe && names.some((n) => phraseRe.test(n)) ? 1
+              : 0;
+            return { s, exact, matched, weight, idx };
           });
-          scored.sort((a, b) => b.matched - a.matched || b.weight - a.weight || a.idx - b.idx);
+          scored.sort((a, b) => b.exact - a.exact || b.matched - a.matched || b.weight - a.weight || a.idx - b.idx);
           skills = scored.slice(offset, offset + limit).map((x) => x.s);
           total = count;
         } else {
@@ -1215,8 +1208,20 @@ export async function GET(request) {
       return Response.json({ skill: applyFallback([skill])[0] });
     }
     
+    // Flagship repos by URL (lib/curated-repos.js) — the ones a visitor
+    // expects to find by name whatever the topic scrape returned this week.
+    // Also runs first inside /ingest; this path is for adding one on demand.
+    if (path === '/ingest-curated') {
+      const curated = await ingestCuratedRepos(database, { headers: ghHeaders() });
+      return Response.json({ success: true, ...curated });
+    }
+
     // Ingest from GitHub - Latest & Most Popular
     if (path === '/ingest') {
+      // Curated pass first: a handful of direct lookups, so a Vercel timeout
+      // in the 50-query scrape below cannot skip it.
+      const curated = await ingestCuratedRepos(database, { headers: ghHeaders() }).catch((e) => ({ error: e?.message || String(e) }));
+
       // Founder-focused queries spanning every niche — trending & maintained repos
       const topicQueries = [
         // --- AI agents, MCP & Claude skills (core marketplace) ---
@@ -1352,6 +1357,7 @@ export async function GET(request) {
         scraped: scrapedSkills.length,
         newlyAdded: inserted,
         refreshed,
+        curated,
         sort,
         sinceDays,
         note: inserted > 0 ? `Run /api/agent-rewrite?pending=true to rewrite the ${inserted} new skill(s).` : 'No new repos this run.'

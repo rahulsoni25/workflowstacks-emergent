@@ -11,6 +11,7 @@
 
 import { MongoClient } from 'mongodb'
 import { TOOLS_ONLY } from '../../../lib/catalog-gates'
+import { tokenize, tokenPattern, tokenMatcher } from '../../../lib/search-tokens'
 import { rateLimit } from '../../../lib/rate-limit'
 import { matchTemplate } from '../../../lib/templates'
 
@@ -34,34 +35,12 @@ async function connectDB() {
   return db
 }
 
-// ---- Stage 1: candidate pre-filter (reuses search-skills logic, simplified) ----
-
-const NOISE = new Set([
-  'the','a','an','my','your','our','for','of','to','from','with','in','on','at',
-  'is','are','be','can','do','i','we','you','it','that','this','and','or','but',
-  'how','what','when','where','want','need','please','help','make','build','create',
-  'use','using','about','some','any','find','show','give','let','tell','best','top','good',
-])
-function lightStem(t) {
-  return t
-    .replace(/(ization|isation|ations|ation)$/i, 'ate')
-    .replace(/(ribed|ribing|ription)$/i, 'ribe')
-    .replace(/(ies)$/i, 'y')
-    .replace(/(ing|ed|es|s)$/i, '')
-}
-function tokenize(q) {
-  return Array.from(new Set(
-    String(q || '')
-      .toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/)
-      .filter(t => t.length >= 3 && !NOISE.has(t))
-      .map(lightStem).filter(t => t.length >= 3)
-  ))
-}
+// ---- Stage 1: candidate pre-filter (same tokenizer as search-skills) ----
 
 async function preFilterCandidates(database, goal, max = 60) {
   const tokens = tokenize(goal)
   if (tokens.length === 0) return []
-  const fieldRegexes = (field) => tokens.map(t => ({ [field]: { $regex: t, $options: 'i' } }))
+  const fieldRegexes = (field) => tokens.map(t => ({ [field]: { $regex: tokenPattern(t), $options: 'i' } }))
   const ors = [
     ...fieldRegexes('explainer.use_case_example'),
     ...fieldRegexes('explainer.what_you_can_make'),
@@ -82,6 +61,7 @@ async function preFilterCandidates(database, goal, max = 60) {
     .find({ $or: ors, hidden: { $ne: true }, published: { $ne: false }, ...TOOLS_ONLY }, { projection })
     .limit(max * 2).toArray()
   // Score by token-hit count + log-stars tiebreaker, take top `max`
+  const matchers = tokens.map((t) => tokenMatcher(t))
   function score(s) {
     let n = 0
     const all = [
@@ -90,7 +70,7 @@ async function preFilterCandidates(database, goal, max = 60) {
       s.explainer?.what_it_is, s.explainer?.what_you_can_make,
       s.explainer?.how_it_helps, s.explainer?.use_case_example,
     ].filter(Boolean).join(' ').toLowerCase()
-    for (const t of tokens) if (all.includes(t)) n++
+    for (const m of matchers) if (m(all)) n++
     return n + Math.log10(Math.max(1, s.github_stars || 0)) * 0.3
   }
   return docs.map(s => ({ ...s, _score: score(s) }))

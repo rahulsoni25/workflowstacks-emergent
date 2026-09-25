@@ -81,6 +81,14 @@ Scrape GitHub and populate database
 - Fetches from 7 topics (10 repos each = 70 skills max)
 - Adds 6 sample AgentPowers skills
 - Returns: Count and breakdown
+- Runs the curated pass below first
+
+### GET `/api/ingest-curated` (admin)
+Upsert the flagship repos listed in `lib/curated-repos.js` by URL, published immediately
+- The topic scrape only sees the most recently pushed repos per query, so a repo like
+  `nextlevelbuilder/ui-ux-pro-max-skill` can stay unlisted for months; this pass guarantees it
+- Add a repo by appending one line to `CURATED_REPOS`; it lands on the next daily refresh
+- Returns: `{ considered, inserted, refreshed, skipped: [{ url, reason }] }`
 
 ### GET `/api/stats`
 Get marketplace statistics

@@ -1,6 +1,7 @@
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import { isSpamRepo, classifyContentType } from '../../../../lib/catalog-gates';
+import { ingestCuratedRepos } from '../../../../lib/curated-repos';
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
 // including the GitHub, Groq and Resend calls below. Each cache miss is a
@@ -207,6 +208,9 @@ export async function GET(request) {
     ];
 
     console.log('🔄 Starting GitHub skill refresh...');
+    // Flagship repos by URL first (lib/curated-repos.js): a few direct
+    // lookups that must not depend on the topic search below returning them.
+    const curated = await ingestCuratedRepos(database, { headers: ghHeaders() }).catch((e) => ({ error: e?.message || String(e) }));
     const scrapedSkills = await scrapeGitHub(topicQueries, { limit: 8, sort: 'updated', sinceDays: 120 });
 
     // Safe upsert: refresh live metadata, add new repos, preserve curated fields
@@ -253,6 +257,7 @@ export async function GET(request) {
       success: true,
       scraped: scrapedSkills.length,
       newlyAdded: inserted,
+      curated,
       starRefresh: stale,
       timestamp: new Date().toISOString()
     });

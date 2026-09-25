@@ -15,6 +15,17 @@ jobs:
   refresh:
     runs-on: ubuntu-latest
     steps:
+      - name: Curated — flagship repos by URL (lib/curated-repos.js)
+        # Its own step, ahead of the 50-query scrape: a handful of direct
+        # lookups that must land even when /api/ingest hits the function
+        # time ceiling. The scrape only ever sees the eight most recently
+        # pushed repos per query, which is how ui-ux-pro-max-skill went
+        # unlisted while a search for it returned a crypto miner.
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/ingest-curated" | tee /tmp/curated.json
+          echo
+
       - name: Discover — pull newest GitHub repos
         run: |
           curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
@@ -158,6 +169,8 @@ jobs:
         run: |
           echo "### Content refresh complete" >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/curated.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+          echo '' >> $GITHUB_STEP_SUMMARY
           cat /tmp/ingest.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
           echo '' >> $GITHUB_STEP_SUMMARY
           cat /tmp/dedupe.json >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
