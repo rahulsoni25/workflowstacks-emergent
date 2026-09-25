@@ -1,3 +1,23 @@
+// Standalone landing pages served from their own hostname.
+//
+// Each entry is a static site under public/sites/<dir>/ — plain HTML with its
+// own CSS, JS and media, no Next layout, header or footer. Requests to `host`
+// are rewritten into that folder (see rewrites().beforeFiles), so the folder's
+// index.html answers "/" and its assets answer "/<file>". `host` is a regex
+// (Next anchors it with ^…$); the localhost alternative lets you preview the
+// site at http://founder-avatar.localhost:3001/ under `npm run dev`.
+//
+// The one step that is not in this repo is serving the hostname: add it to
+// the Vercel project (Settings → Domains) and create the DNS record Vercel
+// shows for it. See docs/subdomain-landing-pages.md.
+const SUBDOMAIN_SITES = [
+  {
+    host: 'founder-avatar\\.(?:workflowstacks\\.com|localhost)',
+    canonicalHost: 'founder-avatar.workflowstacks.com',
+    dir: 'founder-avatar-studio',
+  },
+]
+
 const nextConfig = {
   poweredByHeader: false,
   images: {
@@ -34,16 +54,46 @@ const nextConfig = {
         destination: '/tools',
         permanent: true,
       },
+      ...SUBDOMAIN_SITES.flatMap((site) => {
+        const onSite = [{ type: 'host', value: site.host }]
+        const onApex = [{ type: 'host', value: 'workflowstacks.com' }]
+        return [
+          // "/" on the subdomain is rewritten to index.html below; if someone
+          // reaches the file by name, fold it back so there is one URL.
+          { source: '/index.html', has: onSite, destination: '/', permanent: true },
+          // The folder is also reachable at its real path on the apex — that is
+          // how a Vercel preview (whose host matches nothing) can still open
+          // it. On the apex proper, send it to the subdomain so the page has a
+          // single indexable URL. index.html first, so it lands on "/" in one
+          // hop instead of two.
+          { source: `/sites/${site.dir}/index.html`, has: onApex, destination: `https://${site.canonicalHost}/`, permanent: true },
+          { source: `/sites/${site.dir}/:path*`, has: onApex, destination: `https://${site.canonicalHost}/:path*`, permanent: true },
+        ]
+      }),
     ]
   },
   async rewrites() {
-    // Brand-evolution: 'stacks' is the new term for packs (more accurate for what
-    // they are — curated combinations that solve a goal). Both URLs work; canonical
-    // remains /packs for now to avoid SEO churn. We'll flip in a future pass.
-    return [
-      { source: '/stacks', destination: '/packs' },
-      { source: '/stacks/:id', destination: '/packs/:id' },
-    ]
+    return {
+      // beforeFiles runs before the filesystem, so "/" on a landing-page host
+      // reaches its index.html instead of the WorkflowStacks homepage.
+      beforeFiles: SUBDOMAIN_SITES.flatMap((site) => {
+        const has = [{ type: 'host', value: site.host }]
+        return [
+          { source: '/', has, destination: `/sites/${site.dir}/index.html` },
+          // Every other path on the host is one of the site's own files
+          // (hero.mp4, robots.txt, sitemap.xml …). _next/ stays Next's, and
+          // sites/ is already the real path.
+          { source: '/:path((?!_next/|sites/).*)', has, destination: `/sites/${site.dir}/:path` },
+        ]
+      }),
+      // Brand-evolution: 'stacks' is the new term for packs (more accurate for what
+      // they are — curated combinations that solve a goal). Both URLs work; canonical
+      // remains /packs for now to avoid SEO churn. We'll flip in a future pass.
+      afterFiles: [
+        { source: '/stacks', destination: '/packs' },
+        { source: '/stacks/:id', destination: '/packs/:id' },
+      ],
+    }
   },
   async headers() {
     return [
