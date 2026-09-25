@@ -60,6 +60,9 @@ const footerLinks = {
       { label: 'Become a Creator', href: '/submit' },
       { label: 'About', href: '/about' },
       { label: 'Enterprise', href: '/enterprise' },
+      // Static landing page served by a rewrite (see LANDING_PAGES in next.config.js),
+      // so it is a plain anchor rather than a client-side <Link>.
+      { label: 'AI Avatar Studio', href: '/ai-avatar', plain: true },
       { label: 'API Docs', href: '/docs' },
       { label: 'Terms', href: '/terms' },
       { label: 'Privacy', href: '/privacy' },
@@ -125,9 +128,13 @@ export default function Footer() {
               <ul className="space-y-2.5">
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    <Link prefetch={false} href={link.href} className="text-text-muted transition-colors hover:text-[#C6F24E]">
-                      {link.label}
-                    </Link>
+                    {link.plain ? (
+                      <a href={link.href} className="text-text-muted transition-colors hover:text-[#C6F24E]">{link.label}</a>
+                    ) : (
+                      <Link prefetch={false} href={link.href} className="text-text-muted transition-colors hover:text-[#C6F24E]">
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

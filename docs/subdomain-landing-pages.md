@@ -57,6 +57,16 @@ To check any URL from outside your own network, run the `http-check`
 workflow under Actions: it prints status, key headers, the first bytes of the
 body and the DNS records.
 
+## Measurement
+
+The page loads the same Google Tag Manager container as the main site when
+`GTM_ID` at the top of its script is set (GA4, Meta Pixel and so on are
+configured inside GTM, not in the page). With it empty nothing is loaded, but
+events are still pushed to `window.dataLayer`: `generate_lead` when the
+WhatsApp message is prepared (with `need`, `has_phone`, `has_email`),
+`whatsapp_open` when the WhatsApp button is tapped, and `contact_click` with
+`channel` for the footer contact links.
+
 ## Adding another landing page
 
 1. Put the site in `public/sites/<new-dir>/` with an `index.html`. Link media
