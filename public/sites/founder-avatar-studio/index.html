@@ -161,7 +161,7 @@
   .samples{display:grid; gap:18px; grid-template-columns:1fr; margin-top:34px}
   @media(min-width:720px){ .samples{grid-template-columns:repeat(3,1fr)} }
   .sample{background:var(--surface); border:1px solid var(--line); border-radius:3px; overflow:hidden; display:flex; flex-direction:column}
-  .sample img{display:block; width:100%; object-fit:cover; aspect-ratio:4/5}
+  .sample img{display:block; width:100%; height:auto; object-fit:cover; aspect-ratio:4/5} /* height:auto beats the intrinsic height attribute */
   .sample .cap{padding:16px 18px}
   .sample .cap h3{font-family:var(--fb); font-size:16px; font-weight:600}
   .sample .cap p{color:var(--muted); font-size:14px; margin:6px 0 0}
