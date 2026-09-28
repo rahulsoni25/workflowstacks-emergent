@@ -1,6 +1,6 @@
 {
   "date": "2026-09-28",
-  "generated_at": "2026-09-28T10:30:03.584Z",
+  "generated_at": "2026-09-28T11:44:23.023Z",
   "previous_report": "2026-09-21.json",
   "gsc": {
     "week": {
@@ -668,8 +668,8 @@
     "depth_distribution": {
       "0": 1,
       "1": 48,
-      "2": 347,
-      "3": 4
+      "2": 349,
+      "3": 2
     },
     "max_depth": 3,
     "non_200_linked": [],
@@ -701,6 +701,11 @@
       },
       {
         "url": "/skills/wagtail",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/skills/bips",
         "inbound": 1,
         "depth": 2
       },
@@ -740,22 +745,12 @@
         "depth": 2
       },
       {
-        "url": "/skills/suna",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
         "url": "/skills/mcpproxy-go",
         "inbound": 1,
         "depth": 2
       },
       {
-        "url": "/mcp/sequential-thinking",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/mcp/slack",
+        "url": "/skills/maxtext",
         "inbound": 1,
         "depth": 2
       },
@@ -770,12 +765,32 @@
         "depth": 2
       },
       {
-        "url": "/skills/e7134e58-8bfb-4b7a-b47c-3d8eb6bf2b99",
+        "url": "/mcp/sequential-thinking",
         "inbound": 1,
         "depth": 2
       },
       {
-        "url": "/skills/7126b1db-bfd2-4209-9076-d8c13015d401",
+        "url": "/mcp/slack",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/packs/founder-launch-pack",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/packs/developer-productivity-pack",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/packs/outbound-sales-pack",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/packs/content-and-marketing-pack",
         "inbound": 1,
         "depth": 2
       },
@@ -800,11 +815,6 @@
         "depth": 2
       },
       {
-        "url": "/skills/googlemapsdelivery",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
         "url": "/skills/site",
         "inbound": 1,
         "depth": 2
@@ -815,12 +825,37 @@
         "depth": 2
       },
       {
+        "url": "/skills/world-forge-ai",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
         "url": "/skills/sapphire-opti-composer",
         "inbound": 1,
         "depth": 2
       },
       {
         "url": "/skills/pathmind",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/personas/growth-marketer",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/personas/indie-hacker",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/personas/sales-closer",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/personas/solo-founder",
         "inbound": 1,
         "depth": 2
       },
@@ -850,46 +885,6 @@
         "depth": 2
       },
       {
-        "url": "/packs/founder-launch-pack",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/packs/developer-productivity-pack",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/packs/outbound-sales-pack",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/packs/content-and-marketing-pack",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/personas/growth-marketer",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/personas/indie-hacker",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/personas/sales-closer",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/personas/solo-founder",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
         "url": "/blog/n8n-vs-openclaw",
         "inbound": 1,
         "depth": 2
@@ -906,36 +901,6 @@
       },
       {
         "url": "/partner",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/a/77fdcc6f-639f-4fbd-982b-85c5c7c52841",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/a/574584bf-fc2c-4a28-a32f-0670c2429f26",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/a/9950557c-be8b-4f6c-a3c3-71a0819637c4",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/a/2e561d53-7e73-4322-85d1-5deab1de31f6",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/a/c83f3631-4a9b-4827-9a97-81292d61be1e",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/join",
         "inbound": 1,
         "depth": 2
       },
@@ -1538,20 +1503,50 @@
         "url": "/creators/spatie",
         "inbound": 1,
         "depth": 2
+      },
+      {
+        "url": "/a/77fdcc6f-639f-4fbd-982b-85c5c7c52841",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/a/574584bf-fc2c-4a28-a32f-0670c2429f26",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/a/9950557c-be8b-4f6c-a3c3-71a0819637c4",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/a/2e561d53-7e73-4322-85d1-5deab1de31f6",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/a/c83f3631-4a9b-4827-9a97-81292d61be1e",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/join",
+        "inbound": 1,
+        "depth": 2
       }
     ],
     "uuid_urls_linked": [
       "/skills/2ee35816-ac85-4206-869b-3a9f25e51b4a",
+      "/skills/e7134e58-8bfb-4b7a-b47c-3d8eb6bf2b99",
       "/skills/e242c510-fd94-4a53-8717-483f5dd90121",
       "/skills/64d7fcbe-4694-43df-8920-b1571672690a",
-      "/skills/a78ef0be-ee8d-4bc5-8599-0475c488e2bd",
       "/skills/7a603032-cf86-4597-bdb4-e96d3d23c2d4",
+      "/skills/a78ef0be-ee8d-4bc5-8599-0475c488e2bd",
       "/skills/9d1b1837-f79b-44e5-90a1-eadb5c258b41",
       "/skills/03e725e0-8133-4a8c-bc7b-88d967561b3b",
       "/skills/1eb515a5-e78d-43e6-be2a-d06cc7c89ff7",
       "/skills/1c126c57-f73a-4e6b-8798-0973ae042067",
       "/skills/daeb095c-6038-4d05-bcb3-a2799d749946",
-      "/skills/e7134e58-8bfb-4b7a-b47c-3d8eb6bf2b99",
       "/skills/7126b1db-bfd2-4209-9076-d8c13015d401",
       "/skills/88d07782-e9ee-405a-9256-e91d16c6badd",
       "/a/77fdcc6f-639f-4fbd-982b-85c5c7c52841",
@@ -1563,7 +1558,7 @@
     "sections": [
       [
         "/skills",
-        145
+        143
       ],
       [
         "/creators",
@@ -1606,16 +1601,16 @@
         5
       ],
       [
+        "/automate",
+        5
+      ],
+      [
         "/bundles",
         5
       ],
       [
         "/a",
         5
-      ],
-      [
-        "/automate",
-        3
       ],
       [
         "/kits",
@@ -2071,7 +2066,7 @@
         ]
       },
       "/automate": {
-        "sample": "/automate/automate-product-descriptions",
+        "sample": "/automate/automate-review-replies",
         "types": [
           "Answer",
           "BreadcrumbList",
@@ -2236,7 +2231,7 @@
     },
     "/bundles/lead-finder": {
       "verdict": "NEUTRAL",
-      "coverage": "Discovered - currently not indexed",
+      "coverage": "URL is unknown to Google",
       "last_crawl": null,
       "indexing_state": "INDEXING_STATE_UNSPECIFIED",
       "canonical_google": null,
@@ -2283,14 +2278,14 @@
     "/": {
       "mobile": {
         "source": "lighthouse",
-        "score": 78,
+        "score": 73,
         "lab": {
-          "lcp_ms": 2725,
+          "lcp_ms": 2715,
           "cls": 0,
-          "tbt_ms": 553,
-          "fcp_ms": 1884,
-          "ttfb_ms": 21,
-          "speed_index_ms": 4305
+          "tbt_ms": 841,
+          "fcp_ms": 1901,
+          "ttfb_ms": 6,
+          "speed_index_ms": 4287
         },
         "field": null
       },
@@ -2298,12 +2293,12 @@
         "source": "lighthouse",
         "score": 100,
         "lab": {
-          "lcp_ms": 713,
+          "lcp_ms": 740,
           "cls": 0,
           "tbt_ms": 0,
-          "fcp_ms": 532,
-          "ttfb_ms": 21,
-          "speed_index_ms": 532
+          "fcp_ms": 482,
+          "ttfb_ms": 6,
+          "speed_index_ms": 482
         },
         "field": null
       }
@@ -2311,14 +2306,14 @@
     "/skills": {
       "mobile": {
         "source": "lighthouse",
-        "score": 95,
+        "score": 96,
         "lab": {
-          "lcp_ms": 2573,
+          "lcp_ms": 2561,
           "cls": 0,
-          "tbt_ms": 0,
-          "fcp_ms": 1880,
-          "ttfb_ms": 20,
-          "speed_index_ms": 2622
+          "tbt_ms": 39,
+          "fcp_ms": 1832,
+          "ttfb_ms": 6,
+          "speed_index_ms": 1832
         },
         "field": null
       },
@@ -2326,12 +2321,12 @@
         "source": "lighthouse",
         "score": 100,
         "lab": {
-          "lcp_ms": 624,
+          "lcp_ms": 570,
           "cls": 0,
           "tbt_ms": 0,
-          "fcp_ms": 559,
-          "ttfb_ms": 21,
-          "speed_index_ms": 559
+          "fcp_ms": 511,
+          "ttfb_ms": 6,
+          "speed_index_ms": 511
         },
         "field": null
       }
@@ -2341,25 +2336,25 @@
         "source": "lighthouse",
         "score": 91,
         "lab": {
-          "lcp_ms": 3039,
+          "lcp_ms": 3015,
           "cls": 0,
-          "tbt_ms": 98,
-          "fcp_ms": 2052,
-          "ttfb_ms": 21,
-          "speed_index_ms": 2833
+          "tbt_ms": 132,
+          "fcp_ms": 1988,
+          "ttfb_ms": 6,
+          "speed_index_ms": 2589
         },
         "field": null
       },
       "desktop": {
         "source": "lighthouse",
-        "score": 99,
+        "score": 100,
         "lab": {
-          "lcp_ms": 743,
+          "lcp_ms": 655,
           "cls": 0,
           "tbt_ms": 0,
-          "fcp_ms": 554,
-          "ttfb_ms": 21,
-          "speed_index_ms": 554
+          "fcp_ms": 522,
+          "ttfb_ms": 6,
+          "speed_index_ms": 531
         },
         "field": null
       }
@@ -2369,12 +2364,12 @@
         "source": "lighthouse",
         "score": 97,
         "lab": {
-          "lcp_ms": 2425,
+          "lcp_ms": 2415,
           "cls": 0,
-          "tbt_ms": 0,
-          "fcp_ms": 1718,
-          "ttfb_ms": 20,
-          "speed_index_ms": 1718
+          "tbt_ms": 5,
+          "fcp_ms": 1684,
+          "ttfb_ms": 6,
+          "speed_index_ms": 1684
         },
         "field": null
       }
@@ -2384,12 +2379,12 @@
         "source": "lighthouse",
         "score": 96,
         "lab": {
-          "lcp_ms": 2425,
+          "lcp_ms": 2419,
           "cls": 0.064,
           "tbt_ms": 0,
-          "fcp_ms": 1727,
-          "ttfb_ms": 21,
-          "speed_index_ms": 1727
+          "fcp_ms": 1690,
+          "ttfb_ms": 6,
+          "speed_index_ms": 1690
         },
         "field": null
       }
@@ -2397,14 +2392,14 @@
     "/automate/triage-your-inbox": {
       "mobile": {
         "source": "lighthouse",
-        "score": 96,
+        "score": 97,
         "lab": {
-          "lcp_ms": 2426,
+          "lcp_ms": 2414,
           "cls": 0,
-          "tbt_ms": 0,
-          "fcp_ms": 1736,
-          "ttfb_ms": 21,
-          "speed_index_ms": 2929
+          "tbt_ms": 18,
+          "fcp_ms": 1685,
+          "ttfb_ms": 6,
+          "speed_index_ms": 1685
         },
         "field": null
       }
@@ -2414,12 +2409,12 @@
         "source": "lighthouse",
         "score": 97,
         "lab": {
-          "lcp_ms": 2427,
+          "lcp_ms": 2420,
           "cls": 0,
-          "tbt_ms": 0,
-          "fcp_ms": 1730,
-          "ttfb_ms": 20,
-          "speed_index_ms": 1730
+          "tbt_ms": 22,
+          "fcp_ms": 1687,
+          "ttfb_ms": 6,
+          "speed_index_ms": 1687
         },
         "field": null
       }
@@ -2427,14 +2422,14 @@
     "/blog/seo-brief-n8n-claude": {
       "mobile": {
         "source": "lighthouse",
-        "score": 94,
+        "score": 96,
         "lab": {
-          "lcp_ms": 2739,
+          "lcp_ms": 2587,
           "cls": 0,
-          "tbt_ms": 0,
-          "fcp_ms": 2045,
-          "ttfb_ms": 20,
-          "speed_index_ms": 2045
+          "tbt_ms": 3,
+          "fcp_ms": 1854,
+          "ttfb_ms": 6,
+          "speed_index_ms": 1854
         },
         "field": null
       }
@@ -2444,12 +2439,12 @@
         "source": "lighthouse",
         "score": 97,
         "lab": {
-          "lcp_ms": 2424,
+          "lcp_ms": 2413,
           "cls": 0,
-          "tbt_ms": 0,
-          "fcp_ms": 1705,
-          "ttfb_ms": 20,
-          "speed_index_ms": 2802
+          "tbt_ms": 46,
+          "fcp_ms": 1686,
+          "ttfb_ms": 6,
+          "speed_index_ms": 1686
         },
         "field": null
       }
