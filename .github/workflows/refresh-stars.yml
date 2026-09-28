@@ -37,7 +37,12 @@ jobs:
           MONGO_URL: ${{ secrets.MONGO_URL }}
           DB_NAME: ${{ secrets.DB_NAME }}
           GITHUB_TOKEN: ${{ github.token }}
+        # set -o pipefail: without it, `node ... | tee` reports tee's exit
+        # code (always 0), not the script's -- a script failure (e.g. missing
+        # MONGO_URL) showed this step as green with zero repos refreshed
+        # (caught 2026-09-28, first live run after this workflow shipped).
         run: |
+          set -o pipefail
           node scripts/refresh-stars.mjs --max=80 --scope=published --passes=10 | tee /tmp/stars.log
           echo
 
