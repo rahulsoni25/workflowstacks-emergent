@@ -5,6 +5,7 @@ import { relatedAssets } from '@/lib/related-assets'
 import { buildCodeflow, summarize } from '@/lib/codeflow'
 import { SITE_URL as BASE } from '@/lib/site-url'
 import { rawFetch } from '@/lib/raw-fetch'
+import { getSkillDirect, getRelatedSkillsDirect } from '@/lib/skills-data'
 
 // Note: invalid skill IDs render the not-found UI with HTTP 200 (a Next.js 14
 // App Router limitation — notFound() doesn't emit a 404 status under ISR, and
@@ -43,21 +44,9 @@ function stableHash(str) {
   return h >>> 0
 }
 async function getRelated(skill) {
-  const cat = encodeURIComponent(skill.category || '')
-  const get = async (qs) => {
-    try {
-      const res = await fetch(`${BASE}/api/skills?${qs}`, { next: { revalidate: WEEK }, signal: AbortSignal.timeout(10_000) })
-      if (!res.ok) return []
-      const data = await res.json()
-      return data.skills || []
-    } catch {
-      return []
-    }
-  }
-  const [popular, recent] = await Promise.all([
-    get(`category=${cat}&sort=popular&limit=6`),
-    get(`category=${cat}&sort=updated&limit=60`),
-  ])
+  // Direct Mongo read — see lib/skills-data.js for why this replaced a
+  // self-fetch to ${BASE}/api/skills.
+  const { popular, recent } = await getRelatedSkillsDirect(skill.category || '').catch(() => ({ popular: [], recent: [] }))
   const picked = []
   const seen = new Set([skill.id])
   for (const s of popular) {
@@ -81,25 +70,15 @@ async function getRelated(skill) {
 }
 
 async function getSkill(id) {
-  try {
-    // Content only actually changes once/day (06:00 UTC refresh-content.yml cron),
-    // so a 5 min window bought no real freshness — it just forced this page to
-    // regenerate on almost every crawler/bot visit, which was the direct cause of
-    // a 0% edge-cache-hit rate and blew past the Vercel Hobby Fast Origin
-    // Transfer / Fluid Active CPU limits (2026-08-11). 1h keeps pages reasonably
-    // fresh while cutting regeneration frequency ~12x.
-    //
-    // ?isr=1 opts this request out of the CDN Cache-Control rule in vercel.json.
-    // Without it, a regeneration triggered by revalidateSkill() right after a
-    // rewrite could be handed the CDN's pre-rewrite JSON (s-maxage + SWR) and
-    // bake it into the page for a week. Next's data cache still dedupes it.
-    const res = await fetch(`${BASE}/api/skills/${id}?isr=1`, { next: { revalidate: WEEK }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
-    const data = await res.json()
-    return data.skill || null
-  } catch {
-    return null
-  }
+  // Direct Mongo read (2026-09-28) — this page used to self-fetch
+  // ${BASE}/api/skills/${id}, i.e. a full HTTP round trip from this Vercel
+  // Function to ANOTHER Vercel Function, on every ISR regeneration. With
+  // ~2.7k skill pages regenerating on their 7-day window (see the comment on
+  // `revalidate` above), that extra hop was a second Function invocation and
+  // its own Fluid Active CPU for every single regen — the CDN/?isr=1
+  // staleness concern that hop used to guard against doesn't apply to a
+  // direct DB read (no intermediate cached JSON to go stale).
+  return getSkillDirect(id).catch(() => null)
 }
 
 function ghHeaders() {
