@@ -242,7 +242,7 @@ async function main() {
 
   console.log(JSON.stringify({ candidates: candidates.length, limit: LIMIT, dryRun: DRY_RUN }))
 
-  let rewritten = 0, improved = 0, unchanged = 0, failed = 0
+  let rewritten = 0, improved = 0, unchanged = 0, failed = 0, vanished = 0
   for (let i = 0; i < candidates.length; i += BATCH) {
     const batch = candidates.slice(i, i + BATCH)
     await Promise.all(batch.map(async (skill) => {
@@ -253,8 +253,15 @@ async function main() {
         // Only write over the templated copy if the new copy actually
         // cleared the same quality bar the live pipeline uses AND isn't
         // just another template. Never touch `published`.
+        let written = false
         if (!DRY_RUN && score !== null && score >= GATE_MIN && !stillTemplated) {
-          await col.updateOne(
+          // This repo has several concurrent sessions writing to the same
+          // live Mongo (confirmed 2026-09-29: two candidates from an
+          // earlier real test had been deleted -- likely a dedupe pass --
+          // by the time their write ran, and the script logged them as
+          // written anyway because it never checked the result). Trust
+          // matchedCount, not the write condition alone.
+          const r = await col.updateOne(
             { id: skill.id },
             { $set: {
                 title_human: result.title,
@@ -264,12 +271,12 @@ async function main() {
                 rewrite_score: score,
               } }
           )
-          improved++
+          if (r.matchedCount > 0) { improved++; written = true } else { vanished++ }
         } else {
           unchanged++
         }
         rewritten++
-        console.log(JSON.stringify({ slug: skill.slug || skill.id, score, stillTemplated, written: !DRY_RUN && score >= GATE_MIN && !stillTemplated }))
+        console.log(JSON.stringify({ slug: skill.slug || skill.id, score, stillTemplated, written }))
       } catch (e) {
         failed++
         console.log(JSON.stringify({ slug: skill.slug || skill.id, error: String(e.message || e).slice(0, 150) }))
@@ -278,7 +285,7 @@ async function main() {
     if (i + BATCH < candidates.length) await new Promise((r) => setTimeout(r, SLEEP_MS))
   }
 
-  console.log(JSON.stringify({ summary: true, candidates: candidates.length, rewritten, improved, unchanged, failed }))
+  console.log(JSON.stringify({ summary: true, candidates: candidates.length, rewritten, improved, unchanged, vanished, failed }))
   await client.close()
 }
 
