@@ -5,82 +5,12 @@ import { OUTCOMES } from '../lib/outcomes'
 import { MCP_SERVERS } from '../lib/mcp-servers'
 import { KITS } from '../lib/kits'
 import { SLASH_COMMANDS } from '../lib/commands'
-import { isAiRelevant, guideRichness } from '../lib/skill-relevance'
+import { SKILL_INDEX_GATE, passesSkillIndexGate } from '../lib/skill-index-gate'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
-// --- Why this file gates skill pages -----------------------------------
-// Google Search Console (2026-07-29) reported 1,450 URLs "Discovered –
-// currently not indexed" and 45 "Crawled – currently not indexed". Google
-// sampled 45 skill pages, indexed none, then stopped crawling the rest.
-//
-// Skill pages are largely derived from third-party GitHub READMEs. At 1,749
-// of 1,827 sitemap URLs (96%) they consume nearly all crawl budget on a
-// domain with little authority, starving the pages that are original work
-// (templates, /automate outcome pages, MCP configs) — the ones that can
-// actually rank. Google's scaled-content-abuse policy judges usefulness, not
-// production method, so volume alone is a liability here.
-//
-// The gate below submits only skill pages carrying our OWN substantive
-// content (a real use_guide), high rewrite quality, and enough upstream
-// notability to have genuine search demand.
-//
-// IMPORTANT: this narrows the sitemap only. Every skill page stays live,
-// internally linked, and indexable — removing a URL from a sitemap is a
-// discovery hint, not a deindex request. Already-indexed pages keep their
-// index status.
-//
-// --- Why the score threshold moved 9 -> 8 (stage 1 of a staged widening) ---
-// The original gate carried no topical relevance test, so `minRewriteScore: 9`
-// and `minStars: 1000` were doing double duty: filtering for quality AND, by
-// accident, for "is this even an AI tool". They filtered badly at the second
-// job — /skills/linux, /skills/flutter and /skills/youtube-dl all cleared it.
-//
-// Relevance is now enforced explicitly by isAiRelevant(), which frees the
-// score threshold to mean only what it says. Against the live catalog:
-//
-//   score>=9, stars>=1000, guide>=600  ->  143 pages   (previous behaviour)
-//   score>=8, stars>=1000, guide>=600  ->  447 pages   (this commit)
-//   score>=8, stars>=100,  guide>=600  ->  871 pages
-//   score>=8, stars>=0,    guide>=600  ->  952 pages
-//
-// 8 is the publish gate, so every page in the 447 already cleared the quality
-// bar we set for showing it to a human at all, carries 600+ chars of guidance
-// we wrote, and describes a tool notable enough (1k+ stars) for its name to
-// have real query volume. That is a defensible expansion.
-//
-// We deliberately do NOT jump to 871 or 952. Relaxing `minStars` is what
-// reinstates the original failure — a sitemap dominated by pages for tools
-// nobody searches for by name, on a domain with little authority. The next
-// widening should be driven by Search Console coverage data for these 447,
-// not by another guess. Search Console is not currently connected; connecting
-// it is the prerequisite for stage 2.
-const SKILL_SITEMAP_GATE = {
-  minRewriteScore: 8, // == the publish gate; relevance is handled separately now
-  minStars: 1000, // upstream notability => real query volume for the tool name
-  minGuideRichness: 600, // chars of OUR written guidance; ~1/3 of the catalog falls below this
-}
-
-function passesSkillGate(s) {
-  const score = typeof s.rewrite_score === 'number' ? s.rewrite_score : 0
-  const stars = typeof s.github_stars === 'number' ? s.github_stars : 0
-  return (
-    !s.dead_repo &&
-    // Topical relevance, judged from the upstream repo rather than our stored
-    // `category` field — that field is unreliable enough to have filed the
-    // Linux kernel, Flutter and yt-dlp as `ai-agent`, which is how those pages
-    // ended up submitted to Google as top-tier assets. See lib/skill-relevance.
-    isAiRelevant(s) &&
-    // 495 of 2,215 catalog entries never got a slug, so `s.slug || s.id` below
-    // yields /skills/<uuid> — a URL carrying no keyword signal, unreadable in
-    // a SERP and unquotable by an answer engine. 37 were in the live sitemap.
-    // They stay live and linked; they just stop being submitted until the slug
-    // backfill reaches them.
-    !!s.slug &&
-    score >= SKILL_SITEMAP_GATE.minRewriteScore &&
-    stars >= SKILL_SITEMAP_GATE.minStars &&
-    guideRichness(s.use_guide) >= SKILL_SITEMAP_GATE.minGuideRichness
-  )
-}
+// Skill pages are gated: only those passing lib/skill-index-gate.js are
+// submitted here, and the same rule marks every other skill page noindex.
+// The reasoning and the threshold history live in that file.
 
 // Static, indexable routes
 const STATIC_ROUTES = [
@@ -129,10 +59,13 @@ function priorityFor(path) {
 export const revalidate = 86400 // refresh sitemap daily
 
 export default async function sitemap() {
-  const now = new Date()
+  // No lastModified on hand-built routes: we have no per-page edit date, and
+  // stamping every one with "now" on each daily regeneration told Google all
+  // of them changed every day. Google ignores lastmod on a site where it
+  // is consistently wrong, which also discounts the real dates below (blog,
+  // newsletter, skills). Omitted is honest; "now" was not.
   const staticEntries = STATIC_ROUTES.map((path) => ({
     url: `${BASE}${path}`,
-    lastModified: now,
     changeFrequency: path === '' || path === '/skills' || path === '/hot' ? 'daily' : path === '/submit' ? 'monthly' : 'weekly',
     priority: priorityFor(path),
   }))
@@ -153,8 +86,8 @@ export default async function sitemap() {
     // pass was slow enough to blow the timeout below and silently fall back
     // to static-only. guideRichness still needs a JS check (it reads a
     // structured sub-object the DB filter can't easily express), so this is
-    // a coarse pre-filter, not a full replacement of passesSkillGate.
-    const gateParams = `minScore=${SKILL_SITEMAP_GATE.minRewriteScore}&minStars=${SKILL_SITEMAP_GATE.minStars}`
+    // a coarse pre-filter, not a full replacement of passesSkillIndexGate.
+    const gateParams = `minScore=${SKILL_INDEX_GATE.minRewriteScore}&minStars=${SKILL_INDEX_GATE.minStars}`
     const [toolsRes, resourcesRes] = await Promise.all([
       fetch(`${BASE}/api/skills?${gateParams}&limit=2000`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(15_000) }),
       fetch(`${BASE}/api/skills?type=resource&${gateParams}&limit=2000`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(15_000) }),
@@ -162,9 +95,9 @@ export default async function sitemap() {
     const docs = []
     if (toolsRes.ok) docs.push(...((await toolsRes.json()).skills || []))
     if (resourcesRes.ok) docs.push(...((await resourcesRes.json()).skills || []))
-    skillEntries = docs.filter(passesSkillGate).map((s) => ({
+    skillEntries = docs.filter(passesSkillIndexGate).map((s) => ({
       url: `${BASE}/skills/${s.slug || s.id}`,
-      lastModified: s.last_updated ? new Date(s.last_updated) : now,
+      lastModified: s.last_updated ? new Date(s.last_updated) : undefined,
       changeFrequency: 'weekly',
       priority: 0.5,
     }))
@@ -204,7 +137,6 @@ export default async function sitemap() {
       .filter((i) => i.slug)
       .map((i) => ({
         url: `${BASE}/${i.kind}/${i.slug}`,
-        lastModified: now,
         changeFrequency: 'monthly',
         priority: 0.7,
       }))
@@ -212,25 +144,10 @@ export default async function sitemap() {
     console.error('[sitemap] collection entries unavailable:', e?.message || e)
   }
 
-  // Crawlable catalog pagination (/skills/page/N). These are the link path
-  // to every published skill regardless of the gate above; listing them here
-  // just tells Google the chain exists. Count comes from the API's `total`.
-  let pageEntries = []
-  try {
-    const res = await fetch(`${BASE}/api/skills?limit=1`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
-    if (res.ok) {
-      const total = (await res.json()).total || 0
-      const pages = Math.ceil(total / 48)
-      pageEntries = Array.from({ length: Math.max(0, pages - 1) }, (_, i) => ({
-        url: `${BASE}/skills/page/${i + 2}`,
-        lastModified: now,
-        changeFrequency: 'weekly',
-        priority: 0.4,
-      }))
-    }
-  } catch (e) {
-    console.error('[sitemap] catalog page entries unavailable:', e?.message || e)
-  }
+  // Catalog pagination (/skills/page/N) is deliberately NOT listed. Those
+  // pages stay live and linked from /skills, so the crawl path to every skill
+  // is intact, but they are lists of mostly-noindex entries — submitting 49
+  // of them told Google they were among our best URLs.
 
   // Archived Monday issues (/newsletter/<date>). Each one is a dated page of
   // ranked skills — they rank for the skill names they carry.
@@ -241,7 +158,7 @@ export default async function sitemap() {
       const issues = (await res.json()).issues || []
       issueEntries = issues.map((it) => ({
         url: `${BASE}/newsletter/${it.issue}`,
-        lastModified: it.sent_at ? new Date(it.sent_at) : now,
+        lastModified: it.sent_at ? new Date(it.sent_at) : undefined,
         changeFrequency: 'monthly',
         priority: 0.6,
       }))
@@ -250,5 +167,5 @@ export default async function sitemap() {
     console.error('[sitemap] newsletter issue entries unavailable:', e?.message || e)
   }
 
-  return [...staticEntries, ...blogEntries, ...collectionEntries, ...issueEntries, ...pageEntries, ...skillEntries]
+  return [...staticEntries, ...blogEntries, ...collectionEntries, ...issueEntries, ...skillEntries]
 }

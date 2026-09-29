@@ -6,6 +6,7 @@ import { buildCodeflow, summarize } from '@/lib/codeflow'
 import { SITE_URL as BASE } from '@/lib/site-url'
 import { rawFetch } from '@/lib/raw-fetch'
 import { getSkillDirect, getRelatedSkillsDirect } from '@/lib/skills-data'
+import { passesSkillIndexGate } from '@/lib/skill-index-gate'
 
 // Note: invalid skill IDs render the not-found UI with HTTP 200 (a Next.js 14
 // App Router limitation — notFound() doesn't emit a 404 status under ISR, and
@@ -188,6 +189,11 @@ export async function generateMetadata({ params }) {
     title,
     description,
     alternates: { canonical: url },
+    // Only pages that pass the index gate ask to be indexed; the rest stay
+    // live and followable. Replaces the layout's robots block wholesale, so
+    // its googleBot "index" directive does not leak through.
+    // See lib/skill-index-gate.js.
+    ...(passesSkillIndexGate(skill) ? {} : { robots: { index: false, follow: true } }),
     // No explicit `images`: the sibling opengraph-image.js renders a per-skill
     // card, and listing the generic site-wide /opengraph-image here overrode
     // it — every shared skill link showed the same anonymous preview.
