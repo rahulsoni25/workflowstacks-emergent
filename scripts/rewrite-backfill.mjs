@@ -227,6 +227,14 @@ async function main() {
   await client.connect()
   const col = client.db(DB_NAME).collection('skills')
 
+  // Canary: a run that connects to an empty/wrong database and one that
+  // genuinely has zero candidates left both print `candidates: 0` --
+  // indistinguishable without this. (2026-09-29: a real run reported
+  // candidates:0 seconds after a direct local check against the same
+  // MONGO_URL showed 1175 matches; totalDocs here is the fastest way to
+  // tell "nothing to do" from "something's wrong with this connection".)
+  const totalDocs = await col.estimatedDocumentCount()
+
   const bannedOpeners = [
     ...new Set(
       (await col.find({ description_human: { $exists: true } }, { projection: { description_human: 1 } })
@@ -240,7 +248,7 @@ async function main() {
     .limit(LIMIT)
     .toArray()
 
-  console.log(JSON.stringify({ candidates: candidates.length, limit: LIMIT, dryRun: DRY_RUN }))
+  console.log(JSON.stringify({ candidates: candidates.length, limit: LIMIT, dryRun: DRY_RUN, totalDocsInCollection: totalDocs, dbName: DB_NAME }))
 
   let rewritten = 0, improved = 0, unchanged = 0, failed = 0, vanished = 0
   for (let i = 0; i < candidates.length; i += BATCH) {
