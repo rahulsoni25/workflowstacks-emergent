@@ -50,9 +50,13 @@ jobs:
         # have moved to Groq's Enterprise-only tier) -- checking the real
         # list once instead of guessing a 4th time. Costs nothing (no LLM
         # call, just a catalog read) and never fails the job.
-        if: ${{ secrets.GROQ_API_KEY != '' }}
+        #
+        # `secrets` is not a valid context inside a step's `if:` (broke the
+        # whole workflow's ability to dispatch, caught immediately on first
+        # real trigger after merge) -- route the check through `env:` first.
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        if: ${{ env.GROQ_API_KEY != '' }}
         run: |
           echo "### Groq models available to this key" >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
