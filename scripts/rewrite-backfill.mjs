@@ -26,7 +26,10 @@
 import { MongoClient } from 'mongodb'
 
 const MONGO_URL = process.env.MONGO_URL
-const DB_NAME = process.env.DB_NAME || 'workflowstacks'
+// See scripts/refresh-stars.mjs for the full story: 'workflowstacks' is a
+// separate, ~89-document legacy/test database, not production
+// ('workflowstacks-emergent'). Confirmed 2026-09-29.
+const DB_NAME = process.env.DB_NAME || 'workflowstacks-emergent'
 const GROQ_API_KEY = process.env.GROQ_API_KEY
 // llama-3.3-70b-versatile 404'd -- moved to Groq's Enterprise-only tier (same
 // stale default this repo's app/api/agent-rewrite/route.js still has).
