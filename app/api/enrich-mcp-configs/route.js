@@ -71,7 +71,9 @@ Output ONLY the JSON object.`
   }
   let raw = ''
   try {
-    if (key) raw = await call('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_REC_MODEL || 'llama-3.3-70b-versatile', key)
+    // llama-3.3-70b-versatile moved to Groq's Enterprise-only tier -- see
+    // app/api/agent-rewrite/route.js for the same fix + confirmation.
+    if (key) raw = await call('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_REC_MODEL || 'openai/gpt-oss-120b', key)
     else if (orKey) raw = await call('https://openrouter.ai/api/v1/chat/completions', 'anthropic/claude-haiku-4.5', orKey)
     else return null
   } catch (e) {

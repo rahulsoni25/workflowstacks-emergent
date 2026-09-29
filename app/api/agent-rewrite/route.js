@@ -28,7 +28,15 @@ function resolveProvider() {
   if (process.env.GROQ_API_KEY) {
     return {
       name: 'groq',
-      model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+      // llama-3.3-70b-versatile moved to Groq's Enterprise-only tier (per
+      // Groq's own docs; confirmed 404 -- "does not exist or you do not have
+      // access to it" -- against a free-tier key on 2026-09-29). Any call on
+      // this route with GROQ_API_KEY set would throw and silently fall back
+      // to rewriteHeuristic() -- lower-quality, non-LLM copy, indistinguishable
+      // from a "working" response since the route never fails the request.
+      // openai/gpt-oss-120b confirmed live against Groq's real
+      // /openai/v1/models catalog the same day.
+      model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
     };
   }
   if (process.env.OPENROUTER_API_KEY) {

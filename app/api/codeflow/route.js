@@ -79,7 +79,11 @@ Output ONLY the JSON object.`
 
   let raw = '', provider = null, error = null
   try {
-    if (groq) { raw = await call('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_REC_MODEL || 'llama-3.3-70b-versatile', groq); provider = 'groq' }
+    // llama-3.3-70b-versatile moved to Groq's Enterprise-only tier (404 on a
+    // free-tier key, confirmed 2026-09-29 against the real /openai/v1/models
+    // catalog); openai/gpt-oss-120b is the strongest general model actually
+    // available there.
+    if (groq) { raw = await call('https://api.groq.com/openai/v1/chat/completions', process.env.GROQ_REC_MODEL || 'openai/gpt-oss-120b', groq); provider = 'groq' }
     else { raw = await call('https://openrouter.ai/api/v1/chat/completions', 'anthropic/claude-haiku-4.5', orKey); provider = 'openrouter' }
   } catch (e) {
     error = `${provider || 'groq'}: ${String(e?.message || e).slice(0, 60)}`
