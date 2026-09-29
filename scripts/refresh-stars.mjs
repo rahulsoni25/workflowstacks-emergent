@@ -21,7 +21,15 @@
 import { MongoClient } from 'mongodb'
 
 const MONGO_URL = process.env.MONGO_URL
-const DB_NAME = process.env.DB_NAME || 'workflowstacks'
+// The real production database is 'workflowstacks-emergent'. 'workflowstacks'
+// (this script's old default, copied from lib/mongo.js's own fallback -- safe
+// THERE only because Vercel always sets DB_NAME explicitly) is a separate,
+// ~89-document legacy/test database. Confirmed 2026-09-29: this script had
+// been writing real star/velocity data into that wrong database on every run
+// since it shipped -- /hot's real entries came from a different, still-active
+// Vercel-hosted fallback pass, not from here. No GitHub secret ever set
+// DB_NAME, so every run silently used the wrong default.
+const DB_NAME = process.env.DB_NAME || 'workflowstacks-emergent'
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''
 
 if (!MONGO_URL) {
