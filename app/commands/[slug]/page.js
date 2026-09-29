@@ -21,6 +21,14 @@ export function generateMetadata({ params }) {
   }
 }
 
+// Sibling commands, same category first — gives each /commands/* page more
+// than the single inbound link from the /commands index the crawl found.
+function relatedCommands(cmd, limit = 6) {
+  const others = Object.values(SLASH_COMMANDS).filter((c) => c.slug !== cmd.slug)
+  const same = others.filter((c) => c.category === cmd.category)
+  return [...same, ...others.filter((c) => c.category !== cmd.category)].slice(0, limit)
+}
+
 const STEPS = [
   'Copy the command file below.',
   'Save it as .claude/commands/<name>.md in your project (create the folder if it doesn\'t exist).',
@@ -124,6 +132,18 @@ export default function SlashCommandPage({ params }) {
         <p className="text-xs text-text-muted mb-8">
           The linked repo is the source of truth — if the author updates it, the repo link stays current.
         </p>
+
+        <h2 className="text-white font-bold text-lg mb-3">More Claude Code slash commands</h2>
+        <ul className="grid sm:grid-cols-2 gap-2 mb-10">
+          {relatedCommands(cmd).map((c) => (
+            <li key={c.slug}>
+              <Link href={`/commands/${c.slug}`} className="block rounded-lg border border-slate-700/50 bg-slate-900/60 px-4 py-3 hover:border-[#C6F24E]/40">
+                <span className="block text-white text-sm font-semibold">{c.name}</span>
+                <span className="block text-text-muted text-xs mt-0.5">{c.category}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
 
         <Card className="bg-gradient-to-br from-[#C6F24E]/10 to-transparent border-[#C6F24E]/25">
           <CardContent className="py-5 flex flex-wrap items-center justify-between gap-4">

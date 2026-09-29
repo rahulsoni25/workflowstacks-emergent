@@ -21,6 +21,15 @@ export function generateMetadata({ params }) {
   }
 }
 
+// Sibling servers, same category first. The weekly crawl found most /mcp/*
+// pages reachable only from the /mcp index (one inbound link each); linking
+// them to each other gives every page several paths in.
+function relatedServers(server, limit = 6) {
+  const others = Object.values(MCP_SERVERS).filter((s) => s.slug !== server.slug)
+  const same = others.filter((s) => s.category === server.category)
+  return [...same, ...others.filter((s) => s.category !== server.category)].slice(0, limit)
+}
+
 const STEPS = [
   'Open Claude Desktop → Settings → Developer → Edit Config.',
   'Paste the block below into claude_desktop_config.json (merge it into "mcpServers" if you already have some).',
@@ -126,6 +135,18 @@ export default function McpServerPage({ params }) {
         <p className="text-xs text-text-muted mb-8">
           The linked repo is the source of truth — if the package name ever changes, it’ll be current there.
         </p>
+
+        <h2 className="text-white font-bold text-lg mb-3">More MCP servers for Claude Desktop</h2>
+        <ul className="grid sm:grid-cols-2 gap-2 mb-10">
+          {relatedServers(server).map((s) => (
+            <li key={s.slug}>
+              <Link href={`/mcp/${s.slug}`} className="block rounded-lg border border-slate-700/50 bg-slate-900/60 px-4 py-3 hover:border-[#C6F24E]/40">
+                <span className="block text-white text-sm font-semibold">{s.name}</span>
+                <span className="block text-text-muted text-xs mt-0.5">{s.category}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
 
         <Card className="bg-gradient-to-br from-[#C6F24E]/10 to-transparent border-[#C6F24E]/25">
           <CardContent className="py-5 flex flex-wrap items-center justify-between gap-4">
