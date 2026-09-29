@@ -1,0 +1,22 @@
+name: Cost guard
+
+# Blocks changes that would put the site back over Vercel's Hobby caps:
+# a page that revalidates too often, a route handler that lets Next cache its
+# outbound calls, a workflow that polls the site. See docs/COSTS.md.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  cost-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/cost-guard.mjs

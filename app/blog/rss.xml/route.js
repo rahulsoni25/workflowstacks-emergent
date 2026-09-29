@@ -1,9 +1,9 @@
 // RSS feed for the blog — used by readers, syndication tools and answer
-// engines that still poll feeds. Regenerated hourly.
+// engines that still poll feeds. Regenerated every 6 hours.
 import { allPublishedForSitemap } from '@/lib/blog/store'
 import { SITE_URL } from '@/lib/schema'
 
-export const revalidate = 3600
+export const revalidate = 21600
 
 function esc(s) {
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')

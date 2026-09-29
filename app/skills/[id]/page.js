@@ -19,14 +19,15 @@ import { getSkillDirect, getRelatedSkillsDirect } from '@/lib/skills-data'
 // assumed ISR was in effect; it wasn't. An empty param list + revalidate makes
 // each slug render on first hit, then serve from the edge cache.
 //
-// 7 days, not 1 (2026-09-21): with ~2.7k skill pages and crawlers touching most
-// of them daily, a 24h window meant ~2.7k regenerations a day — each one an ISR
-// write plus this page's GitHub/codeflow work — and put ISR Writes (287K/200K)
-// and Fluid Active CPU (5h18m/4h) over the Hobby caps. Real content edits don't
-// wait for the timer: the write endpoints call revalidateSkill()
-// (lib/revalidate.js). Only star counts can lag, by up to a week.
-export const revalidate = 604800
-const WEEK = 604800
+// 30 days (2026-09-29) — about the longest Vercel keeps an ISR entry. It was 24h
+// until 2026-09-21 and 7 days after that; both regenerated the ~2.4k-page
+// catalog on a timer, each regeneration an ISR write plus function CPU, and
+// kept the Hobby plan over both caps. Production deploys are now batched
+// weekly (docs/COSTS.md) and a deploy empties the cache anyway, so a shorter
+// timer only adds a second full pass. Real content edits don't wait for it:
+// the write endpoints call revalidateSkill() (lib/revalidate.js). Star counts
+// on this page can lag until the next release.
+export const revalidate = 2592000
 export const dynamicParams = true
 export function generateStaticParams() { return [] }
 
@@ -66,7 +67,33 @@ async function getRelated(skill) {
     if (picked.length >= 6) break
     if (!seen.has(s.id)) { seen.add(s.id); picked.push(s) }
   }
-  return picked
+  return picked.map(relatedCard)
+}
+
+// What actually reaches the browser. The Mongo document carries bookkeeping
+// the page never shows — a 90-entry stars_history, refresh timestamps, the
+// raw codeflow (passed separately, summarised) — and the six related cards
+// carried all of it again. It was ~70% of the client payload, and because
+// those fields change several times a day no two regenerations were ever
+// byte-identical, so Vercel's "unchanged content costs no write units" rule
+// could never apply.
+function relatedCard(s) {
+  return {
+    id: s.id, slug: s.slug, name: s.name, title_human: s.title_human,
+    description: s.description, description_human: s.description_human,
+    category: s.category, github_stars: s.github_stars,
+  }
+}
+const CLIENT_OMIT = [
+  '_id', 'stars_history', 'stars_refreshed_at', 'codeflow', 'codeflow_at',
+  'codeflow_provider', 'codeflow_error', 'codeflow_flow_error', 'description_original',
+  'name_original', 'rewrite_trail', 'slug_assigned_at', 'updated_at', 'added_at',
+  'seo_optimized_at', 'hot_rank_at', 'mcp_config_checked',
+]
+function clientSkill(skill) {
+  const out = { ...skill }
+  for (const k of CLIENT_OMIT) delete out[k]
+  return out
 }
 
 async function getSkill(id) {
@@ -252,7 +279,7 @@ export default async function SkillDetailPage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
-      <SkillDetailClient skill={skill} sourceSpec={sourceSpec} codeflow={codeflow} related={related} bundle={relatedBundle(skill)} assets={relatedAssets(skill)} />
+      <SkillDetailClient skill={clientSkill(skill)} sourceSpec={sourceSpec} codeflow={codeflow} related={related} bundle={relatedBundle(skill)} assets={relatedAssets(skill)} />
     </>
   )
 }

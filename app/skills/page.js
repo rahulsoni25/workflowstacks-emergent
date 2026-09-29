@@ -14,9 +14,9 @@ export const metadata = {
   },
 }
 
-// 30 min — short enough that enrichment landings show up fast, long enough
-// to not hammer the DB on every page view.
-export const revalidate = 1800
+// 6 hours (was 30 min). The catalog only changes when the daily jobs run, and
+// each regeneration of this page is ~10 ISR write units — docs/COSTS.md.
+export const revalidate = 21600
 
 // One page's worth for the default SSR load. The catalog has thousands of
 // published skills — fetching them all in one request took 90s+ and blew
@@ -28,7 +28,7 @@ export const PAGE_SIZE = 48
 async function getSkills() {
   try {
     const res = await fetch(`${BASE}/api/skills?sort=trending&limit=${PAGE_SIZE}`, {
-      next: { revalidate: 1800 },
+      next: { revalidate: 21600 },
       signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) return { skills: [], total: 0, hasMore: false }

@@ -11,11 +11,14 @@ export const metadata = {
   alternates: { canonical: '/' },
 }
 
-export const revalidate = 1800
+// 6 hours, not 30 minutes (2026-09-29): every regeneration whose output
+// changed is billed in ISR write units, and the catalog this page summarises
+// only changes when the daily jobs run. See docs/COSTS.md before lowering.
+export const revalidate = 21600
 
 async function getJson(path) {
   try {
-    const res = await fetch(`${BASE}${path}`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}${path}`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     return await res.json()
   } catch {

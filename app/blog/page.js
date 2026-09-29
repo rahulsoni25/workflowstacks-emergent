@@ -4,9 +4,10 @@ import NewsletterSignup from '@/components/NewsletterSignup'
 import { listPublished, TOPICS } from '@/lib/blog/store'
 import { breadcrumbSchema } from '@/lib/schema'
 
-// New posts appear when their published_at passes — hourly ISR keeps the
-// index fresh without a rebuild.
-export const revalidate = 3600
+// New posts appear when their published_at passes. The index reads
+// searchParams, so it is rendered per request; the value below only matters
+// if that ever changes (6h floor — docs/COSTS.md).
+export const revalidate = 21600
 
 export const metadata = {
   title: 'The WorkflowStacks Journal — n8n, MCP & AI agent guides',

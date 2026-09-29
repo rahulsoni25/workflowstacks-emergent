@@ -4,6 +4,13 @@ import { revalidateSkill } from '@/lib/revalidate'
 import { parseGithubUrl, fetchRepoFacts, analyzeRepo, validateFlow, ghHeaders, CODEFLOW_VERSION } from '@/lib/codeflow'
 
 export const dynamic = 'force-dynamic'
+
+// Equal apart from when it was computed.
+function sameCodeflow(a, b) {
+  if (!a || !b) return false
+  const strip = ({ computed_at, ...rest }) => rest
+  return JSON.stringify(strip(a)) === JSON.stringify(strip(b))
+}
 export const maxDuration = 60
 
 // Header only (no ?secret= — query strings end up in logs), constant-time compare.
@@ -195,7 +202,10 @@ export async function GET(request) {
         if (flowError && /http|no-provider|bad-json|timeout|abort/i.test(flowError)) set.codeflow_flow_error = flowError
         else unset.codeflow_flow_error = ''
         await col.updateOne({ _id: s._id }, { $set: set, $unset: unset })
-        revalidateSkill(s)
+        // The backfill re-analyses ~60 repos a day and most come back the
+        // same. Invalidating the page regardless made each of them regenerate
+        // (and be written to the ISR cache again) for no visible change.
+        if (!sameCodeflow(s.codeflow, cf)) revalidateSkill(s)
       }
       ok++
       results.push({ slug: s.slug || s.id, ok: true, tier: cf.size.tier, loc: cf.size.loc_human, setup: cf.setup.level, provider, flow: cf.flow, flow_error: flowError, ...(dry ? { codeflow: cf } : {}) })

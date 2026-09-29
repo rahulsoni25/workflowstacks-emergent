@@ -9,7 +9,7 @@ import RankedSection from '@/components/RankedSection'
 // The public face of the Monday digest. Same three lists, same data, one
 // page that can be linked, shared and indexed — the email is the inbox
 // version of this. 30-minute ISR; the numbers move once a day.
-export const revalidate = 1800
+export const revalidate = 21600
 
 export const metadata = {
   title: 'Hot this week — the fastest-growing open-source AI skills | WorkflowStacks',
@@ -20,7 +20,7 @@ export const metadata = {
 
 async function getHot() {
   try {
-    const res = await fetch(`${BASE}/api/hot`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/hot`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     return await res.json()
   } catch {

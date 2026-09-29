@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { SITE_URL as BASE } from '@/lib/site-url'
 import { slugifyName } from '@/lib/collections'
 
-export const revalidate = 1800
+export const revalidate = 21600
 
 function audienceColor(a) {
   const c = {
@@ -21,7 +21,7 @@ function audienceColor(a) {
 
 async function getPlaybooks() {
   try {
-    const res = await fetch(`${BASE}/api/playbooks`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/playbooks`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     return (await res.json()).playbooks || []
   } catch {

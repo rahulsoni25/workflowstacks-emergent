@@ -21,7 +21,7 @@ import { breadcrumbSchema } from '@/lib/schema'
 // `newest` because it is the most stable ordering the API offers — items
 // only ever enter at the front.
 export const PAGE_SIZE = 48
-export const revalidate = 1800
+export const revalidate = 21600
 export const dynamicParams = true
 export function generateStaticParams() { return [] }
 
@@ -29,7 +29,7 @@ async function getPage(n) {
   const offset = (n - 1) * PAGE_SIZE
   try {
     const res = await fetch(`${BASE}/api/skills?sort=newest&limit=${PAGE_SIZE}&offset=${offset}`, {
-      next: { revalidate: 1800 },
+      next: { revalidate: 21600 },
       signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) return null

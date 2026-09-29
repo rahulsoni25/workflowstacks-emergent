@@ -2,11 +2,11 @@ import { notFound } from 'next/navigation'
 import StackDetailClient from './StackDetailClient'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
-export const revalidate = 3600
+export const revalidate = 21600
 
 async function getStack(slug) {
   try {
-    const res = await fetch(`${BASE}/api/stacks/${slug}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/stacks/${slug}`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     const data = await res.json()
     return data.stack ? { stack: data.stack, skills: data.skills || [] } : null

@@ -5,7 +5,7 @@ import NewsletterSignup from '@/components/NewsletterSignup'
 
 // Public archive of the Monday digest. Archived issues rank for the skill
 // names they contain and give the signup form proof the newsletter exists.
-export const revalidate = 1800
+export const revalidate = 21600
 
 export const metadata = {
   title: 'WorkflowStacks Weekly — the Monday digest of fast-growing AI skills',
@@ -16,7 +16,7 @@ export const metadata = {
 
 async function getIssues() {
   try {
-    const res = await fetch(`${BASE}/api/newsletter/issues`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/newsletter/issues`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     return (await res.json()).issues || []
   } catch {

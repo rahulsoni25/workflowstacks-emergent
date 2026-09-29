@@ -1,11 +1,11 @@
 import ProblemsClient from './ProblemsClient'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
-export const revalidate = 1800
+export const revalidate = 21600
 
 async function getProblems() {
   try {
-    const res = await fetch(`${BASE}/api/problems`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/problems`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     return (await res.json()).problems || []
   } catch {

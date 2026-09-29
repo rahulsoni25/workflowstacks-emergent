@@ -11,7 +11,7 @@ export const metadata = {
   alternates: { canonical: '/members' },
 }
 
-export const revalidate = 1800
+export const revalidate = 21600
 
 // Member categories — the pools that make up the network
 export const MEMBER_CATEGORIES = [
@@ -32,7 +32,7 @@ const CAT_COLOR = {
 
 async function getMembers() {
   try {
-    const res = await fetch(`${BASE}/api/members`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/members`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return []
     const d = await res.json()
     return d.members || []
