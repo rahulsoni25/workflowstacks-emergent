@@ -20,6 +20,10 @@ on:
         description: User-Agent to send (blank = curl's default). Use a Googlebot string to see what Google is served.
         required: false
         default: ""
+      gsc:
+        description: "Optional Search Console reads via /api/gsc, space-separated: 'sitemaps' and/or 'inspect:<url>'"
+        required: false
+        default: ""
 
 jobs:
   probe:
@@ -59,6 +63,20 @@ jobs:
           print('html bytes:', len(b), '| visible text chars:', len(text))
           print('visible text sample:', text[:600])
           PY
+          done
+      - name: Search Console
+        if: ${{ inputs.gsc != '' }}
+        env:
+          GSC: ${{ inputs.gsc }}
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+        run: |
+          for spec in $GSC; do
+            case "$spec" in
+              inspect:*) q="action=inspect&url=$(python3 -c 'import sys,urllib.parse;print(urllib.parse.quote(sys.argv[1],safe=""))' "${spec#inspect:}")" ;;
+              *) q="action=$spec" ;;
+            esac
+            echo "=================== gsc $spec"
+            curl -sS --max-time 60 -H "x-admin-secret: $ADMIN_SECRET" "https://workflowstacks.com/api/gsc?$q" | head -c 4000; echo
           done
       - name: DNS
         run: |
