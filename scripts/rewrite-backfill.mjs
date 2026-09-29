@@ -94,7 +94,14 @@ async function callGroq(system, user, maxTokens = 300) {
   let provName = PROVIDER
   const body = {
     model: isGroq ? GROQ_MODEL : OPENROUTER_MODEL,
-    max_tokens: maxTokens,
+    // gpt-oss-120b (the isGroq default) spends real output tokens on hidden
+    // reasoning before emitting content -- at the old max_tokens:300, a
+    // real test run (2026-09-29) exhausted the budget mid-reasoning and
+    // returned empty content on all 3 attempts ("Unexpected end of JSON
+    // input"). 'low' effort + more headroom for a task this simple
+    // (Groq docs: console.groq.com/docs/reasoning).
+    ...(isGroq ? { reasoning_effort: 'low' } : {}),
+    max_tokens: isGroq ? Math.max(maxTokens, 800) : maxTokens,
     messages: [
       { role: 'system', content: system },
       { role: 'user', content: user },
@@ -135,7 +142,14 @@ async function callGroq(system, user, maxTokens = 300) {
 function parseJsonObject(text) {
   let t = (text || '').replace(/^```(?:json)?/i, '').replace(/```$/, '').trim()
   const m = t.match(/\{[\s\S]*\}/)
-  return JSON.parse(m ? m[0] : t)
+  try {
+    return JSON.parse(m ? m[0] : t)
+  } catch (e) {
+    // Include what actually came back -- an empty/truncated response (e.g.
+    // a reasoning model that ran out of tokens before emitting content)
+    // looks identical to a malformed one from the exception alone.
+    throw new Error(`${e.message} -- raw content (${text?.length || 0} chars): ${JSON.stringify((text || '').slice(0, 150))}`)
+  }
 }
 
 // Same prompt as app/api/agent-rewrite/route.js rewriteWithLLM -- kept in
