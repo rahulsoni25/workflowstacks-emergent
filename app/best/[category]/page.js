@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { SITE_URL as BASE } from '@/lib/site-url'
 import { breadcrumbSchema } from '@/lib/schema'
+import { isAiRelevant } from '@/lib/skill-relevance'
 import { TYPE_CATEGORIES, FOR_CATEGORIES } from '@/lib/skill-display'
 import NewsletterSignup from '@/components/NewsletterSignup'
 import RankedSection from '@/components/RankedSection'
@@ -47,12 +48,15 @@ export default async function BestCategoryPage({ params }) {
   if (!label) notFound()
 
   const [list, hotData] = await Promise.all([
-    getJson(`/api/skills?category=${encodeURIComponent(category)}&sort=popular&limit=20`),
+    getJson(`/api/skills?category=${encodeURIComponent(category)}&sort=popular&limit=60`),
     getJson(`/api/hot?category=${encodeURIComponent(category)}`),
   ])
-  const top = (list?.skills || []).filter((s) => !s.dead_repo)
-  const hot = (hotData?.hot || []).slice(0, 5)
-  const rising = (hotData?.rising || []).slice(0, 5)
+  // Stored categories are unreliable (the Linux kernel and Flutter are filed
+  // as `ai-agent`), and a star-ranked list puts them first. Over-fetch, keep
+  // only real AI tools, then take the top 20. See lib/skill-relevance.
+  const top = (list?.skills || []).filter((s) => !s.dead_repo && isAiRelevant(s)).slice(0, 20)
+  const hot = (hotData?.hot || []).filter((s) => isAiRelevant(s)).slice(0, 5)
+  const rising = (hotData?.rising || []).filter((s) => isAiRelevant(s)).slice(0, 5)
   const total = list?.total || top.length
 
   const crumbs = breadcrumbSchema([

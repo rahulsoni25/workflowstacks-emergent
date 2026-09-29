@@ -510,6 +510,7 @@ const WEEKLY_FIELDS = {
   _id: 0, id: 1, slug: 1, name: 1, title_human: 1, description: 1, description_human: 1,
   'use_guide.whatItDoes': 1, category: 1, github_stars: 1, github_forks: 1, github_url: 1,
   creator: 1, velocity_7d: 1, velocity_provisional: 1, added_at: 1, last_updated: 1,
+  github_topics: 1, // isAiRelevant() reads it; /best filters hot + rising lists
 };
 
 // Hot = most stars gained in the last 7 days (velocity_7d, written by

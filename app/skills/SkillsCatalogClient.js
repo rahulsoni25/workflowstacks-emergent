@@ -12,6 +12,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { trackInstall } from '@/lib/track-install'
+import { isAiRelevant } from '@/lib/skill-relevance'
 import {
   TARGETS,
   TYPE_CATEGORIES,
@@ -250,9 +251,13 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
   const noFilters = category === 'all' && !q && !freeOnly
   const heroes = useMemo(() => {
     if (!noFilters || skills.length < 2) return []
-    const byStars = [...skills].sort((a, b) => (b.github_stars || 0) - (a.github_stars || 0))
+    // Heroes are the first two skill links on /skills, the catalog's hub page,
+    // so they only ever feature real AI tools — star count alone crowned the
+    // Linux kernel "MOST STARRED" here. Same strict test as the homepage rail.
+    const pool = skills.filter((s) => isAiRelevant(s, { strict: true }))
+    const byStars = [...pool].sort((a, b) => (b.github_stars || 0) - (a.github_stars || 0))
     const mostStarred = byStars[0]
-    const byHealth = [...skills].filter((s) => s !== mostStarred && healthScore(s) !== null).sort((a, b) => healthScore(b) - healthScore(a))
+    const byHealth = pool.filter((s) => s !== mostStarred && healthScore(s) !== null).sort((a, b) => healthScore(b) - healthScore(a))
     const topHealth = byHealth[0]
     const out = []
     if (mostStarred) out.push({ s: mostStarred, kicker: 'MOST STARRED', lime: true })
