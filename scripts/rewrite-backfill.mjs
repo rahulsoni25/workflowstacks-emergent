@@ -28,7 +28,14 @@ import { MongoClient } from 'mongodb'
 const MONGO_URL = process.env.MONGO_URL
 const DB_NAME = process.env.DB_NAME || 'workflowstacks'
 const GROQ_API_KEY = process.env.GROQ_API_KEY
-const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
+// llama-3.3-70b-versatile 404'd -- moved to Groq's Enterprise-only tier (same
+// stale default this repo's app/api/agent-rewrite/route.js still has).
+// Confirmed live against this account's real /openai/v1/models list
+// (2026-09-29): canopylabs/orpheus-* and whisper-* are audio models,
+// llama-prompt-guard-2-* are classifiers, allam-2-7b is Arabic-specialized --
+// openai/gpt-oss-120b is the strongest general-purpose chat model actually
+// available.
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
 // google/gemma-2-9b-it:free returned 404 "No endpoints found" in the first
 // real test run (2026-09-29) -- deprecated/removed from OpenRouter's catalog

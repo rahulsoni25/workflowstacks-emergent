@@ -105,7 +105,9 @@ async function preFilterCandidates(database, goal, max = 60) {
 // fall through to OpenRouter instead of degrading the whole recommender.
 function providerChain() {
   const chain = []
-  if (process.env.GROQ_API_KEY) chain.push({ name: 'groq', model: process.env.GROQ_REC_MODEL || 'llama-3.3-70b-versatile' })
+  // llama-3.3-70b-versatile moved to Groq's Enterprise-only tier -- see
+  // app/api/agent-rewrite/route.js for the same fix + confirmation.
+  if (process.env.GROQ_API_KEY) chain.push({ name: 'groq', model: process.env.GROQ_REC_MODEL || 'openai/gpt-oss-120b' })
   if (process.env.OPENROUTER_API_KEY) chain.push({ name: 'openrouter', model: 'anthropic/claude-haiku-4.5' })
   return chain
 }
