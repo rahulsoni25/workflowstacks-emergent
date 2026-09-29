@@ -1,0 +1,62 @@
+name: Rewrite backfill (templated listing copy)
+
+# One-time backfill, not a recurring schedule: re-writes the title/description
+# of already-published skills whose copy matches the old templated pattern
+# ("Get X with Y, for founders...") that PR #64 stopped generating for NEW
+# skills but never retroactively fixed. 1,175 of 2,582 published skills
+# matched this pattern as of 2026-09-28 -- confirmed the leading hypothesis
+# for Google Search Console's Page indexing report showing 549 pages
+# "Crawled - currently not indexed" and 504 "Discovered - currently not
+# indexed" out of a 674-URL sitemap sitting at 0 indexed.
+#
+# Manual trigger only, with a --limit input, so it can run in controlled
+# chunks (Groq/OpenRouter free-tier rate limits) rather than one multi-hour
+# run. Re-run with the same or a higher limit until the candidate count
+# (printed at the top of the log) hits 0 -- each run only re-selects skills
+# whose description still matches the templated pattern, so it's safe to
+# re-run without re-touching already-fixed skills.
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Max skills to process this run'
+        required: false
+        default: '150'
+      dry_run:
+        description: 'Score candidates but write nothing'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350 # this is a long-running batch job; GH Actions caps a job at 6h (360m)
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Backfill templated listing copy
+        env:
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          set -o pipefail
+          node scripts/rewrite-backfill.mjs \
+            --limit=${{ github.event.inputs.limit || '150' }} \
+            --dry-run=${{ github.event.inputs.dry_run || 'false' }} \
+            | tee /tmp/backfill.log
+          echo
+
+      - name: Summary
+        run: |
+          echo "### Rewrite backfill" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          grep '"summary":true' /tmp/backfill.log >> $GITHUB_STEP_SUMMARY || echo "no summary line -- check the job log" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
