@@ -26,6 +26,10 @@ on:
         description: 'Score candidates but write nothing'
         required: false
         default: 'false'
+      groq_model:
+        description: 'Override GROQ_MODEL for this run (blank = script default)'
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -40,12 +44,29 @@ jobs:
         with:
           node-version: 20
       - run: npm ci
+      - name: What Groq models does this key actually have?
+        # 3 wrong hardcoded defaults in a row this session (2 OpenRouter
+        # models gone/throttled, then llama-3.3-70b-versatile turned out to
+        # have moved to Groq's Enterprise-only tier) -- checking the real
+        # list once instead of guessing a 4th time. Costs nothing (no LLM
+        # call, just a catalog read) and never fails the job.
+        if: ${{ secrets.GROQ_API_KEY != '' }}
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: |
+          echo "### Groq models available to this key" >> $GITHUB_STEP_SUMMARY
+          echo '```json' >> $GITHUB_STEP_SUMMARY
+          curl -s https://api.groq.com/openai/v1/models -H "Authorization: Bearer $GROQ_API_KEY" \
+            | jq '[.data[].id]' >> $GITHUB_STEP_SUMMARY || echo "call failed" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
       - name: Backfill templated listing copy
         env:
           MONGO_URL: ${{ secrets.MONGO_URL }}
           DB_NAME: ${{ secrets.DB_NAME }}
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GROQ_MODEL: ${{ github.event.inputs.groq_model }}
         run: |
           set -o pipefail
           node scripts/rewrite-backfill.mjs \
