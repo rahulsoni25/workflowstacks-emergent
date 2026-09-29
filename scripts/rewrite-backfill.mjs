@@ -30,7 +30,12 @@ const DB_NAME = process.env.DB_NAME || 'workflowstacks'
 const GROQ_API_KEY = process.env.GROQ_API_KEY
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemma-2-9b-it:free'
+// google/gemma-2-9b-it:free returned 404 "No endpoints found" in the first
+// real test run (2026-09-29) -- deprecated/removed from OpenRouter's catalog
+// since this script was written. gemma-4-31b-it:free is the writer model the
+// blog pipeline already uses in production (lib/blog/llm.js) and was
+// confirmed live against OpenRouter's /api/v1/models the same day.
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemma-4-31b-it:free'
 // Same provider priority as resolveProvider() in app/api/agent-rewrite/route.js.
 const PROVIDER = GROQ_API_KEY ? 'groq' : OPENROUTER_API_KEY ? 'openrouter' : null
 
