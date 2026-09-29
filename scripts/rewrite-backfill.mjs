@@ -67,24 +67,60 @@ function formatStars(stars) {
   return `${stars} GitHub stars`
 }
 
+function openrouterHeaders() {
+  return { 'Content-Type': 'application/json', Authorization: `Bearer ${OPENROUTER_API_KEY}`, 'X-Title': 'WorkflowStacks' }
+}
+function groqHeaders() {
+  return { 'Content-Type': 'application/json', Authorization: `Bearer ${GROQ_API_KEY}` }
+}
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
+
+// Same retry/fallback shape as lib/blog/llm.js, which this repo already
+// proved out on this exact model family. First real test run (2026-09-29,
+// 3-skill batch): 3/3 failed with "google/gemma-4-31b-it:free is temporarily
+// rate-limited upstream" -- OpenRouter's shared free pool being throttled,
+// not this account's quota. A 20s wait + one retry usually clears it; if
+// GROQ_API_KEY is also set, fall back to Groq for that call rather than fail.
 async function callGroq(system, user, maxTokens = 300) {
   const isGroq = PROVIDER === 'groq'
-  const url = isGroq ? 'https://api.groq.com/openai/v1/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions'
-  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${isGroq ? GROQ_API_KEY : OPENROUTER_API_KEY}` }
-  if (!isGroq) headers['X-Title'] = 'WorkflowStacks'
-  const res = await fetch(url, {
+  let provName = PROVIDER
+  const body = {
+    model: isGroq ? GROQ_MODEL : OPENROUTER_MODEL,
+    max_tokens: maxTokens,
+    messages: [
+      { role: 'system', content: system },
+      { role: 'user', content: user },
+    ],
+  }
+  let res = await fetch(isGroq ? GROQ_URL : OPENROUTER_URL, {
     method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model: isGroq ? GROQ_MODEL : OPENROUTER_MODEL,
-      max_tokens: maxTokens,
-      messages: [
-        { role: 'system', content: system },
-        { role: 'user', content: user },
-      ],
-    }),
+    headers: isGroq ? groqHeaders() : openrouterHeaders(),
+    body: JSON.stringify(body),
   })
-  if (!res.ok) throw new Error(`${PROVIDER} ${res.status}: ${(await res.text()).slice(0, 200)}`)
+
+  if (res.status === 429 && !isGroq) {
+    await new Promise((r) => setTimeout(r, 20_000))
+    res = await fetch(OPENROUTER_URL, { method: 'POST', headers: openrouterHeaders(), body: JSON.stringify(body) })
+  }
+  if (!res.ok && !isGroq && [401, 402, 403, 429].includes(res.status) && GROQ_API_KEY) {
+    provName = 'groq'
+    body.model = GROQ_MODEL
+    res = await fetch(GROQ_URL, { method: 'POST', headers: groqHeaders(), body: JSON.stringify(body) })
+  }
+  if (res.status === 429 && provName === 'groq') {
+    const bodyText = await res.text()
+    const m = bodyText.match(/try again in ([0-9.]+)s/) || [null, res.headers.get('retry-after')]
+    const waitS = Math.ceil(parseFloat(m[1] || '15'))
+    if (waitS <= 30) {
+      await new Promise((r) => setTimeout(r, (waitS + 1) * 1000))
+      res = await fetch(GROQ_URL, { method: 'POST', headers: groqHeaders(), body: JSON.stringify(body) })
+    } else {
+      throw new Error(`groq 429: ${bodyText.slice(0, 200)}`)
+    }
+  }
+
+  if (!res.ok) throw new Error(`${provName} ${res.status}: ${(await res.text()).slice(0, 200)}`)
   const data = await res.json()
   return data.choices?.[0]?.message?.content || ''
 }
