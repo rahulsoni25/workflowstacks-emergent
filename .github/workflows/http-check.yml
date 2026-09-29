@@ -16,6 +16,10 @@ on:
         description: Space-separated hostnames to resolve
         required: false
         default: "workflowstacks.com founder-avatar.workflowstacks.com www.workflowstacks.com"
+      user_agent:
+        description: User-Agent to send (blank = curl's default). Use a Googlebot string to see what Google is served.
+        required: false
+        default: ""
 
 jobs:
   probe:
@@ -24,17 +28,37 @@ jobs:
     env:
       URLS: ${{ inputs.urls }}
       HOSTS: ${{ inputs.hosts }}
+      UA: ${{ inputs.user_agent }}
     steps:
       - name: HTTP
         run: |
           for u in $URLS; do
             echo "=================== $u"
-            code=$(curl -sS -o body.txt -D headers.txt --max-time 30 -w '%{http_code}' "$u") || echo "curl exit $?"
+            code=$(curl -sS -o body.txt -D headers.txt --max-time 30 ${UA:+-A "$UA"} -w '%{http_code} %{time_total}s' "$u") || echo "curl exit $?"
             echo "status: $code"
-            grep -iE '^(location|server|content-type|x-vercel-id|x-vercel-error|x-vercel-cache|x-matched-path|cache-control):' headers.txt || true
+            grep -iE '^(location|server|content-type|x-vercel-id|x-vercel-error|x-vercel-cache|x-matched-path|cache-control|x-robots-tag):' headers.txt || true
             echo "--- body, first 700 bytes ---"
             head -c 700 body.txt | tr -d '\r'; echo
             echo "--- tag ids in body ---"; grep -oE 'GTM-[A-Z0-9]{4,12}|G-[A-Z0-9]{6,12}|fbq\(.init.,.[0-9]{8,20}' body.txt | sort -u || true
+            # What a search engine reads from this response: title, robots,
+            # canonical, first H1, and how much visible text the HTML carries
+            # before any JavaScript runs.
+            echo "--- indexing signals ---"
+            python3 - <<'PY'
+          import re, html
+          b = open('body.txt', encoding='utf-8', errors='replace').read()
+          def first(p):
+              m = re.search(p, b, re.I | re.S)
+              return html.unescape(re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', m.group(1)))).strip()[:200] if m else None
+          print('title:', first(r'<title[^>]*>(.*?)</title>'))
+          print('meta robots:', re.findall(r'<meta[^>]+name="robots"[^>]*>', b, re.I) or None)
+          print('canonical:', first(r'<link[^>]+rel="canonical"[^>]+href="([^"]+)"'))
+          print('h1:', first(r'<h1[^>]*>(.*?)</h1>'))
+          text = re.sub(r'<(script|style|noscript)[^>]*>.*?</\1>', ' ', b, flags=re.I | re.S)
+          text = html.unescape(re.sub(r'\s+', ' ', re.sub(r'<[^>]+>', ' ', text))).strip()
+          print('html bytes:', len(b), '| visible text chars:', len(text))
+          print('visible text sample:', text[:600])
+          PY
           done
       - name: DNS
         run: |
