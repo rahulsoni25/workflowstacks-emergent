@@ -11,7 +11,7 @@ export const metadata = {
 
 // 5 min — short enough that AI rewrite landings show up fast, long enough to
 // not hammer the DB on every page view.
-export const revalidate = 1800
+export const revalidate = 21600
 
 const SECTIONS = [
   { key: 'trending', label: '🔥 Trending', hint: 'Popular and recently active' },
@@ -28,7 +28,7 @@ const SECTIONS = [
 async function getSection(sortKey) {
   try {
     const res = await fetch(`${BASE}/api/skills?sort=${sortKey}&limit=8`, {
-      next: { revalidate: 1800 },
+      next: { revalidate: 21600 },
       signal: AbortSignal.timeout(10_000),
     })
     if (!res.ok) return []

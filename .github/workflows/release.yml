@@ -1,0 +1,94 @@
+name: Release to production
+
+# Production deploys are batched. Merging to main does NOT deploy: the Vercel
+# ignore step (scripts/vercel-ignore-build.sh) only builds a production commit
+# whose message contains [deploy]. This workflow is what writes that commit —
+# once a week on schedule, or on demand from the Actions tab.
+#
+# Why: every production deploy empties the ISR cache and the catalog is then
+# regenerated on demand, billed per 8 KB written. ~45 deploys a month put the
+# Hobby plan at 164% of its ISR write units. See docs/COSTS.md.
+on:
+  schedule:
+    - cron: '30 3 * * 1' # Monday 03:30 UTC, before the week's scheduled jobs
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Deploy even if no site files changed since the last production deploy'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  deployments: read
+
+concurrency:
+  group: release-production
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Find the commit production is running
+        id: live
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          sha=""
+          for id in $(gh api "repos/${{ github.repository }}/deployments?environment=Production&per_page=30" --jq '.[].id'); do
+            state=$(gh api "repos/${{ github.repository }}/deployments/$id/statuses?per_page=1" --jq '.[0].state // ""')
+            if [ "$state" = "success" ]; then
+              sha=$(gh api "repos/${{ github.repository }}/deployments/$id" --jq '.sha')
+              break
+            fi
+          done
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Production is on: ${sha:-unknown}"
+
+      - name: Decide
+        id: decide
+        run: |
+          live="${{ steps.live.outputs.sha }}"
+          if [ "${{ inputs.force }}" = "true" ]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"; echo "Forced."; exit 0
+          fi
+          if [ -z "$live" ] || ! git cat-file -e "$live^{commit}" 2>/dev/null; then
+            echo "go=true" >> "$GITHUB_OUTPUT"; echo "Live commit unknown - deploying."; exit 0
+          fi
+          if [ "$live" = "$(git rev-parse HEAD)" ]; then
+            echo "go=false" >> "$GITHUB_OUTPUT"; echo "Production is already on main's HEAD."; exit 0
+          fi
+          # Same pathspec as scripts/vercel-ignore-build.sh.
+          if git diff --quiet "$live" HEAD -- . \
+              ':(exclude)reports' ':(exclude).github' ':(exclude)docs' ':(exclude)memory' \
+              ':(exclude)tests' ':(exclude)test_reports' ':(exclude)cli' \
+              ':(exclude,glob)*.md' ':(exclude)backend_test.py'; then
+            echo "go=false" >> "$GITHUB_OUTPUT"; echo "Nothing the site is built from changed since $live."
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+            echo "Commits going live:"; git log --oneline "$live"..HEAD | head -50
+          fi
+
+      - name: Push the [deploy] commit
+        if: steps.decide.outputs.go == 'true'
+        run: |
+          git config user.name "release-bot"
+          git config user.email "release-bot@users.noreply.github.com"
+          git commit --allow-empty -m "Release: production deploy $(date -u +%Y-%m-%d) [deploy]"
+          git push origin HEAD:main
+
+      - name: Summary
+        run: |
+          if [ "${{ steps.decide.outputs.go }}" = "true" ]; then
+            echo "### Production deploy requested" >> "$GITHUB_STEP_SUMMARY"
+            echo "Previous live commit: \`${{ steps.live.outputs.sha }}\`" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### No deploy - nothing to release" >> "$GITHUB_STEP_SUMMARY"
+          fi

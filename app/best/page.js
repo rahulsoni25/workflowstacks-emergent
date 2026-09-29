@@ -4,7 +4,7 @@ import { breadcrumbSchema } from '@/lib/schema'
 import { TYPE_CATEGORIES, FOR_CATEGORIES } from '@/lib/skill-display'
 import NewsletterSignup from '@/components/NewsletterSignup'
 
-export const revalidate = 86400
+export const revalidate = 604800
 
 export const metadata = {
   title: 'Best open-source AI skills by category — ranked by GitHub stars | WorkflowStacks',
@@ -15,7 +15,7 @@ export const metadata = {
 
 async function getCounts() {
   try {
-    const res = await fetch(`${BASE}/api/stats`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/stats`, { next: { revalidate: 604800 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return {}
     return (await res.json()).categories || {}
   } catch {

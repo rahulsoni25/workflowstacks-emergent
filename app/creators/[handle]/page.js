@@ -12,7 +12,7 @@ import InviteCapture from '@/components/creators/InviteCapture'
 // Rendered on first visit, then cached for a week. A successful claim calls
 // revalidatePath for this URL, so verification shows up immediately. Nothing is
 // prebuilt: ~2k owner pages would be ~2k ISR writes on every deploy.
-export const revalidate = 604800
+export const revalidate = 2592000
 export function generateStaticParams() {
   return []
 }

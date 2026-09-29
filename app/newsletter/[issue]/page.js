@@ -7,7 +7,7 @@ import ShareButtons from '@/components/ShareButtons'
 import RankedSection from '@/components/RankedSection'
 
 // One archived Monday issue, rendered from the lists stored at send time.
-export const revalidate = 3600
+export const revalidate = 86400
 export const dynamicParams = true
 export function generateStaticParams() { return [] }
 
@@ -16,7 +16,7 @@ const ISSUE_RE = /^\d{4}-\d{2}-\d{2}$/
 async function getIssue(issue) {
   if (!ISSUE_RE.test(issue)) return null
   try {
-    const res = await fetch(`${BASE}/api/newsletter/issues/${issue}`, { next: { revalidate: 3600 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/newsletter/issues/${issue}`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     return (await res.json()).issue || null
   } catch {

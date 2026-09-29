@@ -10,7 +10,7 @@ import Prose from '@/components/blog/Prose'
 import PostCard from '@/components/blog/PostCard'
 import NewsletterSignup from '@/components/NewsletterSignup'
 
-export const revalidate = 3600
+export const revalidate = 21600
 // Slugs come from Mongo, not a registry — render on demand.
 export const dynamicParams = true
 export async function generateStaticParams() { return [] }

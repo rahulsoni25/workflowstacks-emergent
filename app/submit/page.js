@@ -1,11 +1,11 @@
 import SubmitClient from './SubmitClient'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
-export const revalidate = 1800
+export const revalidate = 21600
 
 async function getStats() {
   try {
-    const res = await fetch(`${BASE}/api/stats`, { next: { revalidate: 1800 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}/api/stats`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     return await res.json()
   } catch {

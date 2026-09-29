@@ -10,7 +10,7 @@ import RankedSection from '@/components/RankedSection'
 // "best <category> …" queries, link 20+ skill pages each (the crawl found
 // most skill pages hanging off a single link), and carry the signup form.
 // Rendered on first request and refreshed daily, like skill pages.
-export const revalidate = 86400
+export const revalidate = 604800
 export const dynamicParams = true
 export function generateStaticParams() { return [] }
 
@@ -19,7 +19,7 @@ const LABELS = Object.fromEntries(ALL)
 
 async function getJson(path) {
   try {
-    const res = await fetch(`${BASE}${path}`, { next: { revalidate: 86400 }, signal: AbortSignal.timeout(10_000) })
+    const res = await fetch(`${BASE}${path}`, { next: { revalidate: 604800 }, signal: AbortSignal.timeout(10_000) })
     if (!res.ok) return null
     return await res.json()
   } catch {
