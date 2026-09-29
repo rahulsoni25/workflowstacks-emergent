@@ -58,10 +58,14 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         if: ${{ env.GROQ_API_KEY != '' }}
         run: |
+          # $GITHUB_STEP_SUMMARY only renders in the GitHub UI (needs a login
+          # to view on this repo) -- also print to stdout, which the plain
+          # job log captures and `gh api .../logs` can read headlessly.
+          MODELS=$(curl -s https://api.groq.com/openai/v1/models -H "Authorization: Bearer $GROQ_API_KEY" | jq -c '[.data[].id]')
+          echo "GROQ_MODELS_AVAILABLE: ${MODELS:-call failed}"
           echo "### Groq models available to this key" >> $GITHUB_STEP_SUMMARY
           echo '```json' >> $GITHUB_STEP_SUMMARY
-          curl -s https://api.groq.com/openai/v1/models -H "Authorization: Bearer $GROQ_API_KEY" \
-            | jq '[.data[].id]' >> $GITHUB_STEP_SUMMARY || echo "call failed" >> $GITHUB_STEP_SUMMARY
+          echo "${MODELS:-call failed}" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Backfill templated listing copy
