@@ -42,6 +42,17 @@
     --fm:"IBM Plex Mono",ui-monospace,Menlo,monospace;
   }
   *{box-sizing:border-box}
+  /* Light sections: the same tokens re-mapped, so every component rule below
+     works unchanged in either scheme. Measured on the cream (#F4EEE6): text
+     16.2:1, muted 7.6:1, dim 4.9:1, accent #8F4E0C 5.6:1 (and cream on the
+     accent 5.6:1 for the plan flag). Sections alternate dark / light from the
+     hero down; the hero stays dark because the video reads best there. */
+  section.light{
+    --ground:#F4EEE6; --surface:#FFFFFF; --surface2:#EAE3D9;
+    --line:rgba(20,17,28,.12); --line-strong:rgba(20,17,28,.5);
+    --text:#14111C; --muted:#4E4760; --dim:#6B6479; --amber:#8F4E0C;
+    background:var(--ground); color:var(--text);
+  }
   html{scroll-padding-top:calc(var(--bar-h) + 12px + env(safe-area-inset-top,0px))}
   @media(prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
   body{
@@ -120,7 +131,7 @@
   .submit-row{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:18px}
   .submit-row small{color:var(--dim); font-size:13px}
   .privacy{color:var(--dim); font-size:13px; margin:14px 0 0}
-  .privacy a{color:var(--muted); text-decoration:underline; text-underline-offset:3px; transition:color var(--t) ease}
+  .privacy a{color:var(--muted); text-decoration:underline; text-underline-offset:3px; transition:color var(--t) ease; display:inline-block; padding:12px 0; margin:-12px 0}
   .privacy a:hover{color:var(--text)}
 
   .sent{border:1px solid var(--mint); background:rgba(127,209,185,.07); border-radius:3px; padding:22px; margin-top:30px}
@@ -326,7 +337,7 @@
     </div>
   </section>
 
-  <section id="why">
+  <section id="why" class="light">
     <div class="wrap">
       <p class="eyebrow">The arithmetic</p>
       <h2 class="lede">A three-day shoot in Dubai costs AED&nbsp;35,000–&#8288;60,000. It buys you one day of your own time and one language.</h2>
@@ -361,7 +372,7 @@
     </div>
   </section>
 
-  <section id="how">
+  <section id="how" class="light">
     <div class="wrap">
       <p class="eyebrow">How it works</p>
       <h2 class="lede">Three steps, then it runs without you.</h2>
@@ -387,7 +398,7 @@
     </div>
   </section>
 
-  <section id="pricing">
+  <section id="pricing" class="light">
     <div class="wrap">
       <p class="eyebrow">Pricing</p>
       <h2 class="lede">Buy the production, the media, or both.</h2>
@@ -413,7 +424,7 @@
     </div>
   </section>
 
-  <section id="faq">
+  <section id="faq" class="light">
     <div class="wrap">
       <p class="eyebrow">Straight answers</p>
       <h2 class="lede">The questions founders actually ask.</h2>
