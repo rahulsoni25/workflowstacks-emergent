@@ -53,6 +53,19 @@ Colours (contrast measured with the WCAG formula):
 | `--line` / `--line-strong` | white at .13 / .26 | dividers, ghost borders | |
 | field border | white at .40 | input boundary | 3.5:1 ground, 3.2:1 surface (non-text 3:1) |
 
+Light sections (`section.light`: arithmetic, how it works, pricing, FAQ) re-map
+the same tokens so every component rule works in both schemes; the hero,
+proof, distribution, control and close sections stay dark.
+
+| Token (light) | Value | Contrast on cream `#F4EEE6` |
+| --- | --- | --- |
+| `--ground` / `--surface` / `--surface2` | `#F4EEE6` / `#FFFFFF` / `#EAE3D9` | |
+| `--text` | `#14111C` | 16.2:1 |
+| `--muted` | `#4E4760` | 7.6:1 |
+| `--dim` | `#6B6479` | 4.9:1 |
+| `--amber` | `#8F4E0C` | 5.6:1, and cream on it 5.6:1 |
+| `--line` / `--line-strong` | ink at .12 / .5 | |
+
 Type: `--fd` Instrument Serif (display, h1/h2/prices), `--fb` Archivo (body,
 UI), `--fm` IBM Plex Mono (labels, eyebrows, tags). Body 17px, line-height
 1.6; minimum information text 12px; form controls 16px (prevents iOS zoom);
