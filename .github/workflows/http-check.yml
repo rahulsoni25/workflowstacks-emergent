@@ -16,6 +16,10 @@ on:
         description: Space-separated hostnames to resolve
         required: false
         default: "workflowstacks.com founder-avatar.workflowstacks.com www.workflowstacks.com"
+      match:
+        description: Optional text to count in each body (e.g. a class name that proves a deploy landed)
+        required: false
+        default: ""
 
 jobs:
   probe:
@@ -24,6 +28,7 @@ jobs:
     env:
       URLS: ${{ inputs.urls }}
       HOSTS: ${{ inputs.hosts }}
+      MATCH: ${{ inputs.match }}
     steps:
       - name: HTTP
         run: |
@@ -35,6 +40,7 @@ jobs:
             echo "--- body, first 700 bytes ---"
             head -c 700 body.txt | tr -d '\r'; echo
             echo "--- tag ids in body ---"; grep -oE 'GTM-[A-Z0-9]{4,12}|G-[A-Z0-9]{6,12}|fbq\(.init.,.[0-9]{8,20}' body.txt | sort -u || true
+            if [ -n "$MATCH" ]; then echo "--- occurrences of \"$MATCH\" in body: $(grep -o -F -- "$MATCH" body.txt | wc -l) ---"; fi
           done
       - name: DNS
         run: |
