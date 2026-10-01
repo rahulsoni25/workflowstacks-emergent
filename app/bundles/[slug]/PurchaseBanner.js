@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { trackEvent } from '@/lib/analytics'
 
 // Split out of BundleSalesClient purely so that useSearchParams lives behind a
 // Suspense boundary. Without one, Next 14 bails the WHOLE route out of static
@@ -13,7 +14,7 @@ import { Card, CardContent } from '@/components/ui/card'
 // from the served HTML, leaving Google and AI crawlers a blank page on the only
 // pages that carry a price. Everything a crawler needs now renders on the
 // server; only this post-checkout banner waits for the query string.
-export default function PurchaseBanner({ bundleTitle }) {
+export default function PurchaseBanner({ bundleTitle, bundleSlug = '', priceUsd = 0 }) {
   const searchParams = useSearchParams()
   const justPurchased = searchParams.get('purchased') === '1'
   const sessionId = searchParams.get('session_id') || ''
@@ -33,7 +34,18 @@ export default function PurchaseBanner({ bundleTitle }) {
       body: JSON.stringify({ session_id: sessionId }),
     })
       .then((r) => r.json())
-      .then((d) => { if (d.unlock_url) setUnlockUrl(d.unlock_url) })
+      .then((d) => {
+        if (!d.unlock_url) return
+        setUnlockUrl(d.unlock_url)
+        // Counted only once the server has confirmed the Stripe session, and
+        // once per checkout — a reload or a hand-typed ?purchased=1 is not a sale.
+        try {
+          const key = `ws_purchase_${sessionId}`
+          if (localStorage.getItem(key)) return
+          localStorage.setItem(key, '1')
+        } catch {}
+        trackEvent('purchase', { transaction_id: sessionId, value: priceUsd, currency: 'USD', content_name: bundleSlug, content_category: 'bundle', items: [{ item_id: bundleSlug, item_name: bundleTitle, price: priceUsd, quantity: 1 }] })
+      })
       .catch(() => {})
   }, [justPurchased, sessionId])
 

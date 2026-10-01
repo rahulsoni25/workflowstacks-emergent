@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Download, Sparkles, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { trackEvent } from '@/lib/analytics'
 
 // Download flow with a SOFT email gate:
 //  - We ask for an email (single field) before the download.
@@ -55,6 +56,7 @@ export default function DownloadButtons({ slug, filename }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, source: 'template-download', template: slug }),
       })
+      trackEvent('newsletter_signup', { source: 'template-download', content_name: slug })
     } catch {}
   }
 
