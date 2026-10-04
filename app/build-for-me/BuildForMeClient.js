@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft, Check, Wrench, Clock, KeyRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { trackEvent } from '@/lib/analytics'
 
 const PROMISES = [
   { icon: Wrench, title: 'Built from proven tools', desc: 'We assemble your agent from the same open-source skills in our catalog — no black boxes, you can read every part.' },
@@ -36,6 +37,7 @@ export default function BuildForMeClient() {
       const data = await res.json()
       if (!res.ok || !data.ok) throw new Error(data.error || 'Something went wrong — try again.')
       setState('done')
+      trackEvent('dfy_request', { source: 'build-for-me', content_name: 'build-for-me' })
     } catch (err) {
       setState('error')
       setError(err.message)

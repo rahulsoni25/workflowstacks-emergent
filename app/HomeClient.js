@@ -18,6 +18,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { trackInstall } from '@/lib/track-install'
+import { trackEvent } from '@/lib/analytics'
 import { homeFaqs } from '@/lib/home-faqs'
 import NewsletterSignup from '@/components/NewsletterSignup'
 import {
@@ -240,6 +241,7 @@ export default function HomeClient({ initialSkills = [], initialStats = null, ho
       clearTimers() // stop pending phase ticks; the real answer has arrived
       if (seq !== searchSeq.current) return // a newer search superseded this one
       const list = Array.isArray(data?.results) ? data.results : []
+      trackEvent('site_search', { search_term: String(q).slice(0, 100), search_string: String(q).slice(0, 100), results: list.length })
       setResults(list)
       setMatchTokens(Array.isArray(data?.tokens) ? data.tokens : [])
       setAgent(list[0] || null)

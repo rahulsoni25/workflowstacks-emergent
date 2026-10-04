@@ -18,7 +18,7 @@ export default function BundleSalesClient({ bundle }) {
     setError('')
     try {
       const attribution = getUtm()
-      trackEvent('checkout_start', { bundle: bundle.slug, value: bundle.price_usd, currency: 'USD', ...(attribution || {}) })
+      trackEvent('checkout_start', { bundle: bundle.slug, value: bundle.price_usd, currency: 'USD', content_name: bundle.slug, content_category: 'bundle', ...(attribution || {}) })
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -47,7 +47,7 @@ export default function BundleSalesClient({ bundle }) {
 
       <div className="container mx-auto px-4 py-16 max-w-2xl">
         <Suspense fallback={null}>
-          <PurchaseBanner bundleTitle={bundle.title} />
+          <PurchaseBanner bundleTitle={bundle.title} bundleSlug={bundle.slug} priceUsd={bundle.price_usd} />
         </Suspense>
 
         <p className="text-xs tracking-widest uppercase text-[#C6F24E] font-semibold mb-3">Premium · one-time</p>

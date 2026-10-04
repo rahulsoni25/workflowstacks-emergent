@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import CookieSettingsButton from '@/components/CookieSettingsButton'
 
 export const metadata = {
   title: 'Privacy Policy | WorkflowStacks',
@@ -48,12 +49,13 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">4. Cookies</h2>
-            <p className="text-text-secondary leading-relaxed">We use essential cookies for site functionality and analytics cookies to understand usage patterns. You can disable non-essential cookies in your browser settings.</p>
+            <p className="text-text-secondary leading-relaxed">We use essential storage for site functionality. We also use Google Analytics to understand which pages help, and the Meta Pixel to measure and show our own ads. In the EEA, the UK and Switzerland these set cookies only after you accept; elsewhere they are on by default and you can turn them off here at any time. A Global Privacy Control signal from your browser is treated as a refusal. We never send your email address to either service.</p>
+            <CookieSettingsButton />
           </section>
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-3">5. Third-Party Services</h2>
-            <p className="text-text-secondary leading-relaxed">We integrate with GitHub's public API for skill discovery. When you use generated blueprints in third-party AI tools, those tools' privacy policies apply.</p>
+            <p className="text-text-secondary leading-relaxed">We integrate with GitHub's public API for skill discovery, and with Google Analytics and Meta for the measurement described above. When you use generated blueprints in third-party AI tools, those tools' privacy policies apply.</p>
           </section>
 
           <section>

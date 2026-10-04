@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Mail, Check } from 'lucide-react'
+import { trackEvent } from '@/lib/analytics'
 
 // The one newsletter form. Every surface (footer, skill page, blog, /hot,
 // homepage, exit prompt) uses it with a different `source`, which is how
@@ -45,6 +46,7 @@ export default function NewsletterSignup({
       })
       if (!res.ok) throw new Error('subscribe failed')
       setState('done')
+      trackEvent('newsletter_signup', { source, frequency: daily ? 'all' : 'weekly', content_name: source })
       try { localStorage.setItem('ws_subscribed', '1') } catch {}
     } catch {
       setState('error')

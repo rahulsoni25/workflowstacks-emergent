@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { trackEvent } from '@/lib/analytics'
 
 const CATS = ['all', 'Research', 'Automation', 'Sales', 'Marketing', 'Design', 'Productivity', 'AI Video', 'Other']
 const SORTS = [
@@ -46,6 +47,7 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
   const lockSeat = async (dealId) => {
     setLocking(dealId)
     try {
+      trackEvent('checkout_start', { deal: dealId, content_name: dealId, content_category: 'deal' })
       const res = await fetch('/api/stripe/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dealId }) })
       const d = await res.json()
       if (d.url) window.location.href = d.url
