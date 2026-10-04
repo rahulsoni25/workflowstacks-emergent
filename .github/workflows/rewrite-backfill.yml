@@ -16,6 +16,14 @@ name: Rewrite backfill (templated listing copy)
 # whose description still matches the templated pattern, so it's safe to
 # re-run without re-touching already-fixed skills.
 on:
+  # The 'agent': runs itself daily until no templated copy is left, so the
+  # backfill doesn't depend on someone re-triggering it. One run only gets
+  # through ~100-200 skills before Groq's daily token cap (then OpenRouter
+  # fallback), so finishing ~1,100 takes about a week of unattended runs.
+  # Once zero candidates remain each run exits in seconds. Daily is well
+  # inside the docs/COSTS.md 6-hour floor, and this job never calls the site.
+  schedule:
+    - cron: '40 1 * * *' # 01:40 UTC daily
   workflow_dispatch:
     inputs:
       limit:
@@ -33,6 +41,12 @@ on:
 
 permissions:
   contents: read
+
+# Two runs at once would hand the same candidates to both and double-spend
+# the provider's daily quota. Queue, never cancel a run mid-batch.
+concurrency:
+  group: rewrite-backfill
+  cancel-in-progress: false
 
 jobs:
   backfill:
