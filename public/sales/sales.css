@@ -66,7 +66,8 @@ section{padding:56px 0}
 
 /* Phone demo */
 .phone{width:min(360px,100%);margin:0 auto;border-radius:36px;background:#111827;padding:12px;box-shadow:0 30px 60px rgba(15,23,42,.22)}
-.screen{border-radius:26px;overflow:hidden;background:var(--chat-bg);min-height:500px;display:flex;flex-direction:column}
+.screen{border-radius:26px;overflow:hidden;background:var(--chat-bg);display:flex;flex-direction:column}
+@media (min-width:920px){.screen{min-height:500px}}
 .chat-head{background:#075e54;color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;font-size:15px}
 .chat-head .av{width:34px;height:34px;border-radius:50%;background:#cbd5e1;display:grid;place-items:center;color:#0f172a;font-weight:800;font-size:13px}
 .chat-head small{display:block;opacity:.8;font-size:12px}
@@ -99,8 +100,9 @@ section{padding:56px 0}
 .card.bad{border-top:4px solid #fca5a5}.card.good{border-top:4px solid #5eead4}
 
 /* Demo tabs */
-.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin:24px 0 18px;scrollbar-width:thin}
-.tab{flex:0 0 auto;min-height:44px;padding:10px 16px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font:700 15px var(--f);color:var(--ink);cursor:pointer}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:24px 0 18px}
+@media (min-width:860px){.tabs{display:flex;flex-wrap:wrap}}
+.tab{min-height:44px;padding:10px 14px;border-radius:999px;border:1.5px solid var(--line);background:#fff;font:700 14.5px/1.25 var(--f);color:var(--ink);cursor:pointer}
 .tab[aria-selected="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
 .demo{display:grid;gap:16px}
 @media (min-width:860px){.demo{grid-template-columns:1fr 64px 1fr;align-items:stretch}}
