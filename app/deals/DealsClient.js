@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { trackEvent } from '@/lib/analytics'
+import PurchaseTracker from '@/components/PurchaseTracker'
 
 const CATS = ['all', 'Research', 'Automation', 'Sales', 'Marketing', 'Design', 'Productivity', 'AI Video', 'Other']
 const SORTS = [
@@ -47,7 +48,8 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
   const lockSeat = async (dealId) => {
     setLocking(dealId)
     try {
-      trackEvent('checkout_start', { deal: dealId, content_name: dealId, content_category: 'deal' })
+      const deal = deals.find((x) => x.id === dealId)
+      trackEvent('checkout_start', { deal: dealId, value: Number(deal?.groupPrice) || 0, currency: 'USD', content_name: dealId, content_category: 'deal' })
       const res = await fetch('/api/stripe/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dealId }) })
       const d = await res.json()
       if (d.url) window.location.href = d.url
@@ -79,6 +81,7 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
 
   return (
     <div className="min-h-screen bg-neptune">
+      <PurchaseTracker flag="locked" category="deal" />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/"><Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
