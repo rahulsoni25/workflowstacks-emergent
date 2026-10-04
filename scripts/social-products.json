@@ -1,0 +1,63 @@
+{
+  "_readme": "WorkflowStacks' own products for the daily social job (scripts/social-daily.mjs). Wednesday features one of these, least recently posted first. Add a product with \"added\": \"YYYY-MM-DD\" and it goes out on the next run, whatever the day, if that date is within 14 days. \"facts\" is all the agents may say about it: copy it from the product's own page, and name that page in \"source\". \"by\" defaults to WorkflowStacks. \"enabled\": false keeps an entry out of the rotation.",
+  "products": [
+    {
+      "id": "hot-list",
+      "name": "Hot this week",
+      "url": "https://workflowstacks.com/hot",
+      "facts": "The open-source AI skills, MCP servers and agents gaining the most GitHub stars this week, ranked by 7-day star growth rather than total stars. Updated daily, emailed every Monday.",
+      "source": "app/hot/page.js (metadata.description)",
+      "added": null
+    },
+    {
+      "id": "claude-code-plugin",
+      "name": "WorkflowStacks plugin for Claude Code",
+      "url": "https://github.com/rahulsoni25/workflowstacks-emergent",
+      "facts": "The WorkflowStacks catalog inside Claude Code: search 2,000+ open-source AI skills, load any skill's instructions mid-conversation, and keep a personal skill library — via the WorkflowStacks MCP connector. Install it in Claude Code with: /plugin marketplace add rahulsoni25/workflowstacks-emergent",
+      "source": ".claude-plugin/marketplace.json (plugins[0].description); README.md (quick starts)",
+      "added": null
+    },
+    {
+      "id": "mcp-configs",
+      "name": "MCP server configs for Claude Desktop",
+      "url": "https://workflowstacks.com/mcp",
+      "facts": "Add tools to Claude Desktop in under a minute. Verified, copy-paste MCP server configs — filesystem, GitHub, web search, browsers, databases, and more. Free.",
+      "source": "app/mcp/page.js (metadata.description)",
+      "added": null
+    },
+    {
+      "id": "cli",
+      "name": "WorkflowStacks CLI",
+      "url": "https://www.npmjs.com/package/workflowstacks",
+      "facts": "Install WorkflowStacks skills into Claude Code from the terminal: npx workflowstacks add <slug>",
+      "source": "cli/package.json (description)",
+      "added": null
+    },
+    {
+      "id": "build-for-me",
+      "name": "We build your AI agent for you",
+      "url": "https://workflowstacks.com/build-for-me",
+      "facts": "Describe the workflow you want automated. We build a working AI agent from proven open-source tools, set it up in YOUR tools, and hand you the keys. Working in 7 days. From $500, one-time.",
+      "source": "app/build-for-me/page.js (metadata.title and metadata.description)",
+      "added": null
+    },
+    {
+      "id": "finishing-kits",
+      "name": "Finishing Kits",
+      "url": "https://workflowstacks.com/kits",
+      "facts": "Free assets matched to your template. Curated captions, badges, LUTs, overlays and SFX/music — picked for one specific ad style, not a generic stock library. Link-only, nothing to host.",
+      "source": "app/kits/page.js (metadata.title and metadata.description)",
+      "added": null
+    },
+    {
+      "id": "founder-avatar-studio",
+      "name": "Founder Avatar Studio",
+      "by": "FluoDigital",
+      "url": "https://workflowstacks.com/ai-avatar",
+      "facts": "We build a digital twin of you in seven days, then write, produce and publish your videos in English and Arabic — and put paid media behind the ones that work. One 45-minute capture session is all you ever sit through.",
+      "source": "public/sites/founder-avatar-studio/index.html (JSON-LD Service.description)",
+      "added": null,
+      "enabled": false
+    }
+  ]
+}

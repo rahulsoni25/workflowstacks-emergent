@@ -1,0 +1,102 @@
+name: Daily social posts
+
+# One story a day on X, LinkedIn and Instagram, written and checked by a team
+# of agents: Scout → Fact-checker → Writer ⇄ Editor ⇄ Hygiene → publishers.
+# Nothing is published unless every agent passes it. How it works and how to
+# connect each account: docs/SOCIAL.md.
+#
+# The work happens in this runner against Mongo (docs/COSTS.md rule 6). The
+# site is read once a run, to confirm the page being linked loads.
+on:
+  schedule:
+    - cron: '35 13 * * *' # 13:35 UTC daily: US morning, evening in Dubai and India
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run the agents and render the media; publish and record nothing'
+        type: boolean
+        default: true
+      format:
+        description: 'Format for this run (blank = the weekday rotation)'
+        type: choice
+        options: ['', 'post', 'carousel', 'reel']
+        default: ''
+      product:
+        description: 'Feature a WorkflowStacks product instead of a repo'
+        type: boolean
+        default: false
+      only:
+        description: 'Platforms to publish to, comma-separated (blank = x,linkedin,instagram)'
+        required: false
+        default: ''
+
+permissions:
+  # Instagram fetches media by public URL; the job writes the day's files to
+  # the single-commit social-assets branch (scripts/social-publish.mjs).
+  contents: write
+
+# Two runs at once could publish the same day twice.
+concurrency:
+  group: social-daily
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # 22: the script imports the site's lib/*.js helpers directly, which
+          # needs Node's ES-module syntax detection.
+          node-version: 22
+      - run: npm ci
+      - name: Media tools (sharp for images, ffmpeg for Reels, a font for both)
+        run: |
+          npm install --no-save --no-audit --no-fund sharp@0.35.5
+          command -v ffmpeg >/dev/null || { sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg; }
+          fc-list | grep -qi dejavu || { sudo apt-get update -qq && sudo apt-get install -y -qq fonts-dejavu-core; }
+
+      - name: Run the social team
+        env:
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_ORG_ID: ${{ secrets.LINKEDIN_ORG_ID }}
+          LINKEDIN_VERSION: ${{ vars.LINKEDIN_VERSION }}
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
+          INSTAGRAM_GRAPH_URL: ${{ vars.INSTAGRAM_GRAPH_URL }}
+          GITHUB_TOKEN: ${{ github.token }}
+          # Inputs pass through env, never pasted into the script below.
+          IS_MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+          IN_DRY: ${{ inputs.dry_run }}
+          IN_FORMAT: ${{ inputs.format }}
+          IN_PRODUCT: ${{ inputs.product }}
+          IN_ONLY: ${{ inputs.only }}
+        run: |
+          set -o pipefail
+          ARGS=()
+          if [ "$IS_MANUAL" = "true" ]; then
+            [ "$IN_DRY" = "true" ] && ARGS+=(--dry-run)
+            [ "$IN_PRODUCT" = "true" ] && ARGS+=(--product)
+            [ -n "$IN_FORMAT" ] && ARGS+=("--format=$IN_FORMAT")
+            [ -n "$IN_ONLY" ] && ARGS+=("--only=$IN_ONLY")
+          fi
+          node scripts/social-daily.mjs "${ARGS[@]}"
+
+      - name: Keep the rendered media
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: social-media-${{ github.run_id }}
+          path: social-out/
+          if-no-files-found: ignore
+          retention-days: 14

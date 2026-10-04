@@ -128,3 +128,6 @@ _pb.html
 *.gz
 *.hdr
 *.brhdr
+
+# Media rendered by scripts/social-daily.mjs
+/social-out/
