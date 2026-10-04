@@ -132,8 +132,19 @@ async function callGroq(system, user, maxTokens = 300) {
     if (waitS <= 30) {
       await new Promise((r) => setTimeout(r, (waitS + 1) * 1000))
       res = await fetch(GROQ_URL, { method: 'POST', headers: groqHeaders(), body: JSON.stringify(body) })
+    } else if (OPENROUTER_API_KEY) {
+      // The gap that lost 991 of 1173 calls in a real run (2026-09-29): a
+      // long wait time here means the DAILY token cap for this model is
+      // exhausted (not a per-minute blip that clears in <=30s), and no
+      // amount of waiting inside one job run fixes that. This script only
+      // ever built the OTHER direction (OpenRouter 429 -> Groq); Groq being
+      // PRIMARY here left its own exhaustion with nowhere to fall back to,
+      // so every remaining call in the run threw immediately.
+      provName = 'openrouter'
+      body.model = OPENROUTER_MODEL
+      res = await fetch(OPENROUTER_URL, { method: 'POST', headers: openrouterHeaders(), body: JSON.stringify(body) })
     } else {
-      throw new Error(`groq 429: ${bodyText.slice(0, 200)}`)
+      throw new Error(`groq 429 (daily cap, ${waitS}s reported): ${bodyText.slice(0, 200)}`)
     }
   }
 
