@@ -31,6 +31,13 @@ case "$MSG" in
   *) echo "production build without [deploy] in the commit message - skipped (batched into the next release; see docs/COSTS.md)"; exit 0 ;;
 esac
 
+# A forced release (release.yml, force=true) builds regardless of the diff:
+# an env-var-only change (a new NEXT_PUBLIC_* id) touches no file, so the
+# check below would skip it and the new value would never reach the site.
+case "$MSG" in
+  *"[force]"*) echo "[deploy] [force] - building without a diff check"; exit 1 ;;
+esac
+
 # [deploy] requested. Compare against the last deployed commit; if that SHA
 # isn't in the shallow clone, git diff fails (non-zero) and we build.
 BASE_SHA="${VERCEL_GIT_PREVIOUS_SHA:-HEAD^}"
