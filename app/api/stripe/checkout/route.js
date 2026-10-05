@@ -65,7 +65,7 @@ export async function POST(request) {
           },
           quantity: 1,
         }],
-        success_url: `${SITE_URL}/deals?locked=1`,
+        success_url: `${SITE_URL}/deals?locked=1&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${SITE_URL}/deals`,
         metadata: { dealId: body.dealId, type: 'deal', tool: deal.tool },
       })
@@ -97,7 +97,7 @@ export async function POST(request) {
       },
       quantity: 1,
     }],
-    success_url: `${SITE_URL}/a/${agentId}?purchased=1`,
+    success_url: `${SITE_URL}/a/${agentId}?purchased=1&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${SITE_URL}/a/${agentId}`,
     metadata: { agentId, type: 'agent', creator: agent.creatorName || '' },
   }

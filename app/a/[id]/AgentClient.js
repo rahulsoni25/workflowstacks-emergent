@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import LaunchInTools from '@/components/LaunchInTools'
 import { trackEvent } from '@/lib/analytics'
+import PurchaseTracker from '@/components/PurchaseTracker'
 
 export default function AgentClient({ agent, skills }) {
   const router = useRouter()
@@ -80,6 +81,7 @@ export default function AgentClient({ agent, skills }) {
 
   return (
     <div className="min-h-screen bg-neptune">
+      <PurchaseTracker flag="purchased" category="agent" itemName={agent.name} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/community">
