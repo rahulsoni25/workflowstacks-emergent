@@ -128,7 +128,7 @@ function StatCell({ value, label }) {
 // Page
 // ---------------------------------------------------------------------------
 
-export default function HomeClient({ initialSkills = [], initialStats = null, hot = [] }) {
+export default function HomeClient({ initialSkills = [], initialStats = null, hot = [], kits = [] }) {
   // ----- flow state -----
   const [step, setStep] = useState(1)
   const [query, setQuery] = useState('')
@@ -928,6 +928,36 @@ export default function HomeClient({ initialSkills = [], initialStats = null, ho
           </div>
         </div>
       </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* AI KITS — the digital-products store at /get (standalone pages, so  */}
+      {/* plain <a> links, not <Link>)                                        */}
+      {/* ------------------------------------------------------------------ */}
+      {kits.length > 0 && (
+        <section id="ai-kits" className="mx-auto max-w-[1200px] px-5 pt-[72px] sm:px-10">
+          <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-2">
+              <Mono className="text-[13px] text-[#C6F24E]">AI KITS · READY-MADE ASSISTANTS</Mono>
+              <h2 className="m-0 text-[28px] font-bold tracking-[-0.03em] sm:text-[32px]">Ready-made AI assistants for your business.</h2>
+              <p className="m-0 max-w-[640px] text-[16px] text-text-secondary">Ten assistants, a complete guide and 120 prompts per kit. Describe your business once; they draft in your voice. Works with ChatGPT, Claude or Gemini.</p>
+            </div>
+            <a href="/get" className="shrink-0 text-sm font-semibold text-[#C6F24E] hover:text-[#A6D62E]">All AI kits →</a>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            {kits.map((k) => (
+              <a key={k.slug} href={`/get/${k.slug}`} className="flex flex-col rounded-[14px] border border-[#262B2D] bg-[#101314] p-6 transition-colors hover:border-[#C6F24E]">
+                {k.tag && <Mono className="mb-2 text-[12px] text-[#C6F24E]">{k.tag}</Mono>}
+                <h3 className="m-0 mb-2 text-[19px] font-bold tracking-[-0.02em] text-text-primary">{k.name}</h3>
+                <p className="m-0 flex-1 text-[15px] text-text-muted">{k.card}</p>
+                <span className="mt-4 flex items-center justify-between border-t border-[#262B2D] pt-4">
+                  <span className="text-[18px] font-bold text-text-primary">{k.price}</span>
+                  <span className="text-sm font-semibold text-[#C6F24E]">See what’s inside →</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ------------------------------------------------------------------ */}
       {/* DONE-FOR-YOU                                                        */}

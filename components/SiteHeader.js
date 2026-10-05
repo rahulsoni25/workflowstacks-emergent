@@ -34,6 +34,9 @@ const NAV_GROUPS = [
   {
     label: 'Premium',
     items: [
+      // /get is the digital-products store: standalone HTML served by a route
+      // handler, not a React page, so it's linked with a plain <a> ("hard").
+      { href: '/get', label: 'AI Kits', note: 'Ready-made AI assistants for your business', hard: true },
       { href: '/tools', label: 'Premium Tools', note: 'Paid, one-time automations' },
       { href: '/templates', label: 'Workflow Templates', note: 'Free, working n8n automations' },
       { href: '/automate', label: 'What to Automate', note: 'The job you want done, and the workflow for it' },
@@ -52,6 +55,12 @@ const NAV_GROUPS = [
   },
 ]
 
+// Store pages (/get) are standalone HTML; a client-side <Link> can't render
+// them, so they get a normal full-page link.
+function NavLink({ item, ...props }) {
+  return item.hard ? <a href={item.href} {...props} /> : <Link href={item.href} {...props} />
+}
+
 function DesktopDropdown({ group, openLabel, setOpenLabel }) {
   const isOpen = openLabel === group.label
   return (
@@ -68,15 +77,15 @@ function DesktopDropdown({ group, openLabel, setOpenLabel }) {
         <div className="absolute left-0 top-full pt-2 z-50">
           <div className="min-w-[240px] rounded-xl border border-[#262B2D] bg-[#101314] backdrop-blur-xl p-1.5 shadow-2xl shadow-black/40">
             {group.items.map((item) => (
-              <Link
+              <NavLink
                 key={item.href}
-                href={item.href}
+                item={item}
                 onClick={() => setOpenLabel(null)}
                 className="block rounded-lg px-3 py-2 hover:bg-white/5 transition-colors"
               >
                 <span className="block text-sm text-text-secondary">{item.label}</span>
                 {item.note && <span className="block text-[11px] text-text-muted">{item.note}</span>}
-              </Link>
+              </NavLink>
             ))}
           </div>
         </div>
@@ -118,6 +127,9 @@ export default function SiteHeader() {
             {NAV_GROUPS.map((group) => (
               <DesktopDropdown key={group.label} group={group} openLabel={openLabel} setOpenLabel={setOpenLabel} />
             ))}
+            <a href="/get" className="text-sm font-semibold text-[#C6F24E] hover:text-[#A6D62E] px-3 py-2 rounded-md hover:bg-white/5 transition-colors">
+              Shop
+            </a>
             <Link href="/pricing" className="text-sm text-text-secondary hover:text-white px-3 py-2 rounded-md hover:bg-white/5 transition-colors">
               Pricing
             </Link>
@@ -154,6 +166,9 @@ export default function SiteHeader() {
                 <Zap className="w-4 h-4 mr-1.5" />Build Agent
               </Button>
             </Link>
+            <a href="/get" className="block text-sm text-[#C6F24E] font-semibold mb-6">
+              Shop AI Kits
+            </a>
             <Link href="/pricing" onClick={() => setMobileOpen(false)} className="block text-sm text-text-secondary font-semibold mb-6">
               Pricing
             </Link>
@@ -165,15 +180,15 @@ export default function SiteHeader() {
                 <h4 className="text-[11px] uppercase tracking-wider text-text-muted font-mono mb-2">{group.label}</h4>
                 <div className="space-y-0.5">
                   {group.items.map((item) => (
-                    <Link
+                    <NavLink
                       key={item.href}
-                      href={item.href}
+                      item={item}
                       onClick={() => setMobileOpen(false)}
                       className="block rounded-lg px-2.5 py-2 hover:bg-white/5 transition-colors"
                     >
                       <span className="block text-sm text-text-secondary">{item.label}</span>
                       {item.note && <span className="block text-[11px] text-text-muted">{item.note}</span>}
-                    </Link>
+                    </NavLink>
                   ))}
                 </div>
               </div>

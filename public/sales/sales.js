@@ -12,21 +12,36 @@
    The Purchase event fires on the checkout platform, not here. */
 (function () {
   "use strict";
-  var el = document.getElementById("product-config");
-  if (!el) return;
-  var cfg;
-  try { cfg = JSON.parse(el.textContent); } catch (e) { return; }
-  document.documentElement.classList.add("js");
-
   window.dataLayer = window.dataLayer || [];
   function track(name, params) {
     var o = { event: name };
     if (params) for (var k in params) o[k] = params[k];
     window.dataLayer.push(o);
   }
-  if (/^GTM-[A-Z0-9]{4,12}$/.test(cfg.gtmId || "")) {
-    (function (w, d, s, l, i) { w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" }); var f = d.getElementsByTagName(s)[0], j = d.createElement(s); j.async = true; j.src = "https://www.googletagmanager.com/gtm.js?id=" + i; f.parentNode.insertBefore(j, f); })(window, document, "script", "dataLayer", cfg.gtmId);
+  function loadGtm(id) {
+    if (!/^GTM-[A-Z0-9]{4,12}$/.test(id || "")) return;
+    (function (w, d, s, l, i) { w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" }); var f = d.getElementsByTagName(s)[0], j = d.createElement(s); j.async = true; j.src = "https://www.googletagmanager.com/gtm.js?id=" + i; f.parentNode.insertBefore(j, f); })(window, document, "script", "dataLayer", id);
   }
+
+  /* Store index (/get): list view and which product card was opened. */
+  var store = document.getElementById("store-config");
+  if (store) {
+    var sc;
+    try { sc = JSON.parse(store.textContent); } catch (e) { return; }
+    loadGtm(sc.gtmId);
+    track("view_item_list", { ecommerce: { item_list_name: "AI Kits", items: sc.items } });
+    Array.prototype.forEach.call(document.querySelectorAll(".pcard[data-item]"), function (a) {
+      a.addEventListener("click", function () { track("select_item", { ecommerce: { item_list_name: "AI Kits", items: sc.items.filter(function (x) { return x.item_id === a.getAttribute("data-item"); }) } }); });
+    });
+    return;
+  }
+
+  var el = document.getElementById("product-config");
+  if (!el) return;
+  var cfg;
+  try { cfg = JSON.parse(el.textContent); } catch (e) { return; }
+  document.documentElement.classList.add("js");
+  loadGtm(cfg.gtmId);
 
   var item = { item_id: cfg.slug, item_name: cfg.name, price: cfg.price, quantity: 1 };
   var ecommerce = { currency: cfg.currency, value: cfg.price, items: [item] };
