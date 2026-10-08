@@ -176,6 +176,8 @@
   @media(min-width:720px){ .samples{grid-template-columns:repeat(3,1fr)} }
   .sample{background:var(--surface); border:1px solid var(--line); border-radius:3px; overflow:hidden; display:flex; flex-direction:column}
   .sample img{display:block; width:100%; height:auto; object-fit:cover; aspect-ratio:4/5} /* height:auto beats the intrinsic height attribute */
+  .sample video{display:block; width:100%; height:auto; aspect-ratio:16/9; background:#000}
+  @media(min-width:720px){ .samples-video{grid-template-columns:repeat(2,1fr); margin-top:18px} }
   .sample .cap{padding:16px 18px}
   .sample .cap h3{font-family:var(--fb); font-size:16px; font-weight:600}
   .sample .cap p{color:var(--muted); font-size:14px; margin:6px 0 0}
@@ -354,7 +356,7 @@
     <div class="wrap">
       <p class="eyebrow">Proof</p>
       <h2 class="lede">We built it on our own founder first.</h2>
-      <p class="said">Every frame below is Rahul's twin — not a stock demo or a vendor showreel. Same avatar, three formats.</p>
+      <p class="said">Every frame below is Rahul's twin — not a stock demo or a vendor showreel. Same avatar, five pieces.</p>
       <div class="samples">
         <figure class="sample">
           <img src="/sites/founder-avatar-studio/talking-head.jpg" width="576" height="1024" loading="lazy" decoding="async" alt="Vertical talking-head video of a founder's AI avatar">
@@ -367,6 +369,20 @@
         <figure class="sample">
           <img src="/sites/founder-avatar-studio/cinematic.jpg" width="800" height="450" loading="lazy" decoding="async" alt="Cinematic scene produced with AI video">
           <figcaption class="cap"><span class="tag">16:9 · Brand film</span><h3>Cinematic scenes</h3><p>Full sets, lighting and cast, with no location, permit or shoot day. From the Signature build up.</p></figcaption>
+        </figure>
+      </div>
+      <div class="samples samples-video">
+        <figure class="sample">
+          <video controls playsinline preload="none" width="1280" height="720" poster="/sites/founder-avatar-studio/balcony.jpg" aria-label="Rahul's AI avatar speaking on a luxury balcony">
+            <source src="/sites/founder-avatar-studio/balcony.mp4" type="video/mp4">
+          </video>
+          <figcaption class="cap"><span class="tag">16:9 · Speaking · 0:10</span><h3>Luxury balcony</h3><p>A Dubai high-rise balcony at golden hour, with the skyline behind. No location hire, no travel, no shoot day. Sound on.</p></figcaption>
+        </figure>
+        <figure class="sample">
+          <video controls playsinline preload="none" width="1280" height="720" poster="/sites/founder-avatar-studio/real-estate-pitch.jpg" aria-label="Rahul's AI avatar delivering a real estate pitch">
+            <source src="/sites/founder-avatar-studio/real-estate-pitch.mp4" type="video/mp4">
+          </video>
+          <figcaption class="cap"><span class="tag">16:9 · Speaking · 0:10</span><h3>Real estate pitch</h3><p>A rooftop-pool setting above the Dubai skyline, built for property and luxury-sector pitches. Sound on.</p></figcaption>
         </figure>
       </div>
     </div>
