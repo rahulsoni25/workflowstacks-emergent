@@ -131,7 +131,7 @@ unmeasured), WebP exports, and the generator's palette or font swaps.
   markup in three `tabpanel`s toggled with the `hidden` attribute (a global
   `[hidden]{display:none !important}` beats the grid rules), instead of being
   injected by script. Same visual result, readable without JavaScript.
-- **FAQ** grew from four to nine entries; the same `<details>` rows, so the
+- **FAQ** grew from four to ten entries; the same `<details>` rows, so the
   44px summary rows and the +/– marker are unchanged.
 
 ## Re-checking
