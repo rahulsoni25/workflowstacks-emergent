@@ -105,8 +105,13 @@ Overviews, Bing Copilot) and generative engines (ChatGPT, Perplexity, Claude):
   h1, the lead of the "How it works" section and four of the h2s carry the
   terms the page is about: *AI avatar videos*, *founders*, *Dubai*, *Mumbai*,
   *digital twin*, *English and Arabic*. The FAQ answers the long-tail
-  questions (cost in Dubai, time to build, Arabic, platforms, where based) in
-  one short paragraph each, so they can be lifted as direct answers.
+  questions (cost in Dubai, time to build, Arabic, platforms, where based,
+  and the synonyms people search for: AI clone, AI spokesperson video) in one
+  short paragraph each, so they can be lifted as direct answers. The words
+  were checked against live autocomplete strings for the UAE and India
+  (`keyword-suggest` run of 2026-10-09): "ai avatar video agency / service /
+  production", "ai video agency in dubai / mumbai", "ai clone video", "ai
+  spokesperson video", "ai avatar arabic", "personal branding video".
 - **No script needed.** Every pricing tier is in the HTML; the tabs only
   choose which panel is visible. Most AI crawlers do not run JavaScript, and
   before this change they saw an empty pricing section.
