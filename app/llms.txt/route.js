@@ -5,6 +5,7 @@ import { OUTCOMES } from '@/lib/outcomes'
 import { KITS, kitItemCount } from '@/lib/kits'
 import { SLASH_COMMANDS } from '@/lib/commands'
 import { SITE_URL } from '@/lib/schema'
+import { TYPE_CATEGORIES, FOR_CATEGORIES } from '@/lib/skill-display'
 import { isAiRelevant, qualityRank } from '@/lib/skill-relevance'
 
 export const revalidate = 86400
@@ -123,6 +124,19 @@ ${kits.map((k) => `- [${k.title}](${SITE_URL}/kits/${k.slug}) — ${k.outcome} $
 Hand-verified slash commands for Claude Code. Each page shows the actual command file (not a description of one), credits its original author, and links to the source repo.
 
 ${commands.map((c) => `- [${c.name}](${SITE_URL}/commands/${c.slug}) — ${c.blurb} License: ${c.license}, by ${c.author}.`).join('\n')}
+
+## Learn — definitions and how it works
+
+- [How WorkflowStacks works](${SITE_URL}/learn/how-it-works) — describe a job, review the matched repository, install it in Claude, ChatGPT or Gemini; includes a comparison with browsing GitHub directly.
+- [What are AI skills?](${SITE_URL}/learn/skills) — Claude Skills, Gemini extensions, MCP servers and prompts explained.
+- [What are AI agents?](${SITE_URL}/learn/agents) — how an agent differs from a skill, and how an agent blueprint works here.
+- [What is MCP?](${SITE_URL}/learn/mcp) — Model Context Protocol and how MCP servers work.
+- [Security](${SITE_URL}/learn/security) — how listings are checked and what installing one involves.
+
+## Rankings
+
+- [Hot this week](${SITE_URL}/hot) — open-source AI skills ranked by GitHub stars gained in the last 7 days (not total stars), refreshed daily.
+${[...TYPE_CATEGORIES, ...FOR_CATEGORIES].map(([slug, label]) => `- [Best ${label}](${SITE_URL}/best/${slug})`).join('\n')}
 
 ## Services
 

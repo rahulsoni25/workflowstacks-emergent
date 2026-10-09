@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { jsonLdScript, learnPageSchema, breadcrumbSchema } from '@/lib/schema'
 
 export const metadata = {
   title: 'What Is MCP (Model Context Protocol)? | WorkflowStacks Learn',
@@ -12,6 +13,8 @@ export const metadata = {
 export default function LearnMCPPage() {
   return (
     <div className="min-h-screen bg-neptune">
+      <script {...jsonLdScript(learnPageSchema({ name: 'What Is MCP?', description: 'Model Context Protocol (MCP) is an open standard for connecting AI models to external tools, databases and APIs.', url: '/learn/mcp', term: 'Model Context Protocol (MCP)', termDescription: 'An open standard that lets AI models call external tools and read external data through one common protocol.' }))} />
+      <script {...jsonLdScript(breadcrumbSchema([{ name: 'Home', path: '/' }, { name: 'Learn', path: '/learn' }, { name: 'What Is MCP?', path: '/learn/mcp' }]))} />
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 py-4">
           <Link href="/"><Button variant="ghost" className="text-text-secondary hover:text-white hover:bg-white/5"><ArrowLeft className="w-4 h-4 mr-2" />Home</Button></Link>
@@ -19,7 +22,8 @@ export default function LearnMCPPage() {
       </header>
       <div className="container mx-auto px-4 py-16 max-w-4xl">
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center">What Is MCP?</h1>
-        <p className="text-xl text-text-secondary text-center mb-16 max-w-2xl mx-auto">Model Context Protocol (MCP) is the universal standard for connecting AI models to external tools, databases, and APIs.</p>
+        <p className="text-xl text-text-secondary text-center mb-6 max-w-2xl mx-auto">Model Context Protocol (MCP) is the universal standard for connecting AI models to external tools, databases, and APIs.</p>
+        <p data-answer="true" className="text-text-secondary leading-relaxed max-w-2xl mx-auto mb-12 text-center">An MCP server is a small program that exposes tools and data, such as a database query or a file search, to an AI model through the Model Context Protocol. The model connects over JSON-RPC and can then call those tools during a conversation. One MCP server works with any MCP-capable AI client.</p>
         
         <div className="space-y-8">
           <Card className="bg-slate-900/60 border-slate-700/50">
@@ -60,7 +64,7 @@ export default function LearnMCPPage() {
                   'Enable AI to search your internal documentation',
                 ].map((uc, i) => (
                   <li key={i} className="flex items-start gap-2 text-text-secondary">
-                    <span className="text-emerald-400">\u2713</span>{uc}
+                    <span className="text-emerald-400">{'\u2713'}</span>{uc}
                   </li>
                 ))}
               </ul>
