@@ -1,0 +1,100 @@
+name: keyword-suggest
+
+# Pull live autocomplete suggestions from Google, YouTube and Bing for a set of
+# seed terms and markets, from GitHub's runners. These are real query strings
+# people type (no volume data), useful for choosing the words a page should
+# use. The dev sandbox cannot reach the suggest endpoints, hence a workflow.
+
+on:
+  workflow_dispatch:
+    inputs:
+      seeds:
+        description: Seed terms, separated by |
+        required: true
+        default: "ai avatar video|ai avatar agency|ai video agency dubai|digital twin video"
+      modifiers:
+        description: Suffixes appended to each seed, separated by | (an empty entry means the bare seed)
+        required: false
+        default: "|dubai|uae|mumbai|india|agency|service|for founders|price|cost|arabic"
+      markets:
+        description: Country codes, space-separated (Google gl / Bing mkt)
+        required: false
+        default: "ae in"
+      engines:
+        description: Any of google youtube bing, space-separated
+        required: false
+        default: "google bing youtube"
+
+jobs:
+  suggest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SEEDS: ${{ inputs.seeds }}
+      MODIFIERS: ${{ inputs.modifiers }}
+      MARKETS: ${{ inputs.markets }}
+      ENGINES: ${{ inputs.engines }}
+    steps:
+      - name: Fetch suggestions
+        shell: python
+        run: |
+          import collections, json, os, time, urllib.parse, urllib.request
+
+          seeds = [s.strip() for s in os.environ['SEEDS'].split('|') if s.strip()]
+          mods = [m.strip() for m in os.environ['MODIFIERS'].split('|')]
+          markets = os.environ['MARKETS'].split()
+          engines = os.environ['ENGINES'].split()
+          MKT = {'ae': 'en-AE', 'in': 'en-IN', 'us': 'en-US', 'gb': 'en-GB', 'sa': 'ar-SA'}
+
+          def get(url):
+              req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+              with urllib.request.urlopen(req, timeout=20) as r:
+                  return json.loads(r.read().decode('utf-8', 'replace'))
+
+          def google(q, gl, ds=None):
+              p = {'client': 'firefox', 'hl': 'en', 'gl': gl, 'q': q}
+              if ds:
+                  p['ds'] = ds
+              return get('https://suggestqueries.google.com/complete/search?' + urllib.parse.urlencode(p))[1]
+
+          def bing(q, gl):
+              p = {'query': q, 'mkt': MKT.get(gl, 'en-' + gl.upper())}
+              return get('https://api.bing.com/osjson.aspx?' + urllib.parse.urlencode(p))[1]
+
+          first = {}
+          count = collections.Counter()
+          errors = 0
+          for gl in markets:
+              for eng in engines:
+                  for seed in seeds:
+                      for m in mods:
+                          q = (seed + ' ' + m).strip()
+                          try:
+                              if eng == 'google':
+                                  out = google(q, gl)
+                              elif eng == 'youtube':
+                                  out = google(q, gl, 'yt')
+                              elif eng == 'bing':
+                                  out = bing(q, gl)
+                              else:
+                                  continue
+                          except Exception as e:
+                              errors += 1
+                              print(f'!! {eng} {gl} "{q}": {e}')
+                              out = []
+                          for i, s in enumerate(out):
+                              key = (eng, gl, s.lower().strip())
+                              count[key] += 1
+                              first.setdefault(key, (i + 1, q))
+                          time.sleep(0.25)
+
+          stamp = time.strftime('%Y-%m-%d %H:%M UTC', time.gmtime())
+          print(f'{len(first)} unique suggestions, {errors} request errors, fetched {stamp}')
+          for eng in engines:
+              for gl in markets:
+                  keys = [k for k in first if k[0] == eng and k[1] == gl]
+                  keys.sort(key=lambda k: (-count[k], first[k][0]))
+                  print(f'\n===== {eng} · {gl} · {len(keys)} unique  (times seen | first position | suggestion | for query)')
+                  for k in keys:
+                      pos, q = first[k]
+                      print(f'{count[k]}\t{pos}\t{k[2]}\t(for "{q}")')
