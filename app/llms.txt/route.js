@@ -78,6 +78,10 @@ WorkflowStacks does not host or execute anything. Catalog skills run inside the 
 
 Every catalog listing is a real open-source repository that cleared an 8/10 quality gate, with a plain-English usage guide and a one-click install (compiled prompt, Claude Skill package, or the MCP connector). The n8n templates are complete, tested workflow files: download one JSON file, import it into n8n, connect your accounts, and it runs.
 
+## Founder Avatar Studio — AI avatar videos for founders (Dubai and Mumbai)
+
+- [Founder Avatar Studio](${SITE_URL}/ai-avatar) — a done-for-you AI avatar video service by FluoDigital (Rahul Soni, Founder & Director), hosted on this site. One directed 45-minute capture session builds a digital twin of the founder's face and voice within seven days; the studio then scripts, produces, publishes and amplifies weekly videos in English and Arabic, each approved by the founder before it goes out. Production plans: Presence AED 6,000 a month (8 videos, one language), Authority AED 11,000 (16 videos, English and Arabic), Omnipresence AED 18,000 (30 videos plus ad variations, 48-hour turnaround); prices exclude VAT, three-month minimum. Paid media is priced separately (from AED 3,000 a month plus management) or bundled (from AED 11,000). The founder owns the avatar, the ad account and the audiences; the model is deleted on request at the end of the engagement. Studios in Dubai Silicon Oasis and Mumbai. Contact: WhatsApp +971 52 208 6253.
+
 ## AI skills catalog${skills.length ? ` (top ${skills.length} of the published catalog)` : ''}
 
 Open-source AI agents, Claude skills and MCP servers, quality-gated at 8/10. Each installs into Claude, ChatGPT or Gemini as a compiled prompt, or into Claude / Claude Code as a Skill package via its skill_md endpoint. Full machine-readable list: ${SITE_URL}/llms-full.txt · Browse: ${SITE_URL}/skills

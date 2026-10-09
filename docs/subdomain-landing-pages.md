@@ -82,7 +82,49 @@ WhatsApp message is prepared (with `need`, `has_phone`, `has_email`),
 3. Add `'/new-slug'` to `STATIC_ROUTES` in `app/sitemap.js`.
 4. Optionally attach the hostname in Vercel as above.
 
-## SEO notes
+## SEO, AEO and GEO
+
+What the page carries for search engines, answer engines (Google AI
+Overviews, Bing Copilot) and generative engines (ChatGPT, Perplexity, Claude):
+
+- **Indexability.** `meta robots` is `index,follow` with unlimited snippet,
+  image and video previews; the canonical is the apex path; `/ai-avatar/`
+  308s to `/ai-avatar`. The site `robots.txt` (`app/robots.js`) allows every
+  major search crawler and explicitly allows GPTBot, OAI-SearchBot,
+  ClaudeBot, PerplexityBot, Google-Extended and the other AI agents, so the
+  page is readable by the engines that cite sources.
+- **Discovery.** `/ai-avatar` is in the site sitemap at priority 0.9
+  (`app/sitemap.js`), linked from every page's footer, and described in
+  `/llms.txt` (`app/llms.txt/route.js`) with its prices and contact so an
+  answer engine can quote it without parsing the HTML. The weekly IndexNow
+  workflow pushes the whole sitemap to Bing, Yandex, Seznam and Naver (and
+  through Bing to ChatGPT search and Copilot); run it on demand under Actions
+  after a content change. Google has no push endpoint: request indexing in
+  Search Console (URL inspection → Request indexing).
+- **Words.** The title, meta description, the plain-words line inside the
+  h1, the lead of the "How it works" section and four of the h2s carry the
+  terms the page is about: *AI avatar videos*, *founders*, *Dubai*, *Mumbai*,
+  *digital twin*, *English and Arabic*. The FAQ answers the long-tail
+  questions (cost in Dubai, time to build, Arabic, platforms, where based) in
+  one short paragraph each, so they can be lifted as direct answers.
+- **No script needed.** Every pricing tier is in the HTML; the tabs only
+  choose which panel is visible. Most AI crawlers do not run JavaScript, and
+  before this change they saw an empty pricing section.
+- **Structured data.** One JSON-LD graph: `Organization` (FluoDigital, with
+  both studios and contact points), `Person` (the founder), `WebPage` with
+  `BreadcrumbList`, `VideoObject` for the hero sample (duration and size read
+  from the file), `Service` with every tier as an `Offer` carrying a monthly
+  `UnitPriceSpecification`, and `FAQPage` built from the visible `<details>`.
+  The graph is generated from the page by `scripts/founder-avatar-jsonld.py`
+  so the FAQ markup and the visible answers cannot drift apart; run it from
+  the repo root after editing the title, description, h1, prices or FAQ.
+- **Checks.** The `http-check` workflow (with `match`) confirms what is live;
+  the `lighthouse` workflow reports the SEO category; the `keyword-suggest`
+  workflow prints live autocomplete strings per market for choosing words.
+  Rankings and impressions are only visible in Search Console and Bing
+  Webmaster Tools, which need the property verified by the site owner.
+
+Other notes:
 
 - Keep media as separate files rather than base64 inside the HTML.
 - The site sitemap lists the canonical path; the folder's own `robots.txt`
