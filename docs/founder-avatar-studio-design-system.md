@@ -119,6 +119,21 @@ Deliberately not applied: rem conversion, a font-size token set, a full
 4/8px spacing rewrite, metric-matched font fallbacks (percentages were
 unmeasured), WebP exports, and the generator's palette or font swaps.
 
+## Later changes
+
+- **Light sections** (see Tokens above): arithmetic, how it works, pricing
+  and FAQ re-map the tokens to a cream ground.
+- **Descriptive h1 line** (`.h1-kw`): a plain-words line inside the h1,
+  Archivo 500 at 15–18px in `--amber` (9.2:1 on the ground), under the serif
+  hook. It says what the page is for people and search engines; the hook
+  keeps the display role.
+- **Pricing panels in the HTML**: the three tiers of each mode are static
+  markup in three `tabpanel`s toggled with the `hidden` attribute (a global
+  `[hidden]{display:none !important}` beats the grid rules), instead of being
+  injected by script. Same visual result, readable without JavaScript.
+- **FAQ** grew from four to nine entries; the same `<details>` rows, so the
+  44px summary rows and the +/– marker are unchanged.
+
 ## Re-checking
 
 ```bash
