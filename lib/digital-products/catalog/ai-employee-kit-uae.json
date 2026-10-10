@@ -1,0 +1,354 @@
+{
+  "slug": "ai-employee-kit-uae",
+  "status": "live",
+  "market": "AE",
+  "name": "AI Employee Kit — UAE Business Edition",
+  "card": "Ten ready-made AI assistants for UAE small businesses: WhatsApp replies, quotes, reminders, reviews and more, in English or Arabic.",
+  "seo": {
+    "title": "AI Employee Kit for UAE Small Businesses — 10 Ready-Made AI Assistants | WorkflowStacks",
+    "ogTitle": "Ten AI assistants for the jobs that fill your business day",
+    "description": "WhatsApp replies, quotations, payment reminders, review replies and Instagram posts — drafted in your business's voice, with your prices, in English or Arabic. Works with ChatGPT, Claude or Gemini. USD 99, 7-day refund."
+  },
+  "price": {
+    "amount": 99,
+    "currency": "USD",
+    "label": "USD 99",
+    "note": "(≈ AED 364)",
+    "period": "One-time payment"
+  },
+  "checkout": {
+    "provider": "gumroad",
+    "url": ""
+  },
+  "whatsapp": {
+    "number": "971522086253",
+    "text": "Hi WorkflowStacks, I'd like to buy the AI Employee Kit — UAE Business Edition (USD 99)."
+  },
+  "buy": {
+    "label": "Get the kit — USD 99",
+    "short": "Get the kit",
+    "note": {
+      "checkout": "Instant download after payment · 7-day no-questions refund",
+      "whatsapp": "Order on WhatsApp — we reply with a secure payment link · 7-day no-questions refund"
+    }
+  },
+  "hero": {
+    "eyebrow": "AI Kit · UAE Business Edition",
+    "headline": "Ten AI assistants for the jobs that fill your business day.",
+    "sub": "WhatsApp replies, quotations, payment reminders, review replies, Instagram posts and more — drafted in your business's own voice, using **your** prices and policies, in English or Arabic. You check. You send.",
+    "bullets": [
+      "Works with ChatGPT, Claude or Gemini — including free plans",
+      "Set up your first assistant in about 10 minutes",
+      "No coding, no new app to learn"
+    ],
+    "demo": {
+      "contact": "Sara (sample customer)",
+      "status": "WhatsApp",
+      "messages": [
+        {
+          "from": "in",
+          "text": "I booked for 4pm and NOBODY came!!! Second time this happens. Totally unprofessional.",
+          "time": "4:42 pm"
+        },
+        {
+          "chip": "Complaint Resolver is drafting…"
+        },
+        {
+          "from": "out",
+          "text": "Hi Sara, I'm really sorry. You were expecting us at 4pm and we didn't arrive or let you know — that's not good enough. Our technician was delayed at an earlier job. We can be with you **today at 6pm** or **tomorrow at 10am**. Which suits you better?",
+          "time": "4:44 pm"
+        }
+      ],
+      "note": "Sample business and customer. The owner checks every draft before sending."
+    }
+  },
+  "problem": {
+    "title": "Your business runs on WhatsApp. So does your evening.",
+    "quotes": [
+      "“How much?”",
+      "“Are you open Friday?”",
+      "“Do you come to Al Nahda?”",
+      "“Can you send the quote again?”"
+    ],
+    "body": "Every message deserves a fast, friendly, correct answer. But the same questions arrive while you're with a customer, on site, or finally at home. Then there's the quotation to write from scribbled notes, the overdue invoice, the review that needs a careful reply, the Instagram post nobody planned, and the lead who read your price and went quiet.",
+    "before": {
+      "title": "Why “just using ChatGPT” gives generic answers",
+      "body": "A general AI chat doesn't know your prices, your opening hours, your cancellation policy or how you talk to customers. So it guesses, or sounds like a brochure. You end up rewriting everything."
+    },
+    "after": {
+      "title": "What changes with this kit",
+      "body": "You describe your business **once** — services and prices, hours, areas, booking, payments, policies, tone, languages and your top FAQs. Every assistant uses that profile. When something is missing, it asks you or writes **[CHECK]** instead of making it up."
+    }
+  },
+  "demosTitle": "Real jobs in. Ready drafts out.",
+  "demos": [
+    {
+      "id": "quote",
+      "label": "Notes → quotation",
+      "inputLabel": "The owner's site notes",
+      "input": "mirdif villa, paint 3 bed + hall, walls only, our paint, 1800 per bed, hall 2200, 4 days, half advance",
+      "outputLabel": "Quotation & Proposal Writer",
+      "output": [
+        "Bedroom walls, painting incl. paint — 3 × AED 1,800 = **AED 5,400**",
+        "Hall walls, painting incl. paint — 1 × AED 2,200 = **AED 2,200**",
+        "Subtotal: **AED 7,600**",
+        "VAT line: only if you're VAT-registered — marked [CHECK] for you to confirm",
+        "Timeline: 4 working days · Payment: half in advance, balance on completion"
+      ],
+      "flag": "Plus a short cover message for WhatsApp",
+      "note": "Sample figures from a fictional business."
+    },
+    {
+      "id": "review",
+      "label": "1★ review → reply",
+      "inputLabel": "Google review",
+      "input": "★☆☆☆☆ “Waited 40 minutes past my appointment. Nobody apologised.”",
+      "outputLabel": "Google Review Responder",
+      "output": "Thank you for telling us, and we're sorry your visit started this way. Waiting past your appointment time isn't the experience we want for anyone. We'd like to understand what happened and make it right — please message us on [CONTACT] so we can speak with you directly.",
+      "flag": "No arguing in public. No admission of legal fault.",
+      "note": "Sample review for a fictional business."
+    },
+    {
+      "id": "price",
+      "label": "“How much?” → answer",
+      "inputLabel": "Customer on WhatsApp",
+      "input": "Hi, how much for deep cleaning a 2-bedroom in JLT? Can you come Saturday?",
+      "outputLabel": "WhatsApp Enquiry Replier",
+      "output": "Hi! Deep cleaning for a 2-bedroom apartment is from AED 450 (sample price), depending on the condition. Is it furnished or empty? Saturday — [CHECK: availability]. If you share your location, I'll confirm a time for you.",
+      "flag": "Never guesses availability — marks it for you to check",
+      "note": "Sample price from a fictional business."
+    },
+    {
+      "id": "arabic",
+      "label": "Arabic → draft",
+      "inputLabel": "Customer on WhatsApp (sample — have a fluent speaker check)",
+      "input": "مرحبا، هل عندكم موعد اليوم؟\n(Hello, do you have an appointment today?)",
+      "outputLabel": "WhatsApp Enquiry Replier",
+      "output": "أهلاً وسهلاً! نعم، لدينا موعد اليوم الساعة 5 مساءً. هل تود أن نحجزه لك؟\n(Welcome! Yes, we have an appointment today at 5pm. Would you like us to book it for you?)",
+      "flag": "Every Arabic draft comes with the English meaning and a reminder to have a fluent speaker check before sending",
+      "note": "Sample conversation."
+    }
+  ],
+  "inside": {
+    "title": "Ten assistants. One profile. Your voice.",
+    "intro": "Each assistant comes with copy-paste instructions, 2-minute setup steps for ChatGPT, Claude and Gemini, three “try it now” examples and tips to improve results.",
+    "items": [
+      {
+        "name": "WhatsApp Enquiry Replier",
+        "desc": "Answers enquiries from your price list and FAQ, in English or Arabic, under 80 words, and moves the chat to a booking."
+      },
+      {
+        "name": "Quotation & Proposal Writer",
+        "desc": "Turns rough notes into a clean quote or proposal, with a VAT line placeholder for you to confirm."
+      },
+      {
+        "name": "Payment Reminder Assistant",
+        "desc": "Friendly, then firmer, then final. Never threatening."
+      },
+      {
+        "name": "Google Review Responder",
+        "desc": "Thoughtful replies from 5 stars to 1 star."
+      },
+      {
+        "name": "Instagram & Content Planner",
+        "desc": "A monthly calendar, captions and Reels scripts, including Ramadan, Eid and UAE National Day (you confirm the dates)."
+      },
+      {
+        "name": "Lead Follow-up Assistant",
+        "desc": "Day 1, 3, 7 and 14 follow-ups, plus replies to “too expensive” and “I'll think about it”."
+      },
+      {
+        "name": "Complaint Resolver",
+        "desc": "A calm reply, an action checklist, and clear flags for decisions you must make."
+      },
+      {
+        "name": "Hiring Assistant",
+        "desc": "Fair job ads, screening questions and interview scorecards."
+      },
+      {
+        "name": "SOP & Staff Training Writer",
+        "desc": "Voice notes into step-by-step SOPs, checklists and quizzes, in your staff's language."
+      },
+      {
+        "name": "Admin & Email Assistant",
+        "desc": "Emails, thread summaries, meeting notes and English ↔ Arabic translation."
+      }
+    ],
+    "extras": [
+      {
+        "title": "Business Profile",
+        "desc": "A fill-once worksheet with a filled-in example. Paste it into every assistant."
+      },
+      {
+        "title": "120-prompt library",
+        "desc": "Copy-paste prompts in 12 categories, as a document and a spreadsheet."
+      },
+      {
+        "title": "40 WhatsApp quick replies",
+        "desc": "Greetings, prices, bookings, payments, delays, reviews and holidays."
+      },
+      {
+        "title": "Weekly routine + privacy guide",
+        "desc": "A 30-minutes-a-week plan, and what never to paste."
+      },
+      {
+        "title": "The complete guide",
+        "desc": "11 chapters: AI basics, prompts, the WhatsApp workflow, troubleshooting, your first 30 days, 50 questions answered."
+      }
+    ]
+  },
+  "stepsTitle": "Up and running in about 10 minutes",
+  "steps": [
+    {
+      "time": "About 5 minutes",
+      "title": "Describe your business",
+      "body": "Fill in the essentials of your Business Profile: services and prices, hours, booking, payments and your top FAQs."
+    },
+    {
+      "time": "About 2 minutes",
+      "title": "Set up an assistant",
+      "body": "Copy its instructions, paste your profile in, and save it in ChatGPT, Claude or Gemini — or paste into a new chat on a free plan."
+    },
+    {
+      "time": "Every day",
+      "title": "Paste, check, send",
+      "body": "Paste a customer message or your rough notes. Read the draft, fix anything marked [CHECK], and send it yourself."
+    }
+  ],
+  "guardrailsTitle": "It asks instead of guessing.",
+  "guardrailsIntro": "The kit is written so you stay in charge of every word your business sends.",
+  "guardrails": [
+    "Uses **your** prices, policies and facts — and writes **[CHECK]** instead of guessing",
+    "Flags **OWNER DECISION NEEDED** for refunds, discounts and complaints with legal risk",
+    "No legal, tax, medical or investment advice",
+    "Reminds you never to paste Emirates ID, passport, card or bank details",
+    "Adds “have a fluent speaker check” to every Arabic, Hindi or Urdu draft",
+    "Keeps hiring fair: no criteria based on nationality, gender, age or religion"
+  ],
+  "statsEyebrow": "Why now",
+  "statsTitle": "Written for the businesses that run the UAE.",
+  "stats": [
+    {
+      "value": "#1",
+      "text": "The UAE ranked first in the world for AI adoption in Q2 2026, with 73.3% of working-age people using generative AI.",
+      "source": "Microsoft AI Diffusion Report, Sept 2026",
+      "url": "https://www.microsoft.com/en-us/research/wp-content/uploads/2026/09/Microsoft-AI-Diffusion-Report-2026-Q2.pdf"
+    },
+    {
+      "value": "~95%",
+      "text": "SMEs are about 95% of companies operating in the UAE — owner-run businesses where the owner is also the front desk, the sales team and the accounts department.",
+      "source": "WAM / UAE Ministry of Economy",
+      "url": "https://www.wam.ae/en/article/bltjo32-minister-economy-uae-seeks-increase-number"
+    }
+  ],
+  "fit": {
+    "title": "Is it for you?",
+    "yes": [
+      "Run or manage a small UAE business — salon, clinic front desk, café, cleaning, fit-out, trading, tutoring, car services or similar",
+      "Handle customer messages on WhatsApp in English, Arabic, or both",
+      "Want replies that are fast, professional and still sound like you",
+      "Are happy to read a draft before it goes out"
+    ],
+    "no": [
+      "Want messages sent automatically with no human check",
+      "Need a website chatbot or a WhatsApp API integration",
+      "Are looking for legal, tax, VAT, medical or HR advice",
+      "Are a property agent — see the AI Property Agent Kit instead"
+    ]
+  },
+  "offer": {
+    "title": "One download. Everything ready to use.",
+    "stack": [
+      {
+        "item": "**10 ready-made AI assistants**",
+        "detail": "copy-paste"
+      },
+      {
+        "item": "Complete guide: 11 chapters",
+        "detail": "in the ebook"
+      },
+      {
+        "item": "Business Profile worksheet + filled-in example",
+        "detail": "fill once"
+      },
+      {
+        "item": "120-prompt library",
+        "detail": "doc + spreadsheet"
+      },
+      {
+        "item": "40 WhatsApp quick replies",
+        "detail": "fill-in-the-blanks"
+      },
+      {
+        "item": "Weekly AI routine",
+        "detail": "30 min a week"
+      },
+      {
+        "item": "Privacy & safety guide",
+        "detail": "checklist"
+      },
+      {
+        "item": "Designed PDF ebook",
+        "detail": "start in 10 min"
+      }
+    ],
+    "boxChecks": [
+      "ChatGPT, Claude or Gemini",
+      "English and Arabic",
+      "No subscription"
+    ]
+  },
+  "refund": {
+    "title": "7-day no-questions refund",
+    "body": "Download the kit, fill in your profile and try the assistants on your real messages. If it's not right for your business, ask for a refund within 7 days. No questions asked.",
+    "short": "7-day no-questions refund"
+  },
+  "faq": [
+    {
+      "q": "Do I need to be technical?",
+      "a": "No. You copy, paste and type. The start guide takes you from download to your first draft in about 10 minutes."
+    },
+    {
+      "q": "Do I need a paid AI plan?",
+      "a": "No. It works on free plans by pasting the instructions into a new chat. Paid plans let you save each assistant so it's always ready."
+    },
+    {
+      "q": "Which AI app should I use?",
+      "a": "Any of ChatGPT, Claude or Gemini. Setup steps for each are in every assistant file."
+    },
+    {
+      "q": "Will it sound robotic?",
+      "a": "You set your tone, greetings and sign-off once, and you can save your best replies so the assistants copy your style. You edit every draft."
+    },
+    {
+      "q": "What if it gets something wrong?",
+      "a": "The assistants are told to use your facts and write [CHECK] when unsure. The privacy and safety guide includes a quick check before you send anything."
+    },
+    {
+      "q": "Does it work in Arabic?",
+      "a": "Yes. Arabic drafts come with the English meaning and a reminder to have a fluent speaker check."
+    },
+    {
+      "q": "Is it safe to paste customer messages?",
+      "a": "Remove phone numbers and personal details first, and never paste ID, card or bank details. The guide shows you how."
+    },
+    {
+      "q": "Does it handle VAT?",
+      "a": "The quotation writer adds a VAT line placeholder if you're VAT-registered, for you and your accountant to confirm. It doesn't give tax advice."
+    },
+    {
+      "q": "Can my staff use it?",
+      "a": "Yes. Share the assistant instructions with your team, and use the SOP writer to create training material in their language."
+    },
+    {
+      "q": "What if it isn't right for me?",
+      "a": "Ask for a refund within 7 days. No questions asked."
+    }
+  ],
+  "final": {
+    "headline": "Describe your business once. Let ten assistants draft the rest.",
+    "body": "WhatsApp replies, quotes, reminders, reviews, posts, follow-ups, complaints, hiring, training and admin — in your voice, with your prices, in English or Arabic. You stay in charge of every word you send."
+  },
+  "footerNote": "ChatGPT, Claude and Gemini are trademarks of their respective owners; this kit is not affiliated with or endorsed by them. Sample conversations on this page are fictional.",
+  "storeTag": "UAE · Small businesses"
+}
