@@ -20,6 +20,10 @@ on:
         description: Optional text to count in each body (e.g. a class name that proves a deploy landed)
         required: false
         default: ""
+      text_chars:
+        description: If above 0, also print each page's tag-stripped text up to this many characters
+        required: false
+        default: "0"
 
 jobs:
   probe:
@@ -29,6 +33,7 @@ jobs:
       URLS: ${{ inputs.urls }}
       HOSTS: ${{ inputs.hosts }}
       MATCH: ${{ inputs.match }}
+      TEXT_CHARS: ${{ inputs.text_chars }}
     steps:
       - name: HTTP
         run: |
@@ -41,6 +46,11 @@ jobs:
             head -c 700 body.txt | tr -d '\r'; echo
             echo "--- tag ids in body ---"; grep -oE 'GTM-[A-Z0-9]{4,12}|G-[A-Z0-9]{6,12}|fbq\(.init.,.[0-9]{8,20}' body.txt | sort -u || true
             if [ -n "$MATCH" ]; then echo "--- occurrences of \"$MATCH\" in body: $(grep -o -F -- "$MATCH" body.txt | wc -l) ---"; fi
+            echo "--- title / description ---"; grep -oiE '<title[^>]*>[^<]*</title>|<meta name="description" content="[^"]*"' body.txt | head -2 || true
+            if [ "${TEXT_CHARS:-0}" -gt 0 ] 2>/dev/null; then
+              echo "--- text, first $TEXT_CHARS chars ---"
+              perl -0pe 's/<script.*?<\/script>//gs; s/<style.*?<\/style>//gs; s/<[^>]+>/ /g; s/&nbsp;|&#160;/ /g; s/\s+/ /g' body.txt | head -c "$TEXT_CHARS"; echo
+            fi
           done
       - name: DNS
         run: |
