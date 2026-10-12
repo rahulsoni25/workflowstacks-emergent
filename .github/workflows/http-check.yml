@@ -24,6 +24,10 @@ on:
         description: If above 0, also print each page's tag-stripped text up to this many characters
         required: false
         default: "0"
+      raw_chars:
+        description: If above 0, also print the first N raw bytes of each body (to read a page's head, CSS variables and asset URLs)
+        required: false
+        default: "0"
 
 jobs:
   probe:
@@ -34,6 +38,7 @@ jobs:
       HOSTS: ${{ inputs.hosts }}
       MATCH: ${{ inputs.match }}
       TEXT_CHARS: ${{ inputs.text_chars }}
+      RAW_CHARS: ${{ inputs.raw_chars }}
     steps:
       - name: HTTP
         run: |
@@ -47,6 +52,7 @@ jobs:
             echo "--- tag ids in body ---"; grep -oE 'GTM-[A-Z0-9]{4,12}|G-[A-Z0-9]{6,12}|fbq\(.init.,.[0-9]{8,20}' body.txt | sort -u || true
             if [ -n "$MATCH" ]; then echo "--- occurrences of \"$MATCH\" in body: $(grep -o -F -- "$MATCH" body.txt | wc -l) ---"; fi
             echo "--- title / description ---"; grep -oiE '<title[^>]*>[^<]*</title>|<meta name="description" content="[^"]*"' body.txt | head -2 || true
+            if [ "${RAW_CHARS:-0}" -gt 0 ] 2>/dev/null; then echo "--- raw, first $RAW_CHARS bytes ---"; head -c "$RAW_CHARS" body.txt | tr -d '\r'; echo; fi
             if [ "${TEXT_CHARS:-0}" -gt 0 ] 2>/dev/null; then
               echo "--- text, first $TEXT_CHARS chars ---"
               perl -0pe 's/<script.*?<\/script>//gs; s/<style.*?<\/style>//gs; s/<[^>]+>/ /g; s/&nbsp;|&#160;/ /g; s/\s+/ /g' body.txt | head -c "$TEXT_CHARS"; echo
