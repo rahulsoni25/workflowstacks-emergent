@@ -2,6 +2,7 @@ import HomeClient from './HomeClient'
 import { homeFaqs } from '@/lib/home-faqs'
 import { SITE_URL as BASE } from '@/lib/site-url'
 import { isAiRelevant, qualityRank } from '@/lib/skill-relevance'
+import { productCards } from '@/lib/digital-products'
 
 // The root layout no longer sets alternates.canonical — it silently applied
 // '/' to every route that forgot to declare one, so /help, /join and
@@ -103,7 +104,7 @@ export default async function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />
-      <HomeClient initialSkills={featured} initialStats={stats} hot={hot} />
+      <HomeClient initialSkills={featured} initialStats={stats} hot={hot} kits={productCards()} />
     </>
   )
 }

@@ -1,0 +1,362 @@
+{
+  "slug": "ai-property-agent-kit-dubai",
+  "status": "live",
+  "market": "AE",
+  "name": "AI Property Agent Kit — Dubai Edition",
+  "card": "Ten ready-to-use AI assistants for Dubai property agents: listings, lead replies, follow-ups, viewings and your daily plan, drafted from your facts.",
+  "seo": {
+    "title": "AI Property Agent Kit for Dubai Agents — 10 Ready-Made AI Assistants | WorkflowStacks",
+    "ogTitle": "Ten AI assistants for the writing and organising in a Dubai agent's day",
+    "description": "Turn voice notes into portal-ready listings, answer new leads in seconds, follow up on time and plan your day, using your facts and never invented ones. Works with ChatGPT, Claude or Gemini. USD 99, 7-day refund."
+  },
+  "price": {
+    "amount": 99,
+    "currency": "USD",
+    "label": "USD 99",
+    "note": "(≈ AED 364)",
+    "period": "One-time payment"
+  },
+  "checkout": {
+    "provider": "gumroad",
+    "url": ""
+  },
+  "whatsapp": {
+    "number": "971522086253",
+    "text": "Hi WorkflowStacks, I'd like to buy the AI Property Agent Kit — Dubai Edition (USD 99)."
+  },
+  "buy": {
+    "label": "Get the kit — USD 99",
+    "short": "Get the kit",
+    "note": {
+      "checkout": "Instant download after payment · 7-day no-questions refund",
+      "whatsapp": "Order on WhatsApp — we reply with a secure payment link · 7-day no-questions refund"
+    }
+  },
+  "hero": {
+    "eyebrow": "AI Kit · Dubai Edition",
+    "headline": "Reply first. Look professional. Keep your pipeline moving.",
+    "sub": "10 ready-to-use AI assistants for Dubai property agents. Turn voice notes into portal-ready listings, answer new leads in seconds, follow up on time and plan your day. Uses **your** facts and never invents them. You check. You send.",
+    "bullets": [
+      "Works with ChatGPT, Claude or Gemini — including free plans",
+      "Set up your first assistant in about 10 minutes",
+      "No coding, no new app to learn"
+    ],
+    "demo": {
+      "contact": "Omar (sample lead)",
+      "status": "WhatsApp",
+      "messages": [
+        {
+          "from": "in",
+          "text": "Hi, is the 1 bed in Sample Tower still available? What's the final price?",
+          "time": "9:40 pm"
+        },
+        {
+          "chip": "Lead Qualifier is drafting…"
+        },
+        {
+          "from": "out",
+          "text": "Hi Omar, thanks for your message about the 1-bed in Sample Tower! It's listed at AED 1,050,000 (sample price). I'm confirming the latest availability with the owner now and will come back to you within the hour. Meanwhile, is it for you to live in, or as an investment? And roughly when are you hoping to buy?",
+          "time": "9:41 pm"
+        }
+      ],
+      "note": "Sample lead, property and price — all fictional. The agent checks every draft before sending."
+    }
+  },
+  "problem": {
+    "title": "The job is people. The admin gets in the way.",
+    "quotes": [
+      "“Is it still available?”",
+      "“What's the final price?”",
+      "“Is it a good investment?”",
+      "“Can you send the listing text by tomorrow?”"
+    ],
+    "body": "A portal lead arrives at 10pm. A landlord wants the listing text by tomorrow. Three clients went quiet after you sent options. Your viewing notes are in a voice memo, a notebook and your head. A client writes in Russian. Another asks if the property is “a good investment”. All of it matters, and all of it competes with the part of the job that needs you most: talking to people, showing homes, building trust.",
+    "before": {
+      "title": "Why “just using ChatGPT” gives generic answers",
+      "body": "A general AI chat doesn't know your confirmed facts, your areas, your fee answer or how you talk to clients. So it fills the gaps with guesses — a distance, an amenity, a promise you'd never make — and you end up rewriting and fact-checking everything."
+    },
+    "after": {
+      "title": "What changes with this kit",
+      "body": "You fill your Agent Profile **once**: name, brokerage, focus areas, languages, tone, fee answer, top client FAQs and the things you never say. Every assistant uses it. Each one is written for a specific agent task, asks for the right details first, and writes [CHECK] instead of guessing."
+    }
+  },
+  "demosTitle": "Your notes in. Ready drafts out.",
+  "demos": [
+    {
+      "id": "listing",
+      "label": "Voice note → listing",
+      "inputLabel": "The agent's voice-note transcript",
+      "input": "ok creekside gardens tower B, two bed two bath, owner says 1,180 sq ft, high floor, partial water view from living room, balcony, kitchen redone last year owner says, unfurnished, vacant, available 1 November, one parking",
+      "outputLabel": "Listing Description Writer",
+      "output": [
+        "3 headline options, each leading with a different confirmed feature",
+        "A 50-word short description and a 150–250 word long description",
+        "6–10 feature bullets, one confirmed fact each",
+        "PERMIT / REF NO.: [ ____ ] — a placeholder for any number your regulator or portal requires",
+        "A fact check table showing where every claim came from",
+        "What's missing: [CHECK: rent and payment terms approved by the owner]"
+      ],
+      "flag": "Asks instead of guessing: “add how far it is from the metro” becomes [CHECK: distance to nearest metro, confirmed by you]",
+      "note": "Sample property — fictional."
+    },
+    {
+      "id": "lead",
+      "label": "Lead's reply → Lead Card",
+      "inputLabel": "The lead replies on WhatsApp",
+      "input": "Budget around 2M, want to move in about 3 months, will need a mortgage, prefer a townhouse, we have 2 kids.",
+      "outputLabel": "Lead First-Response & Qualifier",
+      "output": [
+        "Buy · Townhouse · Budget around AED 2M · Move in about 3 months",
+        "Financing: mortgage · Household: 2 children",
+        "Still to learn: areas, ready or off-plan",
+        "Temperature: Warm (timeline about 3 months)",
+        "Next message: “Thanks, that really helps. Which communities are you considering so far? And would you prefer somewhere ready to move into, or are you open to off-plan?”"
+      ],
+      "flag": "Mortgage mentioned? It offers to introduce the mortgage partner in your profile and never comments on eligibility, rates or approval",
+      "note": "Sample lead — fictional."
+    },
+    {
+      "id": "objection",
+      "label": "“I'll wait” → reply",
+      "inputLabel": "Client on WhatsApp",
+      "input": "I think I'll wait a year, prices might come down.",
+      "outputLabel": "Objection Handler",
+      "output": "That makes sense. It's a big decision and the timing should be right for you. Can I ask what would make it feel right: a budget, a move date, or something else? I can't predict prices, but I'm happy to send you official updates you can check yourself, so you decide with the facts. Would that help?",
+      "flag": "No market predictions, no pressure. Plus a call talk track and phrases to avoid",
+      "note": "Sample conversation — fictional."
+    },
+    {
+      "id": "followup",
+      "label": "Quiet lead → follow-ups",
+      "inputLabel": "The agent's notes",
+      "input": "Buyer lead Sara wants a 3-bed townhouse in Palm Grove Villas, budget around AED 2.5M. I sent four options last Monday, no reply. New listing: 3-bed end unit, AED 2.45M, vacant on transfer.",
+      "outputLabel": "Follow-up Sequence Builder",
+      "output": [
+        "Day 1: Hi Sara, a new one for your search: a 3-bed end unit in Palm Grove Villas, AED 2.45M, vacant on transfer. Shall I send the photos?",
+        "Day 3: Of the four options I sent last Monday, did any stand out? If none felt right, tell me what was missing and I'll refine the search.",
+        "Day 7, 14: an easy offer each time, such as a call or a video viewing",
+        "Day 30: a respectful close-the-loop — reply “still looking” or “not now”"
+      ],
+      "flag": "No “just checking in”. The sequence stops the moment she replies",
+      "note": "Sample lead, community and prices — fictional."
+    }
+  ],
+  "inside": {
+    "title": "Ten assistants. One profile. Your facts.",
+    "intro": "Each assistant comes with copy-paste instructions, 2-minute setup steps for ChatGPT, Claude and Gemini, three “try it now” examples and tips to improve results.",
+    "items": [
+      {
+        "name": "Listing Description Writer",
+        "desc": "Portal-ready headlines, descriptions and bullets in English, with optional Arabic. Uses your confirmed facts and flags what's missing."
+      },
+      {
+        "name": "Lead First-Response & Qualifier",
+        "desc": "Natural WhatsApp replies to portal and Instagram leads, plus qualifying questions that don't feel like a form."
+      },
+      {
+        "name": "Follow-up Sequence Builder",
+        "desc": "Day 1, 3, 7, 14 and 30 messages for quiet buyers, tenants and investors. No “just checking in”."
+      },
+      {
+        "name": "Viewing Coordinator",
+        "desc": "Confirmations, reminders, occupant access requests, feedback questions and next steps."
+      },
+      {
+        "name": "Objection Handler",
+        "desc": "Calm, honest answers to “too expensive”, “I'll wait”, “show me more”, “why you” and fee questions."
+      },
+      {
+        "name": "Market Update Post Writer",
+        "desc": "Turns figures you've checked into posts and newsletters, with the source named on every number."
+      },
+      {
+        "name": "Content Planner for Agents",
+        "desc": "A 30-day plan, Reels scripts and captions built around your real listings and client questions."
+      },
+      {
+        "name": "Community Guide Writer",
+        "desc": "Area guides from your own notes, with [VERIFY] on anything you haven't confirmed."
+      },
+      {
+        "name": "Landlord & Seller Meeting Prep",
+        "desc": "Agenda, questions, comparables table, presentation outline and follow-up email."
+      },
+      {
+        "name": "Pipeline & Daily Planner",
+        "desc": "Messy notes and voice notes into a pipeline and a prioritised today-list."
+      }
+    ],
+    "extras": [
+      {
+        "title": "Agent Profile worksheet",
+        "desc": "Fill it once, with a fictional filled-in sample to copy. Every assistant then knows your name, brokerage, areas, languages, tone, fee answer and the things you never say."
+      },
+      {
+        "title": "120-prompt library",
+        "desc": "Copy-paste prompts in 12 categories, written for Dubai agents, as a document and a spreadsheet."
+      },
+      {
+        "title": "40 WhatsApp scripts for agents",
+        "desc": "First responses, viewings, follow-ups, landlord outreach, referral asks and thank-yous, with sample lines in Arabic, Hindi and Russian marked for a fluent-speaker check."
+      },
+      {
+        "title": "Weekly routine + privacy guide",
+        "desc": "A 30-minutes-a-week plan with a checklist, what never to paste, and a 5-point check before you send."
+      },
+      {
+        "title": "The complete guide",
+        "desc": "11 chapters, from AI in plain English and the lead-to-deal workflow to fee conversations, troubleshooting and your first 30 days."
+      }
+    ]
+  },
+  "stepsTitle": "Up and running in about 10 minutes",
+  "steps": [
+    {
+      "time": "About 5 minutes",
+      "title": "Fill your Agent Profile",
+      "body": "Your name, brokerage, focus areas, languages, tone and the things you never promise."
+    },
+    {
+      "time": "About 2 minutes",
+      "title": "Set up an assistant",
+      "body": "Copy its instructions into ChatGPT, Claude or Gemini and save it — or, on a free plan, paste them into a new chat."
+    },
+    {
+      "time": "About 1 minute",
+      "title": "Send your first message",
+      "body": "Paste a lead's message or your listing notes. Read the draft, fix anything marked [CHECK], and send it yourself."
+    }
+  ],
+  "guardrailsTitle": "Built to protect your name.",
+  "guardrailsIntro": "Every assistant follows the same rules, so you stay in charge of every word you send.",
+  "guardrails": [
+    "Uses **your** facts — missing details become [CHECK] or a question to you, never a guess",
+    "No promises of returns, yields, price growth, visas or mortgage approval — it suggests a qualified professional when a client asks",
+    "Listing text includes a placeholder line for any permit or reference number your regulator or portal requires. The kit doesn't tell you what the rules are; your brokerage does",
+    "Pricing, fees, offers and anything with legal risk are flagged [AGENT DECISION]",
+    "Reminds you never to paste Emirates ID, passport or bank details",
+    "Every non-English draft comes with “Have a fluent speaker check before sending”"
+  ],
+  "statsEyebrow": "The context",
+  "statsTitle": "Dubai's brokerage profession is busy and growing.",
+  "stats": [
+    {
+      "value": "13,083",
+      "text": "New brokers registered in Dubai in 2025, up 38% on 2024.",
+      "source": "Dubai Land Department / Dubai Media Office, March 2026",
+      "url": "https://www.mediaoffice.ae/en/news/2026/march/09-03/dubai-brokerage-sector-strengthens-its-role-as-a-key-driver-of-market-growth-in-2025"
+    },
+    {
+      "value": "9,785",
+      "text": "Registered brokerage offices in Dubai at the end of 2025. In a field that full, what stays in your control is replying clearly, keeping clients informed and getting the details right.",
+      "source": "Dubai Land Department / Dubai Media Office, March 2026",
+      "url": "https://www.mediaoffice.ae/en/news/2026/march/09-03/dubai-brokerage-sector-strengthens-its-role-as-a-key-driver-of-market-growth-in-2025"
+    }
+  ],
+  "fit": {
+    "title": "Is it for you?",
+    "yes": [
+      "Are a property agent or broker in Dubai, especially in your first few years",
+      "Work across buyers, tenants, landlords, sellers or off-plan launches",
+      "Live on WhatsApp and portals and want replies, listings and follow-ups that look professional",
+      "Serve clients in several languages"
+    ],
+    "no": [
+      "Want AI to decide prices, give investment advice or make promises to clients",
+      "Want automatic sending or a CRM — this kit is instructions and templates you use in your own AI chat",
+      "Won't read a draft before you send it",
+      "Aren't a property agent — see the AI Employee Kit — UAE Business Edition instead"
+    ]
+  },
+  "offer": {
+    "title": "One download. Everything ready to use.",
+    "stack": [
+      {
+        "item": "**10 ready-to-use AI assistants**",
+        "detail": "copy-paste"
+      },
+      {
+        "item": "Agent Profile worksheet + fictional filled-in sample",
+        "detail": "fill once"
+      },
+      {
+        "item": "120-prompt library",
+        "detail": "doc + spreadsheet"
+      },
+      {
+        "item": "40 WhatsApp scripts for agents",
+        "detail": "fill-in-the-blanks"
+      },
+      {
+        "item": "Weekly AI routine",
+        "detail": "30 min a week"
+      },
+      {
+        "item": "Privacy & safety guide",
+        "detail": "5-point check"
+      },
+      {
+        "item": "The complete guide",
+        "detail": "11 chapters"
+      }
+    ],
+    "boxChecks": [
+      "ChatGPT, Claude or Gemini",
+      "Free or paid AI plans",
+      "No subscription"
+    ]
+  },
+  "refund": {
+    "title": "7-day no-questions refund",
+    "body": "Download the kit, set it up and try it on your real work. If it's not right for you, reply to your purchase email within 7 days for a full refund. No questions asked.",
+    "short": "7-day no-questions refund"
+  },
+  "faq": [
+    {
+      "q": "Do I need to be technical?",
+      "a": "No. If you can copy and paste, you can use this kit. The quick start takes about 10 minutes."
+    },
+    {
+      "q": "Does it work with a free AI plan?",
+      "a": "Yes. Paste the assistant's instructions as the first message of a new chat. Paid plans let you save each assistant (as a Project, custom GPT or Gem) so it's always ready."
+    },
+    {
+      "q": "Which AI tool do I need?",
+      "a": "ChatGPT, Claude or Gemini. Use the one you already have."
+    },
+    {
+      "q": "Will it invent facts about my property or area?",
+      "a": "It's instructed to use your facts and to mark anything missing as [CHECK] or [VERIFY]. AI can still make mistakes, so the kit includes a quick 5-point check before you send."
+    },
+    {
+      "q": "Will it write investment promises or talk about returns or visas?",
+      "a": "No. Every assistant is instructed never to promise returns, yields, price growth, visas or mortgage approval, and to suggest a qualified professional when a client asks."
+    },
+    {
+      "q": "Does it know Dubai's advertising rules?",
+      "a": "It doesn't state any rules. It adds a placeholder for any permit or reference number your regulator or portal requires, and follows the compliance notes you write in your Agent Profile. Your brokerage and the official sources set the rules."
+    },
+    {
+      "q": "Can it write in Arabic, Hindi, Urdu or Russian?",
+      "a": "It can draft in other languages with an English version for you. Always have a fluent speaker check before sending."
+    },
+    {
+      "q": "Will it sound like me?",
+      "a": "Your Agent Profile captures your tone, sign-off and phrases. Paste a few of your best messages and it matches your voice."
+    },
+    {
+      "q": "What about my clients' privacy?",
+      "a": "The kit shows you what never to paste, such as Emirates ID, passport or bank details, and how to check your AI tool's settings."
+    },
+    {
+      "q": "What if it's not right for me?",
+      "a": "7-day no-questions refund. Reply to your purchase email."
+    }
+  ],
+  "final": {
+    "headline": "Give your next lead a reply you're proud of.",
+    "body": "Set up your first assistant in 10 minutes. Paste a lead message or a voice note. See a draft that sounds like you, sticks to your facts and is ready for you to check and send."
+  },
+  "footerNote": "The AI Property Agent Kit is a writing and organising aid. It is not legal, tax, mortgage or investment advice and does not describe the requirements of any regulator, portal or platform. Not affiliated with or endorsed by Dubai Land Department, any regulator, any property portal, OpenAI, Anthropic or Google. ChatGPT, Claude and Gemini are trademarks of their respective owners. Sample properties and messages on this page are fictional.",
+  "storeTag": "Dubai · Property agents"
+}
