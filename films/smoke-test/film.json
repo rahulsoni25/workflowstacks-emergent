@@ -1,0 +1,52 @@
+{
+  "title": "film-studio smoke test",
+  "slug": "smoke-test",
+  "format": "9:16",
+  "fps": 24,
+  "disclosure": "AI avatar · no camera",
+  "brand": {
+    "name": "Founder Avatar Studio",
+    "by": "by FluoDigital",
+    "logo": null,
+    "accent": "#F2A65A",
+    "ink": "#14111C",
+    "paper": "#F4EEE6",
+    "fonts": { "display": "Instrument Serif", "body": "Archivo", "mono": "IBM Plex Mono", "displayWeight": 400 },
+    "note": "Colours and fonts are the landing page's own tokens (docs/founder-avatar-studio-design-system.md)."
+  },
+  "sources": [
+    { "url": "https://workflowstacks.com/ai-avatar", "file": "sources/ai-avatar.txt" }
+  ],
+  "audio": { "clipAudio": true },
+  "shots": [
+    {
+      "label": "The founder's avatar speaks to camera",
+      "clip": "clips/hero.mp4",
+      "url": "https://workflowstacks.com/sites/founder-avatar-studio/hero.mp4",
+      "in": 0, "out": 3.6,
+      "graphics": [
+        { "type": "headline", "at": 0.5, "until": 3.3, "eyebrow": "Founder Avatar Studio", "text": "Post every week.\nNever film _again._", "wordGap": 0.12 }
+      ],
+      "transition": { "type": "fade", "duration": 0.4 }
+    },
+    {
+      "label": "Same take, second half",
+      "clip": "clips/hero.mp4",
+      "url": "https://workflowstacks.com/sites/founder-avatar-studio/hero.mp4",
+      "in": 3.4, "out": 7.0,
+      "graphics": [
+        { "type": "lowerThird", "at": 0.4, "until": 3.3, "name": "Our founder's avatar", "role": "No camera was involved" },
+        { "type": "chips", "at": 0.7, "until": 3.3, "items": ["45 min on camera, once", "7 days to your twin", "English and Arabic"] }
+      ],
+      "transition": { "type": "fadeblack", "duration": 0.5 }
+    }
+  ],
+  "endCard": {
+    "title": "Founder Avatar Studio",
+    "tagline": "AI avatar videos for founders in Dubai and Mumbai, in English and Arabic.",
+    "url": "workflowstacks.com/ai-avatar",
+    "sub": "by FluoDigital",
+    "note": "The person in this film is an AI avatar",
+    "duration": 2.5
+  }
+}

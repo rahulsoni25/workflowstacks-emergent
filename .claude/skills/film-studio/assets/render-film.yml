@@ -1,0 +1,128 @@
+name: render-film
+
+# Renders film-studio projects (films/<slug>/film.json) on GitHub's runners and uploads the
+# finished files as an artifact: master and web MP4s, SRT/VTT subtitles, poster, QA sheet and
+# report. Clips are downloaded from each shot's "url"; a project whose clips cannot be
+# downloaded (local-only uploads) is skipped with a notice instead of failing the run.
+#
+# Run it from the Actions tab (Run workflow) with a project path, or push a change to a
+# film.json. A change to the engine itself renders films/smoke-test to prove it still works.
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: Project folder, e.g. films/smoke-test
+        required: true
+        default: films/smoke-test
+      formats:
+        description: "Formats, comma separated (16:9,9:16). Empty: the project's own format"
+        required: false
+        default: ""
+      max_mb:
+        description: Size limit for the web MP4 in MB
+        required: false
+        default: "25"
+  push:
+    paths:
+      - "films/*/film.json"
+      - ".claude/skills/film-studio/**"
+      - ".github/workflows/render-film.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-film-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SKILL: .claude/skills/film-studio
+      PROJECT: ${{ inputs.project }}
+      FORMATS: ${{ inputs.formats }}
+      MAX_MB: ${{ inputs.max_mb || '25' }}
+      BEFORE: ${{ github.event.before }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: .claude/skills/film-studio/package-lock.json
+
+      - name: Pick projects
+        id: pick
+        run: |
+          set -euo pipefail
+          : > projects.txt
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "${PROJECT%/}" > projects.txt
+          else
+            if [ -n "${BEFORE}" ] && git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+              git diff --name-only "${BEFORE}" "${GITHUB_SHA}" > changed.txt
+            else
+              git diff --name-only HEAD~1 HEAD > changed.txt || git ls-files > changed.txt
+            fi
+            grep -E '^films/[^/]+/film\.json$' changed.txt | xargs -r -n1 dirname >> projects.txt || true
+            if grep -qE '^(\.claude/skills/film-studio/|\.github/workflows/render-film\.yml)' changed.txt; then
+              echo films/smoke-test >> projects.txt
+            fi
+          fi
+          sort -u projects.txt -o projects.txt
+          echo "Projects:"; cat projects.txt
+          echo "count=$(grep -c . projects.txt || true)" >> "$GITHUB_OUTPUT"
+
+      - name: Install the engine
+        if: steps.pick.outputs.count != '0'
+        run: |
+          npm ci --prefix "$SKILL" --no-audit --no-fund
+          node "$SKILL/scripts/studio.mjs" setup | tee setup.log
+          if grep -q 'chromium: not found' setup.log; then
+            (cd "$SKILL" && npx playwright-core install --with-deps chromium)
+          fi
+
+      - name: Render
+        if: steps.pick.outputs.count != '0'
+        run: |
+          set -uo pipefail
+          S="$SKILL/scripts/studio.mjs"
+          status=0
+          while read -r P; do
+            [ -n "$P" ] || continue
+            if [ ! -f "$P/film.json" ]; then echo "::warning title=render-film::$P has no film.json"; continue; fi
+            if ! node "$S" fetch "$P"; then
+              echo "::notice title=render-film::Skipped $P: its clips are not downloadable from CI. Give each shot a \"url\" to render it here."
+              continue
+            fi
+            if [ -n "${FORMATS}" ]; then LIST="${FORMATS//,/ }"; else LIST="default"; fi
+            for F in $LIST; do
+              if [ "$F" = "default" ]; then ARGS=(); else ARGS=(--format "$F"); fi
+              if node "$S" render "$P" --workers 4 --max-mb "$MAX_MB" "${ARGS[@]}"; then
+                for R in "$P"/out/report-*.md; do
+                  [ -f "$R" ] && { echo; grep -v '^!\[' "$R"; } >> "$GITHUB_STEP_SUMMARY"
+                done
+              else
+                status=1
+                echo "::error title=render-film::$P ($F) failed to render"
+              fi
+            done
+          done < projects.txt
+          exit $status
+
+      - name: Upload the films
+        if: always() && steps.pick.outputs.count != '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: films-${{ github.run_id }}
+          path: |
+            films/*/out/
+            !films/*/out/.work-*/
+          if-no-files-found: warn
+          retention-days: 14

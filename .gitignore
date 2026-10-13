@@ -128,3 +128,9 @@ _pb.html
 *.gz
 *.hdr
 *.brhdr
+
+# film-studio projects: renders, downloaded clips and exported frames stay local
+films/*/out/
+films/*/clips/*
+!films/*/clips/.gitkeep
+films/*/frames/

@@ -1,0 +1,237 @@
+{
+  "title": "Roster launch film",
+  "slug": "roster-launch",
+  "format": "16:9",
+  "fps": 24,
+  "disclosure": "AI-generated film",
+  "brand": {
+    "name": "Roster",
+    "by": "by FluoDigital",
+    "logo": null,
+    "accent": "#8B7CFF",
+    "ink": "#0B0B10",
+    "paper": "#F5F3EE",
+    "fonts": {
+      "display": "Space Grotesk",
+      "body": "Space Grotesk",
+      "mono": "JetBrains Mono"
+    },
+    "note": "Roster has no published palette; the violet accent is a placeholder until the brand colours arrive."
+  },
+  "sources": [
+    {
+      "url": "https://collab.fluodigital.com",
+      "file": "sources/collab-home.txt"
+    },
+    {
+      "url": "https://collab.fluodigital.com/pricing",
+      "file": "sources/collab-pricing.txt"
+    }
+  ],
+  "audio": {
+    "clipAudio": true
+  },
+  "shots": [
+    {
+      "label": "An AI creator fires the render",
+      "clip": "clips/01-render.mp4",
+      "in": 0,
+      "out": 10,
+      "graphics": [
+        {
+          "type": "checklist",
+          "at": 0.8,
+          "until": 6.4,
+          "title": "Pitch accepted · rendering",
+          "items": [
+            "Brief read: beauty, Reels, barter",
+            "Pitch sent in one click",
+            "Booked, payment escrowed",
+            "Content delivered"
+          ],
+          "fillFrom": 0.4,
+          "fillTo": 3.8,
+          "9:16": {
+            "place": "bottom",
+            "until": 5.8
+          }
+        },
+        {
+          "type": "headline",
+          "at": 5.9,
+          "until": 9.5,
+          "eyebrow": "Roster · every creator is an AI persona",
+          "text": "AI creators, ready to pitch.",
+          "wordGap": 0.16
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "duration": 0.5
+      },
+      "9:16": {
+        "focus": 0.45
+      }
+    },
+    {
+      "label": "Two founders talk through a brief",
+      "clip": "clips/02-brief.mp4",
+      "in": 0,
+      "out": 10,
+      "graphics": [
+        {
+          "type": "headline",
+          "at": 0.8,
+          "until": 9.6,
+          "eyebrow": "For brands · free · no signup",
+          "wordGap": 0.15,
+          "lines": [
+            {
+              "at": 1.0,
+              "text": "Post what you need."
+            },
+            {
+              "at": 5.3,
+              "text": "AI creators pitch you."
+            }
+          ]
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "duration": 0.4
+      },
+      "9:16": {
+        "fit": "blur"
+      }
+    },
+    {
+      "label": "Rohan swirls a cutting chai",
+      "clip": "clips/03-chai.mp4",
+      "in": 0,
+      "out": 10,
+      "graphics": [
+        {
+          "type": "headline",
+          "at": 0.6,
+          "until": 3.0,
+          "eyebrow": "The old way",
+          "text": "No outreach. No back-and-forth.",
+          "wordGap": 0.13
+        },
+        {
+          "type": "card",
+          "at": 3.1,
+          "until": 5.4,
+          "eyebrow": "Barter deals, built in",
+          "text": "Ship product. *Creators post.*\nEveryone reviews everyone.",
+          "sub": "No cash required to start."
+        },
+        {
+          "type": "statement",
+          "at": 5.6,
+          "until": 9.8,
+          "text": "Paid, barter,\nor _both._"
+        }
+      ],
+      "transition": {
+        "type": "fade",
+        "duration": 0.5
+      },
+      "9:16": {
+        "focus": 0.55
+      }
+    },
+    {
+      "label": "A founder offers a drink",
+      "clip": "clips/04-founder.mp4",
+      "in": 0,
+      "out": 10,
+      "graphics": [
+        {
+          "type": "lowerThird",
+          "at": 2.2,
+          "until": 9.4,
+          "name": "A brand owner",
+          "role": "AI avatar · shipping product for a barter deal"
+        },
+        {
+          "type": "headline",
+          "at": 2.1,
+          "until": 9.5,
+          "eyebrow": "One-click booking",
+          "wordGap": 0.16,
+          "lines": [
+            {
+              "at": 2.3,
+              "text": "Escrowed until delivery."
+            }
+          ],
+          "sub": "Browse by niche, budget and platform. Book and pay in one flow.",
+          "subAt": 3.8
+        },
+        {
+          "type": "steps",
+          "at": 4.4,
+          "until": 9.5,
+          "items": [
+            "Post a brief",
+            "AI creators pitch",
+            "Book, escrowed",
+            "Delivered, released"
+          ],
+          "formats": [
+            "16:9"
+          ]
+        }
+      ],
+      "transition": {
+        "type": "smoothleft",
+        "duration": 0.5
+      },
+      "9:16": {
+        "focus": 0.47
+      }
+    },
+    {
+      "label": "The team reacts",
+      "clip": "clips/05-team.mp4",
+      "in": 0,
+      "out": 10,
+      "graphics": [
+        {
+          "type": "statement",
+          "at": 0.8,
+          "until": 9.3,
+          "text": "Post a brief.\nGet _pitches._",
+          "dim": true
+        },
+        {
+          "type": "chips",
+          "at": 4.3,
+          "until": 9.4,
+          "items": [
+            "Free for brands",
+            "10% only on paid deals",
+            "First 30 creators: 0% for 6 months"
+          ]
+        }
+      ],
+      "transition": {
+        "type": "fadeblack",
+        "duration": 0.6
+      },
+      "9:16": {
+        "fit": "blur"
+      }
+    }
+  ],
+  "endCard": {
+    "title": "Roster",
+    "tagline": "The marketplace for AI creators and the brands who hire them.",
+    "url": "collab.fluodigital.com",
+    "sub": "Early access · built in India · by FluoDigital",
+    "note": "Every person in this film is an AI avatar",
+    "duration": 3.5
+  }
+}

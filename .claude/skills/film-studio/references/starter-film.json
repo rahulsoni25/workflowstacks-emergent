@@ -1,0 +1,55 @@
+{
+  "title": "[Film title]",
+  "slug": "my-film",
+  "format": "16:9",
+  "fps": 24,
+  "disclosure": "AI-generated film",
+  "brand": {
+    "name": "[Brand]",
+    "by": "",
+    "logo": null,
+    "accent": "#C6F24E",
+    "ink": "#0A0C0D",
+    "paper": "#F3F3EC",
+    "fonts": { "display": "Space Grotesk", "body": "Space Grotesk", "mono": "JetBrains Mono" }
+  },
+  "sources": [
+    { "url": "[https://your-product-page]", "file": "sources/home.txt" }
+  ],
+  "audio": { "clipAudio": true },
+  "shots": [
+    {
+      "clip": "clips/01.mp4",
+      "prompt": "[Flow prompt: who is in the shot, what they do, where, camera move, light, sound]",
+      "graphics": [
+        { "type": "headline", "at": 0.8, "until": 6.5, "eyebrow": "[Short label]", "text": "[The promise in five words, one *accent* word]" }
+      ],
+      "transition": { "type": "fade", "duration": 0.5 }
+    },
+    {
+      "clip": "clips/02.mp4",
+      "prompt": "[Flow prompt for shot 2]",
+      "graphics": [
+        { "type": "card", "at": 0.8, "until": 6.5, "eyebrow": "[Feature]", "text": "[What it does,\nin two short lines]", "sub": "[One supporting line from the product page]" }
+      ],
+      "transition": { "type": "fade", "duration": 0.5 }
+    },
+    {
+      "clip": "clips/03.mp4",
+      "prompt": "[Flow prompt for shot 3]",
+      "graphics": [
+        { "type": "statement", "at": 0.8, "until": 6.8, "text": "[The line people\nshould _remember_]" },
+        { "type": "chips", "at": 3.4, "until": 6.8, "items": ["[Proof point 1]", "[Proof point 2]", "[Proof point 3]"] }
+      ],
+      "transition": { "type": "fadeblack", "duration": 0.6 }
+    }
+  ],
+  "endCard": {
+    "title": "[Brand]",
+    "tagline": "[One-line description from the product page]",
+    "url": "[yourdomain.com]",
+    "sub": "",
+    "note": "Every person in this film is an AI avatar",
+    "duration": 3.5
+  }
+}
