@@ -209,7 +209,7 @@ Pill-shaped proof points that rise in 0.22 s apart, usually under a statement. K
 { "type": "captions", "at": 0.5, "until": 6.0, "text": "We shipped the product and the creator posted in two days", "perPage": 4 }
 ```
 
-Spoken words, shown `perPage` words at a time with the current word highlighted. Words are spread evenly across the window, so match the window to the speech. The engine cannot hear the clip, so listen to it, or read the line from the Flow prompt's dialogue.
+Spoken words, shown `perPage` words at a time with the current word highlighted. Words are spread evenly across the window, so match the window to the speech. The engine does not transcribe audio. Take the words from the shot's `dialogue`, the line given to Flow, or from the user; without them, leave captions out rather than guess.
 
 ## 8. endCard
 
@@ -231,13 +231,13 @@ A brand-colour card after the last shot. Titles longer than 14 characters get a 
 ## 10. Validation rules
 
 `check` fails when any of these is true:
-- a clip is missing or unreadable;
+- a clip is missing or unreadable (the rest of the plan is still checked, with missing clips timed at their `out` or 8 s, so a plan can be checked before Flow has made anything);
 - `in` or `out` falls outside the clip;
 - a transition is longer than half a shot, or has an unknown type;
 - a graphic window falls outside its shot, or lacks required text;
 - two graphics share a slot at the same time (a bottom panel in 9:16 also clashes with lower thirds and captions);
 - `fit`, `focus`, `side`, `place`, `formats` or `displayWeight` has a value outside its allowed set;
-- a `[placeholder]` is left in;
+- a `[placeholder]` is left in a graphic, the end card, the brand name or the disclosure;
 - a brand colour is not `#RRGGBB`, or the logo file is missing;
 - a font is not available;
 - a number on screen is not found in any snapshot (unless `--allow-unsourced`).

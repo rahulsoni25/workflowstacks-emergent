@@ -27,6 +27,7 @@ const DEFAULT_BRAND = {
 };
 
 const r3 = n => Math.round(n * 1000) / 1000;
+const tl_disclosure = spec => (typeof spec.disclosure === 'string' ? spec.disclosure : '');
 const num = (v, d) => (typeof v === 'number' && Number.isFinite(v) ? v : d);
 const PLACEHOLDER = /\[[^\]]{2,}\]/;
 
@@ -64,14 +65,23 @@ export function buildTimeline(spec, probes, { format, dir, skillDir } = {}) {
 
   const hasEnd = !!spec.endCard;
   const shots = [];
+  const missingClips = [];   // reported by check, blocking for stills and render
   let start = 0;
   spec.shots.forEach((s, i) => {
     const where = `shot ${i + 1}`;
     const pr = probes[i] || { missing: true };
     if (!s.clip) errors.push(`${where}: "clip" is required (path to the video, relative to the project folder)`);
-    if (pr.missing) errors.push(`${where}: clip not found: ${s.clip}${s.url ? ' (run fetch to download it)' : ''}`);
+    if (pr.missing) {
+      const ready = s.startFrame && dir && fs.existsSync(path.resolve(dir, s.startFrame));
+      const how = s.url ? ' (run fetch to download it)'
+        : s.startFrame ? ` (Flow: Frames to Video from ${s.startFrame}, ${ready ? 'ready' : 'exported by frames once that shot is downloaded'})`
+        : s.prompt ? ' (Flow: Text to Video; the prompt is in prompts.md)' : '';
+      missingClips.push(pr.unreadable ? `${where}: ${s.clip} is not a readable video` : `${where}: clip not found: ${s.clip}${how}`);
+    }
     const dur0 = pr.duration || 0;
-    const inn = num(s.in, 0), out = num(s.out, dur0 || inn + 1);
+    // A clip that does not exist yet (a planned Flow shot) is timed at its "out", or at 8 s,
+    // Flow's longest single generation, so the rest of the plan can still be checked.
+    const inn = num(s.in, 0), out = num(s.out, pr.missing ? inn + 8 : (dur0 || inn + 1));
     if (!pr.missing && (inn < 0 || out > dur0 + 0.05)) errors.push(`${where}: in/out ${inn}–${out}s is outside the clip (0–${dur0.toFixed(2)}s)`);
     if (!(out > inn)) errors.push(`${where}: "out" must be after "in"`);
     const dur = r3(Math.max(0.1, Math.min(out, dur0 || out) - inn));
@@ -144,13 +154,14 @@ export function buildTimeline(spec, probes, { format, dir, skillDir } = {}) {
   // Copy left as a [placeholder]
   for (const e of elements) for (const t of e.texts) if (PLACEHOLDER.test(t)) errors.push(`${e.where}: placeholder text left in: "${t}"`);
   if (end) for (const t of [end.title, end.tagline, end.url, end.sub]) if (PLACEHOLDER.test(t || '')) errors.push(`end card: placeholder text left in: "${t}"`);
+  for (const t of [brand.name, brand.by, tl_disclosure(spec)]) if (PLACEHOLDER.test(t || '')) errors.push(`brand: placeholder text left in: "${t}"`);
   if (spec.disclosure === undefined) warnings.push('no "disclosure" set; using "AI-generated film"');
 
   return {
     format: fmtKey, tag: fmt.tag, w: fmt.w, h: fmt.h, fps, total, shots, elements, end, brand,
     disclosure: spec.disclosure === undefined ? 'AI-generated film' : spec.disclosure,
     slug: spec.slug || (dir ? path.basename(path.resolve(dir)) : 'film'), title: spec.title || spec.slug || 'Film',
-    errors, warnings,
+    errors, warnings, missingClips,
   };
 }
 

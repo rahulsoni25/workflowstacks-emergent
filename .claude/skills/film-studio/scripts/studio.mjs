@@ -25,9 +25,12 @@ const HELP = `film-studio — Google Flow clips + a product page -> a finished b
   check <dir> [--format F]    validate the spec, verify every number against the sources, test layout and contrast
   stills <dir> [--format F]   QA stills at every graphic, plus out/qa-<format>/sheet.jpg
   render <dir> [--format F]   master MP4, web MP4 (<= --max-mb, default 25), SRT, VTT, poster, QA sheet, report
+  animatic <dir> [--format F] preview the plan before Flow has made the clips: labelled stand-in plates for
+                              missing clips, the real graphics on top (out/<slug>-<format>-animatic-web.mp4)
   setup [--force]             install dependencies (done automatically on first use)
 
-  render options: --format 16:9|9:16  --workers N (default 2)  --max-mb 25  --crf 18  --keep-frames  --allow-unsourced
+  --format takes 16:9, 9:16, a list such as 16:9,9:16, or all (check, stills, render and animatic)
+  render options: --workers N (default 2)  --max-mb 25  --crf 18  --keep-frames  --allow-unsourced
 `;
 
 const log = (...a) => console.log(...a);
@@ -47,17 +50,61 @@ function flags(argv) {
 }
 
 const mb = n => (n / 1048576).toFixed(1) + ' MB';
+const show = p => { const r = path.relative(process.cwd(), p); return !r ? '.' : r.startsWith('..') ? p : r; };
 const sec = n => n.toFixed(2).replace(/\.?0+$/, '') + 's';
 
-function prepare(dir, o) {
+async function prepare(dir, o, { plates = false } = {}) {
   if (!dir) fail('Give the project folder, e.g. films/my-launch');
   const deps = load();
   const spec = loadSpec(dir);
   const probes = (spec.shots || []).map(s => (s.clip ? media.probe(deps.ff, path.resolve(dir, s.clip)) : { missing: true }));
-  probes.forEach((p, i) => { if (p.unreadable) p.missing = true, p.error = `shot ${i + 1}: ${spec.shots[i].clip} is not a readable video`; });
+  probes.forEach(p => { if (p.unreadable) p.missing = true; });
+  const stand = plates ? await makePlates(dir, spec, probes, o.format || spec.format || '16:9', deps) : {};
   const tl = buildTimeline(spec, probes, { format: o.format, dir, skillDir: SKILL_DIR });
-  probes.forEach(p => p.error && tl.errors.push(p.error));
+  for (const [i, file] of Object.entries(stand)) tl.shots[+i].file = file;
+  tl.animatic = plates;
+  tl.standIns = Object.keys(stand).map(i => +i + 1);
   return { deps, spec, tl };
+}
+
+// Stand-in plates for clips Flow has not made yet: a dark card in the brand colours with the shot
+// number, its label and how to make it, held for the shot's planned length. The real graphics,
+// timing and transitions run on top, so the plan can be watched before any credits are spent.
+async function makePlates(dir, spec, probes, fmtKey, deps) {
+  const fmt = FORMATS[fmtKey] || FORMATS['16:9'];
+  const tag = fmt.tag, W = fmt.w, H = fmt.h;
+  const pdir = path.join(outDir(dir), `.animatic-${tag}`);
+  fs.rmSync(pdir, { recursive: true, force: true }); fs.mkdirSync(pdir, { recursive: true });
+  const brand = { ink: '#0A0C0D', paper: '#F3F3EC', accent: '#C6F24E', ...(spec.brand || {}) };
+  const fps = typeof spec.fps === 'number' ? spec.fps : 24;
+  const todo = (spec.shots || []).map((s, i) => ({ s, i })).filter(({ i }) => probes[i].missing);
+  const made = {};
+  if (!todo.length) return made;
+  const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const browser = await launchBrowser(deps.chromium);
+  try {
+    const page = await browser.newPage({ viewport: { width: W, height: H }, deviceScaleFactor: 1 });
+    for (const { s, i } of todo) {
+      // exactly the planned length, so the animatic is timed like check times the plan
+      const len = typeof s.out === 'number' ? s.out : (typeof s.in === 'number' ? s.in : 0) + 8;
+      const how = s.startFrame ? `Frames to Video from ${s.startFrame}` : s.ingredients ? 'Ingredients to Video' : 'Text to Video';
+      const about = s.label || (s.prompt ? String(s.prompt).slice(0, 110) + (String(s.prompt).length > 110 ? '…' : '') : '');
+      const grid = [1, 2].map(k => `<div style="position:absolute;left:${k * 33.333}%;top:0;bottom:0;width:1px;background:rgba(255,255,255,.07)"></div><div style="position:absolute;top:${k * 33.333}%;left:0;right:0;height:1px;background:rgba(255,255,255,.07)"></div>`).join('');
+      await page.setContent(`<html><body style="margin:0"><div style="position:relative;width:${W}px;height:${H}px;overflow:hidden;background:linear-gradient(160deg,${brand.ink} 0%,#26262e 100%);font-family:Arial,sans-serif;color:${brand.paper}">${grid}
+        <div style="position:absolute;left:0;right:0;top:${Math.round(H * 0.36)}px;text-align:center;font-size:${Math.round(W * 0.11)}px;font-weight:700;opacity:.13;letter-spacing:.04em">SHOT ${i + 1}</div>
+        <div style="position:absolute;left:8%;right:8%;top:${Math.round(H * 0.17)}px;text-align:center;opacity:.55">
+          <div style="font-size:${Math.round(W * 0.0125) + 8}px;letter-spacing:.22em;color:${brand.accent}">STAND-IN · MAKE IN GOOGLE FLOW · ${esc(how).toUpperCase()}</div>
+          <div style="margin-top:14px;font-size:${Math.round(W * 0.012) + 12}px;line-height:1.35">${esc(about)}</div>
+          <div style="margin-top:10px;font-size:${Math.round(W * 0.01) + 8}px;opacity:.8">${esc(s.clip)} · ${len.toFixed(1)} s</div>
+        </div></div></body></html>`);
+      const png = path.join(pdir, `${String(i + 1).padStart(2, '0')}.png`), mp4 = png.replace(/\.png$/, '.mp4');
+      await page.screenshot({ path: png, clip: { x: 0, y: 0, width: W, height: H } });
+      media.run(deps.ff, ['-y', '-loop', '1', '-framerate', String(fps), '-t', len.toFixed(2), '-i', png, '-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'stillimage', '-pix_fmt', 'yuv420p', mp4]);
+      probes[i] = media.probe(deps.ff, mp4);
+      made[i] = mp4;
+    }
+  } finally { await browser.close(); }
+  return made;
 }
 
 const workDir = (dir, tl) => path.join(dir, 'out', `.work-${tl.tag}`);
@@ -74,6 +121,7 @@ function contrast(ff, tl) {
   const orient = tl.h > tl.w ? 'portrait' : 'landscape';
   for (const e of tl.elements) {
     if (e.dim === true) { e.dim = 0.8; continue; }
+    if (tl.shots[e.shot].src && tl.shots[e.shot].src.missing) { e.dim = typeof e.dim === 'number' ? Math.max(0, Math.min(1, e.dim)) : 0; continue; }
     if (e.dim === false) { e.dim = 0; continue; }
     if (typeof e.dim === 'number') { e.dim = Math.max(0, Math.min(1, e.dim)); continue; }
     if (!['main', 'center', 'captions'].includes(e.slot)) { e.dim = 0; continue; }
@@ -112,6 +160,7 @@ function shotAt(tl, t) {
 
 function printIssues(tl) {
   for (const e of tl.errors) log(`  error  ${e}`);
+  for (const e of tl.missingClips) log(`  error  ${e}`);
   for (const w of tl.warnings) log(`  note   ${w}`);
 }
 
@@ -131,8 +180,9 @@ function printClaims(c) {
 }
 
 async function cmdCheck(dir, o, { quiet = false } = {}) {
-  const { deps, spec, tl } = prepare(dir, o);
-  log(`check ${path.relative(process.cwd(), dir) || '.'}: ${summarize(tl)}`);
+  const { deps, spec, tl } = await prepare(dir, o, { plates: !!o.animatic });
+  log(`${o.animatic ? 'animatic' : 'check'} ${show(dir)}: ${summarize(tl)}`);
+  if (tl.standIns && tl.standIns.length) log(`  note   stand-in plates for shot${tl.standIns.length > 1 ? 's' : ''} ${tl.standIns.join(', ')} (no clip yet)`);
   printIssues(tl);
   if (tl.errors.length) return { ok: false, tl };
   const c = claimsBlock(dir, spec, tl);
@@ -151,14 +201,20 @@ async function cmdCheck(dir, o, { quiet = false } = {}) {
   for (const w of layout) log(`  warn   ${w}`);
   if (!layout.length) log('  ok     layout: no text off-frame or overlapping');
   const unsourced = c.bad.length > 0 || (c.results.length > 0 && !c.sources);
-  const ok = !missingFonts.length && (!unsourced || o['allow-unsourced']);
-  if (!quiet) log(ok ? 'check passed' : 'check failed');
+  const planOk = !missingFonts.length && (!unsourced || o['allow-unsourced']);
+  const ok = planOk && !tl.missingClips.length;
+  if (!quiet) {
+    if (ok) log('check passed');
+    else if (planOk) log(`plan checked: everything else passes; ${tl.missingClips.length} clip(s) still to generate or download, then run probe and check again`);
+    else log('check failed');
+  }
   return { ok, tl, spec, deps, claims: c, dims, layout: [...fontNotes, ...layout], html };
 }
 
 async function cmdStills(dir, o) {
   const r = await cmdCheck(dir, o, { quiet: true });
   if (!r.tl || r.tl.errors.length) fail('Fix the errors above first.');
+  if (r.tl.missingClips.length) fail(`${r.tl.missingClips.length} clip(s) missing: generate them in Flow, save them in clips/, then run stills again.`);
   const { tl, deps, html } = r;
   const qa = path.join(outDir(dir), `qa-${tl.tag}`);
   fs.rmSync(qa, { recursive: true, force: true }); fs.mkdirSync(qa, { recursive: true });
@@ -174,19 +230,22 @@ async function cmdStills(dir, o) {
     log(`  still-${String(k + 1).padStart(2, '0')}.jpg  ${p.t.toFixed(2)}s  ${p.label}`);
   });
   media.sheet(deps.ff, files, path.join(qa, 'sheet.jpg'), tl.h > tl.w ? 4 : 3);
-  log(`stills: ${files.length} in ${path.relative(process.cwd(), qa)}/ (sheet.jpg shows them all)`);
+  log(`stills: ${files.length} in ${show(qa)}/ (sheet.jpg shows them all)`);
 }
 
 async function cmdRender(dir, o) {
   const t0 = Date.now();
   const r = await cmdCheck(dir, o, { quiet: true });
   if (!r.tl || r.tl.errors.length) fail('Fix the errors above before rendering.');
+  if (r.tl.missingClips.length) fail(`Render stopped: ${r.tl.missingClips.length} clip(s) missing. Generate them in Flow, save them in clips/, then render again.`);
   if (!r.ok) fail(r.claims.bad.length || !r.claims.sources ? 'Render stopped: numbers on screen must come from the source snapshots (or pass --allow-unsourced).' : 'Render stopped: fix the font errors above.');
   const { tl, deps, spec, html } = r;
   const work = workDir(dir, tl), out = outDir(dir);
   fs.mkdirSync(out, { recursive: true });
-  const base = `${tl.slug}-${tl.tag}`;
-  const files = { master: path.join(out, `${base}-master.mp4`), web: path.join(out, `${base}-web.mp4`), srt: path.join(out, `${base}.srt`), vtt: path.join(out, `${base}.vtt`), poster: path.join(out, `${base}-poster.jpg`), report: path.join(out, `report-${tl.tag}.md`) };
+  const kind = tl.animatic ? `${tl.tag}-animatic` : tl.tag;
+  const base = `${tl.slug}-${kind}`;
+  const files = { master: path.join(out, `${base}-master.mp4`), web: path.join(out, `${base}-web.mp4`), srt: path.join(out, `${base}.srt`), vtt: path.join(out, `${base}.vtt`), poster: path.join(out, `${base}-poster.jpg`), report: path.join(out, `report-${kind}.md`) };
+  if (tl.animatic) { delete files.srt; delete files.vtt; }
   const workers = Math.max(1, Math.min(8, parseInt(o.workers || '2', 10) || 2));
   log(`render: ${summarize(tl)}`);
   log(`  drawing graphics with ${workers} worker(s)`);
@@ -200,21 +259,21 @@ async function cmdRender(dir, o) {
   log('  web version');
   const maxMb = parseFloat(o['max-mb'] || '25');
   media.encodeWeb(deps.ff, files.master, files.web, tl.total, maxMb);
-  fs.writeFileSync(files.srt, srt(tl)); fs.writeFileSync(files.vtt, vtt(tl));
+  if (files.srt) { fs.writeFileSync(files.srt, srt(tl)); fs.writeFileSync(files.vtt, vtt(tl)); }
   const posterT = spec.poster ?? (tl.elements.find(e => e.type === 'statement') ? (e => (e.at + e.until) / 2)(tl.elements.find(e => e.type === 'statement')) : tl.total * 0.4);
   media.frame(deps.ff, files.master, posterT, files.poster);
   // QA sheet from the finished master, so it shows exactly what ships
-  const qa = path.join(out, `qa-${tl.tag}`);
+  const qa = path.join(out, `qa-${kind}`);
   fs.rmSync(qa, { recursive: true, force: true }); fs.mkdirSync(qa, { recursive: true });
   const pts = sampleTimes(tl), stills = [];
   pts.forEach((p, k) => { const f = path.join(qa, `still-${String(k + 1).padStart(2, '0')}.jpg`); media.frame(deps.ff, files.master, p.t, f); stills.push(f); });
   media.sheet(deps.ff, stills, path.join(qa, 'sheet.jpg'), tl.h > tl.w ? 4 : 3);
   const pr = media.probe(deps.ff, files.master);
-  report(files, tl, spec, r, pr, pts, maxMb, dir);
-  if (!o['keep-frames']) fs.rmSync(work, { recursive: true, force: true });
+  report(files, tl, spec, r, pr, pts, maxMb, dir, kind);
+  if (!o['keep-frames']) { fs.rmSync(work, { recursive: true, force: true }); if (tl.animatic) fs.rmSync(path.join(out, `.animatic-${tl.tag}`), { recursive: true, force: true }); }
   log(`done in ${Math.round((Date.now() - t0) / 1000)}s`);
-  for (const [k, f] of Object.entries(files)) if (fs.existsSync(f)) log(`  ${k.padEnd(6)} ${path.relative(process.cwd(), f)}  ${mb(fs.statSync(f).size)}`);
-  log(`  qa     ${path.relative(process.cwd(), path.join(qa, 'sheet.jpg'))}`);
+  for (const [k, f] of Object.entries(files)) if (f && fs.existsSync(f)) log(`  ${k.padEnd(6)} ${show(f)}  ${mb(fs.statSync(f).size)}`);
+  log(`  qa     ${show(path.join(qa, 'sheet.jpg'))}`);
   if (pr.duration && Math.abs(pr.duration - tl.total) > 0.15) log(`  warn   master is ${pr.duration.toFixed(2)}s, timeline says ${tl.total}s`);
   log(`  frames ${n} at ${tl.fps} fps`);
 }
@@ -229,12 +288,13 @@ function resolveAudio(dir, a = {}) {
   return r;
 }
 
-function report(files, tl, spec, r, pr, pts, maxMb, dir) {
+function report(files, tl, spec, r, pr, pts, maxMb, dir, kind = tl.tag) {
   const rel = f => path.relative(path.dirname(files.report), f);
   const L = [];
-  L.push(`# ${tl.title} (${tl.format})`, '', `Rendered ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC · ${tl.total.toFixed(2)} s · ${tl.w}×${tl.h} · ${tl.fps} fps`, '');
+  L.push(`# ${tl.title} (${tl.format}${tl.animatic ? ', animatic' : ''})`, '', `Rendered ${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC · ${tl.total.toFixed(2)} s · ${tl.w}×${tl.h} · ${tl.fps} fps`, '');
+  if (tl.animatic && tl.standIns.length) L.push(`Animatic: shots ${tl.standIns.join(', ')} are stand-in plates until their clips exist. Faces and bright areas cannot be judged on a plate; check them again on the real clips.`, '');
   L.push('## Files', '', '| File | Size |', '| --- | --- |');
-  for (const k of ['master', 'web', 'srt', 'vtt', 'poster']) if (fs.existsSync(files[k])) L.push(`| ${rel(files[k])} | ${mb(fs.statSync(files[k]).size)} |`);
+  for (const k of ['master', 'web', 'srt', 'vtt', 'poster']) if (files[k] && fs.existsSync(files[k])) L.push(`| ${rel(files[k])} | ${mb(fs.statSync(files[k]).size)} |`);
   L.push('', `The web file is encoded to stay under ${maxMb} MB.`, '');
   L.push('## Timeline', '', '| # | Clip | Used | Starts at | Into next |', '| --- | --- | --- | --- | --- |');
   tl.shots.forEach(s => L.push(`| ${s.i + 1} | ${s.clip} | ${sec(s.in)}–${sec(s.out)} | ${sec(s.start)} | ${s.transition ? `${s.transition.type} ${sec(s.transition.duration)}` : '—'} |`));
@@ -256,7 +316,7 @@ function report(files, tl, spec, r, pr, pts, maxMb, dir) {
   for (const w of r.layout) L.push(`- warning: ${w}`);
   L.push('', '## Sources', '');
   for (const s of spec.sources || []) L.push(`- ${s.url || '(no url)'} → ${s.file || '(no snapshot)'}`);
-  L.push('', '## QA stills', '', `![QA sheet](${rel(path.join(path.dirname(files.report), `qa-${tl.tag}`, 'sheet.jpg'))})`, '');
+  L.push('', '## QA stills', '', `![QA sheet](${rel(path.join(path.dirname(files.report), `qa-${kind}`, 'sheet.jpg'))})`, '');
   pts.forEach((p, k) => L.push(`${k + 1}. ${p.t.toFixed(2)}s · ${p.label}`));
   fs.writeFileSync(files.report, L.join('\n') + '\n');
 }
@@ -275,7 +335,7 @@ function cmdProbe(dir) {
     media.contactSheet(deps.ff, f, p.duration, sheet);
     log(`| ${i + 1} | ${s.clip} | ${sec(p.duration)} | ${p.w}×${p.h} | ${p.fps ?? '?'} | ${p.hasAudio ? 'yes' : 'no'} | ${sec(s.in ?? 0)}–${sec(s.out ?? p.duration)} |`);
   });
-  log(`contact sheets: ${path.relative(process.cwd(), sheets)}/NN.jpg (10 frames per clip, evenly spaced, left to right then the second row)`);
+  log(`contact sheets: ${show(sheets)}/NN.jpg (10 frames per clip, evenly spaced, left to right then the second row)`);
 }
 
 function cmdFrames(dir) {
@@ -293,7 +353,7 @@ function cmdFrames(dir) {
     media.frame(ff, f, b, path.join(fr, `${nn}-last.png`));
     log(`  ${nn}-first.png (${sec(a)})  ${nn}-last.png (${sec(b)})`);
   });
-  log(`frames in ${path.relative(process.cwd(), fr)}/: use NN-last.png as the start frame of the next shot in Flow (Frames to Video) for a seamless join`);
+  log(`frames in ${show(fr)}/: use NN-last.png as the start frame of the next shot in Flow (Frames to Video) for a seamless join`);
 }
 
 function cmdPrompts(dir) {
@@ -320,7 +380,7 @@ function cmdPrompts(dir) {
   });
   const out = path.join(dir, 'prompts.md');
   fs.writeFileSync(out, L.join('\n'));
-  log(`wrote ${path.relative(process.cwd(), out)} (${spec.shots.length} shots)`);
+  log(`wrote ${show(out)} (${spec.shots.length} shots)`);
 }
 
 function directUrl(u) {
@@ -403,9 +463,21 @@ async function main() {
     case 'probe': return cmdProbe(dir);
     case 'frames': return cmdFrames(dir);
     case 'prompts': return cmdPrompts(dir);
-    case 'check': { const r = await cmdCheck(dir, o); process.exitCode = r.ok ? 0 : 1; return; }
-    case 'stills': return cmdStills(dir, o);
-    case 'render': return cmdRender(dir, o);
+    case 'check': case 'stills': case 'render': case 'animatic': {
+      // --format may list several formats (16:9,9:16) or say all; each runs in turn
+      const list = o.format === 'all' ? Object.keys(FORMATS) : String(o.format || '').split(',').map(x => x.trim()).filter(Boolean);
+      for (const f of list) if (!FORMATS[f]) fail(`Unknown format "${f}". Use 16:9, 9:16, a list such as 16:9,9:16, or all.`);
+      let ok = true;
+      for (const f of (list.length ? list : [undefined])) {
+        const oo = { ...o, format: f, animatic: cmd === 'animatic' };
+        if (list.length > 1) log(`\n=== ${f}`);
+        if (cmd === 'check') { const r = await cmdCheck(dir, oo); ok = r.ok && ok; }
+        else if (cmd === 'stills') await cmdStills(dir, oo);
+        else await cmdRender(dir, oo);
+      }
+      if (cmd === 'check') process.exitCode = ok ? 0 : 1;
+      return;
+    }
     default: log(HELP); if (cmd && cmd !== 'help' && cmd !== '--help') process.exitCode = 1;
   }
 }

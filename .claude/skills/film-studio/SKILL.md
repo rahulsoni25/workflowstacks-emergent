@@ -83,6 +83,10 @@ This prints each clip's length, size, frame rate and audio, and writes `out/shee
 - Say only what the sources say. Rephrase for length, never for substance. Numbers must match the page exactly; `check` will catch a 15% that the page states as 10%.
 - Keep the AI disclosure. Flow footage shows AI-generated people, so keep the `disclosure` chip and the end-card `note` unless the user confirms real, consented footage. Do not present avatars as real customers or testimonials.
 
+**Subtitles.** Every render writes SRT and VTT files of the on-screen text. That covers "subtitles" or "subtitles based on the product", which in practice means the product's lines on screen.
+- **Spoken words.** Flow clips often contain speech, and captioning it needs the exact words. Take them from each shot's `dialogue`, meaning the line written into the Flow prompt, or from the user, then use a `captions` graphic.
+- **No transcript.** Do not guess the words or set up speech recognition, which costs a long detour and still mishears names. Deliver the on-screen subtitles and say that spoken lines can be captioned once someone supplies them.
+
 **Timing rules.** These come from what reads comfortably at 24 fps.
 - Start a graphic 0.6–0.8 s into its shot so it lands after the transition, and end it before the next transition starts.
 - Hold text at least 2.5 s, plus roughly 0.3 s per word. Use `lines` rather than cramming two ideas into one headline.
@@ -104,8 +108,10 @@ Open `sheet.jpg`, and any doubtful still at full size. Fix and repeat until `che
 ### 7. Render and deliver
 
 ```bash
-node $S render films/<slug> [--format 9:16] [--workers 3]
+node $S render films/<slug> [--format 16:9,9:16] [--workers 3]
 ```
+
+`--format` takes one format, a list, or `all`; `check` and `stills` take the same.
 
 | Output in `out/` | What it is |
 | --- | --- |
@@ -116,7 +122,7 @@ node $S render films/<slug> [--format 9:16] [--workers 3]
 | `report-<format>.md` | timeline, graphics, the claims table with page context, contrast notes, QA sheet |
 | `qa-<format>/sheet.jpg` | stills taken from the finished master |
 
-Rendering takes a few minutes. The 51-second, 1080p Roster example took about 3 minutes on 4 CPUs. Open the QA sheet from the finished master before you hand the film over.
+Rendering takes a few minutes. The 51-second Roster example took about 4.5 minutes in either format on a 4-CPU machine; the 9-second smoke test took 35 seconds on a GitHub runner. Open the QA sheet from the finished master before you hand the film over.
 
 When delivering, send the web MP4 and summarise the report. For client-facing films, ask the user to have someone check the claims table against the live page before publishing, because pages change after the snapshot.
 
@@ -134,6 +140,10 @@ Any graphic field can be overridden per format this way. Always confirm the vert
 ## Planning shots for Google Flow
 
 When the clips do not exist yet, plan them in film.json first. Give each shot a `prompt`, plus optional `startFrame`, `ingredients`, `dialogue` and `continuity`. Then run `node $S prompts films/<slug>` to write `prompts.md`, the shot list the user works through in Flow.
+
+Run `check` on the plan before any clip exists. Missing clips are timed at their `out`, or 8 seconds, and everything else is verified: claims, placeholders and layout. The check ends with "plan checked" and lists each missing clip with how to make it in Flow. `stills` and `render` wait until the clips exist.
+
+Then preview the plan with `node $S animatic films/<slug> --format all`. It renders the film with a labelled stand-in plate for every missing clip, carrying the real graphics, timing and transitions, as `out/<slug>-<format>-animatic-web.mp4` with a QA sheet. The user can approve the words and pacing before spending Flow credits. Plates cannot show faces or bright areas, so check those again on the real clips.
 
 After each download, `node $S frames films/<slug>` exports each shot's first and last frames into `frames/`. The next shot can then start from the previous shot's last frame (Flow's Frames to Video) for a seamless join.
 
