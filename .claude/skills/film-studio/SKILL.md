@@ -85,7 +85,7 @@ This prints each clip's length, size, frame rate and audio, and writes `out/shee
 
 **Subtitles.** Every render writes SRT and VTT files of the on-screen text. That covers "subtitles" or "subtitles based on the product", which in practice means the product's lines on screen.
 - **Spoken words.** Flow clips often contain speech, and captioning it needs the exact words. Take them from each shot's `dialogue`, meaning the line written into the Flow prompt, or from the user, then use a `captions` graphic.
-- **No transcript.** Do not guess the words or set up speech recognition, which costs a long detour and still mishears names. Deliver the on-screen subtitles and say that spoken lines can be captioned once someone supplies them.
+- **No transcript.** Do not guess the words, and do not install a speech-recognition model to find them. In this skill's first test that detour took most of an hour, and the models still disagreed on an amount (₹4,200 against ₹42). Deliver the on-screen subtitles and say that spoken lines can be captioned once someone supplies them.
 
 **Timing rules.** These come from what reads comfortably at 24 fps.
 - Start a graphic 0.6–0.8 s into its shot so it lands after the transition, and end it before the next transition starts.
@@ -131,7 +131,7 @@ When delivering, send the web MP4 and summarise the report. For client-facing fi
 Run `stills` and `render` with `--format 9:16`; the same spec renders both formats, and graphic positions switch to the vertical layout automatically. A 16:9 clip cropped to 1080×1920 keeps only about a third of its width, so frame every shot for vertical:
 
 - **One person in the shot.** Keep the default cover crop and set `"9:16": { "focus": 0.45 }`, from 0 (keep the left edge) to 1 (keep the right edge).
-- **Two people side by side, or a group.** Use `"9:16": { "fit": "blur" }`. The whole shot sits across the middle of the frame over a blurred copy, and text goes below it.
+- **Two people side by side, or a group.** Use `"9:16": { "fit": "blur" }`. The whole shot sits across the middle of the frame over a blurred copy. Headlines and cards move below the picture, or above it while a lower third shows, so they never cover it.
 - **A side panel covers a face.** Faces sit in the upper half of a vertical frame, where panels go by default. Move the panel down with `"9:16": { "place": "bottom" }`, or keep it in 16:9 only with `"formats": ["16:9"]`.
 - **A headline jumps up over a face.** It moves up while a lower third, captions or a bottom panel overlaps it. Shorten the other graphic in 9:16 only, for example `"9:16": { "until": 5.8 }`.
 

@@ -62,7 +62,7 @@ function endHtml(e, logo) {
     (e.note ? `<div class="note mono">${html(e.note)}</div>` : '');
 }
 
-const PICK = ['id', 'type', 'slot', 'at', 'until', 'dim', 'high', 'side', 'place', 'eyebrow', 'lines', 'per', 'sub', 'subAt', 'html', 'title', 'items', 'fill', 'name', 'role', 'words', 'perPage'];
+const PICK = ['id', 'type', 'slot', 'at', 'until', 'dim', 'high', 'band', 'side', 'place', 'eyebrow', 'lines', 'per', 'sub', 'subAt', 'html', 'title', 'items', 'fill', 'name', 'role', 'words', 'perPage'];
 
 export function buildOverlay({ tl, base, dir, outFile }) {
   const b = tl.brand;

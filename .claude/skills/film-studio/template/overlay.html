@@ -145,6 +145,12 @@
   const env = (t, a, b, d) => { d = d || 0.35; const i = ease(seg(t, a, a + d)), o = ease(seg(t, b - d, b)); return { i, o, v: i * (1 - o) }; };
   const CHECK = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const outside = (t, el) => t < el.at || t > el.until;
+  // Main-slot text on a blur/contain shot in 9:16: below the picture band, or above it when high.
+  const placeMain = (n, el) => {
+    if (!el.band) return;
+    if (el.high) { n.style.bottom = (F.h - el.band.top + 40) + 'px'; }
+    else { n.style.top = (el.band.bottom + 40) + 'px'; n.style.bottom = 'auto'; }
+  };
 
   const scrim = mk(st, 'abs scrim');
   const dimC = mk(st, 'abs dim-center');
@@ -152,7 +158,7 @@
 
   const B = {
     headline(el) {
-      const n = mk(st, 'abs el main' + (el.high ? ' high' : ''));
+      const n = mk(st, 'abs el main' + (el.high ? ' high' : '')); placeMain(n, el);
       const eb = el.eyebrow ? mk(n, 'eyebrow mono', el.eyebrow) : null;
       const hd = mk(n, 'head');
       const lines = el.lines.map(L => {
@@ -187,7 +193,7 @@
       } };
     },
     card(el) {
-      const n = mk(st, 'abs el main card' + (el.high ? ' high' : ''));
+      const n = mk(st, 'abs el main card' + (el.high ? ' high' : '')); placeMain(n, el);
       if (el.eyebrow) mk(n, 'eyebrow mono', el.eyebrow);
       mk(n, 'big', el.html); if (el.sub) mk(n, 'sub', el.sub);
       return { n, update(t) {

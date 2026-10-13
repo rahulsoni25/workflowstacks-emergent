@@ -127,7 +127,9 @@ function contrast(ff, tl) {
     if (!['main', 'center', 'captions'].includes(e.slot)) { e.dim = 0; continue; }
     const sh = tl.shots[e.shot];
     const mid = (e.at + e.until) / 2;
-    const region = REGION[orient][e.slot === 'main' && e.high ? 'high' : e.slot];
+    let region = REGION[orient][e.slot === 'main' && e.high ? 'high' : e.slot];
+    if (e.band) region = e.high ? { x0: .05, y0: Math.max(0, (e.band.top - 340) / tl.h), x1: .95, y1: Math.max(.05, (e.band.top - 40) / tl.h) }
+      : { x0: .05, y0: Math.min(.95, (e.band.bottom + 40) / tl.h), x1: .95, y1: Math.min(1, (e.band.bottom + 340) / tl.h) };
     const L = media.luma(ff, sh.file, sh.in + (mid - sh.start), { w: tl.w, h: tl.h, fit: sh.fit, fx: sh.focus, fy: sh.focusY, bg: tl.brand.ink, id: 'l' }, region);
     e.luma = L;
     if (L !== null && L > THRESH[e.slot]) {

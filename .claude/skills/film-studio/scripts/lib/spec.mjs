@@ -102,6 +102,7 @@ export function buildTimeline(spec, probes, { format, dir, skillDir } = {}) {
       i, clip: s.clip, file: dir ? clipPath(dir, s) : s.clip, url: s.url || null, in: inn, out: r3(inn + dur), dur, start: r3(start),
       transition: hasNext ? { type, duration: r3(d) } : null, focus, focusY, fit: FITS.has(fitMode) ? fitMode : 'cover',
       hasAudio: !!pr.hasAudio, gain: num(s.gain, 1), src: pr, label: s.label || `shot ${i + 1}`,
+      band: pictureBand(fitMode, pr, fmt),
     });
     start = start + dur - (hasNext ? d : 0);
   });
@@ -165,6 +166,16 @@ export function buildTimeline(spec, probes, { format, dir, skillDir } = {}) {
   };
 }
 
+// With fit blur or contain, a clip wider than the frame shows as a band across the middle of a
+// vertical frame. Headlines then go below the band (or above it while a lower third shows),
+// never across the picture.
+function pictureBand(fitMode, pr, fmt) {
+  if (!(fitMode === 'blur' || fitMode === 'contain') || !pr || !pr.w || !pr.h || !(fmt.h > fmt.w)) return null;
+  if (pr.w / pr.h <= fmt.w / fmt.h) return null;
+  const bh = Math.round(fmt.w * pr.h / pr.w), top = Math.round((fmt.h - bh) / 2);
+  return { top, bottom: top + bh };
+}
+
 function element(g, sh, k, errors, warnings) {
   const where = `shot ${sh.i + 1} ${g.type || 'graphic'} #${k + 1}`;
   const slot = SLOTS[g.type];
@@ -174,6 +185,7 @@ function element(g, sh, k, errors, warnings) {
   if (at < 0 || until > sh.dur + 1e-6) errors.push(`${where}: window ${at}–${until}s is outside the shot (0–${sh.dur}s)`);
   const A = r3(sh.start + at), U = r3(sh.start + until);
   const e = { id: `s${sh.i + 1}g${k + 1}`, where, type: g.type, slot, shot: sh.i, at: A, until: U, verify: g.verify !== false, dim: g.dim, texts: [], cues: [] };
+  if (slot === 'main' && sh.band) e.band = sh.band;
   if (slot === 'panel') {
     if (g.side !== undefined && g.side !== 'left' && g.side !== 'right') errors.push(`${where}: "side" must be "left" or "right"`);
     if (g.place !== undefined && g.place !== 'top' && g.place !== 'bottom') errors.push(`${where}: "place" must be "top" or "bottom"`);

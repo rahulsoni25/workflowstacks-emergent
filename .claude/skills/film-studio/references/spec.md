@@ -114,7 +114,7 @@ What it does not do: check numbers written as words, check wording, or check the
 | `graphics` | `[]` | Graphics over this shot, timed from the shot's start |
 | `prompt`, `startFrame`, `ingredients`, `dialogue`, `continuity` | none | Planning fields, used only by `prompts` |
 
-Clips of any size or aspect ratio work; they are never stretched. A 16:9 clip in a 9:16 film keeps only about a third of its width under `cover`. That suits a single person, given the right `focus`. For two people side by side or a group, use `"9:16": { "fit": "blur" }`: the whole shot sits across the middle of the frame, with headline and lower-third text below it on the blurred fill.
+Clips of any size or aspect ratio work; they are never stretched. A 16:9 clip in a 9:16 film keeps only about a third of its width under `cover`. That suits a single person, given the right `focus`. For two people side by side or a group, use `"9:16": { "fit": "blur" }`: the whole shot sits across the middle of the frame. Headlines and cards on such a shot start 40 px below the picture, or end 40 px above it while a lower third or captions show, so text never covers the footage. Statements stay centred on the picture.
 
 ## 6. transitions
 
