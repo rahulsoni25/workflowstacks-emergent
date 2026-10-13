@@ -1,0 +1,844 @@
+﻿Daily Sales & Stock Report - Al Noor Mini Mart
+Date,Item Code,Product Name,Category,Qty Sold,Stock On Hand,Cost,Supplier
+13/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,21,42,AED 4.20,Almarai
+14/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,13,29,AED 4.20,Almarai
+15/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,13,142,AED 4.20,Almarai
+16/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,22,120,AED 4.20,Almarai
+17/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,15,105,AED 4.20,Almarai
+18/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,30,75,AED 4.20,Almarai
+19/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,19,56,AED 4.20,Almarai
+20/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,14,42,AED 4.20,Almarai
+21/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,14,28,AED 4.20,Almarai
+22/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,20,134,AED 4.20,Almarai
+23/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,13,121,AED 4.20,Almarai
+24/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,15,106,AED 4.20,Almarai
+25/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,26,80,AED 4.20,Almarai
+26/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,23,57,AED 4.20,Almarai
+27/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,20,37,AED 4.20,Almarai
+28/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,20,17,AED 4.20,Almarai
+29/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,19,124,AED 4.20,Almarai
+30/09/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,22,102,AED 4.20,Almarai
+01/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,22,80,AED 4.20,Almarai
+02/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,29,51,AED 4.20,Almarai
+03/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,13,38,AED 4.20,Almarai
+04/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,13,25,AED 4.20,Almarai
+05/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,17,8,AED 4.20,Almarai
+06/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,18,116,AED 4.20,Almarai
+07/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,14,102,AED 4.20,Almarai
+08/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,22,80,AED 4.20,Almarai
+09/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,19,61,AED 4.20,Almarai
+10/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,16,45,AED 4.20,Almarai
+11/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,14,31,AED 4.20,Almarai
+12/10/2026,MLK-001,"ALMARAI FULL FAT MILK 1L",Dairy,22,9,AED 4.20,Almarai
+13/09/2026,MLK-002,"Almarai Laban 1L",Dairy,7,59,AED 3.80,Almarai
+14/09/2026,MLK-002,"Almarai Laban 1L",Dairy,11,48,AED 3.80,Almarai
+15/09/2026,MLK-002,"Almarai Laban 1L",Dairy,9,102,AED 3.80,Almarai
+16/09/2026,MLK-002,"Almarai Laban 1L",Dairy,11,91,AED 3.80,Almarai
+17/09/2026,MLK-002,"Almarai Laban 1L",Dairy,7,84,AED 3.80,Almarai
+18/09/2026,MLK-002,"Almarai Laban 1L",Dairy,15,69,AED 3.80,Almarai
+19/09/2026,MLK-002,"Almarai Laban 1L",Dairy,10,59,AED 3.80,Almarai
+20/09/2026,MLK-002,"Almarai Laban 1L",Dairy,7,52,AED 3.80,Almarai
+21/09/2026,MLK-002,"Almarai Laban 1L",Dairy,7,45,AED 3.80,Almarai
+22/09/2026,MLK-002,"Almarai Laban 1L",Dairy,11,97,AED 3.80,Almarai
+23/09/2026,MLK-002,"Almarai Laban 1L",Dairy,6,91,AED 3.80,Almarai
+24/09/2026,MLK-002,"Almarai Laban 1L",Dairy,8,83,AED 3.80,Almarai
+25/09/2026,MLK-002,"Almarai Laban 1L",Dairy,16,67,AED 3.80,Almarai
+26/09/2026,MLK-002,"Almarai Laban 1L",Dairy,8,59,AED 3.80,Almarai
+27/09/2026,MLK-002,"Almarai Laban 1L",Dairy,9,50,AED 3.80,Almarai
+28/09/2026,MLK-002,"Almarai Laban 1L",Dairy,9,41,AED 3.80,Almarai
+29/09/2026,MLK-002,"Almarai Laban 1L",Dairy,8,96,AED 3.80,Almarai
+30/09/2026,MLK-002,"Almarai Laban 1L",Dairy,9,87,AED 3.80,Almarai
+01/10/2026,MLK-002,"Almarai Laban 1L",Dairy,6,81,AED 3.80,Almarai
+02/10/2026,MLK-002,"Almarai Laban 1L",Dairy,13,68,AED 3.80,Almarai
+03/10/2026,MLK-002,"Almarai Laban 1L",Dairy,10,58,AED 3.80,Almarai
+04/10/2026,MLK-002,"Almarai Laban 1L",Dairy,9,49,AED 3.80,Almarai
+05/10/2026,MLK-002,"Almarai Laban 1L",Dairy,10,39,AED 3.80,Almarai
+06/10/2026,MLK-002,"Almarai Laban 1L",Dairy,11,91,AED 3.80,Almarai
+07/10/2026,MLK-002,"Almarai Laban 1L",Dairy,11,80,AED 3.80,Almarai
+08/10/2026,MLK-002,"Almarai Laban 1L",Dairy,9,71,AED 3.80,Almarai
+09/10/2026,MLK-002,"Almarai Laban 1L",Dairy,11,60,AED 3.80,Almarai
+10/10/2026,MLK-002,"Almarai Laban 1L",Dairy,9,51,AED 3.80,Almarai
+11/10/2026,MLK-002,"Almarai Laban 1L",Dairy,12,39,AED 3.80,Almarai
+12/10/2026,MLK-002,"Almarai Laban 1L",Dairy,9,30,AED 3.80,Almarai
+13/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,14,43,AED 1.60,Almarai
+14/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,15,28,AED 1.60,Almarai
+15/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,14,112,AED 1.60,Almarai
+16/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,10,102,AED 1.60,Almarai
+17/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,11,91,AED 1.60,Almarai
+18/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,22,69,AED 1.60,Almarai
+19/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,16,53,AED 1.60,Almarai
+20/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,15,38,AED 1.60,Almarai
+21/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,12,26,AED 1.60,Almarai
+22/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,10,114,AED 1.60,Almarai
+23/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,18,96,AED 1.60,Almarai
+24/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,14,82,AED 1.60,Almarai
+25/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,19,63,AED 1.60,Almarai
+26/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,17,46,AED 1.60,Almarai
+27/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,14,32,AED 1.60,Almarai
+28/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,14,18,AED 1.60,Almarai
+29/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,17,99,AED 1.60,Almarai
+30/09/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,12,87,AED 1.60,Almarai
+01/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,15,72,AED 1.60,Almarai
+02/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,18,54,AED 1.60,Almarai
+03/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,10,44,AED 1.60,Almarai
+04/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,12,32,AED 1.60,Almarai
+05/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,13,19,AED 1.60,Almarai
+06/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,12,105,AED 1.60,Almarai
+07/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,13,92,AED 1.60,Almarai
+08/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,15,77,AED 1.60,Almarai
+09/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,16,61,AED 1.60,Almarai
+10/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,16,45,AED 1.60,Almarai
+11/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,14,31,AED 1.60,Almarai
+12/10/2026,MLK-003,"Almarai Yoghurt 170g",Dairy,11,20,AED 1.60,Almarai
+13/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,5,24,AED 14.50,Al Rawabi
+14/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,6,18,AED 14.50,Al Rawabi
+15/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,5,55,AED 14.50,Al Rawabi
+16/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,5,50,AED 14.50,Al Rawabi
+17/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,7,43,AED 14.50,Al Rawabi
+18/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,7,36,AED 14.50,Al Rawabi
+19/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,4,32,AED 14.50,Al Rawabi
+20/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,4,28,AED 14.50,Al Rawabi
+21/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,6,22,AED 14.50,Al Rawabi
+22/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,8,56,AED 14.50,Al Rawabi
+23/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,6,50,AED 14.50,Al Rawabi
+24/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,8,42,AED 14.50,Al Rawabi
+25/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,10,32,AED 14.50,Al Rawabi
+26/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,5,27,AED 14.50,Al Rawabi
+27/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,5,22,AED 14.50,Al Rawabi
+28/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,7,15,AED 14.50,Al Rawabi
+29/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,6,51,AED 14.50,Al Rawabi
+30/09/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,6,45,AED 14.50,Al Rawabi
+01/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,7,38,AED 14.50,Al Rawabi
+02/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,10,28,AED 14.50,Al Rawabi
+03/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,5,23,AED 14.50,Al Rawabi
+04/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,6,17,AED 14.50,Al Rawabi
+05/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,6,11,AED 14.50,Al Rawabi
+06/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,8,45,AED 14.50,Al Rawabi
+07/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,4,41,AED 14.50,Al Rawabi
+08/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,7,34,AED 14.50,Al Rawabi
+09/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,10,24,AED 14.50,Al Rawabi
+10/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,7,17,AED 14.50,Al Rawabi
+11/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,8,9,AED 14.50,Al Rawabi
+12/10/2026,EGG-001,"AL RAWABI EGGS 30PC",Dairy,5,4,AED 14.50,Al Rawabi
+13/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,30,111,AED 1.20,Modern Bakery
+14/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,39,72,AED 1.20,Modern Bakery
+15/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,38,328,AED 1.20,Modern Bakery
+16/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,48,280,AED 1.20,Modern Bakery
+17/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,30,250,AED 1.20,Modern Bakery
+18/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,54,196,AED 1.20,Modern Bakery
+19/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,37,159,AED 1.20,Modern Bakery
+20/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,54,105,AED 1.20,Modern Bakery
+21/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,37,68,AED 1.20,Modern Bakery
+22/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,30,332,AED 1.20,Modern Bakery
+23/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,45,287,AED 1.20,Modern Bakery
+24/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,47,240,AED 1.20,Modern Bakery
+25/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,54,186,AED 1.20,Modern Bakery
+26/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,35,151,AED 1.20,Modern Bakery
+27/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,31,120,AED 1.20,Modern Bakery
+28/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,54,66,AED 1.20,Modern Bakery
+29/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,46,314,AED 1.20,Modern Bakery
+30/09/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,45,269,AED 1.20,Modern Bakery
+01/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,47,222,AED 1.20,Modern Bakery
+02/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,67,155,AED 1.20,Modern Bakery
+03/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,50,105,AED 1.20,Modern Bakery
+04/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,45,60,AED 1.20,Modern Bakery
+05/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,32,28,AED 1.20,Modern Bakery
+06/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,53,269,AED 1.20,Modern Bakery
+07/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,44,225,AED 1.20,Modern Bakery
+08/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,30,195,AED 1.20,Modern Bakery
+09/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,58,137,AED 1.20,Modern Bakery
+10/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,40,97,AED 1.20,Modern Bakery
+11/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,52,45,AED 1.20,Modern Bakery
+12/10/2026,BRD-001,"ARABIC BREAD 6PC",Bakery,30,15,AED 1.20,Modern Bakery
+13/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,11,42,AED 3.00,Modern Bakery
+14/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,12,30,AED 3.00,Modern Bakery
+15/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,12,95,AED 3.00,Modern Bakery
+16/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,8,87,AED 3.00,Modern Bakery
+17/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,9,78,AED 3.00,Modern Bakery
+18/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,11,67,AED 3.00,Modern Bakery
+19/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,11,56,AED 3.00,Modern Bakery
+20/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,9,47,AED 3.00,Modern Bakery
+21/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,11,36,AED 3.00,Modern Bakery
+22/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,8,105,AED 3.00,Modern Bakery
+23/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,14,91,AED 3.00,Modern Bakery
+24/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,10,81,AED 3.00,Modern Bakery
+25/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,14,67,AED 3.00,Modern Bakery
+26/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,12,55,AED 3.00,Modern Bakery
+27/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,8,47,AED 3.00,Modern Bakery
+28/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,10,37,AED 3.00,Modern Bakery
+29/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,9,105,AED 3.00,Modern Bakery
+30/09/2026,BRD-002,"Sliced White Bread 600g",Bakery,12,93,AED 3.00,Modern Bakery
+01/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,12,81,AED 3.00,Modern Bakery
+02/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,15,66,AED 3.00,Modern Bakery
+03/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,14,52,AED 3.00,Modern Bakery
+04/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,8,44,AED 3.00,Modern Bakery
+05/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,12,32,AED 3.00,Modern Bakery
+06/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,11,98,AED 3.00,Modern Bakery
+07/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,11,87,AED 3.00,Modern Bakery
+08/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,10,77,AED 3.00,Modern Bakery
+09/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,19,58,AED 3.00,Modern Bakery
+10/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,11,47,AED 3.00,Modern Bakery
+11/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,11,36,AED 3.00,Modern Bakery
+12/10/2026,BRD-002,"Sliced White Bread 600g",Bakery,10,26,AED 3.00,Modern Bakery
+13/09/2026,BRD-003,"Croissant Butter",Bakery,5,91,AED 2.10,Modern Bakery
+14/09/2026,BRD-003,"Croissant Butter",Bakery,5,86,AED 2.10,Modern Bakery
+15/09/2026,BRD-003,"Croissant Butter",Bakery,3,132,AED 2.10,Modern Bakery
+16/09/2026,BRD-003,"Croissant Butter",Bakery,3,129,AED 2.10,Modern Bakery
+17/09/2026,BRD-003,"Croissant Butter",Bakery,4,125,AED 2.10,Modern Bakery
+18/09/2026,BRD-003,"Croissant Butter",Bakery,19,106,AED 2.10,Modern Bakery
+19/09/2026,BRD-003,"Croissant Butter",Bakery,12,94,AED 2.10,Modern Bakery
+20/09/2026,BRD-003,"Croissant Butter",Bakery,4,90,AED 2.10,Modern Bakery
+21/09/2026,BRD-003,"Croissant Butter",Bakery,5,85,AED 2.10,Modern Bakery
+22/09/2026,BRD-003,"Croissant Butter",Bakery,4,130,AED 2.10,Modern Bakery
+23/09/2026,BRD-003,"Croissant Butter",Bakery,3,127,AED 2.10,Modern Bakery
+24/09/2026,BRD-003,"Croissant Butter",Bakery,5,122,AED 2.10,Modern Bakery
+25/09/2026,BRD-003,"Croissant Butter",Bakery,19,103,AED 2.10,Modern Bakery
+26/09/2026,BRD-003,"Croissant Butter",Bakery,20,83,AED 2.10,Modern Bakery
+27/09/2026,BRD-003,"Croissant Butter",Bakery,5,78,AED 2.10,Modern Bakery
+28/09/2026,BRD-003,"Croissant Butter",Bakery,5,73,AED 2.10,Modern Bakery
+29/09/2026,BRD-003,"Croissant Butter",Bakery,5,117,AED 2.10,Modern Bakery
+30/09/2026,BRD-003,"Croissant Butter",Bakery,4,113,AED 2.10,Modern Bakery
+01/10/2026,BRD-003,"Croissant Butter",Bakery,5,108,AED 2.10,Modern Bakery
+02/10/2026,BRD-003,"Croissant Butter",Bakery,17,91,AED 2.10,Modern Bakery
+03/10/2026,BRD-003,"Croissant Butter",Bakery,17,74,AED 2.10,Modern Bakery
+04/10/2026,BRD-003,"Croissant Butter",Bakery,3,71,AED 2.10,Modern Bakery
+05/10/2026,BRD-003,"Croissant Butter",Bakery,3,68,AED 2.10,Modern Bakery
+06/10/2026,BRD-003,"Croissant Butter",Bakery,4,113,AED 2.10,Modern Bakery
+07/10/2026,BRD-003,"Croissant Butter",Bakery,5,108,AED 2.10,Modern Bakery
+08/10/2026,BRD-003,"Croissant Butter",Bakery,5,103,AED 2.10,Modern Bakery
+09/10/2026,BRD-003,"Croissant Butter",Bakery,15,88,AED 2.10,Modern Bakery
+10/10/2026,BRD-003,"Croissant Butter",Bakery,19,69,AED 2.10,Modern Bakery
+11/10/2026,BRD-003,"Croissant Butter",Bakery,5,64,AED 2.10,Modern Bakery
+12/10/2026,BRD-003,"Croissant Butter",Bakery,4,60,AED 2.10,Modern Bakery
+13/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,23,73,AED 1.40,Pepsi Dubai
+14/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,20,53,AED 1.40,Pepsi Dubai
+15/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,25,203,AED 1.40,Pepsi Dubai
+16/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,24,179,AED 1.40,Pepsi Dubai
+17/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,21,158,AED 1.40,Pepsi Dubai
+18/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,28,130,AED 1.40,Pepsi Dubai
+19/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,19,111,AED 1.40,Pepsi Dubai
+20/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,23,88,AED 1.40,Pepsi Dubai
+21/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,19,69,AED 1.40,Pepsi Dubai
+22/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,19,225,AED 1.40,Pepsi Dubai
+23/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,22,203,AED 1.40,Pepsi Dubai
+24/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,29,174,AED 1.40,Pepsi Dubai
+25/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,36,138,AED 1.40,Pepsi Dubai
+26/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,32,106,AED 1.40,Pepsi Dubai
+27/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,25,81,AED 1.40,Pepsi Dubai
+28/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,22,59,AED 1.40,Pepsi Dubai
+29/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,22,212,AED 1.40,Pepsi Dubai
+30/09/2026,BEV-001,"PEPSI 330ML CAN",Beverages,28,184,AED 1.40,Pepsi Dubai
+01/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,23,161,AED 1.40,Pepsi Dubai
+02/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,45,116,AED 1.40,Pepsi Dubai
+03/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,18,98,AED 1.40,Pepsi Dubai
+04/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,28,70,AED 1.40,Pepsi Dubai
+05/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,31,39,AED 1.40,Pepsi Dubai
+06/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,18,196,AED 1.40,Pepsi Dubai
+07/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,24,172,AED 1.40,Pepsi Dubai
+08/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,27,145,AED 1.40,Pepsi Dubai
+09/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,31,114,AED 1.40,Pepsi Dubai
+10/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,26,88,AED 1.40,Pepsi Dubai
+11/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,18,70,AED 1.40,Pepsi Dubai
+12/10/2026,BEV-001,"PEPSI 330ML CAN",Beverages,22,48,AED 1.40,Pepsi Dubai
+13/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,12,134,AED 6.00,Agthia
+14/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,11,123,AED 6.00,Agthia
+15/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,12,181,AED 6.00,Agthia
+16/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,7,174,AED 6.00,Agthia
+17/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,9,165,AED 6.00,Agthia
+18/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,17,148,AED 6.00,Agthia
+19/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,8,140,AED 6.00,Agthia
+20/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,12,128,AED 6.00,Agthia
+21/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,8,120,AED 6.00,Agthia
+22/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,8,182,AED 6.00,Agthia
+23/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,10,172,AED 6.00,Agthia
+24/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,9,163,AED 6.00,Agthia
+25/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,18,145,AED 6.00,Agthia
+26/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,8,137,AED 6.00,Agthia
+27/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,10,127,AED 6.00,Agthia
+28/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,12,115,AED 6.00,Agthia
+29/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,13,172,AED 6.00,Agthia
+30/09/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,11,161,AED 6.00,Agthia
+01/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,11,150,AED 6.00,Agthia
+02/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,15,135,AED 6.00,Agthia
+03/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,12,123,AED 6.00,Agthia
+04/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,13,110,AED 6.00,Agthia
+05/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,9,101,AED 6.00,Agthia
+06/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,13,158,AED 6.00,Agthia
+07/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,10,148,AED 6.00,Agthia
+08/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,9,139,AED 6.00,Agthia
+09/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,17,122,AED 6.00,Agthia
+10/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,7,115,AED 6.00,Agthia
+11/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,11,104,AED 6.00,Agthia
+12/10/2026,BEV-002,"Al Ain Water 500ml x12",Beverages,9,95,AED 6.00,Agthia
+13/09/2026,BEV-003,"Red Bull 250ml",Beverages,6,22,AED 5.50,Pepsi Dubai
+14/09/2026,BEV-003,"Red Bull 250ml",Beverages,4,18,AED 5.50,Pepsi Dubai
+15/09/2026,BEV-003,"Red Bull 250ml",Beverages,4,49,AED 5.50,Pepsi Dubai
+16/09/2026,BEV-003,"Red Bull 250ml",Beverages,5,44,AED 5.50,Pepsi Dubai
+17/09/2026,BEV-003,"Red Bull 250ml",Beverages,5,39,AED 5.50,Pepsi Dubai
+18/09/2026,BEV-003,"Red Bull 250ml",Beverages,8,31,AED 5.50,Pepsi Dubai
+19/09/2026,BEV-003,"Red Bull 250ml",Beverages,4,27,AED 5.50,Pepsi Dubai
+20/09/2026,BEV-003,"Red Bull 250ml",Beverages,4,23,AED 5.50,Pepsi Dubai
+21/09/2026,BEV-003,"Red Bull 250ml",Beverages,6,17,AED 5.50,Pepsi Dubai
+22/09/2026,BEV-003,"Red Bull 250ml",Beverages,6,46,AED 5.50,Pepsi Dubai
+23/09/2026,BEV-003,"Red Bull 250ml",Beverages,6,40,AED 5.50,Pepsi Dubai
+24/09/2026,BEV-003,"Red Bull 250ml",Beverages,4,36,AED 5.50,Pepsi Dubai
+25/09/2026,BEV-003,"Red Bull 250ml",Beverages,9,27,AED 5.50,Pepsi Dubai
+26/09/2026,BEV-003,"Red Bull 250ml",Beverages,5,22,AED 5.50,Pepsi Dubai
+27/09/2026,BEV-003,"Red Bull 250ml",Beverages,5,17,AED 5.50,Pepsi Dubai
+28/09/2026,BEV-003,"Red Bull 250ml",Beverages,5,12,AED 5.50,Pepsi Dubai
+29/09/2026,BEV-003,"Red Bull 250ml",Beverages,4,43,AED 5.50,Pepsi Dubai
+30/09/2026,BEV-003,"Red Bull 250ml",Beverages,6,37,AED 5.50,Pepsi Dubai
+01/10/2026,BEV-003,"Red Bull 250ml",Beverages,6,31,AED 5.50,Pepsi Dubai
+02/10/2026,BEV-003,"Red Bull 250ml",Beverages,9,22,AED 5.50,Pepsi Dubai
+03/10/2026,BEV-003,"Red Bull 250ml",Beverages,6,16,AED 5.50,Pepsi Dubai
+04/10/2026,BEV-003,"Red Bull 250ml",Beverages,4,12,AED 5.50,Pepsi Dubai
+05/10/2026,BEV-003,"Red Bull 250ml",Beverages,6,6,AED 5.50,Pepsi Dubai
+06/10/2026,BEV-003,"Red Bull 250ml",Beverages,6,35,AED 5.50,Pepsi Dubai
+07/10/2026,BEV-003,"Red Bull 250ml",Beverages,4,31,AED 5.50,Pepsi Dubai
+08/10/2026,BEV-003,"Red Bull 250ml",Beverages,6,25,AED 5.50,Pepsi Dubai
+09/10/2026,BEV-003,"Red Bull 250ml",Beverages,6,19,AED 5.50,Pepsi Dubai
+10/10/2026,BEV-003,"Red Bull 250ml",Beverages,4,15,AED 5.50,Pepsi Dubai
+11/10/2026,BEV-003,"Red Bull 250ml",Beverages,4,11,AED 5.50,Pepsi Dubai
+12/10/2026,BEV-003,"Red Bull 250ml",Beverages,4,7,AED 5.50,Pepsi Dubai
+13/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,4,AED 11.00,Unilever Gulf
+14/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,1,3,AED 11.00,Unilever Gulf
+15/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,15,AED 11.00,Unilever Gulf
+16/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,13,AED 11.00,Unilever Gulf
+17/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,11,AED 11.00,Unilever Gulf
+18/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,9,AED 11.00,Unilever Gulf
+19/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,7,AED 11.00,Unilever Gulf
+20/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,5,AED 11.00,Unilever Gulf
+21/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,3,AED 11.00,Unilever Gulf
+22/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,3,14,AED 11.00,Unilever Gulf
+23/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,1,13,AED 11.00,Unilever Gulf
+24/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,11,AED 11.00,Unilever Gulf
+25/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,3,8,AED 11.00,Unilever Gulf
+26/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,1,7,AED 11.00,Unilever Gulf
+27/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,1,6,AED 11.00,Unilever Gulf
+28/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,4,AED 11.00,Unilever Gulf
+29/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,16,AED 11.00,Unilever Gulf
+30/09/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,14,AED 11.00,Unilever Gulf
+01/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,12,AED 11.00,Unilever Gulf
+02/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,10,AED 11.00,Unilever Gulf
+03/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,8,AED 11.00,Unilever Gulf
+04/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,6,AED 11.00,Unilever Gulf
+05/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,4,AED 11.00,Unilever Gulf
+06/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,16,AED 11.00,Unilever Gulf
+07/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,14,AED 11.00,Unilever Gulf
+08/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,12,AED 11.00,Unilever Gulf
+09/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,3,9,AED 11.00,Unilever Gulf
+10/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,7,AED 11.00,Unilever Gulf
+11/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,5,AED 11.00,Unilever Gulf
+12/10/2026,GRO-001,"LIPTON YELLOW LABEL 100 BAGS",Grocery,2,3,AED 11.00,Unilever Gulf
+13/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,84,AED 2.90,Al Alali
+14/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,80,AED 2.90,Al Alali
+15/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,97,AED 2.90,Al Alali
+16/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,94,AED 2.90,Al Alali
+17/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,91,AED 2.90,Al Alali
+18/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,87,AED 2.90,Al Alali
+19/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,84,AED 2.90,Al Alali
+20/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,81,AED 2.90,Al Alali
+21/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,78,AED 2.90,Al Alali
+22/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,96,AED 2.90,Al Alali
+23/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,2,94,AED 2.90,Al Alali
+24/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,91,AED 2.90,Al Alali
+25/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,5,86,AED 2.90,Al Alali
+26/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,83,AED 2.90,Al Alali
+27/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,80,AED 2.90,Al Alali
+28/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,76,AED 2.90,Al Alali
+29/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,94,AED 2.90,Al Alali
+30/09/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,90,AED 2.90,Al Alali
+01/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,87,AED 2.90,Al Alali
+02/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,83,AED 2.90,Al Alali
+03/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,80,AED 2.90,Al Alali
+04/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,76,AED 2.90,Al Alali
+05/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,2,74,AED 2.90,Al Alali
+06/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,92,AED 2.90,Al Alali
+07/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,88,AED 2.90,Al Alali
+08/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,85,AED 2.90,Al Alali
+09/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,81,AED 2.90,Al Alali
+10/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,77,AED 2.90,Al Alali
+11/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,3,74,AED 2.90,Al Alali
+12/10/2026,GRO-002,"Al Alali Tomato Paste 400g",Grocery,4,70,AED 2.90,Al Alali
+13/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,16,AED 13.00,Al Alali
+14/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,13,AED 13.00,Al Alali
+15/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,28,AED 13.00,Al Alali
+16/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,25,AED 13.00,Al Alali
+17/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,2,23,AED 13.00,Al Alali
+18/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,4,19,AED 13.00,Al Alali
+19/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,16,AED 13.00,Al Alali
+20/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,13,AED 13.00,Al Alali
+21/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,2,11,AED 13.00,Al Alali
+22/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,26,AED 13.00,Al Alali
+23/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,23,AED 13.00,Al Alali
+24/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,2,21,AED 13.00,Al Alali
+25/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,18,AED 13.00,Al Alali
+26/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,2,16,AED 13.00,Al Alali
+27/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,13,AED 13.00,Al Alali
+28/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,10,AED 13.00,Al Alali
+29/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,25,AED 13.00,Al Alali
+30/09/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,22,AED 13.00,Al Alali
+01/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,2,20,AED 13.00,Al Alali
+02/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,4,16,AED 13.00,Al Alali
+03/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,13,AED 13.00,Al Alali
+04/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,2,11,AED 13.00,Al Alali
+05/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,8,AED 13.00,Al Alali
+06/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,23,AED 13.00,Al Alali
+07/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,20,AED 13.00,Al Alali
+08/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,2,18,AED 13.00,Al Alali
+09/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,4,14,AED 13.00,Al Alali
+10/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,2,12,AED 13.00,Al Alali
+11/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,9,AED 13.00,Al Alali
+12/10/2026,GRO-003,"Sunflower Oil 1.8L",Grocery,3,6,AED 13.00,Al Alali
+13/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,8,AED 24.00,Al Alali
+14/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,7,AED 24.00,Al Alali
+15/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,16,AED 24.00,Al Alali
+16/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,15,AED 24.00,Al Alali
+17/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,14,AED 24.00,Al Alali
+18/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,12,AED 24.00,Al Alali
+19/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,11,AED 24.00,Al Alali
+20/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,9,AED 24.00,Al Alali
+21/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,8,AED 24.00,Al Alali
+22/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,18,AED 24.00,Al Alali
+23/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,17,AED 24.00,Al Alali
+24/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,16,AED 24.00,Al Alali
+25/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,14,AED 24.00,Al Alali
+26/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,12,AED 24.00,Al Alali
+27/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,11,AED 24.00,Al Alali
+28/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,10,AED 24.00,Al Alali
+29/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,19,AED 24.00,Al Alali
+30/09/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,17,AED 24.00,Al Alali
+01/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,16,AED 24.00,Al Alali
+02/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,14,AED 24.00,Al Alali
+03/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,12,AED 24.00,Al Alali
+04/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,11,AED 24.00,Al Alali
+05/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,10,AED 24.00,Al Alali
+06/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,19,AED 24.00,Al Alali
+07/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,18,AED 24.00,Al Alali
+08/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,16,AED 24.00,Al Alali
+09/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,14,AED 24.00,Al Alali
+10/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,1,13,AED 24.00,Al Alali
+11/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,11,AED 24.00,Al Alali
+12/10/2026,GRO-004,"Basmati Rice 5kg",Grocery,2,9,AED 24.00,Al Alali
+13/09/2026,GRO-005,"Sugar 2kg",Grocery,3,19,AED 6.50,Al Alali
+14/09/2026,GRO-005,"Sugar 2kg",Grocery,4,15,AED 6.50,Al Alali
+15/09/2026,GRO-005,"Sugar 2kg",Grocery,4,32,AED 6.50,Al Alali
+16/09/2026,GRO-005,"Sugar 2kg",Grocery,3,29,AED 6.50,Al Alali
+17/09/2026,GRO-005,"Sugar 2kg",Grocery,3,26,AED 6.50,Al Alali
+18/09/2026,GRO-005,"Sugar 2kg",Grocery,5,21,AED 6.50,Al Alali
+19/09/2026,GRO-005,"Sugar 2kg",Grocery,3,18,AED 6.50,Al Alali
+20/09/2026,GRO-005,"Sugar 2kg",Grocery,2,16,AED 6.50,Al Alali
+21/09/2026,GRO-005,"Sugar 2kg",Grocery,3,13,AED 6.50,Al Alali
+22/09/2026,GRO-005,"Sugar 2kg",Grocery,3,31,AED 6.50,Al Alali
+23/09/2026,GRO-005,"Sugar 2kg",Grocery,3,28,AED 6.50,Al Alali
+24/09/2026,GRO-005,"Sugar 2kg",Grocery,3,25,AED 6.50,Al Alali
+25/09/2026,GRO-005,"Sugar 2kg",Grocery,3,22,AED 6.50,Al Alali
+26/09/2026,GRO-005,"Sugar 2kg",Grocery,2,20,AED 6.50,Al Alali
+27/09/2026,GRO-005,"Sugar 2kg",Grocery,4,16,AED 6.50,Al Alali
+28/09/2026,GRO-005,"Sugar 2kg",Grocery,3,13,AED 6.50,Al Alali
+29/09/2026,GRO-005,"Sugar 2kg",Grocery,4,30,AED 6.50,Al Alali
+30/09/2026,GRO-005,"Sugar 2kg",Grocery,3,27,AED 6.50,Al Alali
+01/10/2026,GRO-005,"Sugar 2kg",Grocery,2,25,AED 6.50,Al Alali
+02/10/2026,GRO-005,"Sugar 2kg",Grocery,3,22,AED 6.50,Al Alali
+03/10/2026,GRO-005,"Sugar 2kg",Grocery,2,20,AED 6.50,Al Alali
+04/10/2026,GRO-005,"Sugar 2kg",Grocery,3,17,AED 6.50,Al Alali
+05/10/2026,GRO-005,"Sugar 2kg",Grocery,3,14,AED 6.50,Al Alali
+06/10/2026,GRO-005,"Sugar 2kg",Grocery,3,32,AED 6.50,Al Alali
+07/10/2026,GRO-005,"Sugar 2kg",Grocery,3,29,AED 6.50,Al Alali
+08/10/2026,GRO-005,"Sugar 2kg",Grocery,3,26,AED 6.50,Al Alali
+09/10/2026,GRO-005,"Sugar 2kg",Grocery,5,21,AED 6.50,Al Alali
+10/10/2026,GRO-005,"Sugar 2kg",Grocery,3,18,AED 6.50,Al Alali
+11/10/2026,GRO-005,"Sugar 2kg",Grocery,3,15,AED 6.50,Al Alali
+12/10/2026,GRO-005,"Sugar 2kg",Grocery,3,12,AED 6.50,Al Alali
+13/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,25,202,AED 1.50,Pepsi Dubai
+14/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,15,187,AED 1.50,Pepsi Dubai
+15/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,26,301,AED 1.50,Pepsi Dubai
+16/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,22,279,AED 1.50,Pepsi Dubai
+17/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,18,261,AED 1.50,Pepsi Dubai
+18/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,21,240,AED 1.50,Pepsi Dubai
+19/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,21,219,AED 1.50,Pepsi Dubai
+20/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,14,205,AED 1.50,Pepsi Dubai
+21/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,20,185,AED 1.50,Pepsi Dubai
+22/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,18,307,AED 1.50,Pepsi Dubai
+23/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,21,286,AED 1.50,Pepsi Dubai
+24/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,22,264,AED 1.50,Pepsi Dubai
+25/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,36,228,AED 1.50,Pepsi Dubai
+26/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,17,211,AED 1.50,Pepsi Dubai
+27/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,16,195,AED 1.50,Pepsi Dubai
+28/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,16,179,AED 1.50,Pepsi Dubai
+29/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,17,302,AED 1.50,Pepsi Dubai
+30/09/2026,SNK-001,"LAYS CHIPS 45G",Snacks,26,276,AED 1.50,Pepsi Dubai
+01/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,15,261,AED 1.50,Pepsi Dubai
+02/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,23,238,AED 1.50,Pepsi Dubai
+03/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,24,214,AED 1.50,Pepsi Dubai
+04/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,24,190,AED 1.50,Pepsi Dubai
+05/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,15,175,AED 1.50,Pepsi Dubai
+06/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,20,295,AED 1.50,Pepsi Dubai
+07/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,22,273,AED 1.50,Pepsi Dubai
+08/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,22,251,AED 1.50,Pepsi Dubai
+09/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,23,228,AED 1.50,Pepsi Dubai
+10/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,23,205,AED 1.50,Pepsi Dubai
+11/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,26,179,AED 1.50,Pepsi Dubai
+12/10/2026,SNK-001,"LAYS CHIPS 45G",Snacks,19,160,AED 1.50,Pepsi Dubai
+13/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,12,57,AED 1.90,Mars Gulf
+14/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,13,44,AED 1.90,Mars Gulf
+15/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,13,115,AED 1.90,Mars Gulf
+16/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,13,102,AED 1.90,Mars Gulf
+17/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,14,88,AED 1.90,Mars Gulf
+18/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,12,76,AED 1.90,Mars Gulf
+19/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,13,63,AED 1.90,Mars Gulf
+20/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,9,54,AED 1.90,Mars Gulf
+21/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,15,39,AED 1.90,Mars Gulf
+22/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,10,113,AED 1.90,Mars Gulf
+23/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,15,98,AED 1.90,Mars Gulf
+24/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,11,87,AED 1.90,Mars Gulf
+25/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,21,66,AED 1.90,Mars Gulf
+26/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,11,55,AED 1.90,Mars Gulf
+27/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,11,44,AED 1.90,Mars Gulf
+28/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,11,33,AED 1.90,Mars Gulf
+29/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,13,104,AED 1.90,Mars Gulf
+30/09/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,9,95,AED 1.90,Mars Gulf
+01/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,13,82,AED 1.90,Mars Gulf
+02/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,20,62,AED 1.90,Mars Gulf
+03/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,15,47,AED 1.90,Mars Gulf
+04/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,14,33,AED 1.90,Mars Gulf
+05/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,13,20,AED 1.90,Mars Gulf
+06/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,9,95,AED 1.90,Mars Gulf
+07/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,12,83,AED 1.90,Mars Gulf
+08/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,10,73,AED 1.90,Mars Gulf
+09/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,20,53,AED 1.90,Mars Gulf
+10/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,13,40,AED 1.90,Mars Gulf
+11/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,12,28,AED 1.90,Mars Gulf
+12/10/2026,SNK-002,"Galaxy Chocolate 40g",Snacks,14,14,AED 1.90,Mars Gulf
+13/09/2026,SNK-003,"Mentos Mint",Snacks,3,106,AED 1.10,Mars Gulf
+14/09/2026,SNK-003,"Mentos Mint",Snacks,4,102,AED 1.10,Mars Gulf
+15/09/2026,SNK-003,"Mentos Mint",Snacks,3,127,AED 1.10,Mars Gulf
+16/09/2026,SNK-003,"Mentos Mint",Snacks,5,122,AED 1.10,Mars Gulf
+17/09/2026,SNK-003,"Mentos Mint",Snacks,5,117,AED 1.10,Mars Gulf
+18/09/2026,SNK-003,"Mentos Mint",Snacks,6,111,AED 1.10,Mars Gulf
+19/09/2026,SNK-003,"Mentos Mint",Snacks,5,106,AED 1.10,Mars Gulf
+20/09/2026,SNK-003,"Mentos Mint",Snacks,4,102,AED 1.10,Mars Gulf
+21/09/2026,SNK-003,"Mentos Mint",Snacks,3,99,AED 1.10,Mars Gulf
+22/09/2026,SNK-003,"Mentos Mint",Snacks,4,123,AED 1.10,Mars Gulf
+23/09/2026,SNK-003,"Mentos Mint",Snacks,4,119,AED 1.10,Mars Gulf
+24/09/2026,SNK-003,"Mentos Mint",Snacks,3,116,AED 1.10,Mars Gulf
+25/09/2026,SNK-003,"Mentos Mint",Snacks,6,110,AED 1.10,Mars Gulf
+26/09/2026,SNK-003,"Mentos Mint",Snacks,3,107,AED 1.10,Mars Gulf
+27/09/2026,SNK-003,"Mentos Mint",Snacks,4,103,AED 1.10,Mars Gulf
+28/09/2026,SNK-003,"Mentos Mint",Snacks,5,98,AED 1.10,Mars Gulf
+29/09/2026,SNK-003,"Mentos Mint",Snacks,3,123,AED 1.10,Mars Gulf
+30/09/2026,SNK-003,"Mentos Mint",Snacks,4,119,AED 1.10,Mars Gulf
+01/10/2026,SNK-003,"Mentos Mint",Snacks,4,115,AED 1.10,Mars Gulf
+02/10/2026,SNK-003,"Mentos Mint",Snacks,6,109,AED 1.10,Mars Gulf
+03/10/2026,SNK-003,"Mentos Mint",Snacks,3,106,AED 1.10,Mars Gulf
+04/10/2026,SNK-003,"Mentos Mint",Snacks,4,102,AED 1.10,Mars Gulf
+05/10/2026,SNK-003,"Mentos Mint",Snacks,5,97,AED 1.10,Mars Gulf
+06/10/2026,SNK-003,"Mentos Mint",Snacks,5,120,AED 1.10,Mars Gulf
+07/10/2026,SNK-003,"Mentos Mint",Snacks,5,115,AED 1.10,Mars Gulf
+08/10/2026,SNK-003,"Mentos Mint",Snacks,3,112,AED 1.10,Mars Gulf
+09/10/2026,SNK-003,"Mentos Mint",Snacks,7,105,AED 1.10,Mars Gulf
+10/10/2026,SNK-003,"Mentos Mint",Snacks,5,100,AED 1.10,Mars Gulf
+11/10/2026,SNK-003,"Mentos Mint",Snacks,5,95,AED 1.10,Mars Gulf
+12/10/2026,SNK-003,"Mentos Mint",Snacks,5,90,AED 1.10,Mars Gulf
+13/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,11,40,AED 4.50,Fresh Fruits Co
+14/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,8,32,AED 4.50,Fresh Fruits Co
+15/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,9,86,AED 4.50,Fresh Fruits Co
+16/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,9,77,AED 4.50,Fresh Fruits Co
+17/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,7,70,AED 4.50,Fresh Fruits Co
+18/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,15,55,AED 4.50,Fresh Fruits Co
+19/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,7,48,AED 4.50,Fresh Fruits Co
+20/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,10,38,AED 4.50,Fresh Fruits Co
+21/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,11,27,AED 4.50,Fresh Fruits Co
+22/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,12,78,AED 4.50,Fresh Fruits Co
+23/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,12,66,AED 4.50,Fresh Fruits Co
+24/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,8,58,AED 4.50,Fresh Fruits Co
+25/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,15,43,AED 4.50,Fresh Fruits Co
+26/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,6,37,AED 4.50,Fresh Fruits Co
+27/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,11,26,AED 4.50,Fresh Fruits Co
+28/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,10,16,AED 4.50,Fresh Fruits Co
+29/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,9,70,AED 4.50,Fresh Fruits Co
+30/09/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,11,59,AED 4.50,Fresh Fruits Co
+01/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,10,49,AED 4.50,Fresh Fruits Co
+02/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,13,36,AED 4.50,Fresh Fruits Co
+03/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,8,28,AED 4.50,Fresh Fruits Co
+04/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,9,19,AED 4.50,Fresh Fruits Co
+05/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,11,8,AED 4.50,Fresh Fruits Co
+06/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,11,60,AED 4.50,Fresh Fruits Co
+07/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,7,53,AED 4.50,Fresh Fruits Co
+08/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,8,45,AED 4.50,Fresh Fruits Co
+09/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,16,29,AED 4.50,Fresh Fruits Co
+10/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,10,19,AED 4.50,Fresh Fruits Co
+11/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,8,11,AED 4.50,Fresh Fruits Co
+12/10/2026,FRV-001,"BANANAS 1KG",Fruit & Veg,8,3,AED 4.50,Fresh Fruits Co
+13/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,7,22,AED 3.90,Fresh Fruits Co
+14/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,8,14,AED 3.90,Fresh Fruits Co
+15/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,7,56,AED 3.90,Fresh Fruits Co
+16/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,9,47,AED 3.90,Fresh Fruits Co
+17/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,7,40,AED 3.90,Fresh Fruits Co
+18/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,11,29,AED 3.90,Fresh Fruits Co
+19/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,6,23,AED 3.90,Fresh Fruits Co
+20/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,9,14,AED 3.90,Fresh Fruits Co
+21/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,6,8,AED 3.90,Fresh Fruits Co
+22/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,6,51,AED 3.90,Fresh Fruits Co
+23/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,7,44,AED 3.90,Fresh Fruits Co
+24/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,8,36,AED 3.90,Fresh Fruits Co
+25/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,9,27,AED 3.90,Fresh Fruits Co
+26/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,6,21,AED 3.90,Fresh Fruits Co
+27/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,6,15,AED 3.90,Fresh Fruits Co
+28/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,9,6,AED 3.90,Fresh Fruits Co
+29/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,5,50,AED 3.90,Fresh Fruits Co
+30/09/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,5,45,AED 3.90,Fresh Fruits Co
+01/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,8,37,AED 3.90,Fresh Fruits Co
+02/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,12,25,AED 3.90,Fresh Fruits Co
+03/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,5,20,AED 3.90,Fresh Fruits Co
+04/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,5,15,AED 3.90,Fresh Fruits Co
+05/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,6,9,AED 3.90,Fresh Fruits Co
+06/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,5,53,AED 3.90,Fresh Fruits Co
+07/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,9,44,AED 3.90,Fresh Fruits Co
+08/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,6,38,AED 3.90,Fresh Fruits Co
+09/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,11,27,AED 3.90,Fresh Fruits Co
+10/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,5,22,AED 3.90,Fresh Fruits Co
+11/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,9,13,AED 3.90,Fresh Fruits Co
+12/10/2026,FRV-002,"Tomatoes 1kg",Fruit & Veg,5,8,AED 3.90,Fresh Fruits Co
+13/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,5,41,AED 2.40,Fresh Fruits Co
+14/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,6,35,AED 2.40,Fresh Fruits Co
+15/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,6,64,AED 2.40,Fresh Fruits Co
+16/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,5,59,AED 2.40,Fresh Fruits Co
+17/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,4,55,AED 2.40,Fresh Fruits Co
+18/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,7,48,AED 2.40,Fresh Fruits Co
+19/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,5,43,AED 2.40,Fresh Fruits Co
+20/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,6,37,AED 2.40,Fresh Fruits Co
+21/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,4,33,AED 2.40,Fresh Fruits Co
+22/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,5,63,AED 2.40,Fresh Fruits Co
+23/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,6,57,AED 2.40,Fresh Fruits Co
+24/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,5,52,AED 2.40,Fresh Fruits Co
+25/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,7,45,AED 2.40,Fresh Fruits Co
+26/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,4,41,AED 2.40,Fresh Fruits Co
+27/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,4,37,AED 2.40,Fresh Fruits Co
+28/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,4,33,AED 2.40,Fresh Fruits Co
+29/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,4,64,AED 2.40,Fresh Fruits Co
+30/09/2026,FRV-003,"Onions 1kg",Fruit & Veg,5,59,AED 2.40,Fresh Fruits Co
+01/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,6,53,AED 2.40,Fresh Fruits Co
+02/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,8,45,AED 2.40,Fresh Fruits Co
+03/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,6,39,AED 2.40,Fresh Fruits Co
+04/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,5,34,AED 2.40,Fresh Fruits Co
+05/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,6,28,AED 2.40,Fresh Fruits Co
+06/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,4,59,AED 2.40,Fresh Fruits Co
+07/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,5,54,AED 2.40,Fresh Fruits Co
+08/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,6,48,AED 2.40,Fresh Fruits Co
+09/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,7,41,AED 2.40,Fresh Fruits Co
+10/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,5,36,AED 2.40,Fresh Fruits Co
+11/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,6,30,AED 2.40,Fresh Fruits Co
+12/10/2026,FRV-003,"Onions 1kg",Fruit & Veg,5,25,AED 2.40,Fresh Fruits Co
+13/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,11,AED 8.20,Unilever Gulf
+14/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,10,AED 8.20,Unilever Gulf
+15/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,20,AED 8.20,Unilever Gulf
+16/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,19,AED 8.20,Unilever Gulf
+17/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,17,AED 8.20,Unilever Gulf
+18/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,15,AED 8.20,Unilever Gulf
+19/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,14,AED 8.20,Unilever Gulf
+20/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,13,AED 8.20,Unilever Gulf
+21/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,11,AED 8.20,Unilever Gulf
+22/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,21,AED 8.20,Unilever Gulf
+23/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,20,AED 8.20,Unilever Gulf
+24/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,18,AED 8.20,Unilever Gulf
+25/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,3,15,AED 8.20,Unilever Gulf
+26/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,14,AED 8.20,Unilever Gulf
+27/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,13,AED 8.20,Unilever Gulf
+28/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,11,AED 8.20,Unilever Gulf
+29/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,21,AED 8.20,Unilever Gulf
+30/09/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,19,AED 8.20,Unilever Gulf
+01/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,17,AED 8.20,Unilever Gulf
+02/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,15,AED 8.20,Unilever Gulf
+03/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,13,AED 8.20,Unilever Gulf
+04/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,12,AED 8.20,Unilever Gulf
+05/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,11,AED 8.20,Unilever Gulf
+06/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,21,AED 8.20,Unilever Gulf
+07/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,20,AED 8.20,Unilever Gulf
+08/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,18,AED 8.20,Unilever Gulf
+09/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,16,AED 8.20,Unilever Gulf
+10/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,14,AED 8.20,Unilever Gulf
+11/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,1,13,AED 8.20,Unilever Gulf
+12/10/2026,HH-001,"FAIRY DISH SOAP 750ML",Household,2,11,AED 8.20,Unilever Gulf
+13/09/2026,HH-002,"Clorox Bleach 1L",Household,1,7,AED 5.00,Unilever Gulf
+14/09/2026,HH-002,"Clorox Bleach 1L",Household,1,6,AED 5.00,Unilever Gulf
+15/09/2026,HH-002,"Clorox Bleach 1L",Household,1,11,AED 5.00,Unilever Gulf
+16/09/2026,HH-002,"Clorox Bleach 1L",Household,1,10,AED 5.00,Unilever Gulf
+17/09/2026,HH-002,"Clorox Bleach 1L",Household,1,9,AED 5.00,Unilever Gulf
+18/09/2026,HH-002,"Clorox Bleach 1L",Household,1,8,AED 5.00,Unilever Gulf
+19/09/2026,HH-002,"Clorox Bleach 1L",Household,1,7,AED 5.00,Unilever Gulf
+20/09/2026,HH-002,"Clorox Bleach 1L",Household,1,6,AED 5.00,Unilever Gulf
+21/09/2026,HH-002,"Clorox Bleach 1L",Household,1,5,AED 5.00,Unilever Gulf
+22/09/2026,HH-002,"Clorox Bleach 1L",Household,1,10,AED 5.00,Unilever Gulf
+23/09/2026,HH-002,"Clorox Bleach 1L",Household,1,9,AED 5.00,Unilever Gulf
+24/09/2026,HH-002,"Clorox Bleach 1L",Household,1,8,AED 5.00,Unilever Gulf
+25/09/2026,HH-002,"Clorox Bleach 1L",Household,1,7,AED 5.00,Unilever Gulf
+26/09/2026,HH-002,"Clorox Bleach 1L",Household,1,6,AED 5.00,Unilever Gulf
+27/09/2026,HH-002,"Clorox Bleach 1L",Household,1,5,AED 5.00,Unilever Gulf
+28/09/2026,HH-002,"Clorox Bleach 1L",Household,1,4,AED 5.00,Unilever Gulf
+29/09/2026,HH-002,"Clorox Bleach 1L",Household,1,9,AED 5.00,Unilever Gulf
+30/09/2026,HH-002,"Clorox Bleach 1L",Household,1,8,AED 5.00,Unilever Gulf
+01/10/2026,HH-002,"Clorox Bleach 1L",Household,1,7,AED 5.00,Unilever Gulf
+02/10/2026,HH-002,"Clorox Bleach 1L",Household,1,6,AED 5.00,Unilever Gulf
+03/10/2026,HH-002,"Clorox Bleach 1L",Household,1,5,AED 5.00,Unilever Gulf
+04/10/2026,HH-002,"Clorox Bleach 1L",Household,1,4,AED 5.00,Unilever Gulf
+05/10/2026,HH-002,"Clorox Bleach 1L",Household,1,3,AED 5.00,Unilever Gulf
+06/10/2026,HH-002,"Clorox Bleach 1L",Household,1,8,AED 5.00,Unilever Gulf
+07/10/2026,HH-002,"Clorox Bleach 1L",Household,1,7,AED 5.00,Unilever Gulf
+08/10/2026,HH-002,"Clorox Bleach 1L",Household,1,6,AED 5.00,Unilever Gulf
+09/10/2026,HH-002,"Clorox Bleach 1L",Household,1,5,AED 5.00,Unilever Gulf
+10/10/2026,HH-002,"Clorox Bleach 1L",Household,1,4,AED 5.00,Unilever Gulf
+11/10/2026,HH-002,"Clorox Bleach 1L",Household,1,3,AED 5.00,Unilever Gulf
+12/10/2026,HH-002,"Clorox Bleach 1L",Household,1,2,AED 5.00,Unilever Gulf
+13/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+14/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+15/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+16/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+17/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+18/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+19/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+20/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+21/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+22/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+23/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+24/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+25/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+26/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+27/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+28/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+29/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+30/09/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+01/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+02/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+03/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+04/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+05/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+06/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+07/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+08/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+09/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+10/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+11/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+12/10/2026,SEA-001,"RAMADAN DATES GIFT BOX 1KG",Seasonal,0,22,AED 38.00,Al Alali
+13/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+14/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+15/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+16/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+17/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+18/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+19/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+20/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+21/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+22/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+23/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+24/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+25/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+26/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+27/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+28/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+29/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+30/09/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+01/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+02/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+03/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+04/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+05/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+06/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+07/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+08/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+09/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+10/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+11/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+12/10/2026,SEA-002,"Christmas Cake Tin 500g",Seasonal,0,9,AED 17.00,Modern Bakery
+13/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,2,36,AED 15.50,Unilever Gulf
+14/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,2,34,AED 15.50,Unilever Gulf
+15/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,2,36,AED 15.50,Unilever Gulf
+16/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,2,34,AED 15.50,Unilever Gulf
+17/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,2,32,AED 15.50,Unilever Gulf
+18/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,2,30,AED 15.50,Unilever Gulf
+19/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,2,28,AED 15.50,Unilever Gulf
+20/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,28,AED 15.50,Unilever Gulf
+21/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,28,AED 15.50,Unilever Gulf
+22/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,32,AED 15.50,Unilever Gulf
+23/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,32,AED 15.50,Unilever Gulf
+24/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,32,AED 15.50,Unilever Gulf
+25/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,32,AED 15.50,Unilever Gulf
+26/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,32,AED 15.50,Unilever Gulf
+27/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,32,AED 15.50,Unilever Gulf
+28/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,32,AED 15.50,Unilever Gulf
+29/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,36,AED 15.50,Unilever Gulf
+30/09/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,36,AED 15.50,Unilever Gulf
+01/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,36,AED 15.50,Unilever Gulf
+02/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,36,AED 15.50,Unilever Gulf
+03/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,36,AED 15.50,Unilever Gulf
+04/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,36,AED 15.50,Unilever Gulf
+05/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,36,AED 15.50,Unilever Gulf
+06/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,40,AED 15.50,Unilever Gulf
+07/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,40,AED 15.50,Unilever Gulf
+08/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,40,AED 15.50,Unilever Gulf
+09/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,40,AED 15.50,Unilever Gulf
+10/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,40,AED 15.50,Unilever Gulf
+11/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,40,AED 15.50,Unilever Gulf
+12/10/2026,GRO-006,"Imported Cereal Choco 375g",Grocery,0,40,AED 15.50,Unilever Gulf
+13/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,18,AED 12.00,Almarai
+14/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,15,AED 12.00,Almarai
+15/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,33,AED 12.00,Almarai
+16/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,30,AED 12.00,Almarai
+17/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,27,AED 12.00,Almarai
+18/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,25,AED 12.00,Almarai
+19/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,23,AED 12.00,Almarai
+20/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,20,AED 12.00,Almarai
+21/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,18,AED 12.00,Almarai
+22/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,36,AED 12.00,Almarai
+23/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,34,AED 12.00,Almarai
+24/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,31,AED 12.00,Almarai
+25/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,29,AED 12.00,Almarai
+26/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,27,AED 12.00,Almarai
+27/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,24,AED 12.00,Almarai
+28/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,22,AED 12.00,Almarai
+29/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,40,AED 12.00,Almarai
+30/09/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,38,AED 12.00,Almarai
+01/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,35,AED 12.00,Almarai
+02/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,32,AED 12.00,Almarai
+03/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,29,AED 12.00,Almarai
+04/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,27,AED 12.00,Almarai
+05/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,25,AED 12.00,Almarai
+06/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,2,44,AED 12.00,Almarai
+07/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,3,41,AED 12.00,Almarai
+08/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,8,33,AED 12.00,Almarai
+09/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,6,27,AED 12.00,Almarai
+10/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,7,20,AED 12.00,Almarai
+11/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,8,12,AED 12.00,Almarai
+12/10/2026,FRZ-001,"ICE CREAM TUB VANILLA 1L",Frozen,7,5,AED 12.00,Almarai
+13/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,5,9,AED 22.00,Fresh Fruits Co
+14/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,4,5,AED 22.00,Fresh Fruits Co
+15/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,3,30,AED 22.00,Fresh Fruits Co
+16/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,5,25,AED 22.00,Fresh Fruits Co
+17/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,3,22,AED 22.00,Fresh Fruits Co
+18/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,6,16,AED 22.00,Fresh Fruits Co
+19/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,4,12,AED 22.00,Fresh Fruits Co
+20/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,5,7,AED 22.00,Fresh Fruits Co
+21/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,3,4,AED 22.00,Fresh Fruits Co
+22/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,3,29,AED 22.00,Fresh Fruits Co
+23/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,3,26,AED 22.00,Fresh Fruits Co
+24/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,4,22,AED 22.00,Fresh Fruits Co
+25/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,6,16,AED 22.00,Fresh Fruits Co
+26/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,5,11,AED 22.00,Fresh Fruits Co
+27/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,3,8,AED 22.00,Fresh Fruits Co
+28/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,3,5,AED 22.00,Fresh Fruits Co
+29/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,5,28,AED 22.00,Fresh Fruits Co
+30/09/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,3,25,AED 22.00,Fresh Fruits Co
+01/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,3,22,AED 22.00,Fresh Fruits Co
+02/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,5,17,AED 22.00,Fresh Fruits Co
+03/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,4,13,AED 22.00,Fresh Fruits Co
+04/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,5,8,AED 22.00,Fresh Fruits Co
+05/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,4,4,AED 22.00,Fresh Fruits Co
+06/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,4,28,AED 22.00,Fresh Fruits Co
+07/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,5,23,AED 22.00,Fresh Fruits Co
+08/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,4,19,AED 22.00,Fresh Fruits Co
+09/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,5,14,AED 22.00,Fresh Fruits Co
+10/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,4,10,AED 22.00,Fresh Fruits Co
+11/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,4,6,AED 22.00,Fresh Fruits Co
+12/10/2026,MEA-001,"CHICKEN BREAST 1KG",Meat,4,2,AED 22.00,Fresh Fruits Co
+
+Report generated by DemoPOS v3

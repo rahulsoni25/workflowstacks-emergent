@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --primary: 160 84% 30%; /* grocery green */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 40%;
+    --accent: 210 40% 94%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 160 84% 30%;
+    --radius: 0.9rem;
+
+    --status-red: 0 72% 51%;
+    --status-amber: 38 92% 50%;
+    --status-green: 142 71% 35%;
+    --status-grey: 215 14% 50%;
+    --status-blue: 217 91% 55%;
+
+    --font-sans: 'Inter', 'Segoe UI', 'Noto Sans Arabic', 'Tahoma', system-ui, sans-serif;
+  }
+
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: 17px; /* large base size: owners read this on a phone */
+  }
+  /* Arabic: slightly larger line-height improves legibility of connected script */
+  html[dir='rtl'] body {
+    line-height: 1.7;
+  }
+}
+
+@layer utilities {
+  .tap-target {
+    min-height: 48px;
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    font-size: 12pt;
+    background: #fff;
+  }
+}
