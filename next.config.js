@@ -14,6 +14,11 @@ const LANDING_PAGES = [
     dir: 'founder-avatar-studio',
     host: 'founder-avatar\\.(?:workflowstacks\\.com|localhost)',
   },
+  {
+    path: '/ai-visibility',
+    dir: 'ai-visibility-audit',
+    host: 'ai-visibility\\.(?:workflowstacks\\.com|localhost)',
+  },
 ]
 
 const nextConfig = {

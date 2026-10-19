@@ -9,6 +9,7 @@ WorkflowStacks app: one folder of plain HTML, CSS, JS and media under
 | Canonical URL | Hostname variant | Folder |
 | --- | --- | --- |
 | `https://workflowstacks.com/ai-avatar` | `founder-avatar.workflowstacks.com` (once attached in Vercel) | `public/sites/founder-avatar-studio/` |
+| `https://workflowstacks.com/ai-visibility` | `ai-visibility.workflowstacks.com` (once attached in Vercel) | `public/sites/ai-visibility-audit/` — see `docs/ai-visibility-audit.md` |
 
 ## Why a path on the main site is canonical
 

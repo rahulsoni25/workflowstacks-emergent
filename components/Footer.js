@@ -63,6 +63,7 @@ const footerLinks = {
       // Static landing page served by a rewrite (see LANDING_PAGES in next.config.js),
       // so it is a plain anchor rather than a client-side <Link>.
       { label: 'AI Avatar Studio', href: '/ai-avatar', plain: true },
+      { label: 'AI Visibility Audit', href: '/ai-visibility', plain: true },
       { label: 'API Docs', href: '/docs' },
       { label: 'Terms', href: '/terms' },
       { label: 'Privacy', href: '/privacy' },

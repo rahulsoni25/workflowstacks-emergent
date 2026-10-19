@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI Visibility Audit for Dubai Businesses | AI Invisibility Report</title>
+<meta name="description" content="Free AI visibility scan for Dubai businesses. See which competitors ChatGPT, Gemini, Perplexity and Google AI Overviews recommend instead of you — and how to fix it.">
+<link rel="canonical" href="https://workflowstacks.com/ai-visibility">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="theme-color" content="#14111C">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23FF4A1C'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FluoDigital">
+<meta property="og:locale" content="en_AE">
+<meta property="og:title" content="Is ChatGPT recommending your competitors instead of you?">
+<meta property="og:description" content="Free AI visibility scan for Dubai businesses. See which competitors ChatGPT, Gemini, Perplexity and Google AI Overviews recommend instead of you — and how to fix it.">
+<meta property="og:url" content="https://workflowstacks.com/ai-visibility">
+<meta property="og:image" content="https://workflowstacks.com/sites/ai-visibility-audit/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Is ChatGPT recommending your competitors instead of you? AI Invisibility Report by FluoDigital">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Is ChatGPT recommending your competitors instead of you?">
+<meta name="twitter:description" content="Free AI visibility scan for Dubai businesses. See which competitors ChatGPT, Gemini, Perplexity and Google AI Overviews recommend instead of you — and how to fix it.">
+<meta name="twitter:image" content="https://workflowstacks.com/sites/ai-visibility-audit/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"></noscript>
+<style>
+  /* Same tokens, type and contrast checks as the Founder Avatar Studio page
+     (docs/founder-avatar-studio-design-system.md): one FluoDigital look. Mint
+     marks "named", tally marks "not named"; both clear 4.5:1 on ground. */
+  :root{
+    color-scheme: dark;
+    --ground:#14111C; --surface:#1E1927; --surface2:#271F33;
+    --line:rgba(244,238,230,.13); --line-strong:rgba(244,238,230,.26);
+    --text:#F4EEE6; --muted:#A99DB4; --dim:#8B8296; /* 5.09:1 on ground, 4.68:1 on surface */
+    --tally:#FF4A1C; --amber:#F2A65A; --mint:#7FD1B9;
+    --maxw:1180px; --bar-h:69px; --t:160ms;
+    /* breakpoints: sm 560 · md 720 · lg 900 · xl 960 */
+    --fd:"Instrument Serif",Georgia,serif;
+    --fb:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --fm:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none !important}
+  /* Light sections re-map the same tokens (cream #F4EEE6: text 16.2:1, muted
+     7.6:1, dim 4.9:1, accent #8F4E0C 5.6:1). The scan tool stays dark so the
+     mint and tally verdict colours keep their contrast. */
+  section.light{
+    --ground:#F4EEE6; --surface:#FFFFFF; --surface2:#EAE3D9;
+    --line:rgba(20,17,28,.12); --line-strong:rgba(20,17,28,.5);
+    --text:#14111C; --muted:#4E4760; --dim:#6B6479; --amber:#8F4E0C;
+    background:var(--ground); color:var(--text);
+  }
+  html{scroll-padding-top:calc(var(--bar-h) + 12px + env(safe-area-inset-top,0px))}
+  @media(prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
+  body{
+    margin:0; background:var(--ground); color:var(--text);
+    font-family:var(--fb); font-size:17px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:100%; max-width:var(--maxw); margin:0 auto;
+    padding-left:max(clamp(20px,3.5vw,36px), env(safe-area-inset-left,0px)); padding-right:max(clamp(20px,3.5vw,36px), env(safe-area-inset-right,0px))}
+  h1,h2,h3{text-wrap:balance; margin:0}
+  figure{margin:0}
+  p,li,figcaption{text-wrap:pretty}
+  .skip{position:absolute; left:16px; top:-100px; z-index:60; background:var(--text); color:var(--ground); font-weight:600; padding:10px 14px; border-radius:2px; text-decoration:none}
+  .skip:focus{top:12px}
+  a{color:inherit}
+  .eyebrow{font-family:var(--fm); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--amber); margin:0; text-wrap:balance}
+  .em{font-style:italic; color:var(--amber)}
+  .tag{font-family:var(--fm); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim)}
+
+  /* header */
+  header.bar{position:sticky; top:env(safe-area-inset-top,0px); z-index:50;
+    background:rgba(20,17,28,.86); backdrop-filter:blur(12px); border-bottom:1px solid var(--line)}
+  .bar .wrap{display:flex; align-items:center; gap:16px; justify-content:space-between; padding-block:12px}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:600; letter-spacing:-.01em; font-size:16px}
+  .dot{width:9px; height:9px; border-radius:50%; background:var(--tally); box-shadow:0 0 0 4px rgba(255,74,28,.18)}
+  .bar nav{align-items:center; gap:22px; font-size:14px; color:var(--muted)}
+  .bar nav a{display:inline-block; padding:11px 0; text-decoration:none; border-bottom:1px solid transparent; transition:color var(--t) ease}
+  .bar nav a:hover{color:var(--text)}
+  .bar nav a[aria-current="true"]{color:var(--text); border-bottom-color:var(--amber)}
+  .hide-sm{display:none}
+  @media(min-width:720px){ .hide-sm{display:flex} }
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-family:var(--fb); font-weight:600; font-size:15px; line-height:1;
+    padding:13px 20px; min-height:44px; border-radius:2px; border:1px solid transparent; cursor:pointer; text-decoration:none;
+    transition:transform var(--t) ease, background-color var(--t) ease, border-color var(--t) ease, filter var(--t) ease}
+  .btn-primary{background:var(--tally); color:#170B06; border-color:var(--tally)}
+  .btn-ghost{background:transparent; color:var(--text); border-color:var(--line-strong)}
+  @media(hover:hover){
+    .btn-primary:hover{transform:translateY(-1px); background:#FF5F35}
+    .btn-ghost:hover{border-color:var(--text)}
+  }
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn-primary:active{filter:brightness(.92)}
+  .btn-ghost:active{background:rgba(244,238,230,.08)}
+  .btn-sm{padding:10px 15px; font-size:14px}
+  .btn,.verdict button,summary,input,select,textarea,.bar nav a,.contact a,.ask{touch-action:manipulation}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px}
+
+  /* hero */
+  .hero{padding-block:clamp(36px,6vw,72px) clamp(40px,6vw,80px); border-bottom:1px solid var(--line)}
+  .hero-grid{display:grid; gap:clamp(32px,5vw,56px); grid-template-columns:1fr; align-items:start}
+  @media(min-width:960px){ .hero-grid{grid-template-columns:1.08fr .92fr} }
+  h1.hook{font-family:var(--fd); font-weight:400; font-size:clamp(40px,6.4vw,74px); line-height:1.02; letter-spacing:-.015em; margin-top:18px}
+  .h1-kw{display:block; font-family:var(--fb); font-weight:500; font-size:clamp(15px,1.6vw,18px); line-height:1.45; letter-spacing:0; color:var(--amber); margin-top:16px; max-width:32em}
+  .sub{color:var(--muted); font-size:clamp(17px,2vw,20px); max-width:33em; margin-top:20px}
+  .sub b{color:var(--text); font-weight:600}
+
+  /* forms */
+  .form-card{margin-top:30px; background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:clamp(20px,3vw,28px)}
+  .form-card h2{font-family:var(--fb); font-size:17px; font-weight:600; letter-spacing:-.01em}
+  .form-note{color:var(--dim); font-size:13.5px; margin:6px 0 18px}
+  .fields{display:grid; gap:12px; grid-template-columns:1fr}
+  @media(min-width:560px){ .fields{grid-template-columns:1fr 1fr} .span2{grid-column:1/-1} }
+  label{display:block; font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:6px}
+  input,select,textarea{width:100%; font-family:var(--fb); font-size:16px; color:var(--text); min-height:44px;
+    background:var(--ground); border:1px solid rgba(244,238,230,.40); border-radius:2px; padding:12px 13px; transition:border-color var(--t) ease}
+  textarea{resize:vertical; min-height:74px}
+  input[aria-invalid="true"]{border-color:var(--tally)}
+  input:focus,select:focus,textarea:focus{border-color:var(--amber)}
+  .opt{text-transform:none; letter-spacing:0}
+  .ferr{color:var(--tally); font-size:13.5px; margin:6px 0 0}
+  .hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden}
+  .err{color:var(--tally); font-size:13.5px; margin-top:10px; min-height:1px}
+  .submit-row{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:18px}
+  .submit-row small{color:var(--dim); font-size:13px}
+  .privacy{color:var(--dim); font-size:13px; margin:14px 0 0}
+  .privacy a{color:var(--muted); text-decoration:underline; text-underline-offset:3px; transition:color var(--t) ease; display:inline-block; padding:12px 0; margin:-12px 0}
+  .privacy a:hover{color:var(--text)}
+
+  .sent{border:1px solid var(--mint); background:rgba(127,209,185,.07); border-radius:3px; padding:22px; margin-top:30px}
+  .sent h3{font-family:var(--fb); font-size:17px; font-weight:600}
+  .sent p{color:var(--muted); font-size:15px; margin:8px 0 0}
+  .msg-box{font-family:var(--fm); font-size:13px; color:var(--muted); background:var(--ground);
+    border:1px solid var(--line); border-radius:2px; padding:14px; margin-top:14px; white-space:pre-wrap; overflow-wrap:anywhere}
+  .sent-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px}
+  #copy{min-width:144px}
+
+  /* hero figure: one illustrative row of the report */
+  .answer{background:var(--surface); border:1px solid var(--line-strong); border-radius:3px; padding:clamp(18px,2.6vw,26px)}
+  @media(min-width:960px){ .answer{position:sticky; top:calc(var(--bar-h) + 24px); margin-top:10px} }
+  .ans-top{display:flex; justify-content:space-between; gap:8px 12px; flex-wrap:wrap}
+  .ans-q{font-family:var(--fd); font-size:clamp(26px,3vw,34px); line-height:1.1; margin:14px 0 18px}
+  .ans-row{display:grid; grid-template-columns:1fr; gap:6px 12px; align-items:start; border-top:1px solid var(--line); padding:14px 0}
+  @media(min-width:420px){ .ans-row{grid-template-columns:118px 1fr} }
+  .ans-row .k{font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); padding-top:5px}
+  .chips{list-style:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px}
+  .chips li{font-size:14px; padding:4px 10px; border:1px solid var(--line-strong); border-radius:2px}
+  .chips.cited li{color:var(--muted); border-style:dashed}
+  .engines{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+  .engines li{font-size:14px; display:flex; justify-content:space-between; gap:8px; border:1px solid var(--line); border-radius:2px; padding:5px 10px}
+  .no{color:var(--tally); font-weight:600}
+  .ans-score{display:flex; align-items:baseline; gap:12px; border-top:1px solid var(--line); padding-top:16px}
+  .ans-score .n{font-family:var(--fd); font-size:44px; line-height:1; color:var(--tally); font-variant-numeric:tabular-nums}
+  .ans-score p{margin:0; color:var(--muted); font-size:15px}
+  .answer figcaption{color:var(--muted); font-size:14px; margin-top:16px}
+  .answer figcaption b{color:var(--text); font-weight:600}
+
+  /* generic sections */
+  section{padding-block:clamp(52px,7vw,88px); border-bottom:1px solid var(--line)}
+  .lede{font-family:var(--fd); font-weight:400; font-size:clamp(30px,4.2vw,48px); line-height:1.08; letter-spacing:-.01em; margin-top:14px}
+  .said{color:var(--muted); max-width:58ch; margin-top:18px}
+  .said b{color:var(--text); font-weight:600}
+  .section-body{margin-top:28px}
+  section.last{border-bottom:0}
+
+  .facts{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; grid-template-columns:1fr}
+  @media(min-width:900px){ .facts{grid-template-columns:repeat(3,1fr)} }
+  .fact{background:var(--ground); padding:26px 22px}
+  .fact .n{font-family:var(--fd); font-size:clamp(28px,3.4vw,40px); line-height:1; color:var(--amber)}
+  .fact p{color:var(--muted); font-size:15px; margin:10px 0 0}
+
+  .steps{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; grid-template-columns:1fr}
+  @media(min-width:720px){ .steps.nine{grid-template-columns:repeat(2,1fr)} }
+  @media(min-width:900px){ .steps{grid-template-columns:repeat(3,1fr)} .steps.nine{grid-template-columns:repeat(3,1fr)} }
+  .step{background:var(--ground); padding:26px 24px}
+  .step .k{font-family:var(--fm); font-size:12px; letter-spacing:.16em; color:var(--amber)}
+  .step h3{font-family:var(--fb); font-size:18px; font-weight:600; margin-top:10px}
+  .step p{color:var(--muted); font-size:15px; margin:8px 0 0}
+
+  .quote{margin-top:34px; border-left:2px solid var(--tally); padding:4px 0 4px 20px; max-width:62ch}
+  .quote p{font-family:var(--fd); font-size:clamp(22px,2.6vw,30px); line-height:1.2; margin:8px 0 0}
+
+  /* scan tool */
+  .howto{list-style:none; display:grid; gap:16px; margin:28px 0 0; padding:0; grid-template-columns:1fr}
+  @media(min-width:900px){ .howto{grid-template-columns:repeat(3,1fr)} }
+  .howto li{border-top:2px solid var(--line-strong); padding-top:12px; color:var(--muted); font-size:15px}
+  .howto li:first-child{border-top-color:var(--tally)}
+  .howto b{color:var(--text); font-weight:600}
+  .live{position:sticky; top:calc(var(--bar-h) + env(safe-area-inset-top,0px)); z-index:5; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 16px;
+    background:rgba(20,17,28,.94); backdrop-filter:blur(8px); border:1px solid var(--line); border-radius:2px; padding:8px 8px 8px 14px; margin-top:28px;
+    font-family:var(--fm); font-size:13px; color:var(--muted)}
+  .live b{color:var(--text); font-weight:500}
+  .prompts{display:grid; gap:16px; margin-top:16px; counter-reset:none}
+  .pq{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:clamp(16px,2.4vw,22px)}
+  .pq-head{display:flex; gap:12px; align-items:flex-start}
+  .pq-n{font-family:var(--fm); font-size:12px; letter-spacing:.14em; color:var(--amber); padding-top:6px; flex:0 0 auto}
+  .pq-text{flex:1; font-size:18px; font-weight:500; margin:0; line-height:1.4; overflow-wrap:anywhere}
+  .eng-grid{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:14px; grid-template-columns:1fr}
+  @media(min-width:720px){ .eng-grid{grid-template-columns:repeat(2,1fr)} }
+  .eng{background:var(--surface); display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; padding:6px 8px 6px 12px}
+  .ask{flex:1 1 6em; min-height:44px; display:flex; flex-direction:column; justify-content:center; text-decoration:none; font-weight:600; font-size:15px; line-height:1.25}
+  .ask span{font-family:var(--fm); font-weight:400; font-size:12px; color:var(--dim)}
+  @media(hover:hover){ .ask:hover{color:var(--amber)} }
+  .verdict{display:inline-flex; border:1px solid var(--line-strong); border-radius:2px; flex:0 0 auto}
+  .verdict button{min-height:44px; padding:0 12px; background:transparent; border:0; color:var(--muted); font-family:var(--fb); font-weight:600; font-size:14px; cursor:pointer; transition:background-color var(--t) ease, color var(--t) ease}
+  .verdict button + button{border-left:1px solid var(--line-strong)}
+  @media(hover:hover){ .verdict button:hover{color:var(--text)} }
+  .verdict button[data-v="1"][aria-pressed="true"]{background:var(--mint); color:#0B1A15}
+  .verdict button[data-v="0"][aria-pressed="true"]{background:var(--tally); color:#170B06}
+  .copied{flex-basis:100%; font-size:13px; color:var(--mint); margin:0 0 4px}
+  .instead{margin-top:14px}
+  .brandcheck{margin-top:16px; border:1px dashed var(--line-strong); border-radius:3px; padding:clamp(16px,2.4vw,22px)}
+  .brandcheck h3{font-family:var(--fb); font-size:16px; font-weight:600}
+  .brandcheck > p{color:var(--muted); font-size:15px; margin:6px 0 0}
+  .asks{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
+
+  .result{display:grid; gap:16px; margin-top:28px; grid-template-columns:1fr}
+  @media(min-width:900px){ .result{grid-template-columns:1fr 1fr} }
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:clamp(18px,2.6vw,26px)}
+  .card h3{font-family:var(--fb); font-size:16px; font-weight:600}
+  .card h3 + *{margin-top:10px}
+  .card h3:not(:first-child){margin-top:22px}
+  .big{font-family:var(--fd); font-size:clamp(56px,8vw,88px); line-height:1; font-variant-numeric:tabular-nums; margin-top:10px}
+  .big .of{font-size:.42em; color:var(--muted)}
+  .r-line{color:var(--muted); margin:10px 0 0}
+  .meter{height:8px; background:var(--surface2); border-radius:1px; margin-top:16px; overflow:hidden}
+  .meter i{display:block; height:100%; width:0; background:var(--mint); transition:width var(--t) ease}
+  .by-engine{list-style:none; padding:0; margin:18px 0 0; display:grid; grid-template-columns:repeat(2,1fr); gap:8px 16px}
+  .by-engine li{font-family:var(--fm); font-size:13px; color:var(--muted); border-top:1px solid var(--line); padding-top:8px; display:flex; justify-content:space-between; gap:8px}
+  .by-engine b{color:var(--text); font-weight:500}
+  .rank{list-style:none; padding:0; margin:0; display:grid}
+  .rank li{display:flex; justify-content:space-between; gap:12px; border-top:1px solid var(--line); padding:8px 0; font-size:15px; overflow-wrap:anywhere}
+  .rank .c{font-family:var(--fm); font-size:13px; color:var(--amber); white-space:nowrap}
+  .rank li.empty,.empty{color:var(--dim); font-size:14px; display:block}
+  .next{grid-column:1/-1; border-color:var(--amber)}
+  .next p{color:var(--muted); margin:8px 0 0; max-width:64ch}
+  .next .sent-actions{margin-top:18px}
+
+  /* pricing */
+  .plans{display:grid; gap:16px; grid-template-columns:1fr; margin-top:30px}
+  @media(min-width:900px){ .plans{grid-template-columns:repeat(3,1fr)} }
+  .plan{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:26px 24px; display:flex; flex-direction:column; gap:14px}
+  .plan.feature{border-color:var(--amber)}
+  .plan .flag{font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ground); background:var(--amber); padding:4px 8px; border-radius:2px; align-self:flex-start; margin-bottom:-6px}
+  .plan .name{font-family:var(--fm); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber)}
+  .plan .price{font-family:var(--fd); font-size:44px; line-height:1; letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+  .plan .unit{font-size:14px; color:var(--muted); margin-top:-6px}
+  .plan ul{list-style:none; margin:0; padding:0; display:grid; gap:9px}
+  .plan li{color:var(--muted); font-size:15px; padding-left:18px; position:relative}
+  .plan li::before{content:"—"; position:absolute; left:0; color:var(--dim)}
+  .plan li b{color:var(--text); font-weight:600}
+  .plan .btn{margin-top:auto}
+  .ladder{margin-top:30px; border-top:1px solid var(--line-strong)}
+  .ladder h3.cap{font-family:var(--fm); font-size:12px; font-weight:400; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); padding:16px 0 4px}
+  .rung{display:grid; grid-template-columns:1fr; gap:4px 24px; border-bottom:1px solid var(--line); padding:16px 0}
+  @media(min-width:720px){ .rung{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.6fr); align-items:baseline} }
+  .rung h4{margin:0; font-size:17px; font-weight:600}
+  .rung .p{font-family:var(--fd); font-size:26px; line-height:1.1; font-variant-numeric:tabular-nums}
+  .rung p{margin:0; color:var(--muted); font-size:15px}
+  .fineprint{color:var(--dim); font-size:13.5px; margin-top:22px; max-width:70ch}
+
+  /* who it's for */
+  .lead-niche{margin-top:34px; background:var(--surface); border:1px solid var(--line); border-left:2px solid var(--amber); border-radius:3px; padding:clamp(20px,3vw,30px)}
+  .lead-niche h3{font-family:var(--fb); font-size:19px; font-weight:600; margin-top:8px}
+  .lead-niche p{color:var(--muted); margin:10px 0 0; max-width:64ch}
+  .lead-niche q,.niche q{color:var(--text); font-style:italic}
+  .niches{display:grid; gap:16px; grid-template-columns:1fr; margin-top:16px}
+  @media(min-width:720px){ .niches{grid-template-columns:repeat(2,1fr)} }
+  @media(min-width:900px){ .niches{grid-template-columns:repeat(3,1fr)} }
+  .niche{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:20px 20px}
+  .niche h3{font-family:var(--fb); font-size:16px; font-weight:600}
+  .niche p{color:var(--muted); font-size:15px; margin:8px 0 0}
+  .niche a{color:var(--amber); text-underline-offset:3px; display:inline-block; padding:10px 0; margin:-4px 0 -10px}
+
+  details{border-bottom:1px solid var(--line); padding:0}
+  details summary{cursor:pointer; font-weight:600; font-size:17px; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:18px 0; min-height:44px; transition:color var(--t) ease}
+  details summary:hover,details summary:active{color:var(--amber)}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+" / ""; color:var(--amber); font-family:var(--fm)}
+  details summary:hover::after{color:var(--text)}
+  details[open] summary::after{content:"–" / ""}
+  details p{color:var(--muted); font-size:15.5px; margin:0 0 18px; max-width:66ch}
+
+  .close-grid{display:grid; gap:34px; grid-template-columns:1fr; align-items:start}
+  @media(min-width:900px){ .close-grid{grid-template-columns:1.15fr .85fr} }
+  .contact{display:grid; gap:14px; margin-top:26px}
+  @media(min-width:900px){ .contact{margin-top:0} }
+  .contact > div{border-top:1px solid var(--line); padding-top:14px}
+  .contact .k{font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim)}
+  .contact .v{font-size:17px; margin-top:4px; user-select:all}
+  .contact a.v{display:inline-block; text-decoration:none; padding:9px 0; margin:-5px 0; min-height:44px; transition:color var(--t) ease}
+  .contact a.v:hover{color:var(--amber)}
+  @media(max-width:719px){ .fact p,.step p,.plan li,.niche p,.rung p,.sent p,.howto li{font-size:16px} }
+  @media(prefers-reduced-motion:reduce){ .btn:hover,.btn:active{transform:none} .meter i{transition:none} }
+  footer{border-top:1px solid var(--line); padding-block:30px; color:var(--dim); font-size:13.5px}
+  footer .wrap{display:flex; flex-wrap:wrap; gap:12px 24px; justify-content:space-between}
+  footer a{color:var(--muted); text-underline-offset:3px; display:inline-block; padding:12px 0; margin:-12px 0}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://workflowstacks.com/ai-visibility#organization","name":"FluoDigital","url":"https://workflowstacks.com/ai-visibility","description":"FluoDigital runs the AI Invisibility Report: AI visibility audits for businesses in Dubai and the UAE, showing which competitors ChatGPT, Gemini, Perplexity and Google AI Overviews recommend instead of them, and a plan to change it.","telephone":"+971522086253","email":"rahulsoni25@gmail.com","founder":{"@id":"https://workflowstacks.com/ai-visibility#rahul-soni"},"contactPoint":[{"@type":"ContactPoint","contactType":"sales","telephone":"+971522086253","areaServed":"AE","availableLanguage":["English"]}],"location":{"@type":"Place","name":"Dubai Silicon Oasis","address":{"@type":"PostalAddress","addressLocality":"Dubai","addressCountry":"AE"}},"areaServed":[{"@type":"City","name":"Dubai"},{"@type":"Country","name":"United Arab Emirates"}]},{"@type":"Person","@id":"https://workflowstacks.com/ai-visibility#rahul-soni","name":"Rahul Soni","jobTitle":"Founder & Director","worksFor":{"@id":"https://workflowstacks.com/ai-visibility#organization"}},{"@type":"WebSite","@id":"https://workflowstacks.com/#website","name":"WorkflowStacks","url":"https://workflowstacks.com"},{"@type":"WebPage","@id":"https://workflowstacks.com/ai-visibility#webpage","url":"https://workflowstacks.com/ai-visibility","name":"AI Visibility Audit for Dubai Businesses | AI Invisibility Report","description":"Free AI visibility scan for Dubai businesses. See which competitors ChatGPT, Gemini, Perplexity and Google AI Overviews recommend instead of you — and how to fix it.","inLanguage":"en","isPartOf":{"@id":"https://workflowstacks.com/#website"},"about":{"@id":"https://workflowstacks.com/ai-visibility#service"},"mainEntity":{"@id":"https://workflowstacks.com/ai-visibility#service"},"breadcrumb":{"@id":"https://workflowstacks.com/ai-visibility#breadcrumb"},"hasPart":{"@id":"https://workflowstacks.com/ai-visibility#scan"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://workflowstacks.com/sites/ai-visibility-audit/og.jpg","width":1200,"height":630},"datePublished":"2026-10-19","dateModified":"2026-10-19"},{"@type":"BreadcrumbList","@id":"https://workflowstacks.com/ai-visibility#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"WorkflowStacks","item":"https://workflowstacks.com"},{"@type":"ListItem","position":2,"name":"AI Visibility Audit","item":"https://workflowstacks.com/ai-visibility"}]},{"@type":"Service","@id":"https://workflowstacks.com/ai-visibility#service","name":"AI Invisibility Report","alternateName":["AI Visibility Audit","AI visibility report"],"serviceType":"AI visibility audit","category":"Generative engine optimisation (GEO) and answer engine optimisation (AEO)","slogan":"Is ChatGPT recommending your competitors instead of you?","description":"An AI visibility audit that shows where ChatGPT, Gemini, Perplexity and Google AI Overviews recommend your competitors instead of you, which websites they cite, and a 90-day plan to fix it. 25 buyer prompts run in ChatGPT, Gemini, Perplexity and Google AI Overviews; a score of how many prompts name you; a competitor battleboard; a citation-source map; the top 20 missed prompts; technical and entity issues; a prioritised 90-day fix plan; and a 30-minute walkthrough call. Delivered in five business days.","url":"https://workflowstacks.com/ai-visibility","image":"https://workflowstacks.com/sites/ai-visibility-audit/og.jpg","provider":{"@id":"https://workflowstacks.com/ai-visibility#organization"},"brand":{"@id":"https://workflowstacks.com/ai-visibility#organization"},"areaServed":[{"@type":"City","name":"Dubai"},{"@type":"Country","name":"United Arab Emirates"}],"audience":{"@type":"BusinessAudience","audienceType":"Local service businesses, agencies and B2B founders in Dubai and the UAE"},"offers":[{"@type":"Offer","name":"AI Invisibility Report","price":"1995","priceCurrency":"AED","description":"25 buyer prompts run in ChatGPT, Gemini, Perplexity and Google AI Overviews; a score of how many prompts name you; a competitor battleboard; a citation-source map; the top 20 missed prompts; technical and entity issues; a prioritised 90-day fix plan; and a 30-minute walkthrough call. Delivered in five business days.","url":"https://workflowstacks.com/ai-visibility#pricing","priceSpecification":{"@type":"PriceSpecification","price":"1995","priceCurrency":"AED","valueAddedTaxIncluded":false},"availability":"https://schema.org/InStock","seller":{"@id":"https://workflowstacks.com/ai-visibility#organization"}},{"@type":"Offer","name":"AI Invisibility Report","price":"545","priceCurrency":"USD","description":"25 buyer prompts run in ChatGPT, Gemini, Perplexity and Google AI Overviews; a score of how many prompts name you; a competitor battleboard; a citation-source map; the top 20 missed prompts; technical and entity issues; a prioritised 90-day fix plan; and a 30-minute walkthrough call. Delivered in five business days.","url":"https://workflowstacks.com/ai-visibility#pricing","priceSpecification":{"@type":"PriceSpecification","price":"545","priceCurrency":"USD","valueAddedTaxIncluded":false},"availability":"https://schema.org/InStock","seller":{"@id":"https://workflowstacks.com/ai-visibility#organization"}}],"hasOfferCatalog":{"@type":"OfferCatalog","name":"AI visibility pricing (excluding VAT)","itemListElement":[{"@type":"OfferCatalog","name":"The report","itemListElement":[{"@type":"Offer","name":"AI Invisibility Report","price":"1995","priceCurrency":"AED","description":"25 buyer prompts run in ChatGPT, Gemini, Perplexity and Google AI Overviews; a score of how many prompts name you; a competitor battleboard; a citation-source map; the top 20 missed prompts; technical and entity issues; a prioritised 90-day fix plan; and a 30-minute walkthrough call. Delivered in five business days.","url":"https://workflowstacks.com/ai-visibility#pricing","priceSpecification":{"@type":"PriceSpecification","price":"1995","priceCurrency":"AED","valueAddedTaxIncluded":false},"availability":"https://schema.org/InStock","seller":{"@id":"https://workflowstacks.com/ai-visibility#organization"}},{"@type":"Offer","name":"AI Invisibility Report","price":"545","priceCurrency":"USD","description":"25 buyer prompts run in ChatGPT, Gemini, Perplexity and Google AI Overviews; a score of how many prompts name you; a competitor battleboard; a citation-source map; the top 20 missed prompts; technical and entity issues; a prioritised 90-day fix plan; and a 30-minute walkthrough call. Delivered in five business days.","url":"https://workflowstacks.com/ai-visibility#pricing","priceSpecification":{"@type":"PriceSpecification","price":"545","priceCurrency":"USD","valueAddedTaxIncluded":false},"availability":"https://schema.org/InStock","seller":{"@id":"https://workflowstacks.com/ai-visibility#organization"}}]},{"@type":"OfferCatalog","name":"After the report","itemListElement":[{"@type":"Offer","name":"30-Day Visibility Fix","price":"4995","priceCurrency":"AED","description":"After the report: we fix the top 5 gaps the report finds, within 30 days.","url":"https://workflowstacks.com/ai-visibility#pricing","priceSpecification":{"@type":"PriceSpecification","price":"4995","priceCurrency":"AED","valueAddedTaxIncluded":false},"availability":"https://schema.org/InStock","seller":{"@id":"https://workflowstacks.com/ai-visibility#organization"}},{"@type":"Offer","name":"90-Day AI Visibility Sprint","price":"12500","priceCurrency":"AED","description":"Full implementation of the 90-day plan from the report.","url":"https://workflowstacks.com/ai-visibility#pricing","priceSpecification":{"@type":"PriceSpecification","price":"12500","priceCurrency":"AED","valueAddedTaxIncluded":false},"availability":"https://schema.org/InStock","seller":{"@id":"https://workflowstacks.com/ai-visibility#organization"}},{"@type":"Offer","name":"Monthly AI Visibility Retainer","price":"6500","priceCurrency":"AED","description":"Ongoing tracking and improvement of AI visibility. AED 6,500–12,000 a month.","url":"https://workflowstacks.com/ai-visibility#pricing","priceSpecification":{"@type":"UnitPriceSpecification","priceCurrency":"AED","unitCode":"MON","valueAddedTaxIncluded":false,"minPrice":"6500","maxPrice":"12000"},"availability":"https://schema.org/InStock","seller":{"@id":"https://workflowstacks.com/ai-visibility#organization"}},{"@type":"Offer","name":"Agency white-label","price":"1500","priceCurrency":"AED","description":"Resell the audit under your own name: your logo on reports, enquiries from your own scan link tagged as yours, wholesale pricing or revenue share. From AED 1,500 per client a month.","url":"https://workflowstacks.com/ai-visibility#pricing","priceSpecification":{"@type":"UnitPriceSpecification","priceCurrency":"AED","unitCode":"MON","valueAddedTaxIncluded":false,"minPrice":"1500"},"availability":"https://schema.org/InStock","seller":{"@id":"https://workflowstacks.com/ai-visibility#organization"}}]}]}},{"@type":"WebApplication","@id":"https://workflowstacks.com/ai-visibility#scan","name":"Free AI visibility scan","url":"https://workflowstacks.com/ai-visibility#start","description":"Builds six buyer prompts for your service and city, opens each one in ChatGPT, Gemini, Perplexity and Google, and scores how many answers name your business. Runs in the browser; nothing is sent unless you choose to send it.","applicationCategory":"BusinessApplication","operatingSystem":"Any (web browser)","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"AED"},"provider":{"@id":"https://workflowstacks.com/ai-visibility#organization"}},{"@type":"FAQPage","@id":"https://workflowstacks.com/ai-visibility#faq","url":"https://workflowstacks.com/ai-visibility#faq","mainEntity":[{"@type":"Question","name":"What is an AI visibility audit?","acceptedAnswer":{"@type":"Answer","text":"An AI visibility audit checks whether AI assistants recommend your business when buyers ask them for one. We put the questions your buyers ask to ChatGPT, Gemini, Perplexity and Google AI Overviews, record which businesses each answer names and which websites it cites, and show you where you are missing and why."}},{"@type":"Question","name":"How is it different from an SEO audit?","acceptedAnswer":{"@type":"Answer","text":"An SEO audit asks where your pages rank in Google's results. An AI visibility audit asks whether an assistant names you in its answer at all. The two overlap, since both depend on your website, your business listings and your reviews, but a business can rank well on Google and still be left out of AI answers, and the fixes are not always the same."}},{"@type":"Question","name":"Which AI assistants do you check?","acceptedAnswer":{"@type":"Answer","text":"ChatGPT, Gemini, Perplexity and Google AI Overviews. The free scan on this page opens the same four, so you can see the answers for yourself."}},{"@type":"Question","name":"How much does an AI visibility audit cost in Dubai?","acceptedAnswer":{"@type":"Answer","text":"The AI Invisibility Report is AED 1,995 (USD 545), one-time, excluding VAT. It covers 25 buyer prompts across four AI assistants, a competitor battleboard, a citation-source map, a 90-day fix plan and a 30-minute walkthrough call. The scan on this page is free."}},{"@type":"Question","name":"How long does the report take?","acceptedAnswer":{"@type":"Answer","text":"Five business days from your order, followed by the 30-minute walkthrough call."}},{"@type":"Question","name":"Why does the free scan have me run the prompts myself?","acceptedAnswer":{"@type":"Answer","text":"So you see the real answers in the real products rather than our summary of them. The scan writes the prompts and opens each assistant for you; you mark whether you were named. It runs in your browser, and nothing reaches us unless you choose to send it."}},{"@type":"Question","name":"Will everyone see the same AI answer?","acceptedAnswer":{"@type":"Answer","text":"No. Answers change with the wording of the question, the person's location and history, the day, and whether the assistant searched the web. One answer is a snapshot, which is why the report runs 25 prompts across four assistants rather than one, and why the score is worth re-checking over time."}},{"@type":"Question","name":"Can you guarantee ChatGPT will recommend my business?","acceptedAnswer":{"@type":"Answer","text":"No, and be wary of anyone who does. Nobody controls what an AI assistant says. What can be changed is what it draws on: your website and its structured data, your business listings, your reviews, and the third-party pages it cites. The 90-day plan works on those, in priority order."}},{"@type":"Question","name":"What are GEO and AEO?","acceptedAnswer":{"@type":"Answer","text":"Generative engine optimisation (GEO) and answer engine optimisation (AEO) are two names for the same work: making a business easier for AI assistants and answer engines to find, understand and cite. An AI visibility audit is where that work starts, because it shows what to fix first."}},{"@type":"Question","name":"What happens after the report?","acceptedAnswer":{"@type":"Answer","text":"You can fix the gaps yourself from the plan. If you want them done for you, the 30-Day Visibility Fix (AED 4,995) handles the top five gaps, the 90-Day AI Visibility Sprint (AED 12,500) implements the full plan, and the monthly retainer (AED 6,500–12,000 a month) keeps tracking and improving."}},{"@type":"Question","name":"Do you work with marketing agencies?","acceptedAnswer":{"@type":"Answer","text":"Yes. Agencies can resell the audit under their own name: reports carry your logo, enquiries from your own scan link reach us marked as yours, and pricing is wholesale or a revenue share, from AED 1,500 per client a month."}},{"@type":"Question","name":"Who runs the AI Invisibility Report?","acceptedAnswer":{"@type":"Answer","text":"FluoDigital, led by Rahul Soni (Founder & Director), based in Dubai Silicon Oasis. Enquiries are answered from Dubai on WhatsApp or email."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+  <div class="wrap">
+    <div class="brand"><span class="dot" aria-hidden="true"></span> FluoDigital</div>
+    <nav class="hide-sm" aria-label="Sections">
+      <a href="#report">What you get</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#agencies">Agencies</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="#start">Scan free</a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">AI Invisibility Report · Dubai &amp; UAE</p>
+        <h1 class="hook">Is ChatGPT recommending your <span class="em">competitors</span> instead of you? <span class="h1-kw">AI visibility audit for Dubai businesses across ChatGPT, Gemini, Perplexity and Google AI Overviews.</span></h1>
+        <p class="sub">Run a free AI visibility scan for your business. See the exact prompts, competitors, and websites AI uses instead of your brand. <b>Then get the 90-day plan to change it.</b></p>
+
+        <form class="form-card" id="start" novalidate>
+          <h2>Scan my business free</h2>
+          <p class="form-note">Six buyer prompts, four AI assistants. The scan runs in your browser — nothing is sent to us unless you choose to send it.</p>
+          <div class="fields">
+            <div>
+              <label for="s-biz">Business name <span class="opt">(required)</span></label>
+              <input id="s-biz" name="business" required aria-required="true" autocomplete="organization" placeholder="As customers know it">
+              <p class="ferr" id="s-biz-err" hidden></p>
+            </div>
+            <div>
+              <label for="s-city">City <span class="opt">(required)</span></label>
+              <input id="s-city" name="city" required aria-required="true" list="cities" value="Dubai" autocomplete="address-level2">
+              <p class="ferr" id="s-city-err" hidden></p>
+            </div>
+            <div class="span2">
+              <label for="s-svc">What you sell, as a buyer would say it <span class="opt">(required)</span></label>
+              <input id="s-svc" name="service" required aria-required="true" list="services" placeholder="e.g. real estate agency">
+              <p class="ferr" id="s-svc-err" hidden></p>
+            </div>
+            <div>
+              <label for="s-spec">Speciality <span class="opt">(optional)</span></label>
+              <input id="s-spec" name="speciality" placeholder="e.g. off-plan investment">
+            </div>
+            <div>
+              <label for="s-site">Website <span class="opt">(optional)</span></label>
+              <input id="s-site" name="website" type="url" inputmode="url" autocomplete="url" placeholder="yourcompany.com">
+            </div>
+          </div>
+          <datalist id="services">
+            <option value="real estate agency"><option value="off-plan property developer"><option value="immigration lawyer">
+            <option value="golden visa consultant"><option value="business setup consultant"><option value="aesthetic clinic">
+            <option value="dermatology clinic"><option value="law firm"><option value="recruitment agency">
+            <option value="digital marketing agency"><option value="B2B software company">
+          </datalist>
+          <datalist id="cities">
+            <option value="Dubai"><option value="Abu Dhabi"><option value="Sharjah"><option value="Ajman"><option value="Ras Al Khaimah"><option value="Al Ain">
+          </datalist>
+          <p class="err" id="s-err" role="alert"></p>
+          <div class="submit-row">
+            <button class="btn btn-primary" type="submit">Scan my business free</button>
+            <small>Free. No sign-up.</small>
+          </div>
+        </form>
+      </div>
+
+      <figure class="answer" aria-labelledby="ans-cap">
+        <div class="ans-top"><span class="tag">Buyer prompt</span><span class="tag">Sample finding</span></div>
+        <p class="ans-q">“best immigration lawyer in Dubai”</p>
+        <div class="ans-row"><span class="k">Recommended</span><ul class="chips"><li>Competitor A</li><li>Competitor B</li><li>Competitor C</li></ul></div>
+        <div class="ans-row"><span class="k">Cited</span><ul class="chips cited"><li>Directory 1</li><li>Directory 2</li></ul></div>
+        <div class="ans-row"><span class="k">You</span>
+          <ul class="engines">
+            <li>ChatGPT <span class="no">Absent</span></li>
+            <li>Gemini <span class="no">Absent</span></li>
+            <li>Perplexity <span class="no">Absent</span></li>
+            <li>Google AI <span class="no">Absent</span></li>
+          </ul>
+        </div>
+        <div class="ans-score"><span class="n">0 / 4</span><p>AI assistants named you for this prompt.</p></div>
+        <figcaption id="ans-cap">What one finding in the report reads like: AI recommends three competitors and cites two directories, and you are absent. <b>The names here are placeholders</b>, not real results.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="scan" aria-labelledby="scan-h" hidden>
+    <div class="wrap">
+      <p class="eyebrow">Your free scan</p>
+      <h2 class="lede" id="scan-h">Six questions your buyers ask AI. Does the answer name <span id="scan-biz">you</span>?</h2>
+      <ol class="howto">
+        <li><b>Ask.</b> Each assistant button copies the prompt and opens that assistant in a new tab. If the box there is empty, paste.</li>
+        <li><b>Mark.</b> Did the answer name your business? Tap Named or Not named. Skip any you don't check; only marked answers count.</li>
+        <li><b>Note who it named instead.</b> Your score and a competitor scoreboard build themselves below.</li>
+      </ol>
+      <div class="live" aria-live="polite"><span id="live"><b>0</b> of 24 answers checked</span><button class="btn btn-ghost btn-sm" type="button" id="clear">Clear my marks</button></div>
+      <div class="prompts" id="prompts"></div>
+
+      <div class="brandcheck">
+        <h3>Bonus: ask AI about you directly</h3>
+        <p>Check that the name, services, location and reviews it describes are right. Wrong or missing details are the entity issues the full report lists. Not scored.</p>
+        <p class="pq-text" id="brand-q" style="margin-top:12px"></p>
+        <div class="asks" id="brand-asks"></div>
+      </div>
+
+      <div class="result" id="result">
+        <div class="card">
+          <p class="eyebrow">Your AI visibility score</p>
+          <div class="big"><span id="r-named">0</span><span class="of"> of <span id="r-checked">0</span></span></div>
+          <p class="r-line" id="r-line">Mark at least one answer above to see your score.</p>
+          <div class="meter" aria-hidden="true"><i id="r-meter"></i></div>
+          <ul class="by-engine" id="r-engines"></ul>
+        </div>
+        <div class="card">
+          <h3>Who AI named instead</h3>
+          <ol class="rank" id="r-board"></ol>
+          <h3>Prompts where you were missing</h3>
+          <ul class="rank" id="r-missed"></ul>
+        </div>
+        <div class="card next">
+          <h3>This scan is six prompts, checked by you. The report is 25.</h3>
+          <p>The AI Invisibility Report runs 25 buyer prompts across all four assistants and adds what a self-check can't: the websites AI cites to justify each recommendation, the technical and entity issues holding you back, and a prioritised 90-day fix plan, walked through with you on a 30-minute call.</p>
+          <div class="sent-actions">
+            <a class="btn btn-primary" href="#order" data-need="report">Get the full report — AED 1,995</a>
+            <a class="btn btn-ghost" href="#order" data-need="gap">Send me the free 1-page gap report</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="why" class="light">
+    <div class="wrap">
+      <p class="eyebrow">The shift</p>
+      <h2 class="lede">Your website can rank on Google and still be invisible in ChatGPT.</h2>
+      <p class="said">More buyers now ask an assistant for a shortlist instead of scanning a page of links. The answer names a few businesses. The ones it leaves out don't get the call — and most never find out it happened.</p>
+      <div class="facts">
+        <div class="fact"><div class="n">Full sentences</div><p>Buyers ask “best real estate agency in Dubai for off-plan investment?”, not two keywords. The answer goes to whoever the assistant can match to that question.</p></div>
+        <div class="fact"><div class="n">A shortlist</div><p>An assistant answers with a handful of names. If yours isn't one of them, there is no second page to be found on.</p></div>
+        <div class="fact"><div class="n">Visible sources</div><p>Perplexity, Google AI Overviews and ChatGPT search show the websites behind an answer — directories, review sites, press, competitors' pages. Those are what a fix plan works on.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="report">
+    <div class="wrap">
+      <p class="eyebrow">The AI Invisibility Report</p>
+      <h2 class="lede">See where AI recommends your competitors instead of you — and get a 90-day plan to fix it.</h2>
+      <p class="said">An AI visibility audit, delivered in <b>five business days</b> for <b>AED 1,995 (USD 545), one-time</b>. Nine things in one report:</p>
+      <div class="steps nine">
+        <div class="step"><div class="k">01</div><h3>25 buyer prompts</h3><p>Real questions for your category and city, worded the way your buyers ask them.</p></div>
+        <div class="step"><div class="k">02</div><h3>Four AI assistants</h3><p>Every prompt run in ChatGPT, Gemini, Perplexity and Google AI Overviews.</p></div>
+        <div class="step"><div class="k">03</div><h3>Your score</h3><p>“Your brand appears in X of 25 prompts”, overall and for each assistant. One number to track from here on.</p></div>
+        <div class="step"><div class="k">04</div><h3>Competitor battleboard</h3><p>Who AI recommends instead of you, and how often.</p></div>
+        <div class="step"><div class="k">05</div><h3>Citation-source map</h3><p>The websites AI uses to justify those recommendations.</p></div>
+        <div class="step"><div class="k">06</div><h3>Top 20 missed prompts</h3><p>The questions where you should appear and don't.</p></div>
+        <div class="step"><div class="k">07</div><h3>Technical and entity issues</h3><p>Schema, business information, reviews and service pages that stop AI from understanding who you are.</p></div>
+        <div class="step"><div class="k">08</div><h3>90-day fix plan</h3><p>The fixes in priority order, so you know what to do first.</p></div>
+        <div class="step"><div class="k">09</div><h3>30-minute walkthrough</h3><p>We go through the findings with you on a call and answer your questions.</p></div>
+      </div>
+      <div class="quote"><span class="tag">How a finding reads</span><p>“For ‘best immigration lawyer in Dubai’, AI recommends three competitors and cites two directories. You are absent.”</p></div>
+    </div>
+  </section>
+
+  <section id="how" class="light">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2 class="lede">Scan free. Buy the diagnosis. Then decide on the fixes.</h2>
+      <p class="said">The AI Invisibility Report is FluoDigital's AI visibility audit for businesses in Dubai and the UAE. It shows which competitors ChatGPT, Gemini, Perplexity and Google AI Overviews recommend when your buyers ask, which websites those answers rely on, and what to change first. It is the starting point for generative engine optimisation (GEO), also called answer engine optimisation (AEO).</p>
+      <div class="steps">
+        <div class="step"><div class="k">STEP 01</div><h3>Free scan</h3><p>Run six buyer prompts yourself in the assistants your buyers use, and see your first score on this page.</p></div>
+        <div class="step"><div class="k">STEP 02</div><h3>The report</h3><p>Order the AI Invisibility Report. We run 25 prompts across four assistants and deliver in five business days.</p></div>
+        <div class="step"><div class="k">STEP 03</div><h3>The walkthrough</h3><p>A 30-minute call through the battleboard, the sources and your 90-day plan. Fix it yourself, or have us do it.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="wrap">
+      <p class="eyebrow">Pricing</p>
+      <h2 class="lede">Buy the diagnosis first. Pay for fixes only if you want them done for you.</h2>
+      <div class="plans">
+        <div class="plan"><h3 class="name">Free scan</h3><div class="price">AED 0</div><div class="unit">on this page, right now</div><ul><li><b>6 buyer prompts</b> × 4 AI assistants</li><li>Your score and who AI named instead</li><li>Runs in your browser; nothing is sent to us</li></ul><a class="btn btn-ghost" href="#start">Scan my business free</a></div>
+        <div class="plan feature"><div class="flag">Start here</div><h3 class="name">AI Invisibility Report</h3><div class="price">AED 1,995</div><div class="unit">one-time · USD 545 · 5 business days</div><ul><li><b>25 buyer prompts</b> across 4 AI assistants</li><li>Competitor battleboard and citation-source map</li><li>Top 20 missed prompts, technical and entity issues</li><li>90-day fix plan and a 30-minute walkthrough</li></ul><a class="btn btn-primary" href="#order" data-need="report">Order the report</a></div>
+        <div class="plan"><h3 class="name">30-Day Visibility Fix</h3><div class="price">AED 4,995</div><div class="unit">one-time · after the report</div><ul><li>We fix the <b>top 5 gaps</b> the report finds</li><li>Done within 30 days</li></ul><a class="btn btn-ghost" href="#order" data-need="fix">Ask about the fix</a></div>
+      </div>
+      <div class="ladder">
+        <h3 class="cap">Then, if you want it done for you</h3>
+        <div class="rung"><h4>90-Day AI Visibility Sprint</h4><div class="p">AED 12,500</div><p>Full implementation of your 90-day plan.</p></div>
+        <div class="rung"><h4>Monthly AI Visibility Retainer</h4><div class="p">AED 6,500–12,000 <span class="tag">/ month</span></div><p>Ongoing tracking and improvement of your AI visibility.</p></div>
+        <div class="rung"><h4>Agency white-label</h4><div class="p">from AED 1,500 <span class="tag">/ client / month</span></div><p>Resell the audit under your own name. <a href="#agencies">How it works</a>.</p></div>
+      </div>
+      <p class="fineprint">Prices in AED, excluding VAT. The report is USD 545 if you pay in dollars. Nobody can guarantee what an AI assistant will say; the plan works on what the assistants draw on (your site, listings, reviews and the sources they cite) and the report gives you the score to measure it against.</p>
+    </div>
+  </section>
+
+  <section id="who" class="light">
+    <div class="wrap">
+      <p class="eyebrow">Who it's for</p>
+      <h2 class="lede">Built first for Dubai real estate. Works for any business buyers ask AI about.</h2>
+      <div class="lead-niche">
+        <span class="tag">First niche</span>
+        <h3>Real estate agencies and developers</h3>
+        <p>High-value buyers ask before they call anyone: <q>Best real estate agency in Dubai for off-plan investment?</q> If you aren't in that answer, the enquiry goes to someone who is.</p>
+      </div>
+      <div class="niches">
+        <div class="niche"><h3>Immigration and corporate services</h3><p><q>Who is the best golden visa consultant in Dubai?</q></p></div>
+        <div class="niche"><h3>Aesthetic and dermatology clinics</h3><p><q>Best dermatology clinic in Dubai for acne scars?</q></p></div>
+        <div class="niche"><h3>Law firms</h3><p><q>Best employment lawyer in Dubai?</q></p></div>
+        <div class="niche"><h3>Recruitment agencies</h3><p><q>Top recruitment agencies in Dubai for finance roles?</q></p></div>
+        <div class="niche"><h3>B2B SaaS companies</h3><p><q>Best CRM for real estate brokers in the UAE?</q></p></div>
+        <div class="niche"><h3>Marketing agencies</h3><p>Check your own visibility, then resell the audit to your clients. <a href="#agencies">White-label</a></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="agencies">
+    <div class="wrap">
+      <p class="eyebrow">For agencies</p>
+      <h2 class="lede">Sell AI visibility audits under your own name.</h2>
+      <p class="said">You already have the clients, and they are starting to ask about ChatGPT. We run the scans and write the reports; your clients see your brand.</p>
+      <div class="facts">
+        <div class="fact"><div class="n">Your logo</div><p>On every report you hand a client.</p></div>
+        <div class="fact"><div class="n">Your scan link</div><p>A link to this scan with your tag on it, so every enquiry it brings in reaches us marked as yours.</p></div>
+        <div class="fact"><div class="n">Your margin</div><p>Wholesale pricing or a revenue share — from AED 1,500 per client a month.</p></div>
+      </div>
+      <p class="section-body"><a class="btn btn-primary" href="#order" data-need="agency">Talk white-label</a></p>
+    </div>
+  </section>
+
+  <section id="faq" class="light">
+    <div class="wrap">
+      <p class="eyebrow">Straight answers</p>
+      <h2 class="lede">Questions about AI visibility audits.</h2>
+      <div class="section-body">
+        <details><summary>What is an AI visibility audit?</summary><p>An AI visibility audit checks whether AI assistants recommend your business when buyers ask them for one. We put the questions your buyers ask to ChatGPT, Gemini, Perplexity and Google AI Overviews, record which businesses each answer names and which websites it cites, and show you where you are missing and why.</p></details>
+        <details><summary>How is it different from an SEO audit?</summary><p>An SEO audit asks where your pages rank in Google's results. An AI visibility audit asks whether an assistant names you in its answer at all. The two overlap, since both depend on your website, your business listings and your reviews, but a business can rank well on Google and still be left out of AI answers, and the fixes are not always the same.</p></details>
+        <details><summary>Which AI assistants do you check?</summary><p>ChatGPT, Gemini, Perplexity and Google AI Overviews. The free scan on this page opens the same four, so you can see the answers for yourself.</p></details>
+        <details><summary>How much does an AI visibility audit cost in Dubai?</summary><p>The AI Invisibility Report is AED 1,995 (USD 545), one-time, excluding VAT. It covers 25 buyer prompts across four AI assistants, a competitor battleboard, a citation-source map, a 90-day fix plan and a 30-minute walkthrough call. The scan on this page is free.</p></details>
+        <details><summary>How long does the report take?</summary><p>Five business days from your order, followed by the 30-minute walkthrough call.</p></details>
+        <details><summary>Why does the free scan have me run the prompts myself?</summary><p>So you see the real answers in the real products rather than our summary of them. The scan writes the prompts and opens each assistant for you; you mark whether you were named. It runs in your browser, and nothing reaches us unless you choose to send it.</p></details>
+        <details><summary>Will everyone see the same AI answer?</summary><p>No. Answers change with the wording of the question, the person's location and history, the day, and whether the assistant searched the web. One answer is a snapshot, which is why the report runs 25 prompts across four assistants rather than one, and why the score is worth re-checking over time.</p></details>
+        <details><summary>Can you guarantee ChatGPT will recommend my business?</summary><p>No, and be wary of anyone who does. Nobody controls what an AI assistant says. What can be changed is what it draws on: your website and its structured data, your business listings, your reviews, and the third-party pages it cites. The 90-day plan works on those, in priority order.</p></details>
+        <details><summary>What are GEO and AEO?</summary><p>Generative engine optimisation (GEO) and answer engine optimisation (AEO) are two names for the same work: making a business easier for AI assistants and answer engines to find, understand and cite. An AI visibility audit is where that work starts, because it shows what to fix first.</p></details>
+        <details><summary>What happens after the report?</summary><p>You can fix the gaps yourself from the plan. If you want them done for you, the 30-Day Visibility Fix (AED 4,995) handles the top five gaps, the 90-Day AI Visibility Sprint (AED 12,500) implements the full plan, and the monthly retainer (AED 6,500–12,000 a month) keeps tracking and improving.</p></details>
+        <details><summary>Do you work with marketing agencies?</summary><p>Yes. Agencies can resell the audit under their own name: reports carry your logo, enquiries from your own scan link reach us marked as yours, and pricing is wholesale or a revenue share, from AED 1,500 per client a month.</p></details>
+        <details><summary>Who runs the AI Invisibility Report?</summary><p>FluoDigital, led by Rahul Soni (Founder &amp; Director), based in Dubai Silicon Oasis. Enquiries are answered from Dubai on WhatsApp or email.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section id="close" class="last">
+    <div class="wrap close-grid">
+      <div>
+        <p class="eyebrow">Next step</p>
+        <h2 class="lede">Find out who AI recommends instead of you. Report in five business days.</h2>
+        <form class="form-card" id="order" novalidate>
+          <h2>Order the report, or ask a question</h2>
+          <p class="form-note">If you ran the free scan, your results are added to the message for you.</p>
+          <div class="fields">
+            <div>
+              <label for="o-name">Your name <span class="opt">(required)</span></label>
+              <input id="o-name" name="name" required aria-required="true" autocomplete="name" placeholder="Full name">
+              <p class="ferr" id="o-name-err" hidden></p>
+            </div>
+            <div>
+              <label for="o-biz">Business <span class="opt">(optional)</span></label>
+              <input id="o-biz" name="business" autocomplete="organization" placeholder="Business name">
+            </div>
+            <div>
+              <label for="o-phone">WhatsApp number <span class="opt">(this or email)</span></label>
+              <input id="o-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+971 …">
+              <p class="ferr" id="o-phone-err" hidden></p>
+            </div>
+            <div>
+              <label for="o-email">Email <span class="opt">(this or WhatsApp)</span></label>
+              <input id="o-email" name="email" type="email" autocomplete="email" placeholder="you@company.com">
+              <p class="ferr" id="o-email-err" hidden></p>
+            </div>
+            <div class="span2">
+              <label for="o-need">What you want</label>
+              <select id="o-need" name="need">
+                <option value="report">AI Invisibility Report (AED 1,995)</option>
+                <option value="gap">Free 1-page gap report first</option>
+                <option value="fix">30-Day Visibility Fix (AED 4,995)</option>
+                <option value="sprint">90-Day AI Visibility Sprint (AED 12,500)</option>
+                <option value="retainer">Monthly AI Visibility Retainer</option>
+                <option value="agency">Agency white-label</option>
+                <option value="unsure">Not sure yet — talk it through</option>
+              </select>
+            </div>
+            <div class="span2">
+              <label for="o-note">Anything we should know <span class="opt">(optional)</span></label>
+              <textarea id="o-note" name="note" placeholder="Competitors you worry about, services that matter most…"></textarea>
+            </div>
+          </div>
+          <div class="hp" aria-hidden="true"><label for="o-web">Website</label><input id="o-web" name="hp_website" tabindex="-1" autocomplete="off"></div>
+          <p class="err" id="o-err" role="alert"></p>
+          <div class="submit-row">
+            <button class="btn btn-primary" type="submit">Send on WhatsApp</button>
+            <small>Goes straight to Rahul.</small>
+          </div>
+          <p class="privacy">Your details are used only to reply to this enquiry. <a href="https://workflowstacks.com/privacy">Privacy policy</a></p>
+        </form>
+
+        <div class="sent" id="sent" hidden>
+          <h3>Your message is ready</h3>
+          <p>Tap the button to open WhatsApp with this filled in, or copy it and send however you like.</p>
+          <div class="msg-box" id="msg"></div>
+          <div class="sent-actions">
+            <a class="btn btn-primary" id="wa" href="#" target="_blank" rel="noopener">Open WhatsApp</a>
+            <button class="btn btn-ghost" id="copy" type="button">Copy message</button>
+            <button class="btn btn-ghost" id="edit" type="button">Edit details</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="contact">
+          <div><div class="k">WhatsApp / UAE</div><a class="v" href="https://wa.me/971522086253" target="_blank" rel="noopener">+971 52 208 6253</a></div>
+          <div><div class="k">Email</div><a class="v" href="mailto:rahulsoni25@gmail.com">rahulsoni25@gmail.com</a></div>
+          <div><div class="k">Based in</div><div class="v">Dubai Silicon Oasis</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>FluoDigital — AI Invisibility Report</span>
+    <span>Rahul Soni · Founder &amp; Director</span>
+    <a href="https://workflowstacks.com/privacy">Privacy</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var WA = "971522086253";
+
+  /* Measurement: the same Google Tag Manager container as the main site. Empty GTM_ID
+     loads nothing; events still go to window.dataLayer. No business names or contact
+     details are pushed, only categories and counts. */
+  var GTM_ID = "";
+  window.dataLayer = window.dataLayer || [];
+  function track(name, params){ var o = { event: name }; if (params) for (var k in params) o[k] = params[k]; window.dataLayer.push(o); }
+  if (/^GTM-[A-Z0-9]{4,12}$/.test(GTM_ID)) {
+    (function(w,d,s,l,i){ w[l].push({'gtm.start': new Date().getTime(), event: 'gtm.js'}); var f = d.getElementsByTagName(s)[0], j = d.createElement(s); j.async = true; j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i; f.parentNode.insertBefore(j, f); })(window, document, 'script', 'dataLayer', GTM_ID);
+  }
+
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function $(id){ return document.getElementById(id); }
+  function val(id){ var el = $(id); return el ? el.value.trim() : ''; }
+  function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  /* The four assistants. ChatGPT, Perplexity and Google take the prompt in the URL;
+     Gemini has no documented prefill, so it opens empty and the copied prompt is pasted.
+     Every Ask tap copies the prompt as well, in case a prefill is ignored. */
+  var ENGINES = [
+    { id: 'chatgpt', name: 'ChatGPT', sub: '', url: function(q){ return 'https://chatgpt.com/?q=' + encodeURIComponent(q); } },
+    { id: 'gemini', name: 'Gemini', sub: 'paste the prompt', url: function(){ return 'https://gemini.google.com/app'; } },
+    { id: 'perplexity', name: 'Perplexity', sub: '', url: function(q){ return 'https://www.perplexity.ai/search?q=' + encodeURIComponent(q); } },
+    { id: 'google', name: 'Google', sub: 'AI Overview, if shown', url: function(q){ return 'https://www.google.com/search?q=' + encodeURIComponent(q); } }
+  ];
+
+  function an(word){ return /^[aeiou]/i.test(word) ? 'an' : 'a'; }
+  /* Six discovery prompts. None names the business: the question is whether AI brings
+     you up when a buyer has not heard of you. */
+  function buildPrompts(svc, city, spec){
+    return [
+      'best ' + svc + ' in ' + city,
+      'Which ' + svc + ' in ' + city + ' would you recommend? Give me your top 3 and why.',
+      'Which ' + svc + ' in ' + city + ' has the best reviews?',
+      spec ? 'Best ' + svc + ' in ' + city + ' for ' + spec : 'Most trusted ' + svc + ' in ' + city,
+      'I need ' + an(svc) + ' ' + svc + ' in ' + city + '. Who should I contact first?',
+      'Compare the top 5 options for ' + an(svc) + ' ' + svc + ' in ' + city + '.'
+    ];
+  }
+  function brandPrompt(s){ return 'What do you know about ' + s.biz + ' in ' + s.city + '? Is it a good choice for ' + an(s.svc) + ' ' + s.svc + '?'; }
+
+  /* State lives in this browser only (localStorage, per-viewer convenience). */
+  var KEY = 'aiv-scan-v1';
+  var state = { biz: '', svc: '', city: '', spec: '', site: '', prompts: [], marks: {}, instead: [], ref: '' };
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function restore(){ try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.prompts && s.prompts.length) { for (var k in state) if (s[k] != null) state[k] = s[k]; return true; } } catch (e) {} return false; }
+
+  /* Copy, with a selection fallback where the clipboard API is unavailable. */
+  function copyText(text, onDone){
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function(){ onDone(true); }, function(){ onDone(false); });
+    else onDone(false);
+  }
+
+  /* ---- Scan rendering ---- */
+  var scan = $('scan'), promptsBox = $('prompts');
+
+  function askLink(engine, q, i){
+    var a = el('a', 'ask');
+    a.href = engine.url(q); a.target = '_blank'; a.rel = 'noopener';
+    a.appendChild(document.createTextNode(engine.name + ' ↗'));
+    if (engine.sub) a.appendChild(el('span', null, engine.sub));
+    a.setAttribute('aria-label', 'Ask ' + engine.name + (i != null ? ' prompt ' + (i + 1) : '') + ' (opens in a new tab, copies the prompt)');
+    a.addEventListener('click', function(){
+      var host = a.parentNode, note = host.querySelector('.copied');
+      copyText(q, function(ok){
+        if (!note) { note = el('p', 'copied'); host.appendChild(note); }
+        note.textContent = ok ? 'Prompt copied — paste it if the box is empty.' : 'Copy the prompt above if the box is empty.';
+        clearTimeout(note._t); note._t = setTimeout(function(){ if (note.parentNode) note.parentNode.removeChild(note); }, 4000);
+      });
+      track('scan_ask', { engine: engine.id });
+    });
+    return a;
+  }
+
+  function renderScan(){
+    $('scan-biz').textContent = state.biz;
+    promptsBox.textContent = '';
+    state.prompts.forEach(function(q, i){
+      var card = el('article', 'pq');
+      var head = el('div', 'pq-head');
+      head.appendChild(el('span', 'pq-n', (i < 9 ? '0' : '') + (i + 1)));
+      var qp = el('p', 'pq-text', q); qp.id = 'q-' + i; head.appendChild(qp);
+      var cp = el('button', 'btn btn-ghost btn-sm', 'Copy'); cp.type = 'button'; cp.setAttribute('aria-label', 'Copy prompt ' + (i + 1));
+      cp.addEventListener('click', function(){ copyText(q, function(ok){ cp.textContent = ok ? 'Copied' : 'Select it'; setTimeout(function(){ cp.textContent = 'Copy'; }, 1800); }); });
+      head.appendChild(cp);
+      card.appendChild(head);
+
+      var grid = el('div', 'eng-grid');
+      ENGINES.forEach(function(e){
+        var cell = el('div', 'eng');
+        cell.appendChild(askLink(e, q, i));
+        var g = el('div', 'verdict'); g.setAttribute('role', 'group'); g.setAttribute('aria-label', e.name + ', prompt ' + (i + 1) + ': did it name you?');
+        [['1', 'Named'], ['0', 'Not named']].forEach(function(o){
+          var b = el('button', null, o[1]); b.type = 'button'; b.setAttribute('data-v', o[0]);
+          b.setAttribute('aria-pressed', String(String(state.marks[i + ':' + e.id]) === o[0]));
+          b.addEventListener('click', function(){
+            var k = i + ':' + e.id, v = Number(o[0]);
+            if (state.marks[k] === v) delete state.marks[k]; else state.marks[k] = v;
+            Array.prototype.forEach.call(g.children, function(x){ x.setAttribute('aria-pressed', String(String(state.marks[k]) === x.getAttribute('data-v'))); });
+            save(); recompute();
+          });
+          g.appendChild(b);
+        });
+        cell.appendChild(g);
+        grid.appendChild(cell);
+      });
+      card.appendChild(grid);
+
+      var wrap = el('div', 'instead');
+      var lab = el('label', null, 'Named instead '); lab.htmlFor = 'in-' + i;
+      lab.appendChild(el('span', 'opt', '(optional, separate with commas)'));
+      var inp = el('input'); inp.id = 'in-' + i; inp.placeholder = 'Businesses or websites the answers named';
+      inp.value = state.instead[i] || '';
+      inp.addEventListener('input', function(){ state.instead[i] = inp.value; save(); recompute(); });
+      wrap.appendChild(lab); wrap.appendChild(inp);
+      card.appendChild(wrap);
+      promptsBox.appendChild(card);
+    });
+
+    var bq = brandPrompt(state), asks = $('brand-asks');
+    $('brand-q').textContent = bq; asks.textContent = '';
+    ENGINES.forEach(function(e){ var a = askLink(e, bq, null); a.className = 'btn btn-ghost btn-sm'; a.textContent = e.name + ' ↗'; var c = el('div'); c.appendChild(a); asks.appendChild(c); });
+    scan.hidden = false;
+    recompute();
+  }
+
+  /* ---- Score, board, missed prompts ---- */
+  function tally(){
+    var t = { named: 0, checked: 0, by: {}, missed: [], board: [] };
+    ENGINES.forEach(function(e){ t.by[e.id] = { named: 0, checked: 0 }; });
+    state.prompts.forEach(function(q, i){
+      var anyChecked = false, anyNamed = false;
+      ENGINES.forEach(function(e){
+        var v = state.marks[i + ':' + e.id];
+        if (v === 0 || v === 1) { anyChecked = true; t.checked++; t.by[e.id].checked++; if (v === 1) { anyNamed = true; t.named++; t.by[e.id].named++; } }
+      });
+      if (anyChecked && !anyNamed) t.missed.push(q);
+    });
+    /* Competitors: counted once per prompt they were named for, case-insensitively. */
+    var seen = {}, me = state.biz.toLowerCase();
+    (state.instead || []).forEach(function(line){
+      var inPrompt = {};
+      String(line || '').split(/[,;\n]+/).forEach(function(raw){
+        var name = raw.trim().replace(/\s+/g, ' '), key = name.toLowerCase();
+        if (name.length < 2 || key === me || inPrompt[key]) return;
+        inPrompt[key] = true;
+        if (!seen[key]) { seen[key] = { name: name, count: 0 }; t.board.push(seen[key]); }
+        seen[key].count++;
+      });
+    });
+    t.board.sort(function(a, b){ return b.count - a.count; });
+    return t;
+  }
+
+  function fillList(id, items, emptyText){
+    var ol = $(id); ol.textContent = '';
+    if (!items.length) { ol.appendChild(el('li', 'empty', emptyText)); return; }
+    items.forEach(function(it){ ol.appendChild(it); });
+  }
+
+  function recompute(){
+    var t = tally(), total = state.prompts.length * ENGINES.length;
+    $('live').innerHTML = '';
+    var b1 = el('b', null, String(t.checked)); $('live').appendChild(b1);
+    $('live').appendChild(document.createTextNode(' of ' + total + ' answers checked · named in '));
+    $('live').appendChild(el('b', null, String(t.named)));
+
+    $('r-named').textContent = t.named; $('r-checked').textContent = t.checked;
+    var pct = t.checked ? Math.round(100 * t.named / t.checked) : 0;
+    $('r-meter').style.width = pct + '%';
+    $('r-line').textContent = !t.checked ? 'Mark at least one answer above to see your score.'
+      : t.named === 0 ? state.biz + ' was not named in any of the ' + t.checked + ' answers you checked.'
+      : state.biz + ' was named in ' + t.named + ' of the ' + t.checked + ' answers you checked (' + pct + '%).';
+
+    var eng = $('r-engines'); eng.textContent = '';
+    ENGINES.forEach(function(e){ var c = t.by[e.id], li = el('li'); li.appendChild(document.createTextNode(e.name)); li.appendChild(el('b', null, c.checked ? c.named + ' / ' + c.checked : '—')); eng.appendChild(li); });
+
+    fillList('r-board', t.board.slice(0, 8).map(function(x){
+      var li = el('li'); li.appendChild(el('span', null, x.name)); li.appendChild(el('span', 'c', x.count + ' of ' + state.prompts.length + ' prompts')); return li;
+    }), 'Type the names each answer gave under “Named instead” and they are ranked here.');
+    fillList('r-missed', t.missed.map(function(q){ return el('li', null, q); }), t.checked ? 'None yet — every prompt you checked named you at least once.' : 'Prompts where no assistant you checked named you show up here.');
+    return t;
+  }
+
+  /* ---- Start form ---- */
+  var start = $('start'), sErr = $('s-err');
+  var S_FIELDS = { 's-biz': 'Add your business name — it is what you are looking for in the answers.', 's-svc': 'Say what you sell, the way a buyer would type it.', 's-city': 'Add the city your buyers are in.' };
+  function setErr(id, msg){
+    var input = $(id), slot = $(id + '-err');
+    if (!input || !slot) return;
+    slot.textContent = msg; slot.hidden = !msg;
+    if (msg) { input.setAttribute('aria-invalid', 'true'); input.setAttribute('aria-describedby', id + '-err'); }
+    else { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-describedby'); }
+  }
+  Object.keys(S_FIELDS).forEach(function(id){ $(id).addEventListener('input', function(){ if ($(id).getAttribute('aria-invalid')) setErr(id, ''); }); });
+
+  start.addEventListener('submit', function(e){
+    e.preventDefault();
+    var bad = null;
+    Object.keys(S_FIELDS).forEach(function(id){ var miss = !val(id); setErr(id, miss ? S_FIELDS[id] : ''); if (miss && !bad) bad = id; });
+    if (bad) { sErr.textContent = 'Please fill in the highlighted field.'; $(bad).focus(); return; }
+    sErr.textContent = '';
+    var clean = function(s){ return s.replace(/\s+/g, ' ').slice(0, 80); };
+    var biz = clean(val('s-biz')), svc = clean(val('s-svc')), city = clean(val('s-city')), spec = clean(val('s-spec'));
+    var prompts = buildPrompts(svc, city, spec);
+    if (prompts.join('|') !== state.prompts.join('|')) { state.marks = {}; state.instead = []; }
+    state.biz = biz; state.svc = svc; state.city = city; state.spec = spec; state.site = clean(val('s-site')); state.prompts = prompts;
+    save(); renderScan();
+    if (!val('o-biz')) $('o-biz').value = biz;
+    track('scan_start', { service: svc.toLowerCase(), city: city.toLowerCase() });
+    $('scan-h').scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    $('scan-h').setAttribute('tabindex', '-1'); $('scan-h').focus({ preventScroll: true });
+  });
+
+  $('clear').addEventListener('click', function(){
+    state.marks = {}; state.instead = []; save(); renderScan();
+  });
+
+  /* ---- Prefill: saved scan first, then link parameters (b, s, c, sp, w, ref) ----
+     A link like /ai-visibility?b=Acme&s=real+estate+agency&c=Dubai fills the form for
+     outreach; ref tags enquiries for a partner agency. Values only ever fill inputs. */
+  if (restore()) {
+    $('s-biz').value = state.biz; $('s-svc').value = state.svc; $('s-city').value = state.city; $('s-spec').value = state.spec; $('s-site').value = state.site;
+    $('o-biz').value = state.biz;
+    renderScan();
+  }
+  try {
+    var qs = new URLSearchParams(location.search), map = { b: 's-biz', s: 's-svc', c: 's-city', sp: 's-spec', w: 's-site' };
+    Object.keys(map).forEach(function(k){ var v = qs.get(k); if (v) $(map[k]).value = v.slice(0, 80); });
+    var ref = qs.get('ref');
+    if (ref && /^[a-z0-9][a-z0-9-]{0,39}$/i.test(ref)) { state.ref = ref.toLowerCase(); save(); }
+  } catch (e) {}
+
+  /* ---- CTAs that preselect what the visitor wants ---- */
+  Array.prototype.forEach.call(document.querySelectorAll('a[data-need]'), function(a){
+    a.addEventListener('click', function(){ $('o-need').value = a.getAttribute('data-need'); track('cta_click', { need: a.getAttribute('data-need') }); });
+  });
+
+  /* ---- Header nav: mark the section in view ---- */
+  var navLinks = document.querySelectorAll('.bar nav a[href^="#"]');
+  if ('IntersectionObserver' in window && navLinks.length) {
+    var navIo = new IntersectionObserver(function(es){ es.forEach(function(e){ if (!e.isIntersecting) return;
+      Array.prototype.forEach.call(navLinks, function(a){ if (a.getAttribute('href') === '#' + e.target.id) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); }); }); },
+      { rootMargin: '-40% 0px -55% 0px' });
+    Array.prototype.forEach.call(navLinks, function(a){ var t = document.querySelector(a.getAttribute('href')); if (t) navIo.observe(t); });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('.contact a.v'), function(a){
+    a.addEventListener('click', function(){ var h = a.getAttribute('href') || ''; track('contact_click', { channel: h.indexOf('wa.me') > -1 ? 'whatsapp' : 'email' }); });
+  });
+
+  /* ---- Order form → WhatsApp message ---- */
+  var NEEDS = {
+    report: 'I would like to order the AI Invisibility Report.',
+    gap: 'Please send me the free 1-page AI visibility gap report.',
+    fix: 'I would like to talk about the 30-Day Visibility Fix.',
+    sprint: 'I would like to talk about the 90-Day AI Visibility Sprint.',
+    retainer: 'I would like to talk about the monthly AI visibility retainer.',
+    agency: 'I run an agency and would like to talk about white-label AI visibility audits.',
+    unsure: 'I would like to talk through AI visibility for my business.'
+  };
+  var form = $('order'), sent = $('sent'), err = $('o-err'), msgBox = $('msg'), wa = $('wa'), copy = $('copy'), edit = $('edit');
+  var O_FIELDS = ['o-name', 'o-phone', 'o-email'];
+  function check(id, submitting){
+    var input = $(id), value = input.value.trim(), msg = '';
+    if (id === 'o-name' && !value && submitting) msg = 'Please add your name so we know who we are replying to.';
+    if (id === 'o-email' && value && !input.checkValidity()) msg = 'That email looks incomplete — check for a missing @ or domain.';
+    if (id === 'o-phone' && value && !/^\+?[\d\s().-]{8,}$/.test(value)) msg = 'Enter the number with country code, e.g. +971 52 208 6253.';
+    if (id === 'o-phone' && !value && !val('o-email') && submitting) msg = 'Add a WhatsApp number or an email — one of the two is enough.';
+    setErr(id, msg); return !msg;
+  }
+  O_FIELDS.forEach(function(id){ var input = $(id);
+    input.addEventListener('blur', function(){ check(id, false); });
+    input.addEventListener('input', function(){ if (input.getAttribute('aria-invalid')) check(id, false); });
+  });
+
+  function scanLines(t){
+    if (!state.prompts.length) return [];
+    var out = ['', 'Free scan: ' + state.svc + ' in ' + state.city + (state.spec ? ' (' + state.spec + ')' : '')];
+    if (!t.checked) { out.push('No answers marked yet.'); return out; }
+    out.push('Named in ' + t.named + ' of ' + t.checked + ' answers checked');
+    out.push(ENGINES.filter(function(e){ return t.by[e.id].checked; }).map(function(e){ return e.name + ' ' + t.by[e.id].named + '/' + t.by[e.id].checked; }).join(' · '));
+    if (t.missed.length) out.push('Missing for: ' + t.missed.slice(0, 3).map(function(q){ return '"' + q + '"'; }).join('; '));
+    if (t.board.length) out.push('Named instead: ' + t.board.slice(0, 5).map(function(x){ return x.name + ' (' + x.count + ')'; }).join(', '));
+    return out;
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    if (val('o-web')) { err.textContent = 'We could not prepare your message. Please WhatsApp us directly on +971 52 208 6253.'; return; }   /* honeypot */
+    var ok = O_FIELDS.map(function(id){ return check(id, true); }).every(Boolean);
+    if (!ok) { err.textContent = 'Please fix the highlighted field.'; form.querySelector('[aria-invalid="true"]').focus(); return; }
+    err.textContent = '';
+    var need = $('o-need').value, phone = val('o-phone'), email = val('o-email'), t = tally();
+    var lines = [
+      'Hi Rahul — ' + (NEEDS[need] || NEEDS.unsure),
+      '',
+      'Name: ' + val('o-name'),
+      val('o-biz') ? 'Business: ' + val('o-biz') : '',
+      state.site ? 'Website: ' + state.site : '',
+      phone ? 'WhatsApp: ' + phone : '',
+      email ? 'Email: ' + email : '',
+      val('o-note') ? 'Notes: ' + val('o-note') : ''
+    ].filter(Boolean).concat(scanLines(t));
+    if (state.ref) lines.push('', 'Referred by: ' + state.ref);
+    var text = lines.join('\n');
+
+    msgBox.textContent = text;
+    wa.href = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+    track('generate_lead', { method: 'whatsapp', need: need, has_phone: !!phone, has_email: !!email, scan_checked: t.checked, scan_named: t.named, ref: state.ref || undefined });
+    form.hidden = true; sent.hidden = false;
+    sent.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+    wa.focus();
+  });
+
+  wa.addEventListener('click', function(){ track('whatsapp_open', { method: 'whatsapp' }); });
+  copy.addEventListener('click', function(){
+    var text = msgBox.textContent;
+    copyText(text, function(ok){
+      if (ok) { copy.textContent = 'Copied'; setTimeout(function(){ copy.textContent = 'Copy message'; }, 1800); return; }
+      var r = document.createRange(); r.selectNodeContents(msgBox);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      copy.textContent = 'Selected'; setTimeout(function(){ copy.textContent = 'Copy message'; }, 2600);
+    });
+  });
+  edit.addEventListener('click', function(){ sent.hidden = true; form.hidden = false; $('o-name').focus(); });
+})();
+</script>
+</body>
+</html>
