@@ -1,6 +1,6 @@
 {
   "date": "2026-10-19",
-  "generated_at": "2026-10-19T07:37:33.497Z",
+  "generated_at": "2026-10-19T10:46:57.020Z",
   "previous_report": "2026-10-12.json",
   "gsc": {
     "week": {
@@ -387,6 +387,11 @@
     "non_200_linked": [],
     "weak_inbound": [
       {
+        "url": "/skills/claude-code-ultimate-guide",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
         "url": "/skills/slick",
         "inbound": 1,
         "depth": 2
@@ -457,11 +462,6 @@
         "depth": 2
       },
       {
-        "url": "/skills/claude-code-ultimate-guide",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
         "url": "/skills/biomcp",
         "inbound": 1,
         "depth": 2
@@ -482,52 +482,12 @@
         "depth": 2
       },
       {
-        "url": "/commands/todo",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
         "url": "/bundles/ecommerce-pro-pack",
         "inbound": 1,
         "depth": 2
       },
       {
-        "url": "/newsletter/2026-10-12",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/newsletter/2026-10-05",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/newsletter/2026-09-28",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/newsletter/2026-09-21",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/playbooks/validate-a-new-offer-in-48-hours",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/playbooks/idea-validation-with-market-research",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/playbooks/warm-outreach-for-b2b-leads",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/playbooks/ship-your-mvp-in-a-weekend",
+        "url": "/commands/todo",
         "inbound": 1,
         "depth": 2
       },
@@ -552,6 +512,26 @@
         "depth": 2
       },
       {
+        "url": "/newsletter/2026-10-12",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/newsletter/2026-10-05",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/newsletter/2026-09-28",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/newsletter/2026-09-21",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
         "url": "/packs/founder-launch-pack",
         "inbound": 1,
         "depth": 2
@@ -568,6 +548,26 @@
       },
       {
         "url": "/packs/developer-productivity-pack",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/playbooks/validate-a-new-offer-in-48-hours",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/playbooks/idea-validation-with-market-research",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/playbooks/warm-outreach-for-b2b-leads",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
+        "url": "/playbooks/ship-your-mvp-in-a-weekend",
         "inbound": 1,
         "depth": 2
       },
@@ -672,6 +672,11 @@
         "depth": 2
       },
       {
+        "url": "/partner",
+        "inbound": 1,
+        "depth": 2
+      },
+      {
         "url": "/a/77fdcc6f-639f-4fbd-982b-85c5c7c52841",
         "inbound": 1,
         "depth": 2
@@ -693,11 +698,6 @@
       },
       {
         "url": "/a/c83f3631-4a9b-4827-9a97-81292d61be1e",
-        "inbound": 1,
-        "depth": 2
-      },
-      {
-        "url": "/partner",
         "inbound": 1,
         "depth": 2
       },
@@ -1231,6 +1231,7 @@
       "/skills/4faf9fa0-3232-4a97-a38b-2a1edd735d5c",
       "/skills/ba138273-023f-4523-9c7b-a07c893364fb",
       "/skills/7a603032-cf86-4597-bdb4-e96d3d23c2d4",
+      "/skills/5775defd-afc4-4502-a3dc-f19178f02fec",
       "/skills/d18b4584-646c-4c4e-a4f1-7703e3fbbac3",
       "/skills/26f8bbaf-f023-4a7d-94a4-7ff27476845d",
       "/skills/0dd34580-2886-4142-b0e3-71f7240e6671",
@@ -1241,7 +1242,6 @@
       "/skills/31a9ffd3-1f8c-4be6-a807-766d93abb0d5",
       "/skills/765b9d5a-af1d-4271-912c-bf038eacb6f7",
       "/skills/8e868494-7987-4cef-859e-70fea7ef63c7",
-      "/skills/5775defd-afc4-4502-a3dc-f19178f02fec",
       "/skills/ecd7e2d1-01b9-4214-9716-3b1d984bb207",
       "/skills/2af8ae87-68c1-4470-b1c2-2fe69e3ecc20",
       "/skills/52686af9-b416-49dc-9c5c-e80934a329a9",
@@ -1805,8 +1805,8 @@
           "WebSite"
         ]
       },
-      "/a": {
-        "sample": "/a/77fdcc6f-639f-4fbd-982b-85c5c7c52841",
+      "/partner": {
+        "sample": "/partner",
         "types": [
           "EntryPoint",
           "Organization",
@@ -1814,8 +1814,8 @@
           "WebSite"
         ]
       },
-      "/partner": {
-        "sample": "/partner",
+      "/a": {
+        "sample": "/a/77fdcc6f-639f-4fbd-982b-85c5c7c52841",
         "types": [
           "EntryPoint",
           "Organization",
@@ -1911,7 +1911,7 @@
     },
     "/skills/page/2": {
       "verdict": "NEUTRAL",
-      "coverage": "URL is unknown to Google",
+      "coverage": "Discovered - currently not indexed",
       "last_crawl": null,
       "indexing_state": "INDEXING_STATE_UNSPECIFIED",
       "canonical_google": null,
@@ -1990,14 +1990,14 @@
     "/": {
       "mobile": {
         "source": "lighthouse",
-        "score": 68,
+        "score": 59,
         "lab": {
-          "lcp_ms": 5940,
+          "lcp_ms": 6151,
           "cls": 0,
-          "tbt_ms": 397,
-          "fcp_ms": 1693,
-          "ttfb_ms": 7,
-          "speed_index_ms": 2671
+          "tbt_ms": 730,
+          "fcp_ms": 1745,
+          "ttfb_ms": 3,
+          "speed_index_ms": 2777
         },
         "field": null
       },
@@ -2005,12 +2005,12 @@
         "source": "lighthouse",
         "score": 96,
         "lab": {
-          "lcp_ms": 1377,
+          "lcp_ms": 1360,
           "cls": 0,
           "tbt_ms": 0,
-          "fcp_ms": 481,
-          "ttfb_ms": 7,
-          "speed_index_ms": 481
+          "fcp_ms": 477,
+          "ttfb_ms": 2,
+          "speed_index_ms": 477
         },
         "field": null
       }
@@ -2018,14 +2018,14 @@
     "/skills": {
       "mobile": {
         "source": "lighthouse",
-        "score": 90,
+        "score": 91,
         "lab": {
-          "lcp_ms": 2887,
+          "lcp_ms": 2861,
           "cls": 0,
-          "tbt_ms": 207,
-          "fcp_ms": 1996,
-          "ttfb_ms": 7,
-          "speed_index_ms": 1996
+          "tbt_ms": 177,
+          "fcp_ms": 1983,
+          "ttfb_ms": 3,
+          "speed_index_ms": 1983
         },
         "field": null
       },
@@ -2033,11 +2033,11 @@
         "source": "lighthouse",
         "score": 100,
         "lab": {
-          "lcp_ms": 609,
+          "lcp_ms": 574,
           "cls": 0,
           "tbt_ms": 0,
           "fcp_ms": 510,
-          "ttfb_ms": 6,
+          "ttfb_ms": 3,
           "speed_index_ms": 510
         },
         "field": null
@@ -2046,14 +2046,14 @@
     "/skills/ogcode": {
       "mobile": {
         "source": "lighthouse",
-        "score": 74,
+        "score": 81,
         "lab": {
-          "lcp_ms": 6254,
+          "lcp_ms": 4052,
           "cls": 0,
-          "tbt_ms": 189,
-          "fcp_ms": 1681,
-          "ttfb_ms": 6,
-          "speed_index_ms": 2865
+          "tbt_ms": 250,
+          "fcp_ms": 1683,
+          "ttfb_ms": 2,
+          "speed_index_ms": 1683
         },
         "field": null
       },
@@ -2061,12 +2061,12 @@
         "source": "lighthouse",
         "score": 100,
         "lab": {
-          "lcp_ms": 613,
+          "lcp_ms": 616,
           "cls": 0,
           "tbt_ms": 0,
-          "fcp_ms": 471,
-          "ttfb_ms": 6,
-          "speed_index_ms": 524
+          "fcp_ms": 482,
+          "ttfb_ms": 2,
+          "speed_index_ms": 497
         },
         "field": null
       }
@@ -2074,14 +2074,14 @@
     "/skills/page/2": {
       "mobile": {
         "source": "lighthouse",
-        "score": 94,
+        "score": 95,
         "lab": {
           "lcp_ms": 2413,
           "cls": 0,
-          "tbt_ms": 186,
-          "fcp_ms": 1679,
-          "ttfb_ms": 9,
-          "speed_index_ms": 1679
+          "tbt_ms": 140,
+          "fcp_ms": 1682,
+          "ttfb_ms": 2,
+          "speed_index_ms": 1682
         },
         "field": null
       }
@@ -2089,14 +2089,14 @@
     "/templates/cold-email-personalizer": {
       "mobile": {
         "source": "lighthouse",
-        "score": 95,
+        "score": 94,
         "lab": {
-          "lcp_ms": 2414,
+          "lcp_ms": 2413,
           "cls": 0.064,
-          "tbt_ms": 128,
-          "fcp_ms": 1679,
-          "ttfb_ms": 6,
-          "speed_index_ms": 1679
+          "tbt_ms": 173,
+          "fcp_ms": 1680,
+          "ttfb_ms": 2,
+          "speed_index_ms": 1680
         },
         "field": null
       }
@@ -2104,14 +2104,14 @@
     "/automate/triage-your-inbox": {
       "mobile": {
         "source": "lighthouse",
-        "score": 93,
+        "score": 96,
         "lab": {
-          "lcp_ms": 2411,
+          "lcp_ms": 2414,
           "cls": 0,
-          "tbt_ms": 234,
-          "fcp_ms": 1680,
-          "ttfb_ms": 6,
-          "speed_index_ms": 1680
+          "tbt_ms": 124,
+          "fcp_ms": 1686,
+          "ttfb_ms": 2,
+          "speed_index_ms": 1686
         },
         "field": null
       }
@@ -2119,14 +2119,14 @@
     "/mcp/filesystem": {
       "mobile": {
         "source": "lighthouse",
-        "score": 94,
+        "score": 96,
         "lab": {
-          "lcp_ms": 2420,
+          "lcp_ms": 2412,
           "cls": 0,
-          "tbt_ms": 209,
-          "fcp_ms": 1687,
-          "ttfb_ms": 6,
-          "speed_index_ms": 1687
+          "tbt_ms": 117,
+          "fcp_ms": 1677,
+          "ttfb_ms": 15,
+          "speed_index_ms": 1677
         },
         "field": null
       }
@@ -2134,13 +2134,13 @@
     "/blog/seo-brief-n8n-claude": {
       "mobile": {
         "source": "lighthouse",
-        "score": 93,
+        "score": 95,
         "lab": {
-          "lcp_ms": 2709,
+          "lcp_ms": 2562,
           "cls": 0,
-          "tbt_ms": 153,
+          "tbt_ms": 135,
           "fcp_ms": 1828,
-          "ttfb_ms": 6,
+          "ttfb_ms": 2,
           "speed_index_ms": 1828
         },
         "field": null
@@ -2149,14 +2149,14 @@
     "/collections": {
       "mobile": {
         "source": "lighthouse",
-        "score": 74,
+        "score": 95,
         "lab": {
-          "lcp_ms": 6167,
+          "lcp_ms": 2411,
           "cls": 0,
-          "tbt_ms": 196,
-          "fcp_ms": 1685,
-          "ttfb_ms": 6,
-          "speed_index_ms": 2527
+          "tbt_ms": 141,
+          "fcp_ms": 1683,
+          "ttfb_ms": 3,
+          "speed_index_ms": 1683
         },
         "field": null
       }
