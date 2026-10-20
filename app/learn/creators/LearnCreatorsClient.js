@@ -10,11 +10,15 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion'
 
-const STATS = [
-  { icon: Sparkles, value: '1,500+', label: 'skills already indexed' },
+// Counts come live from /api/stats via the page; a missing one is dropped
+// rather than replaced with a guess.
+const stats = ({ skillCount, communitySize }) => [
+  { icon: Sparkles, value: skillCount, label: 'skills published' },
   { icon: DollarSign, value: '85%', label: 'you keep, per sale' },
-  { icon: Users, value: '2,000+', label: 'active users looking for tools' },
-]
+  { icon: Users, value: communitySize, label: 'subscribers and members' },
+].filter((s) => s.value)
+
+const STAT_COLS = ['', 'grid-cols-1', 'grid-cols-2', 'grid-cols-3']
 
 const GITHUB_STEPS = [
   { n: '1', title: 'Push your skill to a public GitHub repo', body: 'Any Claude Skill, MCP server, prompt pack, or AI agent works — code stays yours, you keep the repo.' },
@@ -48,7 +52,9 @@ const FAQS = [
   { q: 'I applied — what happens now?', a: "You'll get an email once we've reviewed it. Nothing to do in the meantime except make sure your repo (if you have one) is public with a clear README." },
 ]
 
-export default function LearnCreatorsClient() {
+export default function LearnCreatorsClient({ skillCount, communitySize }) {
+  const statItems = stats({ skillCount, communitySize })
+
   return (
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
@@ -82,8 +88,8 @@ export default function LearnCreatorsClient() {
 
       {/* Stats */}
       <div className="container mx-auto px-4 max-w-4xl mb-16">
-        <div className="grid grid-cols-3 gap-3">
-          {STATS.map(({ icon: Icon, value, label }) => (
+        <div className={`grid ${STAT_COLS[statItems.length]} gap-3`}>
+          {statItems.map(({ icon: Icon, value, label }) => (
             <Card key={label} className="bg-slate-900/60 border-slate-700/50">
               <CardContent className="py-5 text-center">
                 <Icon className="w-5 h-5 text-teal-400 mx-auto mb-1.5" />

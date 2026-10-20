@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { ArrowLeft, CheckCircle2, Zap, Users, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { getCatalogStats, countLabel } from '@/lib/catalog-stats'
+
+export const revalidate = 604800
 
 export const metadata = {
   title: 'How WorkflowStacks Works | AI Skills Marketplace Guide',
@@ -9,9 +12,10 @@ export const metadata = {
   alternates: { canonical: '/learn/how-it-works' },
 }
 
-export default function HowItWorksPage() {
+export default async function HowItWorksPage() {
+  const skillCount = countLabel((await getCatalogStats()).publishedSkills)
   const steps = [
-    { step: '01', title: 'Browse or Search', desc: 'Explore our library of 500+ AI skills sourced from GitHub. Filter by category (Claude, Gemini, MCP, Prompts) or search by outcome like "automate reviews" or "rank in AI search".', icon: '🔍' },
+    { step: '01', title: 'Browse or Search', desc: `Explore our library of ${skillCount ? `${skillCount} ` : ''}AI skills sourced from GitHub. Filter by category (Claude, Gemini, MCP, Prompts) or search by outcome like "automate reviews" or "rank in AI search".`, icon: '🔍' },
     { step: '02', title: 'Pick a Playbook or Build Custom', desc: 'Choose a pre-made Playbook for your use case, or use the Agent Builder to select individual skills and combine them into a custom AI agent.', icon: '🛠️' },
     { step: '03', title: 'Generate Your Agent Blueprint', desc: 'Our engine creates a ready-to-paste prompt that combines all your selected skills into one powerful, coherent agent blueprint.', icon: '✨' },
     { step: '04', title: 'Deploy Anywhere', desc: 'Copy the blueprint and paste it into ChatGPT, Claude, Gemini, or any AI chat tool. Your custom agent is live instantly — no install, no code. Some tools need their own API key, shown on the listing.', icon: '🚀' },

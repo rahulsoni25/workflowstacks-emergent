@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { ArrowLeft, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { getCatalogStats, countLabel } from '@/lib/catalog-stats'
+
+export const revalidate = 604800
 
 export const metadata = {
   title: 'About WorkflowStacks | AI Skills Marketplace',
@@ -9,7 +12,14 @@ export const metadata = {
   alternates: { canonical: '/about' },
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const stats = await getCatalogStats()
+  const tiles = [
+    { n: countLabel(stats.publishedSkills), label: 'AI skills published' },
+    { n: countLabel(stats.agentsBuilt), label: 'Agents built in the Builder' },
+    { n: countLabel(stats.communitySize), label: 'Subscribers and members' },
+  ].filter((t) => t.n)
+
   return (
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
@@ -38,18 +48,16 @@ export default function AboutPage() {
             <CardContent className="py-6">
               <h2 className="text-2xl font-bold text-white mb-3">What We Do</h2>
               <p className="text-text-secondary leading-relaxed mb-4">WorkflowStacks is an AI skills marketplace that automatically discovers the best AI tools from GitHub, enriches them with benefit-driven descriptions, and packages them into ready-to-use agent blueprints.</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { n: '500+', label: 'AI skills indexed' },
-                  { n: '2,000+', label: 'Active users' },
-                  { n: '10,000+', label: 'Agents built' },
-                ].map((stat, i) => (
-                  <div key={i} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 text-center">
-                    <div className="text-2xl font-bold text-teal-400">{stat.n}</div>
-                    <div className="text-text-muted text-sm">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
+              {tiles.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {tiles.map((stat) => (
+                    <div key={stat.label} className="bg-slate-800/50 rounded-lg p-4 border border-slate-700/50 text-center">
+                      <div className="text-2xl font-bold text-teal-400">{stat.n}</div>
+                      <div className="text-text-muted text-sm">{stat.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -58,10 +66,10 @@ export default function AboutPage() {
               <h2 className="text-2xl font-bold text-white mb-3">Our Values</h2>
               <ul className="space-y-3">
                 {[
-                  'Accessibility â€” AI should be usable by everyone, not just developers',
-                  'Quality â€” Every skill is verified for quality and usefulness',
-                  'Transparency â€” Open-source skills, clear pricing, no hidden fees',
-                  'Community â€” Built by creators, for creators',
+                  'Accessibility —AI should be usable by everyone, not just developers',
+                  'Quality —Every skill is verified for quality and usefulness',
+                  'Transparency —Open-source skills, clear pricing, no hidden fees',
+                  'Community —Built by creators, for creators',
                 ].map((v, i) => (
                   <li key={i} className="flex items-start gap-2 text-text-secondary">
                     <span className="text-teal-400">•</span>{v}

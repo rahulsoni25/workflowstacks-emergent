@@ -2,22 +2,25 @@ import Link from 'next/link'
 import { ArrowLeft, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { getCatalogStats, countLabel } from '@/lib/catalog-stats'
+
+export const revalidate = 604800
 
 export const metadata = {
   title: 'Pricing — Free Catalog, Premium Tools & Done-For-You Agents | WorkflowStacks',
   description:
-    'Browse 1,500+ open-source AI skills free. Buy premium automation tools one-time ($29–$39). Or have us build your working agent from $500, delivered in 7 days.',
+    'Browse open-source AI skills free. Buy premium automation tools one-time ($29–$39). Or have us build your working agent from $500, delivered in 7 days.',
   alternates: { canonical: '/pricing' },
 }
 
-const TIERS = [
+const tiers = (skillCount) => [
   {
     name: 'Free Catalog',
     price: '$0',
     priceNote: 'forever',
     blurb: 'Everything you need to explore and build on your own.',
     features: [
-      '1,500+ quality-gated open-source AI skills',
+      skillCount ? `${skillCount} quality-gated open-source AI skills` : 'Quality-gated open-source AI skills',
       'No-code Agent Builder',
       '11 free n8n workflow templates',
       'Deploy to ChatGPT, Claude, Gemini',
@@ -65,7 +68,9 @@ const TIERS = [
   },
 ]
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const skillCount = countLabel((await getCatalogStats()).publishedSkills)
+
   return (
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
@@ -88,7 +93,7 @@ export default function PricingPage() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {TIERS.map((tier) => (
+          {tiers(skillCount).map((tier) => (
             <Card key={tier.name} className="bg-slate-900/60 border-slate-700/50 hover:border-[#C6F24E]/40 transition-all duration-300 h-full">
               <CardContent className="py-7 flex flex-col h-full">
                 <h2 className="text-white font-bold text-lg mb-1">{tier.name}</h2>

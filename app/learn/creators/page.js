@@ -1,4 +1,7 @@
 import LearnCreatorsClient from './LearnCreatorsClient'
+import { getCatalogStats, countLabel } from '@/lib/catalog-stats'
+
+export const revalidate = 604800
 
 export const metadata = {
   title: 'For Creators — List Your AI Skill & Earn 85% | WorkflowStacks',
@@ -6,6 +9,12 @@ export const metadata = {
   alternates: { canonical: '/learn/creators' },
 }
 
-export default function LearnCreatorsPage() {
-  return <LearnCreatorsClient />
+export default async function LearnCreatorsPage() {
+  const stats = await getCatalogStats()
+  return (
+    <LearnCreatorsClient
+      skillCount={countLabel(stats.publishedSkills)}
+      communitySize={countLabel(stats.communitySize)}
+    />
+  )
 }
