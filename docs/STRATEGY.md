@@ -86,6 +86,7 @@ better pages is the only path from here.
 
 | Signal | Now (2026-10-20) | Target in 6 weeks |
 |---|---|---|
+| GA4 page views per day (live since 2026-10-04) | ~25–60; ~100 on Mondays, the Hot-email day | 300+ on a weekday |
 | Indexed pages (Search Console → Pages) | 25 | 150+ |
 | "Crawled – currently not indexed" | 758 | falling; most of the catalog moves to "Excluded by noindex" |
 | `/skills` crawl date | none | present, then "Indexed" |
@@ -93,6 +94,13 @@ better pages is the only path from here.
 | Pages with ≤1 inbound link (crawl) | 168 | under 60 |
 | Homepage mobile Lighthouse | 59 | 75+ |
 | Referring domains (Search Console → Links) | not recorded | 20+ |
+
+Email is the channel that works today: the GA4 peaks fall on Mondays, when
+the Hot/Top/Rising issue goes out, and most views land on individual skill
+pages rather than the homepage, which is what five skill links per issue
+produce. Double opt-in (on this branch) will lower the new-subscriber
+conversion rate for a while; existing subscribers are unaffected, and a list
+that confirms is the one that keeps landing in inboxes on Monday.
 
 If after six weeks the ~900 gated pages are still "Crawled – not indexed",
 raise `minGuideRichness` and cut the set again; if the niche pages keep

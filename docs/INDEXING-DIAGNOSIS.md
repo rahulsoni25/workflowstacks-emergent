@@ -187,9 +187,13 @@ Nothing above deploys until the Monday release (`docs/COSTS.md`).
 6. **Vercel plan.** Hobby is for non-commercial use and the site takes
    payments (`docs/COSTS.md:47-51`); the September overage can pause the
    project, which Googlebot experiences as an outage. Pro removes both risks.
-7. **Set the analytics env vars** if they are not set (`NEXT_PUBLIC_GA_ID`,
-   `NEXT_PUBLIC_META_PIXEL_ID`); nothing in the repo shows whether any tag is
-   live, so none of the conversion tracking can be confirmed.
+7. **GA4 is live** (the owner's GA4 report shows data from 2026-10-04, the
+   day PR #63 shipped). Baseline: ~25–60 views/day, ~100 on Mondays, which
+   is when the Hot/Top/Rising email goes out. Confirm the Monday peaks are
+   `newsletter / email` in GA4 → Acquisition → Traffic acquisition (the
+   emails carry UTM tags); the Monday SEO report's Lighthouse runs are the
+   one thing that could inflate them. The Meta Pixel
+   (`NEXT_PUBLIC_META_PIXEL_ID`) still cannot be confirmed from the repo.
 8. **Re-run the catalog gate decision in 4–6 weeks** from Search Console
    coverage for the ~500 indexable pages, as `app/sitemap.js` always intended.
    Widen only if those get indexed; otherwise raise `minStars`.
