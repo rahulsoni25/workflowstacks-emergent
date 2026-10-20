@@ -19,6 +19,9 @@ export default function DownloadButtons({ slug, filename }) {
   const [email, setEmail] = useState('')
   const [state, setState] = useState('idle') // idle | working | error
   const [done, setDone] = useState(false)
+  // Signups are double opt-in: true once /api/subscribe has sent the
+  // confirmation email for this address, so the done state can say so.
+  const [confirmationSent, setConfirmationSent] = useState(false)
 
   function triggerDownload(blob) {
     const url = URL.createObjectURL(blob)
@@ -51,11 +54,13 @@ export default function DownloadButtons({ slug, filename }) {
     const valid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)
     if (!valid) return
     try {
-      await fetch('/api/subscribe', {
+      const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, source: 'template-download', template: slug }),
       })
+      const data = await res.json().catch(() => ({}))
+      if (res.ok && data.pending) setConfirmationSent(true)
       trackEvent('newsletter_signup', { source: 'template-download', content_name: slug })
     } catch {}
   }
@@ -91,6 +96,11 @@ export default function DownloadButtons({ slug, filename }) {
         <p className="text-sm text-text-muted">
           Next: open n8n → Import from File → follow the setup note inside the workflow.
         </p>
+        {confirmationSent && (
+          <p className="text-sm text-[#C6F24E]">
+            We sent a confirmation to {email} — click the link in it to get new templates by email. Nothing is sent until you do.
+          </p>
+        )}
         <button onClick={() => setDone(false)} className="text-xs text-text-muted hover:text-text-secondary underline underline-offset-2">
           Download again
         </button>
@@ -138,7 +148,7 @@ export default function DownloadButtons({ slug, filename }) {
         {state === 'error' && (
           <p className="text-xs text-amber-400">Something hiccuped — click “just download” to grab the standard file.</p>
         )}
-        <p className="text-[11px] text-text-muted">We email new templates occasionally. Unsubscribe anytime. No spam.</p>
+        <p className="text-[11px] text-text-muted">We email new templates occasionally — you’ll get a confirmation email first, and nothing until you click it. Unsubscribe anytime. No spam.</p>
       </div>
     </div>
   )

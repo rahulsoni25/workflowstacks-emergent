@@ -85,21 +85,36 @@ jobs:
             "$BASE_URL/api/cleanup" | tee /tmp/cleanup.json
           echo
 
+      - name: Backfill slugs for entries that have none
+        # Entries without a slug resolve to /skills/<uuid>: no keyword in the
+        # URL, unreadable in a SERP, and noindex under lib/skill-gate.js. The
+        # endpoint only touches rows with a missing/empty slug (never `force`,
+        # which would change live URLs), so once the backlog is gone this is
+        # a no-op that exits in seconds. The weekly crawl kept finding 13-39
+        # UUID links while this ran only by hand (slug-backfill.yml).
+        run: |
+          curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/backfill-slugs" | tee /tmp/slugs.json
+          echo
+
       - name: Did-it-work follow-ups (validates rung 1)
         run: |
           curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
             "$BASE_URL/api/did-it-work" | tee /tmp/diw.json
           echo
 
-      - name: Weekly digest email (Mondays only)
+      - name: Templates digest email (Thursdays only)
+        # Thursday, not Monday: Monday already carries the Hot / Top / Rising
+        # digest (below) and the daily Skill of the Day, which made three
+        # emails on one morning. Still once a week.
         if: github.event_name == 'schedule'
         run: |
-          if [ "$(date -u +%u)" = "1" ]; then
+          if [ "$(date -u +%u)" = "4" ]; then
             curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
               "$BASE_URL/api/digest/send" | tee /tmp/digest.json
             echo
           else
-            echo "Not Monday — skipping digest."
+            echo "Not Thursday — skipping templates digest."
           fi
 
       - name: Auto-discover from trending searches
@@ -114,7 +129,7 @@ jobs:
         # so: up to ten passes over published listings (each takes the 80
         # least-recently refreshed, ~30s per call, under Vercel's 60s ceiling),
         # then one pass over everything else. A failed call ends the loop but
-        # never fails the job — the Monday digest step below must still run.
+        # never fails the job — the Monday Hot digest step below must still run.
         # The job token goes along because the deployment has no GITHUB_TOKEN:
         # unauthenticated calls hit GitHub's 60/hour cap and left /hot empty.
         run: |

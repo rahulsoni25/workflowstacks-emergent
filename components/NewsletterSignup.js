@@ -11,6 +11,11 @@ import { trackEvent } from '@/lib/analytics'
 // Default frequency is 'weekly' (Monday digests only). The daily Skill of the
 // Day is opt-in via `showDailyOption` — daily volume is the most common reason
 // a small list shrinks, so nobody gets it without asking.
+//
+// Signups are double opt-in: /api/subscribe answers { pending: true } for a
+// new (or lapsed) address and sends a confirmation email; nothing else is
+// sent until the link in it is clicked. An address that is already confirmed
+// answers { pending: false }.
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 const X_SHARE_URL =
@@ -31,6 +36,7 @@ export default function NewsletterSignup({
   const [email, setEmail] = useState('')
   const [daily, setDaily] = useState(false)
   const [state, setState] = useState('idle') // idle | working | done | error
+  const [pending, setPending] = useState(true) // done: confirmation sent (true) or already subscribed (false)
 
   async function onSubmit(e) {
     e.preventDefault()
@@ -45,6 +51,8 @@ export default function NewsletterSignup({
         body: JSON.stringify({ email, source, frequency: daily ? 'all' : 'weekly', ...(ref ? { ref: ref.slice(0, 80) } : {}) }),
       })
       if (!res.ok) throw new Error('subscribe failed')
+      const data = await res.json().catch(() => ({}))
+      setPending(data.pending !== false)
       setState('done')
       trackEvent('newsletter_signup', { source, frequency: daily ? 'all' : 'weekly', content_name: source })
       try { localStorage.setItem('ws_subscribed', '1') } catch {}
@@ -59,8 +67,11 @@ export default function NewsletterSignup({
     <div className={`flex items-start gap-2.5 ${inline ? 'text-[13px]' : 'text-sm'}`} role="status">
       <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#C6F24E] text-[#0A0C0D]"><Check className="h-3 w-3" /></span>
       <div>
-        <div className="font-semibold text-text-primary">You’re in — check your inbox for this week’s list.</div>
+        <div className="font-semibold text-text-primary">
+          {pending ? 'Almost there — check your inbox and click the confirmation link.' : 'You’re already on the list — the next issue lands Monday.'}
+        </div>
         <div className="mt-1 text-text-muted">
+          {pending && <>Nothing is sent until you confirm. </>}
           Know a builder who’d want it?{' '}
           <a href={X_SHARE_URL} target="_blank" rel="noopener noreferrer" className="text-[#C6F24E] hover:underline">Share the Hot list on X</a>
           {' '}or forward the email.

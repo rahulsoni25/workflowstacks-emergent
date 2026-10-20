@@ -41,7 +41,7 @@ function ComingCard({ tool }) {
         </div>
         <p className="text-text-muted text-sm leading-relaxed flex-1 mb-4">{tool.blurb}</p>
         {state === 'done' ? (
-          <p className="text-sm text-[#C6F24E] flex items-center gap-1.5"><Check className="w-4 h-4" />You’re on the list — we’ll email you.</p>
+          <p className="text-sm text-[#C6F24E] flex items-center gap-1.5"><Check className="w-4 h-4" />Check your inbox to confirm — then you’re on the list.</p>
         ) : (
           <form onSubmit={notify} className="flex gap-2">
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com"

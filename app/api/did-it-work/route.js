@@ -1,9 +1,10 @@
 import { MongoClient } from 'mongodb'
 import { randomUUID } from 'crypto'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { sendEmail, unsubscribeUrl, SENDABLE } from '@/lib/email'
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
-// including the GitHub, Groq and Resend calls below. Each cache miss is a
+// including the Resend call made from lib/email.js. Each cache miss is a
 // write to Vercel's ISR store (billed per 8 KB), and these calls almost never
 // hit: the star-refresh job sends a per-run GitHub token (new cache key every
 // run) and the LLM calls carry unique bodies. That was most of the Hobby-plan
@@ -26,6 +27,7 @@ function requireAdmin(request) {
 // Admin/cron: email people who downloaded a template ≥2 days ago (and haven't
 // been asked) a one-click "did it work?" — the only programmatic way to
 // validate rung 1 (does it actually work for real humans) at scale.
+// Unconfirmed and unsubscribed addresses are skipped (SENDABLE).
 export async function GET(request) {
   const denied = requireAdmin(request); if (denied) return denied
   if (!process.env.RESEND_API_KEY) return Response.json({ ok: false, error: 'RESEND_API_KEY not set' }, { status: 500 })
@@ -36,9 +38,10 @@ export async function GET(request) {
     source: 'template-download',
     dw_asked: { $ne: true },
     created_at: { $lte: twoDaysAgo },
+    ...SENDABLE,
   }).limit(50).toArray()
 
-  let sent = 0
+  let sent = 0, failed = 0, firstError = null
   for (const sub of targets) {
     const token = randomUUID()
     const tpl = (sub.templates_downloaded && sub.templates_downloaded[0]) || 'the template'
@@ -52,16 +55,20 @@ export async function GET(request) {
         <a href="${no}" style="display:inline-block;background:#1a1a1a;color:#ECEFEA;text-decoration:none;padding:10px 20px;border-radius:8px;border:1px solid #333">👎 Not yet</a>
       </p>
       <p style="color:#8B928D;font-size:13px">One click, that's it. If it didn't work, just reply and tell me what broke — I read every one.</p>
+      <p style="color:#555;font-size:12px;margin-top:24px">You’re receiving this because you downloaded a WorkflowStacks template and asked for more (source: template-download). <a href="${unsubscribeUrl(sub.email)}" style="color:#555">Unsubscribe</a></p>
     </div>`
-    try {
-      await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: 'WorkflowStacks <hello@workflowstacks.com>', to: sub.email, subject: 'Did the template work for you?', html }),
-      })
+    // sendEmail adds the List-Unsubscribe headers and returns { ok, error }.
+    // dw_asked is only set on a successful send, so a failure is retried
+    // on the next run instead of silently counted.
+    const r = await sendEmail({ to: sub.email, from: 'WorkflowStacks <hello@workflowstacks.com>', subject: 'Did the template work for you?', html })
+    if (r.ok) {
       await db.collection('subscribers').updateOne({ _id: sub._id }, { $set: { dw_asked: true, dw_token: token, dw_asked_at: new Date() } })
       sent += 1
-    } catch (e) { console.error('did-it-work send failed:', e.message) }
+    } else {
+      failed += 1
+      firstError = firstError || r.error
+      console.error('did-it-work send failed for', sub.email, r.error)
+    }
   }
-  return Response.json({ ok: true, sent, candidates: targets.length })
+  return Response.json({ ok: failed === 0, sent, failed, ...(firstError ? { first_error: firstError } : {}), candidates: targets.length })
 }

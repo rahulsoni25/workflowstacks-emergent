@@ -60,7 +60,15 @@ if (cmd === 'subscribe') {
     body: JSON.stringify({ email, source: 'cli', frequency: 'weekly' }),
   })
   if (!res.ok) { console.error(`✗ Could not subscribe right now (${res.status}). Try ${BASE}/newsletter`); process.exit(1) }
-  console.log(`✓ ${email} gets the Monday digest: the five fastest-growing open-source AI skills, ranked by GitHub star growth.`)
+  // Double opt-in: a new address gets a confirmation email and nothing else
+  // until the link in it is clicked. pending:false means it is already on.
+  const data = await res.json().catch(() => ({}))
+  if (data.pending === false) {
+    console.log(`✓ ${email} is already subscribed to the Monday digest.`)
+  } else {
+    console.log(`✓ Confirmation sent to ${email} — check your inbox and click the link to start getting the Monday digest:`)
+    console.log('  the five fastest-growing open-source AI skills, ranked by GitHub star growth. Nothing is sent until you confirm.')
+  }
   console.log('  Every email has a one-click unsubscribe.')
   process.exit(0)
 }
