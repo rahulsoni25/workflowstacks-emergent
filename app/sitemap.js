@@ -5,6 +5,7 @@ import { OUTCOMES } from '../lib/outcomes'
 import { MCP_SERVERS } from '../lib/mcp-servers'
 import { KITS } from '../lib/kits'
 import { SLASH_COMMANDS } from '../lib/commands'
+import { INSTALL_TARGET_SLUGS } from '../lib/install-targets'
 import { passesSkillGate, skillPriority, SKILL_GATE_PROJECTION, SKILL_GATE_QUERY, skillLastModified } from '@/lib/skill-gate'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
@@ -58,6 +59,9 @@ const STATIC_ROUTES = [
   // "best of" roundup per catalog category (each links 20+ skill pages).
   '/hot', '/newsletter', '/best', '/creators',
   ...[...TYPE_CATEGORIES, ...FOR_CATEGORIES].map(([slug]) => `/best/${slug}`),
+  // Per-tool hubs ("skills for Claude Code"), see lib/install-targets.js.
+  '/for',
+  ...INSTALL_TARGET_SLUGS.map((slug) => `/for/${slug}`),
   '/learn', '/learn/how-it-works', '/learn/agents', '/learn/skills',
   '/learn/mcp', '/learn/creators', '/learn/security', '/learn/resources',
   '/about', '/docs', '/help', '/enterprise', '/founder-launch', '/pricing',
@@ -75,7 +79,7 @@ const STATIC_ROUTES = [
 function priorityFor(path) {
   if (path === '') return 1
   if (path.startsWith('/templates') || path.startsWith('/automate') || path === '/blog' || path === '/hot' || path === '/ai-avatar') return 0.9
-  if (path.startsWith('/best') || path === '/newsletter') return 0.8
+  if (path.startsWith('/best') || path.startsWith('/for') || path === '/newsletter') return 0.8
   if (path.startsWith('/tools') || path.startsWith('/bundles') || path.startsWith('/mcp') || path.startsWith('/kits') || path.startsWith('/commands')) return 0.8
   if (path === '/skills' || path === '/pricing' || path.startsWith('/learn')) return 0.7
   return 0.5

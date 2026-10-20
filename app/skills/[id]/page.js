@@ -212,7 +212,18 @@ export async function generateMetadata({ params }) {
   // width; long tool names fall back to the plain pattern.
   const withIntent = `${name} for Claude, ChatGPT & Gemini | WorkflowStacks`
   const title = withIntent.length <= 65 ? withIntent : `${name} | WorkflowStacks`
-  const description = clip(skill.description_human || skill.description || '')
+  // First-party proof in the snippet: installs started from this site
+  // (counted server-side across browser, CLI and MCP) and the CI-verified
+  // install. These numbers exist nowhere else, which is what makes the page
+  // more than a copy of the repo's README (docs/STRATEGY.md, learning 2).
+  const installs = Number(skill.installs) || 0
+  const proof = [
+    installs >= 5 ? `${installs.toLocaleString('en-US')} installs` : null,
+    skill.verified_install?.ok ? 'install verified' : null,
+  ].filter(Boolean).join(' · ')
+  const description = proof
+    ? `${clip(skill.description_human || skill.description || '', 160 - proof.length - 3)} · ${proof}`
+    : clip(skill.description_human || skill.description || '')
   const url = `/skills/${skill.slug || skill.id}`
   // Only pages that pass the catalog gate ask to be indexed. The rest stay
   // live and linked (follow) so discovery keeps working, but they no longer
@@ -261,6 +272,10 @@ export default async function SkillDetailPage({ params }) {
     image: `${BASE}/opengraph-image`,
     ...(skill.github_url ? { sameAs: [skill.github_url] } : {}),
     ...(skill.creator ? { author: { '@type': 'Person', name: skill.creator } } : {}),
+    // Installs started from this site, counted server-side (lib/track-install-server.js).
+    ...(Number(skill.installs) >= 5
+      ? { interactionStatistic: { '@type': 'InteractionCounter', interactionType: 'https://schema.org/InstallAction', userInteractionCount: Number(skill.installs) } }
+      : {}),
     ...(codeflow?.languages?.length ? { programmingLanguage: codeflow.languages.map((l) => l.name) } : {}),
     ...(codeflow?.repo?.html_url ? { codeRepository: codeflow.repo.html_url } : {}),
     ...(codeflow?.repo?.pushed_at ? { dateModified: codeflow.repo.pushed_at } : {}),

@@ -23,6 +23,7 @@ const footerLinks = {
     links: [
       { label: 'Hot this week', href: '/hot' },
       { label: 'Best by category', href: '/best' },
+      { label: 'By tool', href: '/for' },
       { label: 'Journal', href: '/blog' },
       { label: 'Newsletter', href: '/newsletter' },
       { label: 'All Skills', href: '/skills' },

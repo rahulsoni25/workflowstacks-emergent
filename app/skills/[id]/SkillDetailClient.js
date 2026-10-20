@@ -93,6 +93,15 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                 </div>
                 <h1 className="text-4xl text-white mb-2 font-semibold leading-tight tracking-tight">{skill.title_human || skill.name}</h1>
                 <CardDescription className="text-xl text-text-secondary">{skill.description_human || skill.description}</CardDescription>
+                {/* The author's own description, verbatim. Our rewrite above is
+                    for a non-technical reader; this line is the signal that
+                    the page is about a real, specific repo and not a template
+                    (docs/STRATEGY.md, learning 3). */}
+                {skill.description && skill.description_human && skill.description.trim() !== skill.description_human.trim() && (
+                  <p className="mt-2 text-sm text-text-muted">
+                    <span className="t-mono text-[11px] uppercase tracking-wider text-text-muted/80">From the repo · </span>“{skill.description}”
+                  </p>
+                )}
                 {skill.explainer && (
                   <div className="flex flex-wrap items-center gap-2 mt-3">
                     {skill.explainer.difficulty && (
@@ -143,6 +152,11 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                       documented install command in a clean runner and records
                       the result. Shown only when we have a passing run; a
                       failed or missing run is simply not claimed. */}
+                  {Number(skill.installs) >= 5 && (
+                    <span className="flex items-center gap-1.5 text-sm bg-white/5 border border-[#323A3C] rounded-full px-3 py-1 text-text-secondary" title="Installs started from WorkflowStacks (browser, CLI and MCP), counted server-side">
+                      <Zap className="w-4 h-4" />{Number(skill.installs).toLocaleString('en-US')} installs via WorkflowStacks
+                    </span>
+                  )}
                   {skill.verified_install?.ok && (
                     <span className="flex items-center gap-1.5 text-sm bg-emerald-500/10 border border-emerald-500/30 rounded-full px-3 py-1 text-emerald-300" title={skill.verified_install.method ? `We ran: ${skill.verified_install.method}` : 'Install verified in a clean runner'}>
                       <CheckCircle2 className="w-4 h-4" />Install verified{skill.verified_install.at ? ` ${new Date(skill.verified_install.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
