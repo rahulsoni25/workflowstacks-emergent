@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>What Does AI Say About You? Free AI Check | Compare 4 AIs</title>
+<meta name="description" content="Free tool: see what ChatGPT, Gemini, Perplexity and Google AI say about you, or ask all four the same question and see where their answers agree. No sign-up.">
+<link rel="canonical" href="https://workflowstacks.com/ai-check">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="theme-color" content="#14111C">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23FF4A1C'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FluoDigital">
+<meta property="og:locale" content="en_AE">
+<meta property="og:title" content="What does AI say about you? And do the AIs agree?">
+<meta property="og:description" content="Free tool: see what ChatGPT, Gemini, Perplexity and Google AI say about you, or ask all four the same question and see where their answers agree. No sign-up.">
+<meta property="og:url" content="https://workflowstacks.com/ai-check">
+<meta property="og:image" content="https://workflowstacks.com/sites/ai-check/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="What does AI say about you? Free AI Check comparing ChatGPT, Gemini, Perplexity and Google">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="What does AI say about you? And do the AIs agree?">
+<meta name="twitter:description" content="Free tool: see what ChatGPT, Gemini, Perplexity and Google AI say about you, or ask all four the same question and see where their answers agree. No sign-up.">
+<meta name="twitter:image" content="https://workflowstacks.com/sites/ai-check/og.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"></noscript>
+<style>
+  /* Same tokens, type and contrast checks as the other FluoDigital pages
+     (docs/founder-avatar-studio-design-system.md). Mint = right / agreed,
+     tally = wrong, surface2 = no idea. */
+  :root{
+    color-scheme: dark;
+    --ground:#14111C; --surface:#1E1927; --surface2:#271F33;
+    --line:rgba(244,238,230,.13); --line-strong:rgba(244,238,230,.26);
+    --text:#F4EEE6; --muted:#A99DB4; --dim:#8B8296;
+    --tally:#FF4A1C; --amber:#F2A65A; --mint:#7FD1B9;
+    --maxw:1180px; --bar-h:69px; --t:160ms;
+    --fd:"Instrument Serif",Georgia,serif;
+    --fb:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --fm:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none !important}
+  section.light{
+    --ground:#F4EEE6; --surface:#FFFFFF; --surface2:#EAE3D9;
+    --line:rgba(20,17,28,.12); --line-strong:rgba(20,17,28,.5);
+    --text:#14111C; --muted:#4E4760; --dim:#6B6479; --amber:#8F4E0C;
+    background:var(--ground); color:var(--text);
+  }
+  html{scroll-padding-top:calc(var(--bar-h) + 12px + env(safe-area-inset-top,0px))}
+  @media(prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
+  body{margin:0; background:var(--ground); color:var(--text); font-family:var(--fb); font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased}
+  .wrap{width:100%; max-width:var(--maxw); margin:0 auto;
+    padding-left:max(clamp(20px,3.5vw,36px), env(safe-area-inset-left,0px)); padding-right:max(clamp(20px,3.5vw,36px), env(safe-area-inset-right,0px))}
+  h1,h2,h3{text-wrap:balance; margin:0}
+  p,li{text-wrap:pretty}
+  .skip{position:absolute; left:16px; top:-100px; z-index:60; background:var(--text); color:var(--ground); font-weight:600; padding:10px 14px; border-radius:2px; text-decoration:none}
+  .skip:focus{top:12px}
+  a{color:inherit}
+  .eyebrow{font-family:var(--fm); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--amber); margin:0}
+  .em{font-style:italic; color:var(--amber)}
+  .tag{font-family:var(--fm); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim)}
+
+  header.bar{position:sticky; top:env(safe-area-inset-top,0px); z-index:50; background:rgba(20,17,28,.86); backdrop-filter:blur(12px); border-bottom:1px solid var(--line)}
+  .bar .wrap{display:flex; align-items:center; gap:16px; justify-content:space-between; padding-block:12px}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:600; letter-spacing:-.01em; font-size:16px}
+  .dot{width:9px; height:9px; border-radius:50%; background:var(--tally); box-shadow:0 0 0 4px rgba(255,74,28,.18)}
+  .bar nav{align-items:center; gap:22px; font-size:14px; color:var(--muted)}
+  .bar nav a{display:inline-block; padding:11px 0; text-decoration:none; transition:color var(--t) ease}
+  .bar nav a:hover{color:var(--text)}
+  .hide-sm{display:none}
+  @media(min-width:720px){ .hide-sm{display:flex} }
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:var(--fb); font-weight:600; font-size:15px; line-height:1;
+    padding:13px 20px; min-height:44px; border-radius:2px; border:1px solid transparent; cursor:pointer; text-decoration:none;
+    transition:transform var(--t) ease, background-color var(--t) ease, border-color var(--t) ease, filter var(--t) ease}
+  .btn-primary{background:var(--tally); color:#170B06; border-color:var(--tally)}
+  .btn-ghost{background:transparent; color:var(--text); border-color:var(--line-strong)}
+  @media(hover:hover){ .btn-primary:hover{transform:translateY(-1px); background:#FF5F35} .btn-ghost:hover{border-color:var(--text)} }
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn-sm{padding:10px 15px; font-size:14px}
+  .btn,.verdict button,.switch button,.chip,summary,input,textarea,.ask{touch-action:manipulation}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px}
+
+  .hero{padding-block:clamp(36px,6vw,72px) clamp(40px,6vw,80px); border-bottom:1px solid var(--line)}
+  h1.hook{font-family:var(--fd); font-weight:400; font-size:clamp(40px,6.4vw,76px); line-height:1.02; letter-spacing:-.015em; margin-top:18px; max-width:16em}
+  .h1-kw{display:block; font-family:var(--fb); font-weight:500; font-size:clamp(15px,1.6vw,18px); line-height:1.45; letter-spacing:0; color:var(--amber); margin-top:16px; max-width:34em}
+  .sub{color:var(--muted); font-size:clamp(17px,2vw,20px); max-width:36em; margin-top:20px}
+  .sub b{color:var(--text); font-weight:600}
+
+  .switch{display:inline-flex; margin-top:32px; border:1px solid var(--line-strong); border-radius:2px; flex-wrap:wrap}
+  .switch button{background:transparent; border:0; color:var(--muted); font-family:var(--fb); font-weight:600; font-size:15px; padding:0 18px; min-height:48px; cursor:pointer; border-right:1px solid var(--line); transition:background-color var(--t) ease, color var(--t) ease}
+  .switch button:last-child{border-right:0}
+  .switch button:hover:not([aria-selected="true"]){color:var(--text); background:var(--surface2)}
+  .switch button[aria-selected="true"]{background:var(--text); color:var(--ground)}
+  @media(max-width:479px){ .switch{display:flex; width:100%} .switch button{flex:1 1 0; padding-inline:8px; font-size:14px} }
+
+  .form-card{margin-top:18px; background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:clamp(20px,3vw,28px); max-width:780px}
+  .form-card h2{font-family:var(--fb); font-size:17px; font-weight:600}
+  .form-note{color:var(--dim); font-size:13.5px; margin:6px 0 18px}
+  .fields{display:grid; gap:12px; grid-template-columns:1fr}
+  @media(min-width:560px){ .fields{grid-template-columns:1fr 1fr} .span2{grid-column:1/-1} }
+  label{display:block; font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:6px}
+  input,textarea{width:100%; font-family:var(--fb); font-size:16px; color:var(--text); min-height:44px; background:var(--ground); border:1px solid rgba(244,238,230,.40); border-radius:2px; padding:12px 13px; transition:border-color var(--t) ease}
+  textarea{resize:vertical; min-height:88px}
+  input[aria-invalid="true"],textarea[aria-invalid="true"]{border-color:var(--tally)}
+  input:focus,textarea:focus{border-color:var(--amber)}
+  .opt{text-transform:none; letter-spacing:0}
+  .ferr{color:var(--tally); font-size:13.5px; margin:6px 0 0}
+  .submit-row{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:18px}
+  .submit-row small{color:var(--dim); font-size:13px}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
+  .chip{font-family:var(--fb); font-size:14px; color:var(--muted); background:transparent; border:1px dashed var(--line-strong); border-radius:2px; padding:8px 12px; min-height:40px; cursor:pointer; text-align:left}
+  @media(hover:hover){ .chip:hover{color:var(--text); border-color:var(--text)} }
+
+  .run{margin-top:30px}
+  .run-h{font-family:var(--fd); font-weight:400; font-size:clamp(28px,3.6vw,40px); line-height:1.1}
+  .howto{list-style:none; display:grid; gap:14px; margin:20px 0 0; padding:0; grid-template-columns:1fr}
+  @media(min-width:900px){ .howto{grid-template-columns:repeat(3,1fr)} }
+  .howto li{border-top:2px solid var(--line-strong); padding-top:10px; color:var(--muted); font-size:15px}
+  .howto li:first-child{border-top-color:var(--tally)}
+  .howto b{color:var(--text); font-weight:600}
+  .prompts{display:grid; gap:16px; margin-top:20px}
+  .pq{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:clamp(16px,2.4vw,22px)}
+  .pq-head{display:flex; gap:12px; align-items:flex-start}
+  .pq-n{font-family:var(--fm); font-size:12px; letter-spacing:.14em; color:var(--amber); padding-top:6px; flex:0 0 auto}
+  .pq-text{flex:1; font-size:18px; font-weight:500; margin:0; line-height:1.4; overflow-wrap:anywhere}
+  .pq-kind{display:block; font-family:var(--fm); font-size:12px; font-weight:400; letter-spacing:.08em; color:var(--dim); margin-top:4px}
+  .eng-grid{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:14px; grid-template-columns:1fr}
+  @media(min-width:900px){ .eng-grid{grid-template-columns:repeat(2,1fr)} }
+  .eng{background:var(--surface); display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; padding:6px 8px 6px 12px}
+  .ask{flex:1 1 6em; min-height:44px; display:flex; flex-direction:column; justify-content:center; text-decoration:none; font-weight:600; font-size:15px; line-height:1.25}
+  .ask span{font-family:var(--fm); font-weight:400; font-size:12px; color:var(--dim)}
+  @media(hover:hover){ .ask:hover{color:var(--amber)} }
+  .verdict{display:inline-flex; border:1px solid var(--line-strong); border-radius:2px; flex:0 0 auto}
+  .verdict button{min-height:44px; padding:0 11px; background:transparent; border:0; color:var(--muted); font-family:var(--fb); font-weight:600; font-size:14px; cursor:pointer; transition:background-color var(--t) ease, color var(--t) ease}
+  .verdict button + button{border-left:1px solid var(--line-strong)}
+  @media(hover:hover){ .verdict button:hover{color:var(--text)} }
+  .verdict button[data-v="right"][aria-pressed="true"],.verdict button[data-v="yes"][aria-pressed="true"]{background:var(--mint); color:#0B1A15}
+  .verdict button[data-v="wrong"][aria-pressed="true"]{background:var(--tally); color:#170B06}
+  .verdict button[data-v="none"][aria-pressed="true"],.verdict button[data-v="no"][aria-pressed="true"]{background:var(--text); color:var(--ground)}
+  .copied{flex-basis:100%; font-size:13px; color:var(--mint); margin:0 0 4px}
+
+  .askrow{display:grid; gap:8px; grid-template-columns:repeat(2,1fr); margin-top:18px}
+  @media(min-width:720px){ .askrow{grid-template-columns:repeat(4,1fr)} }
+  .askrow .ask{border:1px solid var(--line-strong); border-radius:2px; padding:8px 14px; min-height:56px}
+  .askrow .copied{grid-column:1/-1}
+  .answers{display:grid; gap:12px; grid-template-columns:1fr; margin-top:22px}
+  @media(min-width:720px){ .answers{grid-template-columns:repeat(2,1fr)} }
+  .ans{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:16px}
+  .ans h3{font-family:var(--fb); font-size:16px; font-weight:600}
+  .ans .row{display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; margin-top:12px}
+  .ans .row span{font-size:14px; color:var(--muted)}
+
+  .result{display:grid; gap:16px; margin-top:24px; grid-template-columns:1fr}
+  @media(min-width:900px){ .result{grid-template-columns:1fr 1fr} }
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:clamp(18px,2.6vw,26px)}
+  .card h3{font-family:var(--fb); font-size:16px; font-weight:600}
+  .card h3 + *{margin-top:10px}
+  .card h3:not(:first-child){margin-top:22px}
+  .card > p{color:var(--muted); margin:10px 0 0}
+  .big{font-family:var(--fd); font-size:clamp(56px,8vw,88px); line-height:1; font-variant-numeric:tabular-nums; margin-top:10px}
+  .big .of{font-size:.42em; color:var(--muted)}
+  .meter{display:flex; height:8px; background:var(--surface2); border-radius:1px; margin-top:16px; overflow:hidden}
+  .meter i{display:block; height:100%; width:0; transition:width var(--t) ease}
+  .meter .m-right{background:var(--mint)} .meter .m-wrong{background:var(--tally)}
+  .legend{display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:10px; font-family:var(--fm); font-size:13px; color:var(--muted)}
+  .legend b{color:var(--text); font-weight:500}
+  .by-engine{list-style:none; padding:0; margin:16px 0 0; display:grid; grid-template-columns:repeat(2,1fr); gap:8px 16px}
+  .by-engine li{font-family:var(--fm); font-size:13px; color:var(--muted); border-top:1px solid var(--line); padding-top:8px; display:flex; justify-content:space-between; gap:8px}
+  .by-engine b{color:var(--text); font-weight:500}
+  .rank{list-style:none; padding:0; margin:0; display:grid}
+  .rank li{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:6px 12px; border-top:1px solid var(--line); padding:9px 0; font-size:15px; overflow-wrap:anywhere}
+  .rank li.empty{color:var(--dim); font-size:14px; display:block}
+  .badges{display:flex; flex-wrap:wrap; gap:4px}
+  .badges span{font-family:var(--fm); font-size:12px; padding:2px 6px; border:1px solid var(--line-strong); border-radius:2px; color:var(--muted)}
+  .rank.agree .badges span{border-color:var(--mint); color:var(--mint)}
+  .tips{margin:12px 0 0; padding-left:1.1em; color:var(--muted); font-size:15px; display:grid; gap:8px}
+  .caution{color:var(--dim); font-size:14px; margin-top:14px}
+  .wide{grid-column:1/-1}
+  .share{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px}
+
+  section{padding-block:clamp(52px,7vw,88px); border-bottom:1px solid var(--line)}
+  section.last{border-bottom:0}
+  .lede{font-family:var(--fd); font-weight:400; font-size:clamp(30px,4.2vw,48px); line-height:1.08; letter-spacing:-.01em; margin-top:14px}
+  .said{color:var(--muted); max-width:58ch; margin-top:18px}
+  .facts,.steps{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; grid-template-columns:1fr}
+  @media(min-width:900px){ .facts,.steps{grid-template-columns:repeat(3,1fr)} }
+  .fact,.step{background:var(--ground); padding:26px 22px}
+  .fact .n{font-family:var(--fd); font-size:clamp(28px,3.4vw,40px); line-height:1; color:var(--amber)}
+  .fact p,.step p{color:var(--muted); font-size:15px; margin:10px 0 0}
+  .step .k{font-family:var(--fm); font-size:12px; letter-spacing:.16em; color:var(--amber)}
+  .step h3{font-family:var(--fb); font-size:18px; font-weight:600; margin-top:10px}
+
+  details{border-bottom:1px solid var(--line)}
+  details summary{cursor:pointer; font-weight:600; font-size:17px; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:18px 0; min-height:44px; transition:color var(--t) ease}
+  details summary:hover{color:var(--amber)}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+" / ""; color:var(--amber); font-family:var(--fm)}
+  details[open] summary::after{content:"–" / ""}
+  details p{color:var(--muted); font-size:15.5px; margin:0 0 18px; max-width:66ch}
+  .section-body{margin-top:28px}
+
+  .more{display:grid; gap:16px; grid-template-columns:1fr; margin-top:30px}
+  @media(min-width:900px){ .more{grid-template-columns:1fr 1fr} }
+  .more a{display:block; text-decoration:none; background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:24px; transition:border-color var(--t) ease}
+  .more a:hover{border-color:var(--amber)}
+  .more h3{font-family:var(--fd); font-weight:400; font-size:30px; line-height:1.1; margin-top:8px}
+  .more p{color:var(--muted); font-size:15px; margin:10px 0 0}
+  .more .go{display:inline-block; margin-top:14px; color:var(--amber); font-weight:600; font-size:15px}
+  @media(max-width:719px){ .fact p,.step p,.howto li,.more p{font-size:16px} }
+  @media(prefers-reduced-motion:reduce){ .btn:hover,.btn:active{transform:none} .meter i{transition:none} }
+  footer{border-top:1px solid var(--line); padding-block:30px; color:var(--dim); font-size:13.5px}
+  footer .wrap{display:flex; flex-wrap:wrap; gap:12px 24px; justify-content:space-between}
+  footer a{color:var(--muted); text-underline-offset:3px; display:inline-block; padding:12px 0; margin:-12px 0}
+</style>
+<script type="application/ld+json">{}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+  <div class="wrap">
+    <div class="brand"><span class="dot" aria-hidden="true"></span> AI Check</div>
+    <nav class="hide-sm" aria-label="Sections">
+      <a href="#why">Why check</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="#tool">Start free</a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="tool">
+    <div class="wrap">
+      <p class="eyebrow">Free · No sign-up · Runs in your browser</p>
+      <h1 class="hook">What does AI say about <span class="em">you</span>? And do the AIs even agree? <span class="h1-kw">Free AI check: ChatGPT, Gemini, Perplexity and Google AI, side by side.</span></h1>
+      <p class="sub">AI assistants answer with confidence, and they don't always agree. Check what they say about you, or ask all four the same question. <b>Mark what each one said and see where they match.</b></p>
+
+      <div class="switch" role="tablist" aria-label="Choose a check">
+        <button role="tab" id="tab-me" aria-controls="panel-me" aria-selected="true">What AI says about me</button>
+        <button role="tab" id="tab-ask" aria-controls="panel-ask" aria-selected="false" tabindex="-1">Ask four AIs</button>
+      </div>
+
+      <!-- Tab 1: what AI says about a person -->
+      <div id="panel-me" role="tabpanel" aria-labelledby="tab-me">
+        <form class="form-card" id="me-form" novalidate>
+          <h2>Check what AI says about you</h2>
+          <p class="form-note">Only your name is needed; the rest helps the assistants find the right you. It stays in your browser — nothing is sent to us.</p>
+          <div class="fields">
+            <div>
+              <label for="m-name">Your name <span class="opt">(required)</span></label>
+              <input id="m-name" required aria-required="true" autocomplete="name" placeholder="As people search for you">
+              <p class="ferr" id="m-name-err" hidden></p>
+            </div>
+            <div>
+              <label for="m-job">What you do <span class="opt">(optional)</span></label>
+              <input id="m-job" autocomplete="organization-title" placeholder="e.g. architect, fitness coach">
+            </div>
+            <div>
+              <label for="m-city">City <span class="opt">(optional)</span></label>
+              <input id="m-city" autocomplete="address-level2" placeholder="e.g. Dubai">
+            </div>
+            <div>
+              <label for="m-known">Also known for <span class="opt">(optional)</span></label>
+              <input id="m-known" placeholder="Company, school or @handle">
+            </div>
+          </div>
+          <div class="submit-row">
+            <button class="btn btn-primary" type="submit">Check what AI says</button>
+            <small>Takes about five minutes.</small>
+          </div>
+        </form>
+
+        <div class="run" id="me-run" hidden>
+          <h2 class="run-h" id="me-h">What AI says about <span id="me-who">you</span></h2>
+          <ol class="howto">
+            <li><b>Ask.</b> Each assistant button copies the question and opens that assistant in a new tab. If the box there is empty, paste.</li>
+            <li><b>Mark.</b> <b>Right</b>: it knows you and the facts are correct. <b>Wrong</b>: wrong facts, or someone else with your name. <b>No idea</b>: it doesn't know you.</li>
+            <li><b>Read your result.</b> Only the answers you mark count. Skip any assistant you don't use.</li>
+          </ol>
+          <div class="prompts" id="me-prompts"></div>
+          <div class="result">
+            <div class="card">
+              <p class="eyebrow">Your AI check</p>
+              <div class="big"><span id="me-right">0</span><span class="of"> of <span id="me-checked">0</span></span></div>
+              <p id="me-line">Mark at least one answer above to see your result.</p>
+              <div class="meter" aria-hidden="true"><i class="m-right" id="me-m-right"></i><i class="m-wrong" id="me-m-wrong"></i></div>
+              <div class="legend"><span>Right <b id="me-c-right">0</b></span><span>Wrong <b id="me-c-wrong">0</b></span><span>No idea <b id="me-c-none">0</b></span></div>
+              <ul class="by-engine" id="me-engines"></ul>
+              <div class="share">
+                <a class="btn btn-ghost btn-sm" id="me-wa" href="#" target="_blank" rel="noopener">Share on WhatsApp</a>
+                <button class="btn btn-ghost btn-sm" type="button" id="me-copy">Copy result</button>
+              </div>
+            </div>
+            <div class="card">
+              <h3>What usually helps AI know you</h3>
+              <ul class="tips">
+                <li>Describe yourself the same way everywhere — LinkedIn, Instagram, your own page: same name, same job, same city.</li>
+                <li>Have one page that says plainly who you are, what you do and where.</li>
+                <li>Get mentioned where others look: your employer's site, event pages, local press, professional bodies.</li>
+                <li>If an assistant says something false about you, use the feedback button on that answer.</li>
+              </ul>
+              <p class="caution">General practice, not a guarantee: nobody controls what an AI assistant says.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: one question, four assistants -->
+      <div id="panel-ask" role="tabpanel" aria-labelledby="tab-ask" hidden>
+        <form class="form-card" id="ask-form" novalidate>
+          <h2>Ask four AIs the same question</h2>
+          <p class="form-note">Then note what each one said, and see where they agree. Stays in your browser.</p>
+          <label for="a-q">Your question</label>
+          <textarea id="a-q" maxlength="300" placeholder="e.g. Best area in Dubai for a family with young kids?"></textarea>
+          <p class="ferr" id="a-q-err" hidden></p>
+          <div class="chips" aria-label="Example questions">
+            <button type="button" class="chip">Best area in Dubai for a family with young kids?</button>
+            <button type="button" class="chip">Which phone has the best camera under AED 2,500?</button>
+            <button type="button" class="chip">Is it better to rent or buy a flat in Dubai right now?</button>
+            <button type="button" class="chip">Best budget laptop for a university student?</button>
+          </div>
+          <div class="submit-row">
+            <button class="btn btn-primary" type="submit">Ask four AIs</button>
+            <small>Free. No sign-up.</small>
+          </div>
+        </form>
+
+        <div class="run" id="ask-run" hidden>
+          <h2 class="run-h">“<span id="ask-q"></span>”</h2>
+          <ol class="howto">
+            <li><b>Ask.</b> Each button copies your question and opens that assistant in a new tab. If the box there is empty, paste.</li>
+            <li><b>Note the picks.</b> Type each assistant's main answer or top picks, separated by commas.</li>
+            <li><b>Compare.</b> Picks named by two or more assistants rise to the top.</li>
+          </ol>
+          <div class="askrow" id="ask-row"></div>
+          <div class="answers" id="ask-answers"></div>
+          <div class="result">
+            <div class="card">
+              <h3>Where they agree</h3>
+              <ol class="rank agree" id="ask-agree"></ol>
+              <h3>Only one AI said</h3>
+              <ul class="rank" id="ask-single"></ul>
+            </div>
+            <div class="card">
+              <p class="eyebrow">Agreement</p>
+              <div class="big"><span id="ask-n">0</span><span class="of"> shared <span id="ask-n-word">picks</span></span></div>
+              <p id="ask-line">Type each assistant's picks to compare them.</p>
+              <ul class="by-engine" id="ask-sources"></ul>
+              <p class="caution">AI answers can be wrong or out of date, even when they agree. For health, money or legal questions, open the sources or ask a professional.</p>
+              <div class="share">
+                <a class="btn btn-ghost btn-sm" id="ask-wa" href="#" target="_blank" rel="noopener">Share on WhatsApp</a>
+                <button class="btn btn-ghost btn-sm" type="button" id="ask-copy">Copy comparison</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="why" class="light">
+    <div class="wrap">
+      <p class="eyebrow">Why check</p>
+      <h2 class="lede">AI answers sound sure. That doesn't make them right.</h2>
+      <p class="said">More people now ask an assistant before they search, hire, buy or meet someone. It's worth knowing what those answers say — about you, and about the things you're deciding on.</p>
+      <div class="facts">
+        <div class="fact"><div class="n">Mix-ups</div><p>Ask about a person and an assistant can blend two people with the same name, or fill gaps with guesses. Checking is the only way to know.</p></div>
+        <div class="fact"><div class="n">Disagreement</div><p>The same question in ChatGPT, Gemini, Perplexity and Google can give four different shortlists. Where they agree is worth a closer look; where they don't, check the sources.</p></div>
+        <div class="fact"><div class="n">Change</div><p>Answers shift with wording, location and time. A check today is a snapshot, so it's worth repeating.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2 class="lede">You ask. You read. You mark. The page does the counting.</h2>
+      <p class="said">AI Check is a free tool for checking what AI assistants say. It writes the questions, opens ChatGPT, Gemini, Perplexity and Google for you, and turns what you mark into a result you can keep or share.</p>
+      <div class="steps">
+        <div class="step"><div class="k">STEP 01</div><h3>Pick a check</h3><p>What AI says about you, or one question asked to four assistants.</p></div>
+        <div class="step"><div class="k">STEP 02</div><h3>Open each assistant</h3><p>One tap copies the question and opens the assistant in your own browser or app.</p></div>
+        <div class="step"><div class="k">STEP 03</div><h3>Mark and compare</h3><p>Mark what each said. Your result and where they agree build themselves as you go.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq" class="light">
+    <div class="wrap">
+      <p class="eyebrow">Straight answers</p>
+      <h2 class="lede">Questions about AI Check.</h2>
+      <div class="section-body">
+        <details><summary>Is AI Check free?</summary><p>Yes. No sign-up, no account and no limit. It runs in your browser.</p></details>
+        <details><summary>Do you see what I type?</summary><p>No. Your name, your question and your marks stay in your browser, saved only on your device so a refresh doesn't lose them. Nothing is sent to us. The assistants you open see the question you send them, under their own privacy policies.</p></details>
+        <details><summary>Why do I open each AI myself?</summary><p>So you see the real answer from the real product, in your own account, rather than a copy. It also means the tool costs nothing to run, which is why it is free.</p></details>
+        <details><summary>Which AI assistants does it use?</summary><p>ChatGPT, Gemini, Perplexity and Google (its AI Overview, when Google shows one). ChatGPT, Perplexity and Google open with the question filled in; for Gemini, paste the copied question.</p></details>
+        <details><summary>What can I do if AI says something wrong about me?</summary><p>Mark it Wrong so you can see how often it happens, then use the feedback button on that answer — each assistant has one. Describing yourself clearly and consistently on your own profiles gives assistants better material to work from, though nobody can guarantee what they will say.</p></details>
+        <details><summary>Why do the AIs give different answers?</summary><p>They are built differently, search the web differently or not at all, and draw on different sources. That is why comparing them is useful: agreement is a signal, disagreement is a reason to check the sources.</p></details>
+        <details><summary>Does it work on my phone?</summary><p>Yes. Each assistant opens in a new tab, or in its app if you have it. Come back to this tab to mark the answer; your marks are kept.</p></details>
+        <details><summary>Who made AI Check?</summary><p>FluoDigital, led by Rahul Soni and based in Dubai Silicon Oasis. For businesses, the same method powers the AI Invisibility Report, which checks whether AI recommends a business or its competitors.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section id="more" class="last">
+    <div class="wrap">
+      <p class="eyebrow">Going further</p>
+      <h2 class="lede">Want AI to recommend you, not just know you?</h2>
+      <div class="more">
+        <a href="https://workflowstacks.com/ai-visibility" data-to="ai-visibility"><span class="tag">For businesses</span><h3>AI Visibility Audit</h3><p>See which competitors ChatGPT, Gemini, Perplexity and Google AI recommend instead of your business — free scan, then a full report and 90-day plan.</p><span class="go">Scan my business free →</span></a>
+        <a href="https://workflowstacks.com/ai-avatar" data-to="ai-avatar"><span class="tag">For founders</span><h3>Founder Avatar Studio</h3><p>Weekly videos of you, in English and Arabic, made from one 45-minute capture — so people, and AI, know who you are.</p><span class="go">See how it works →</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>AI Check — free, by FluoDigital</span>
+    <span>Rahul Soni · Founder &amp; Director</span>
+    <a href="https://workflowstacks.com/privacy">Privacy</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var SITE = "https://workflowstacks.com/ai-check";
+
+  /* Measurement: empty GTM_ID loads nothing; events still go to window.dataLayer.
+     Never pushes names, questions or picks — only which tool and which assistant. */
+  var GTM_ID = "";
+  window.dataLayer = window.dataLayer || [];
+  function track(name, params){ var o = { event: name }; if (params) for (var k in params) o[k] = params[k]; window.dataLayer.push(o); }
+  if (/^GTM-[A-Z0-9]{4,12}$/.test(GTM_ID)) {
+    (function(w,d,s,l,i){ w[l].push({'gtm.start': new Date().getTime(), event: 'gtm.js'}); var f = d.getElementsByTagName(s)[0], j = d.createElement(s); j.async = true; j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i; f.parentNode.insertBefore(j, f); })(window, document, 'script', 'dataLayer', GTM_ID);
+  }
+
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  function $(id){ return document.getElementById(id); }
+  function val(id){ var e = $(id); return e ? e.value.replace(/\s+/g, ' ').trim() : ''; }
+  function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function an(w){ return /^[aeiou]/i.test(w) ? 'an' : 'a'; }
+  function load(key){ try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch (e) { return null; } }
+  function store(key, v){ try { localStorage.setItem(key, JSON.stringify(v)); } catch (e) {} }
+  function copyText(text, done){
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function(){ done(true); }, function(){ done(false); });
+    else done(false);
+  }
+
+  /* Same four assistants and deep links as the AI visibility scan: ChatGPT, Perplexity
+     and Google take the question in the URL; Gemini opens empty and the copied text is
+     pasted. Every Ask tap copies the question too. */
+  var ENGINES = [
+    { id: 'chatgpt', name: 'ChatGPT', sub: '', url: function(q){ return 'https://chatgpt.com/?q=' + encodeURIComponent(q); } },
+    { id: 'gemini', name: 'Gemini', sub: 'paste the question', url: function(){ return 'https://gemini.google.com/app'; } },
+    { id: 'perplexity', name: 'Perplexity', sub: '', url: function(q){ return 'https://www.perplexity.ai/search?q=' + encodeURIComponent(q); } },
+    { id: 'google', name: 'Google', sub: 'AI Overview, if shown', url: function(q){ return 'https://www.google.com/search?q=' + encodeURIComponent(q); } }
+  ];
+
+  function askLink(engine, q, tool, label){
+    var a = el('a', 'ask');
+    a.href = engine.url(q); a.target = '_blank'; a.rel = 'noopener';
+    a.appendChild(document.createTextNode(engine.name + ' ↗'));
+    if (engine.sub) a.appendChild(el('span', null, engine.sub));
+    a.setAttribute('aria-label', 'Ask ' + engine.name + (label ? ', ' + label : '') + ' (opens in a new tab, copies the question)');
+    a.addEventListener('click', function(){
+      var host = a.parentNode, note = host.querySelector('.copied');
+      copyText(q, function(ok){
+        if (!note) { note = el('p', 'copied'); host.appendChild(note); }
+        note.textContent = ok ? 'Question copied — paste it if the box is empty.' : 'Copy the question above if the box is empty.';
+        clearTimeout(note._t); note._t = setTimeout(function(){ if (note.parentNode) note.parentNode.removeChild(note); }, 4000);
+      });
+      track('check_ask', { tool: tool, engine: engine.id });
+    });
+    return a;
+  }
+
+  /* A row of toggle buttons where tapping the pressed one clears it. */
+  function verdict(options, current, label, onChange){
+    var g = el('div', 'verdict'); g.setAttribute('role', 'group'); g.setAttribute('aria-label', label);
+    options.forEach(function(o){
+      var b = el('button', null, o[1]); b.type = 'button'; b.setAttribute('data-v', o[0]); b.setAttribute('aria-pressed', String(current === o[0]));
+      b.addEventListener('click', function(){
+        var next = b.getAttribute('aria-pressed') === 'true' ? null : o[0];
+        Array.prototype.forEach.call(g.children, function(x){ x.setAttribute('aria-pressed', String(x.getAttribute('data-v') === next)); });
+        onChange(next);
+      });
+      g.appendChild(b);
+    });
+    return g;
+  }
+
+  function setErr(id, msg){
+    var input = $(id), slot = $(id + '-err');
+    slot.textContent = msg; slot.hidden = !msg;
+    if (msg) { input.setAttribute('aria-invalid', 'true'); input.setAttribute('aria-describedby', id + '-err'); }
+    else { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-describedby'); }
+  }
+  function waShare(a, text){ a.href = 'https://wa.me/?text=' + encodeURIComponent(text); }
+  function copyBtn(btn, getText, idle){
+    btn.addEventListener('click', function(){ copyText(getText(), function(ok){ btn.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(function(){ btn.textContent = idle; }, 1800); }); });
+  }
+  function scrollToEl(e){ e.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); e.setAttribute('tabindex', '-1'); e.focus({ preventScroll: true }); }
+
+  /* ---------------- Tab 1: what AI says about me ---------------- */
+  var ME_KEY = 'aicheck-me-v1';
+  var me = { name: '', job: '', city: '', known: '', prompts: [], marks: {} };
+  var ID_OPTS = [['right', 'Right'], ['wrong', 'Wrong'], ['none', 'No idea']];
+  var FIND_OPTS = [['right', 'Named me'], ['none', 'Not named']];
+
+  function mePrompts(s){
+    var who = s.name + (s.job ? ', ' + s.job : '') + (s.city ? (s.job ? ' in ' : ' from ') + s.city : '');
+    var p = [
+      { q: 'Who is ' + who + '?', kind: 'id' },
+      { q: 'What is ' + s.name + (s.known ? ' (' + s.known + ')' : '') + ' known for?', kind: 'id' },
+      { q: 'What do people say about ' + s.name + (s.city ? ' in ' + s.city : '') + '?', kind: 'id' }
+    ];
+    if (s.job && s.city) p.push({ q: 'Can you recommend ' + an(s.job) + ' ' + s.job + ' in ' + s.city + '?', kind: 'find' });
+    return p;
+  }
+
+  function renderMe(){
+    $('me-who').textContent = me.name;
+    var box = $('me-prompts'); box.textContent = '';
+    me.prompts.forEach(function(p, i){
+      var card = el('article', 'pq'), head = el('div', 'pq-head');
+      head.appendChild(el('span', 'pq-n', '0' + (i + 1)));
+      var t = el('p', 'pq-text', p.q);
+      t.appendChild(el('span', 'pq-kind', p.kind === 'find' ? 'Does AI recommend you without being told your name?' : 'Does AI know you, and get the facts right?'));
+      head.appendChild(t);
+      var cp = el('button', 'btn btn-ghost btn-sm', 'Copy'); cp.type = 'button'; cp.setAttribute('aria-label', 'Copy question ' + (i + 1));
+      cp.addEventListener('click', function(){ copyText(p.q, function(ok){ cp.textContent = ok ? 'Copied' : 'Select it'; setTimeout(function(){ cp.textContent = 'Copy'; }, 1800); }); });
+      head.appendChild(cp); card.appendChild(head);
+      var grid = el('div', 'eng-grid');
+      ENGINES.forEach(function(e){
+        var cell = el('div', 'eng'), k = i + ':' + e.id;
+        cell.appendChild(askLink(e, p.q, 'me', 'question ' + (i + 1)));
+        cell.appendChild(verdict(p.kind === 'find' ? FIND_OPTS : ID_OPTS, me.marks[k] || null, e.name + ', question ' + (i + 1), function(v){
+          if (v) me.marks[k] = v; else delete me.marks[k];
+          store(ME_KEY, me); recomputeMe();
+        }));
+        grid.appendChild(cell);
+      });
+      card.appendChild(grid); box.appendChild(card);
+    });
+    $('me-run').hidden = false;
+    recomputeMe();
+  }
+
+  function tallyMe(){
+    var t = { right: 0, wrong: 0, none: 0, checked: 0, by: {} };
+    ENGINES.forEach(function(e){ t.by[e.id] = { right: 0, checked: 0 }; });
+    Object.keys(me.marks).forEach(function(k){
+      var v = me.marks[k], eid = k.split(':')[1];
+      if (!t.by[eid] || !(v in t)) return;
+      t[v]++; t.checked++; t.by[eid].checked++; if (v === 'right') t.by[eid].right++;
+    });
+    return t;
+  }
+  function meShareText(t){
+    return 'I checked what ChatGPT, Gemini, Perplexity and Google say about me: they got me right in ' + t.right + ' of ' + t.checked + ' answers' +
+      (t.wrong ? ', and wrong in ' + t.wrong : '') + '. Check what AI says about you (free): ' + SITE;
+  }
+  function recomputeMe(){
+    var t = tallyMe();
+    $('me-right').textContent = t.right; $('me-checked').textContent = t.checked;
+    $('me-c-right').textContent = t.right; $('me-c-wrong').textContent = t.wrong; $('me-c-none').textContent = t.none;
+    $('me-m-right').style.width = (t.checked ? 100 * t.right / t.checked : 0) + '%';
+    $('me-m-wrong').style.width = (t.checked ? 100 * t.wrong / t.checked : 0) + '%';
+    $('me-line').textContent = !t.checked ? 'Mark at least one answer above to see your result.'
+      : t.wrong ? 'AI got you right in ' + t.right + ' of the ' + t.checked + ' answers you checked — and wrong in ' + t.wrong + '. The wrong ones are worth fixing first.'
+      : t.right === 0 ? 'None of the ' + t.checked + ' answers you checked knew you yet.'
+      : 'AI got you right in ' + t.right + ' of the ' + t.checked + ' answers you checked.';
+    var ul = $('me-engines'); ul.textContent = '';
+    ENGINES.forEach(function(e){ var c = t.by[e.id], li = el('li'); li.appendChild(document.createTextNode(e.name)); li.appendChild(el('b', null, c.checked ? c.right + ' / ' + c.checked + ' right' : '—')); ul.appendChild(li); });
+    waShare($('me-wa'), meShareText(t));
+    return t;
+  }
+
+  $('m-name').addEventListener('input', function(){ if ($('m-name').getAttribute('aria-invalid')) setErr('m-name', ''); });
+  $('me-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    if (!val('m-name')) { setErr('m-name', 'Add your name — it is what the assistants are asked about.'); $('m-name').focus(); return; }
+    setErr('m-name', '');
+    var s = { name: val('m-name').slice(0, 80), job: val('m-job').slice(0, 60), city: val('m-city').slice(0, 60), known: val('m-known').slice(0, 80) };
+    var prompts = mePrompts(s);
+    if (JSON.stringify(prompts) !== JSON.stringify(me.prompts)) me.marks = {};
+    me.name = s.name; me.job = s.job; me.city = s.city; me.known = s.known; me.prompts = prompts;
+    store(ME_KEY, me); renderMe();
+    track('check_start', { tool: 'me', has_job: !!s.job, has_city: !!s.city });
+    scrollToEl($('me-h'));
+  });
+  $('me-wa').addEventListener('click', function(){ track('share', { tool: 'me', channel: 'whatsapp' }); });
+  copyBtn($('me-copy'), function(){ track('share', { tool: 'me', channel: 'copy' }); return meShareText(tallyMe()); }, 'Copy result');
+
+  /* ---------------- Tab 2: ask four AIs ---------------- */
+  var ASK_KEY = 'aicheck-ask-v1';
+  var ask = { q: '', picks: {}, sources: {} };
+
+  function renderAsk(){
+    $('ask-q').textContent = ask.q;
+    var row = $('ask-row'); row.textContent = '';
+    ENGINES.forEach(function(e){ row.appendChild(askLink(e, ask.q, 'ask')); });
+    var box = $('ask-answers'); box.textContent = '';
+    ENGINES.forEach(function(e){
+      var card = el('div', 'ans');
+      card.appendChild(el('h3', null, e.name));
+      var lab = el('label', null, 'Its answer or top picks '); lab.htmlFor = 'p-' + e.id; lab.style.marginTop = '10px';
+      lab.appendChild(el('span', 'opt', '(separate with commas)'));
+      var inp = el('input'); inp.id = 'p-' + e.id; inp.placeholder = 'e.g. Arabian Ranches, Mirdif'; inp.value = ask.picks[e.id] || '';
+      inp.addEventListener('input', function(){ ask.picks[e.id] = inp.value; store(ASK_KEY, ask); recomputeAsk(); });
+      card.appendChild(lab); card.appendChild(inp);
+      var r = el('div', 'row'); r.appendChild(el('span', null, 'Did it show its sources?'));
+      r.appendChild(verdict([['yes', 'Yes'], ['no', 'No']], ask.sources[e.id] || null, e.name + ': showed sources?', function(v){
+        if (v) ask.sources[e.id] = v; else delete ask.sources[e.id];
+        store(ASK_KEY, ask); recomputeAsk();
+      }));
+      card.appendChild(r); box.appendChild(card);
+    });
+    $('ask-run').hidden = false;
+    recomputeAsk();
+  }
+
+  /* Picks are matched case-insensitively, ignoring surrounding punctuation and a leading
+     "the", and each assistant counts once per pick. */
+  function tallyAsk(){
+    var items = [], byKey = {};
+    ENGINES.forEach(function(e){
+      var seen = {};
+      String(ask.picks[e.id] || '').split(/[,;\n]+/).forEach(function(raw){
+        var name = raw.replace(/\s+/g, ' ').trim().replace(/^["'“‘(]+|["'”’).:!?]+$/g, '').trim();
+        var key = name.toLowerCase().replace(/^the /, '');
+        if (key.length < 2 || seen[key]) return;
+        seen[key] = true;
+        if (!byKey[key]) { byKey[key] = { name: name, engines: [] }; items.push(byKey[key]); }
+        byKey[key].engines.push(e.name);
+      });
+    });
+    items.sort(function(a, b){ return b.engines.length - a.engines.length; });
+    var answered = ENGINES.filter(function(e){ return String(ask.picks[e.id] || '').trim(); }).length;
+    var src = { yes: 0, checked: 0 };
+    ENGINES.forEach(function(e){ var v = ask.sources[e.id]; if (v) { src.checked++; if (v === 'yes') src.yes++; } });
+    return { agree: items.filter(function(x){ return x.engines.length > 1; }), single: items.filter(function(x){ return x.engines.length === 1; }), answered: answered, src: src };
+  }
+  function rankList(id, list, emptyText){
+    var ol = $(id); ol.textContent = '';
+    if (!list.length) { ol.appendChild(el('li', 'empty', emptyText)); return; }
+    list.forEach(function(x){
+      var li = el('li'); li.appendChild(el('span', null, x.name));
+      var b = el('span', 'badges'); x.engines.forEach(function(n){ b.appendChild(el('span', null, n)); }); li.appendChild(b);
+      ol.appendChild(li);
+    });
+  }
+  function askShareText(t){
+    var agreed = t.agree.slice(0, 5).map(function(x){ return x.name; });
+    return 'I asked ChatGPT, Gemini, Perplexity and Google: “' + ask.q + '”. ' +
+      (agreed.length ? 'Two or more agreed on: ' + agreed.join(', ') + '.' : 'They all said something different.') +
+      ' Compare the answers yourself (free): ' + SITE + '?q=' + encodeURIComponent(ask.q) + '#ask';
+  }
+  function recomputeAsk(){
+    var t = tallyAsk();
+    rankList('ask-agree', t.agree, t.answered < 2 ? 'Fill in at least two assistants to compare.' : 'No overlap — each assistant named something different. A reason to check the sources.');
+    rankList('ask-single', t.single, 'Picks only one assistant named show up here.');
+    $('ask-n').textContent = t.agree.length; $('ask-n-word').textContent = t.agree.length === 1 ? 'pick' : 'picks';
+    $('ask-line').textContent = t.answered < 2 ? 'Type each assistant\'s picks to compare them.'
+      : t.agree.length ? t.agree.length + (t.agree.length === 1 ? ' pick was' : ' picks were') + ' named by two or more of the ' + t.answered + ' assistants you checked.'
+      : 'The ' + t.answered + ' assistants you checked named nothing in common.';
+    var ul = $('ask-sources'); ul.textContent = '';
+    var li = el('li'); li.appendChild(document.createTextNode('Showed sources')); li.appendChild(el('b', null, t.src.checked ? t.src.yes + ' / ' + t.src.checked : '—')); ul.appendChild(li);
+    var li2 = el('li'); li2.appendChild(document.createTextNode('Answered')); li2.appendChild(el('b', null, t.answered + ' / 4')); ul.appendChild(li2);
+    waShare($('ask-wa'), askShareText(t));
+    return t;
+  }
+
+  $('a-q').addEventListener('input', function(){ if ($('a-q').getAttribute('aria-invalid')) setErr('a-q', ''); });
+  Array.prototype.forEach.call(document.querySelectorAll('.chip'), function(c){
+    c.addEventListener('click', function(){ $('a-q').value = c.textContent; setErr('a-q', ''); $('a-q').focus(); track('example_pick', { tool: 'ask' }); });
+  });
+  $('ask-form').addEventListener('submit', function(e){
+    e.preventDefault();
+    var q = val('a-q').slice(0, 300);
+    if (q.length < 5) { setErr('a-q', 'Type a question, or tap one of the examples.'); $('a-q').focus(); return; }
+    setErr('a-q', '');
+    if (q !== ask.q) { ask.picks = {}; ask.sources = {}; }
+    ask.q = q; store(ASK_KEY, ask); renderAsk();
+    track('check_start', { tool: 'ask' });
+    scrollToEl($('ask-q').parentNode);
+  });
+  $('ask-wa').addEventListener('click', function(){ track('share', { tool: 'ask', channel: 'whatsapp' }); });
+  copyBtn($('ask-copy'), function(){ track('share', { tool: 'ask', channel: 'copy' }); return askShareText(tallyAsk()); }, 'Copy comparison');
+
+  /* ---------------- Tabs (WAI-ARIA, arrow keys, #me / #ask in the URL) ---------------- */
+  var tabs = [$('tab-me'), $('tab-ask')], panels = [$('panel-me'), $('panel-ask')];
+  function activate(i, push){
+    tabs.forEach(function(t, j){ t.setAttribute('aria-selected', String(i === j)); t.tabIndex = i === j ? 0 : -1; panels[j].hidden = i !== j; });
+    if (push) { try { history.replaceState(null, '', (i ? '#ask' : '#me')); } catch (e) {} }
+  }
+  tabs.forEach(function(b, i){
+    b.addEventListener('click', function(){ activate(i, true); track('tab', { tool: i ? 'ask' : 'me' }); });
+    b.addEventListener('keydown', function(e){
+      var j = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : e.key === 'Home' ? 0 : e.key === 'End' ? 1 : null;
+      if (j === null) return; e.preventDefault(); j = (j + 2) % 2; tabs[j].focus(); activate(j, true);
+    });
+  });
+
+  /* ---------------- Restore and prefill ---------------- */
+  var sm = load(ME_KEY);
+  if (sm && sm.name && sm.prompts && sm.prompts.length) {
+    me = { name: sm.name, job: sm.job || '', city: sm.city || '', known: sm.known || '', prompts: sm.prompts, marks: sm.marks || {} };
+    $('m-name').value = me.name; $('m-job').value = me.job; $('m-city').value = me.city; $('m-known').value = me.known;
+    renderMe();
+  }
+  var sa = load(ASK_KEY);
+  if (sa && sa.q) { ask = { q: sa.q, picks: sa.picks || {}, sources: sa.sources || {} }; $('a-q').value = ask.q; renderAsk(); }
+  /* ?q= fills the question box (shared comparison links); it never runs anything. */
+  var startTab = location.hash === '#ask' ? 1 : 0;
+  try { var q = new URLSearchParams(location.search).get('q'); if (q) { $('a-q').value = q.slice(0, 300); startTab = 1; } } catch (e) {}
+  activate(startTab, false);
+
+  Array.prototype.forEach.call(document.querySelectorAll('.more a'), function(a){
+    a.addEventListener('click', function(){ track('cross_click', { to: a.getAttribute('data-to') }); });
+  });
+})();
+</script>
+</body>
+</html>
