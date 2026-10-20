@@ -7,13 +7,52 @@
 //   npx workflowstacks subscribe <email>        the Monday digest, in your inbox
 //
 // Zero dependencies; Node 18+ (built-in fetch).
+//
+// Telemetry: a successful `add` is counted anonymously (skill slug + the
+// channel "cli", nothing else). WORKFLOWSTACKS_NO_TELEMETRY=1 turns it off.
 
-import { mkdir, writeFile } from 'node:fs/promises'
+import { access, mkdir, writeFile } from 'node:fs/promises'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
 
 const BASE = process.env.WORKFLOWSTACKS_BASE || 'https://workflowstacks.com'
 const [cmd, arg, ...rest] = process.argv.slice(2)
+
+// ── Anonymous install telemetry ──────────────────────────────────────────────
+// The same event the website's install buttons send (POST /api/track-install),
+// so CLI installs show up next to zip / deep-link / MCP in the channel stats.
+// No machine id, no path, no email. Honours WORKFLOWSTACKS_NO_TELEMETRY=1 and
+// the DO_NOT_TRACK=1 convention.
+const optedOut = (v) => /^(1|true|yes)$/i.test(String(v || '').trim())
+const NO_TELEMETRY = optedOut(process.env.WORKFLOWSTACKS_NO_TELEMETRY) || optedOut(process.env.DO_NOT_TRACK)
+const NOTICE_FILE = join(homedir(), '.config', 'workflowstacks', 'telemetry-notice')
+
+// Said once, the first time an install is counted. The marker file is what
+// makes it "once"; if the home directory is not writable it is said each time.
+async function telemetryNotice() {
+  if (NO_TELEMETRY) return
+  try { await access(NOTICE_FILE); return } catch {}
+  console.log('  Installs are counted anonymously (skill slug + "cli", nothing else). Opt out with WORKFLOWSTACKS_NO_TELEMETRY=1')
+  try {
+    await mkdir(dirname(NOTICE_FILE), { recursive: true })
+    await writeFile(NOTICE_FILE, `${new Date().toISOString()}\n`, 'utf8')
+  } catch {}
+}
+
+// Fire-and-forget: nothing waits on the result, a 3 s cap bounds how long the
+// process can linger, and every error is swallowed — a failed count must
+// never fail (or even be visible in) an install that already succeeded.
+function countInstall(slug) {
+  if (NO_TELEMETRY) return
+  try {
+    fetch(`${BASE}/api/track-install`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ skillId: slug, channel: 'cli' }),
+      signal: AbortSignal.timeout(3000),
+    }).catch(() => {})
+  } catch {}
+}
 
 function usage(code = 0) {
   console.log(`workflowstacks — install AI skills from ${BASE}
@@ -85,3 +124,7 @@ await writeFile(join(dir, 'SKILL.md'), markdown, 'utf8')
 console.log(`✓ Installed "${slug}" → ${join(dir, 'SKILL.md')}`)
 console.log(`  Claude Code picks it up automatically. Full guide: ${BASE}/skills/${slug}`)
 console.log(`  Tip: the five skills gaining the most stars each week → npx workflowstacks hot`)
+
+// Only after the file is on disk: an install that failed is never counted.
+await telemetryNotice()
+countInstall(slug)

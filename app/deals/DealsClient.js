@@ -59,7 +59,18 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
   const join = async (dealId) => {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return
     const res = await fetch('/api/deals/join', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dealId, email }) })
-    if (res.ok) { setJoined((j) => ({ ...j, [dealId]: true })); setDeals((ds) => ds.map((d) => d.id === dealId ? { ...d, slotsTaken: (d.slotsTaken || 0) + 1 } : d)); setOpenId(null); setEmail('') }
+    if (res.ok) {
+      // A free reservation is a lead (the email is kept server-side only).
+      const deal = deals.find((x) => x.id === dealId)
+      trackEvent('deal_reserve', { deal: dealId, kind: 'groupbuy', value: Number(deal?.groupPrice) || 0, currency: 'USD', content_name: dealId, content_category: 'deal' })
+      setJoined((j) => ({ ...j, [dealId]: true })); setDeals((ds) => ds.map((d) => d.id === dealId ? { ...d, slotsTaken: (d.slotsTaken || 0) + 1 } : d)); setOpenId(null); setEmail('')
+    }
+  }
+  // Affiliate outbound: measured as a promotion click, never as a lead or a
+  // checkout — the partner's checkout is where the money changes hands.
+  const clickDeal = (d) => {
+    const key = d.slug || d.id
+    trackEvent('deal_click', { deal: key, kind: 'affiliate', promotion_id: key, promotion_name: d.tool || key, content_name: key, content_category: 'deal' })
   }
 
   // Stats
@@ -197,7 +208,7 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
                   <CardContent>
                     {affiliate ? (
                       <>
-                        <a href={d.link || '#'} target="_blank" rel="noopener noreferrer" className="block">
+                        <a href={d.link || '#'} target="_blank" rel="noopener noreferrer" className="block" onClick={() => clickDeal(d)}>
                           <Button className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 text-white">Get this deal →</Button>
                         </a>
                         {d.code && <p className="text-center text-sm text-text-muted mt-2">Use code <span className="text-teal-300 font-mono bg-slate-800/60 px-2 py-0.5 rounded">{d.code}</span> at checkout</p>}

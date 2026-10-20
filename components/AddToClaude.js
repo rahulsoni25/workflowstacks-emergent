@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import LaunchInTools from '@/components/LaunchInTools'
 import { installReadiness } from '@/lib/install-readiness'
 import { trackInstall } from '@/lib/track-install'
+import { trackEvent } from '@/lib/analytics'
 
 export default function AddToClaude({ skill, codeflow = null }) {
   const slug = skill.slug || skill.id
@@ -39,6 +40,7 @@ export default function AddToClaude({ skill, codeflow = null }) {
 
   const saveToLibrary = async () => {
     setSaved(true)
+    trackEvent('library_save', { skill: slug, content_name: slug, content_category: 'skill' })
     fetch('/api/library', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

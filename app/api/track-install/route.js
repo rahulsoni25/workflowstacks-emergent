@@ -1,12 +1,14 @@
 // POST /api/track-install — anonymous, fire-and-forget install telemetry.
 // Every button in the "Use with Claude" panel and the editor launch rows
 // reports which channel was used, so we learn where installs actually happen
-// (zip vs deep link vs Claude Code vs Cursor vs MCP) and which skills convert.
+// (zip vs deep link vs Claude Code vs Cursor vs MCP vs the CLI) and which
+// skills convert. The MCP server writes its own rows through the same helper
+// (lib/track-install-server.js) without going through this endpoint.
 //
 // Privacy: no user identity is recorded — just skill id, channel, and time.
 
 import { getDb } from '@/lib/mongo'
-import { randomUUID } from 'crypto'
+import { recordInstall } from '@/lib/track-install-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,6 +30,13 @@ const CHANNELS = new Set([
   'open-chatgpt',
   'open-gemini',
   'download-md',
+  // `npx workflowstacks add <slug>` (cli/index.js), after the file is written.
+  'cli',
+  // MCP server (app/api/mcp/route.js): a skill loaded into a conversation,
+  // and one saved to the user's library. Written server-side; listed here so
+  // the channel vocabulary lives in one place.
+  'mcp_get',
+  'mcp_install',
 ])
 
 // GET (admin-secret) → conversion stats: events by channel and top skills,
@@ -76,34 +85,15 @@ export async function POST(request) {
   if (!skillId || !CHANNELS.has(channel)) {
     return Response.json({ ok: false }, { status: 400 })
   }
-  // First-touch attribution captured client-side (lib/analytics.js). Whitelist
-  // keys and clamp lengths so the collection never becomes a dumping ground.
-  const attribution = {}
-  if (body?.attribution && typeof body.attribution === 'object') {
-    for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid', 'ref', 'landing', 'referrer', 'first_seen']) {
-      const v = body.attribution[k]
-      if (typeof v === 'string' && v) attribution[k] = v.slice(0, 120)
-    }
-  }
-  const page = typeof body?.page === 'string' ? body.page.slice(0, 200) : ''
-  // No DB configured (local dev): accept and drop, never break the client.
-  if (!process.env.MONGO_URL) return new Response(null, { status: 202 })
-  try {
-    const db = await getDb()
-    await db.collection('install_events').insertOne({
-      id: randomUUID(),
-      skill_id: skillId,
-      channel,
-      ...(page ? { page } : {}),
-      ...(Object.keys(attribution).length ? { attribution } : {}),
-      created_at: new Date(),
-    })
-    // Same counter the catalog already sorts/displays with.
-    await db
-      .collection('skills')
-      .updateOne({ $or: [{ id: skillId }, { slug: skillId }] }, { $inc: { installs: 1 } })
-    return new Response(null, { status: 202 })
-  } catch {
-    return new Response(null, { status: 202 }) // telemetry must never error the UI
-  }
+  // First-touch attribution captured client-side (lib/analytics.js); the
+  // helper whitelists its keys. It also swallows every failure and the no-DB
+  // case (local dev), so the client always gets its 202 — telemetry must
+  // never error the UI.
+  await recordInstall({
+    skillId,
+    channel,
+    page: typeof body?.page === 'string' ? body.page : '',
+    attribution: body?.attribution,
+  })
+  return new Response(null, { status: 202 })
 }
