@@ -13,6 +13,7 @@
 import { loadSkill, searchSkills, compileSkillMd, skillSlug, checkSkillSafety, SITE } from '@/lib/claude-skill'
 import { getAccessToken } from '@/lib/oauth-store'
 import { addToLibrary, removeFromLibrary, listLibrary } from '@/lib/library'
+import { recordInstall } from '@/lib/track-install-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -146,6 +147,9 @@ async function callTool(id, name, args = {}, libraryId = null) {
       return textResult(id, `"${skill.title_human || skill.name}" did not pass WorkflowStacks' automated content-safety review, so it cannot be installed.`, true)
     }
     await addToLibrary(libraryId, skill)
+    // Same install_events row the site's buttons write (channel 'mcp_install');
+    // keyed the way AddToClaude keys it so the catalog counter matches.
+    await recordInstall({ skillId: skill.slug || skill.id, channel: 'mcp_install' })
     return textResult(
       id,
       `Saved "${skill.title_human || skill.name}" to the user's library — recall it any time with list_my_skills, and load it with get_skill (slug: ${skillSlug(skill)}).`
@@ -179,6 +183,10 @@ async function callTool(id, name, args = {}, libraryId = null) {
       return textResult(id, `"${skill.title_human || skill.name}" did not pass WorkflowStacks' automated content-safety review, so it cannot be loaded.`, true)
     }
     const { markdown } = compileSkillMd(skill)
+    // Loading a skill into a conversation is the MCP channel's install
+    // (channel 'mcp_get'). Awaited so the write survives the function ending;
+    // the helper never throws, so a telemetry failure cannot fail the tool.
+    await recordInstall({ skillId: skill.slug || skill.id, channel: 'mcp_get' })
     return textResult(id, markdown + installBlock(skill))
   }
 

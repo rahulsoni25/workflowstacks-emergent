@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { getUserId, getHandle, setHandle as saveHandle } from '@/lib/identity'
+import { trackEvent } from '@/lib/analytics'
 import LaunchInTools from '@/components/LaunchInTools'
 import Disclosure from '@/components/Disclosure'
 
@@ -120,6 +121,13 @@ export default function BuilderPage() {
     setSelectedSkillIds(Array.from(next))
   }
 
+  // One agent saved (POST /api/agent-templates succeeded). Counts and a flag
+  // only: no goal text, no handle. `dfy_request` is tracked by the API route.
+  const trackAgentSave = (skillCount) => {
+    const paid = publish && (parseFloat(price) || 0) > 0
+    trackEvent('agent_save', { skills: skillCount, paid, public: publish, content_category: paid ? 'paid-agent' : 'agent' })
+  }
+
   // "Deploy this stack" — adds primary picks (defaults to all rec'd if no roles),
   // then triggers blueprint generation and advances to Step 3.
   const deployRecommendedStack = async () => {
@@ -146,7 +154,7 @@ export default function BuilderPage() {
       })
         .then(r => r.json())
         .then(data => {
-          if (data.success) { setAgentBlueprint(data.template); setStep(3) }
+          if (data.success) { trackAgentSave(newIds.length); setAgentBlueprint(data.template); setStep(3) }
           else alert('Error generating agent: ' + (data.error || 'Unknown error'))
         })
         .catch(() => alert('Error generating agent'))
@@ -360,6 +368,7 @@ export default function BuilderPage() {
       })
       const data = await res.json()
       if (data.success) {
+        trackAgentSave(selectedSkillIds.length)
         setAgentBlueprint(data.template)
         setStep(3)
       } else {
