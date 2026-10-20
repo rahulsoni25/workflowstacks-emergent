@@ -12,8 +12,19 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { getUserId, getHandle, setHandle as saveHandle } from '@/lib/identity'
+import { trackEvent } from '@/lib/analytics'
 import LaunchInTools from '@/components/LaunchInTools'
 import Disclosure from '@/components/Disclosure'
+
+// Done-for-You tiers. The price bands match /build-for-me and /pricing
+// ("from $500", set 2026-07-15), which superseded the $99/$249/$499 tiers this
+// form launched with on 2026-06-18. The ids are what /api/dfy-request accepts
+// (`starter` | `pro` | `agency`), so only the copy and prices change here.
+const DFY_TIERS = [
+  { id: 'starter', label: 'Single agent', price: '$500–750', desc: 'One agent, built into your tools, delivered within 7 days' },
+  { id: 'pro', label: 'Agent + integrations', price: '$750–1,500', desc: 'Custom skill picks, extra integrations, 1 week of support' },
+  { id: 'agency', label: 'Multi-agent / white-label', price: '$1,500+', desc: 'Several agents, white-label setup, handover walkthrough' },
+]
 
 export default function BuilderPage() {
   const searchParams = useSearchParams()
@@ -110,6 +121,13 @@ export default function BuilderPage() {
     setSelectedSkillIds(Array.from(next))
   }
 
+  // One agent saved (POST /api/agent-templates succeeded). Counts and a flag
+  // only: no goal text, no handle. `dfy_request` is tracked by the API route.
+  const trackAgentSave = (skillCount) => {
+    const paid = publish && (parseFloat(price) || 0) > 0
+    trackEvent('agent_save', { skills: skillCount, paid, public: publish, content_category: paid ? 'paid-agent' : 'agent' })
+  }
+
   // "Deploy this stack" — adds primary picks (defaults to all rec'd if no roles),
   // then triggers blueprint generation and advances to Step 3.
   const deployRecommendedStack = async () => {
@@ -136,7 +154,7 @@ export default function BuilderPage() {
       })
         .then(r => r.json())
         .then(data => {
-          if (data.success) { setAgentBlueprint(data.template); setStep(3) }
+          if (data.success) { trackAgentSave(newIds.length); setAgentBlueprint(data.template); setStep(3) }
           else alert('Error generating agent: ' + (data.error || 'Unknown error'))
         })
         .catch(() => alert('Error generating agent'))
@@ -258,6 +276,9 @@ export default function BuilderPage() {
           skill_ids: selectedSkillIds,
           preferred_contact_time: dfyTime.trim(),
           tier: dfyTier,
+          // The band the tier maps to, so the owner's notification email and
+          // the admin pipeline show the same figure /build-for-me sends.
+          budget: DFY_TIERS.find((t) => t.id === dfyTier)?.price || '',
         }),
       })
       setDfyRequested(true)
@@ -265,12 +286,6 @@ export default function BuilderPage() {
       setDfyRequested(true)
     }
   }
-
-  const DFY_TIERS = [
-    { id: 'starter', label: 'Starter', price: 99, desc: 'We configure + test this one agent for you' },
-    { id: 'pro', label: 'Pro', price: 249, desc: 'Starter + custom skill picks + 1 week support' },
-    { id: 'agency', label: 'Agency', price: 499, desc: 'Pro + 3 agents + white-label setup' },
-  ]
 
   useEffect(() => {
     try { setHandle(getHandle()) } catch (e) {}
@@ -353,6 +368,7 @@ export default function BuilderPage() {
       })
       const data = await res.json()
       if (data.success) {
+        trackAgentSave(selectedSkillIds.length)
         setAgentBlueprint(data.template)
         setStep(3)
       } else {
@@ -1219,7 +1235,7 @@ export default function BuilderPage() {
                                 >
                                   <div className="flex items-baseline justify-between mb-1">
                                     <span className="text-white font-semibold text-sm">{t.label}</span>
-                                    <span className="text-amber-300 font-bold text-sm">${t.price}</span>
+                                    <span className="text-amber-300 font-bold text-sm">{t.price}</span>
                                   </div>
                                   <p className="text-xs text-text-muted leading-snug">{t.desc}</p>
                                 </button>
@@ -1249,7 +1265,7 @@ export default function BuilderPage() {
                             className="w-full bg-slate-800/50 border border-slate-700 rounded-md px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50"
                           />
                           <Button type="submit" className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20" size="sm">
-                            Request Done-for-You — ${DFY_TIERS.find((t) => t.id === dfyTier)?.price}
+                            Request Done-for-You — {DFY_TIERS.find((t) => t.id === dfyTier)?.price}
                           </Button>
                         </form>
                       )}

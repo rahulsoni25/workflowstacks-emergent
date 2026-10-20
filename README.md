@@ -1,7 +1,7 @@
 <!-- deploy trigger -->
 # WorkflowStacks 🎯
 
-> **The install-native AI skills marketplace.** Every listing installs with one click into Claude, Claude Code, Claude Cowork, Cursor, Antigravity, VS Code, or Windsurf — as a Claude Skill package, a deep link, a CLI one-liner, or through the WorkflowStacks MCP connector (`/api/mcp`, OAuth 2.1) with a personal cross-conversation skill library. Repo-analyzed readiness badges, CI-verified installs, install telemetry, and an agent-readable catalog (`/llms-full.txt`) included.
+> Open-source AI skills, agents & MCP servers, installed in one click. Free, quality-gated open-source AI skills, agents and MCP servers that install into Claude, ChatGPT or Gemini in one click. Plus templates and done-for-you builds.
 >
 > Quick starts: `claude mcp add --transport http workflowstacks https://workflowstacks.com/api/mcp` · `/plugin marketplace add rahulsoni25/workflowstacks-emergent` · `npx workflowstacks add <slug>` (CLI in `cli/`).
 
@@ -253,7 +253,7 @@ agent_templates: {
 ## 📝 Future Enhancements
 
 - [ ] Add GitHub authentication for higher rate limits
-- [ ] Implement Stripe payments for premium skills
+- [ ] Stripe payments for premium skill listings and done-for-you builds — Stripe checkout is already wired for premium bundles (`/tools`), group-buy seats (`/deals`) and paid agents (`/a/[id]`), but NOT for premium skill listings (they link to the creator's source) or done-for-you (lead capture, quoted by email)
 - [ ] Add user authentication (Supabase/Auth.js)
 - [ ] Creator dashboard with analytics
 - [ ] Skill reviews and ratings

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Bell, Check } from 'lucide-react'
+import { trackEvent } from '@/lib/analytics'
 
 // Fake-door row: each card is a tool that doesn't exist yet. A "notify me"
 // signup is a demand vote — we build the winners.
@@ -28,6 +29,8 @@ function ComingCard({ tool }) {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tool: tool.slug, email }),
       })
+      // The demand vote itself; the address stays server-side.
+      if (res.ok) trackEvent('notify_interest', { tool: tool.slug, content_name: tool.slug, content_category: 'tool' })
       setState(res.ok ? 'done' : 'idle')
     } catch { setState('idle') }
   }
@@ -41,7 +44,7 @@ function ComingCard({ tool }) {
         </div>
         <p className="text-text-muted text-sm leading-relaxed flex-1 mb-4">{tool.blurb}</p>
         {state === 'done' ? (
-          <p className="text-sm text-[#C6F24E] flex items-center gap-1.5"><Check className="w-4 h-4" />You’re on the list — we’ll email you.</p>
+          <p className="text-sm text-[#C6F24E] flex items-center gap-1.5"><Check className="w-4 h-4" />Check your inbox to confirm — then you’re on the list.</p>
         ) : (
           <form onSubmit={notify} className="flex gap-2">
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@company.com"

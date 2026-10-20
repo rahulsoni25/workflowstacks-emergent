@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { KITS, kitItemCount } from '@/lib/kits'
 
 export const metadata = {
-  title: 'Finishing Kits — Free Assets Matched to Your Template | WorkflowStacks',
+  title: 'Finishing Kits — Free Assets for Your Template | WorkflowStacks',
   description: 'Curated captions, badges, LUTs, overlays and SFX/music — picked for one specific ad style, not a generic stock library. Link-only, nothing to host.',
   alternates: { canonical: '/kits' },
 }

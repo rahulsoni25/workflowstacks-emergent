@@ -93,6 +93,15 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                 </div>
                 <h1 className="text-4xl text-white mb-2 font-semibold leading-tight tracking-tight">{skill.title_human || skill.name}</h1>
                 <CardDescription className="text-xl text-text-secondary">{skill.description_human || skill.description}</CardDescription>
+                {/* The author's own description, verbatim. Our rewrite above is
+                    for a non-technical reader; this line is the signal that
+                    the page is about a real, specific repo and not a template
+                    (docs/STRATEGY.md, learning 3). */}
+                {skill.description && skill.description_human && skill.description.trim() !== skill.description_human.trim() && (
+                  <p className="mt-2 text-sm text-text-muted">
+                    <span className="t-mono text-[11px] uppercase tracking-wider text-text-muted/80">From the repo · </span>“{skill.description}”
+                  </p>
+                )}
                 {skill.explainer && (
                   <div className="flex flex-wrap items-center gap-2 mt-3">
                     {skill.explainer.difficulty && (
@@ -143,6 +152,11 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                       documented install command in a clean runner and records
                       the result. Shown only when we have a passing run; a
                       failed or missing run is simply not claimed. */}
+                  {Number(skill.installs) >= 5 && (
+                    <span className="flex items-center gap-1.5 text-sm bg-white/5 border border-[#323A3C] rounded-full px-3 py-1 text-text-secondary" title="Installs started from WorkflowStacks (browser, CLI and MCP), counted server-side">
+                      <Zap className="w-4 h-4" />{Number(skill.installs).toLocaleString('en-US')} installs via WorkflowStacks
+                    </span>
+                  )}
                   {skill.verified_install?.ok && (
                     <span className="flex items-center gap-1.5 text-sm bg-emerald-500/10 border border-emerald-500/30 rounded-full px-3 py-1 text-emerald-300" title={skill.verified_install.method ? `We ran: ${skill.verified_install.method}` : 'Install verified in a clean runner'}>
                       <CheckCircle2 className="w-4 h-4" />Install verified{skill.verified_install.at ? ` ${new Date(skill.verified_install.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : ''}
@@ -424,7 +438,19 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
               <CardHeader><CardTitle className="text-white">Quick Actions</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 {skill.is_premium ? (
-                  <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white" size="lg">Purchase for ${skill.price}</Button>
+                  // Stripe checkout only covers bundles, deals and paid agents —
+                  // not creator listings — so the only honest CTA is the
+                  // creator's own link. Nothing here pretends to take payment.
+                  <>
+                    {(skill.source_url || skill.github_url) && (
+                      <a href={skill.source_url || skill.github_url} target="_blank" rel="noopener noreferrer" className="block">
+                        <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white" size="lg">
+                          <Github className="w-4 h-4 mr-2" />{skill.source_url && skill.source_url !== skill.github_url ? 'Buy direct from the creator' : 'View on GitHub'}
+                        </Button>
+                      </a>
+                    )}
+                    <p className="text-text-muted text-xs text-center">Paid listing — checkout isn&apos;t open yet. Follow the creator&apos;s link to buy direct.</p>
+                  </>
                 ) : (
                   <Button onClick={() => skill.github_url && window.open(skill.github_url, '_blank')} className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
                     <Github className="w-4 h-4 mr-2" />Get it Free on GitHub
@@ -435,7 +461,8 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                     <Zap className="w-4 h-4 mr-2" />Use in Agent Builder
                   </Button>
                 </Link>
-                {skill.github_url && (
+                {/* Hidden when the premium CTA above already points at github_url. */}
+                {skill.github_url && !(skill.is_premium && (skill.source_url || skill.github_url) === skill.github_url) && (
                   <Button variant="outline" className="w-full border-slate-600 text-text-secondary hover:bg-white/5" onClick={() => window.open(skill.github_url, '_blank')}>
                     <Github className="w-4 h-4 mr-2" />View on GitHub
                   </Button>

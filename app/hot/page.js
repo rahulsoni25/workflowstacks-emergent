@@ -12,9 +12,9 @@ import RankedSection from '@/components/RankedSection'
 export const revalidate = 21600
 
 export const metadata = {
-  title: 'Hot this week — the fastest-growing open-source AI skills | WorkflowStacks',
+  title: 'Hot This Week — Fastest-Growing AI Skills | WorkflowStacks',
   description:
-    'The open-source AI skills, MCP servers and agents gaining the most GitHub stars this week, ranked by 7-day star growth rather than total stars. Updated daily, emailed every Monday.',
+    'Open-source AI skills, MCP servers and agents gaining the most GitHub stars this week, ranked by 7-day growth. Updated daily, emailed every Monday.',
   alternates: { canonical: '/hot' },
 }
 

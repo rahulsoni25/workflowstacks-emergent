@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
 export const metadata = {
-  title: 'Discover AI Skills — Trending, Newest, Top Quality | WorkflowStacks',
+  title: 'Discover AI Skills — Trending & Newest | WorkflowStacks',
   description: 'Discover the best free AI skills for founders — ranked by trending, newest, recently updated, top quality, and hidden gems. Real GitHub data, no fake metrics.',
   alternates: { canonical: '/discover' },
 }

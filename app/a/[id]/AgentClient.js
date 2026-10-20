@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Zap, Copy, CheckCircle2, Share2, User, Repeat, Star, Sparkles, ExternalLink } from 'lucide-react'
@@ -11,14 +11,64 @@ import LaunchInTools from '@/components/LaunchInTools'
 import { trackEvent } from '@/lib/analytics'
 import PurchaseTracker from '@/components/PurchaseTracker'
 
-export default function AgentClient({ agent, skills }) {
+// A paid agent arrives from the server WITHOUT its blueprint (only a short
+// `blueprintPreview`); the API withholds it until a valid ?unlock= token is
+// presented (lib/agent-access). After Checkout, the success URL carries
+// session_id: /api/stripe/verify confirms the session with Stripe and mints
+// the token, then /api/agents/:id?unlock= returns the full doc. Nothing on
+// the client decides "purchased" — the blueprint is either here or it isn't.
+export default function AgentClient({ agent: initialAgent, skills }) {
   const router = useRouter()
+  const [agent, setAgent] = useState(initialAgent)
+  const [unlock, setUnlock] = useState('') // the accepted token, reused for the .zip link
+  const [unlockState, setUnlockState] = useState('idle') // idle | checking | failed
   const [copied, setCopied] = useState(false)
   const [shared, setShared] = useState(false)
   const [copies, setCopies] = useState(agent.copyCount || 0)
   const [buying, setBuying] = useState(false)
-  const purchased = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('purchased') === '1'
-  const locked = agent.isPaid && agent.price > 0 && !purchased
+  const paid = !!(agent.isPaid && agent.price > 0)
+  const locked = paid && !agent.agentBlueprint
+  const purchased = paid && !!agent.agentBlueprint
+
+  useEffect(() => {
+    if (!paid || agent.agentBlueprint) return
+    let params
+    try { params = new URLSearchParams(window.location.search) } catch { return }
+    const token = params.get('unlock') || ''
+    const sessionId = params.get('session_id') || ''
+    if (!token && !(params.get('purchased') === '1' && sessionId)) return
+    let cancelled = false
+    setUnlockState('checking')
+
+    const fetchUnlocked = async (t) => {
+      const r = await fetch(`/api/agents/${encodeURIComponent(agent.id)}?unlock=${encodeURIComponent(t)}`, { cache: 'no-store' })
+      const d = await r.json().catch(() => null)
+      if (cancelled) return
+      if (d?.agent?.agentBlueprint) {
+        setAgent(d.agent)
+        setUnlock(t)
+        setUnlockState('idle')
+        // Keep the unlock link in the address bar so a reload or bookmark still works.
+        try { window.history.replaceState(null, '', `${window.location.pathname}?unlock=${encodeURIComponent(t)}`) } catch {}
+      } else {
+        setUnlockState('failed')
+      }
+    }
+    const run = async () => {
+      try {
+        if (token) return await fetchUnlocked(token)
+        const r = await fetch(`/api/stripe/verify?session_id=${encodeURIComponent(sessionId)}`)
+        const d = await r.json().catch(() => null)
+        if (cancelled) return
+        if (d?.paid && d.unlock) return await fetchUnlocked(d.unlock)
+        setUnlockState('failed')
+      } catch {
+        if (!cancelled) setUnlockState('failed')
+      }
+    }
+    run()
+    return () => { cancelled = true }
+  }, [agent.id, paid, agent.agentBlueprint])
 
   const buy = async () => {
     setBuying(true)
@@ -79,6 +129,8 @@ export default function AgentClient({ agent, skills }) {
     } catch { /* ignore */ }
   }
 
+  const zipHref = `/api/agents/${agent.id}/claude-skill?format=zip${unlock ? `&unlock=${encodeURIComponent(unlock)}` : ''}`
+
   return (
     <div className="min-h-screen bg-neptune">
       <PurchaseTracker flag="purchased" category="agent" itemName={agent.name} />
@@ -106,9 +158,13 @@ export default function AgentClient({ agent, skills }) {
 
         <div className="flex flex-wrap gap-3 mb-8">
           {locked ? (
-            <Button onClick={buy} disabled={buying} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20" size="lg">
-              {buying ? 'Opening checkout…' : `Buy for $${agent.price} — unlock blueprint`}
-            </Button>
+            unlockState === 'checking' ? (
+              <Button disabled className="bg-gradient-to-r from-amber-500 to-orange-500 text-white" size="lg">Confirming your purchase…</Button>
+            ) : (
+              <Button onClick={buy} disabled={buying} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg shadow-amber-500/20" size="lg">
+                {buying ? 'Opening checkout…' : `Buy for $${agent.price} — unlock blueprint`}
+              </Button>
+            )
           ) : (
             <>
               <Button onClick={openInClaude} className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
@@ -117,7 +173,7 @@ export default function AgentClient({ agent, skills }) {
               <Button onClick={copyBlueprint} variant="outline" className="border-slate-600 text-text-secondary hover:bg-white/5" size="lg">
                 {copied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-teal-400" />Copied</> : <><Copy className="w-4 h-4 mr-2" />Copy blueprint</>}
               </Button>
-              <a href={`/api/agents/${agent.id}/claude-skill?format=zip`} download>
+              <a href={zipHref} download>
                 <Button variant="outline" className="border-teal-500/30 text-teal-300 hover:bg-teal-500/10" size="lg">
                   Download as Claude Skill (.zip)
                 </Button>
@@ -128,6 +184,9 @@ export default function AgentClient({ agent, skills }) {
             <Zap className="w-4 h-4 mr-2" />Remix the skills — free
           </Button>
         </div>
+        {locked && unlockState === 'failed' && (
+          <p className="text-amber-300 text-sm -mt-4 mb-8">We couldn&apos;t confirm a purchase for this link. If you just paid, reload in a few seconds; otherwise use the link from your receipt.</p>
+        )}
 
         {/* Agentic editors — one click hands the blueprint to the editor's agent */}
         {!locked && agent.agentBlueprint && (
@@ -158,18 +217,18 @@ export default function AgentClient({ agent, skills }) {
           </CardContent>
         </Card>
 
-        {agent.agentBlueprint && (
+        {(agent.agentBlueprint || agent.blueprintPreview) && (
           <Card className="bg-slate-900/60 border-slate-700/50">
-            <CardHeader><CardTitle className="text-white">The agent blueprint{agent.isPaid && agent.price > 0 ? ` · $${agent.price}` : ''}</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-white">The agent blueprint{paid ? ` · $${agent.price}` : ''}</CardTitle></CardHeader>
             <CardContent>
               {locked ? (
                 <div className="relative">
                   <div className="bg-slate-950/60 rounded-lg p-4 border border-slate-800 max-h-48 overflow-hidden">
-                    <pre className="text-text-muted whitespace-pre-wrap font-mono text-xs blur-sm select-none">{(agent.agentBlueprint || '').slice(0, 600)}</pre>
+                    <pre className="text-text-muted whitespace-pre-wrap font-mono text-xs blur-sm select-none">{agent.blueprintPreview || ''}</pre>
                   </div>
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent rounded-lg">
                     <p className="text-white font-semibold mb-3">🔒 Buy to unlock the full blueprint</p>
-                    <Button onClick={buy} disabled={buying} className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">{buying ? 'Opening…' : `Buy for $${agent.price}`}</Button>
+                    <Button onClick={buy} disabled={buying || unlockState === 'checking'} className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">{buying ? 'Opening…' : `Buy for $${agent.price}`}</Button>
                     <p className="text-text-muted text-xs mt-2">or remix the skills for free</p>
                   </div>
                 </div>
@@ -178,7 +237,7 @@ export default function AgentClient({ agent, skills }) {
                   <div className="bg-slate-950/60 rounded-lg p-4 border border-slate-800 max-h-96 overflow-auto">
                     <pre className="text-text-secondary whitespace-pre-wrap font-mono text-xs">{agent.agentBlueprint}</pre>
                   </div>
-                  <p className="text-text-muted text-sm mt-3">{purchased ? '✅ Purchased — ' : ''}Paste into Claude, ChatGPT, or Gemini — or hit Remix to customize it in the Builder.</p>
+                  <p className="text-text-muted text-sm mt-3">{purchased ? '✅ Purchased — keep this page’s link, it is your unlock link. ' : ''}Paste into Claude, ChatGPT, or Gemini — or hit Remix to customize it in the Builder.</p>
                 </>
               )}
             </CardContent>

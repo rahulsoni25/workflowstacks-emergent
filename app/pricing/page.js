@@ -2,70 +2,101 @@ import Link from 'next/link'
 import { ArrowLeft, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { SITE_URL as BASE } from '@/lib/site-url'
 
-export const metadata = {
-  title: 'Pricing — Free Catalog, Premium Tools & Done-For-You Agents | WorkflowStacks',
-  description:
-    'Browse 1,500+ open-source AI skills free. Buy premium automation tools one-time ($29–$39). Or have us build your working agent from $500, delivered in 7 days.',
-  alternates: { canonical: '/pricing' },
+// 6 hours: the catalog count on this page comes from /api/stats and moves
+// when the daily jobs run. See docs/COSTS.md before lowering.
+export const revalidate = 21600
+
+async function getStats() {
+  try {
+    const res = await fetch(`${BASE}/api/stats`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
+    if (!res.ok) return null
+    return await res.json()
+  } catch {
+    return null
+  }
 }
 
-const TIERS = [
-  {
-    name: 'Free Catalog',
-    price: '$0',
-    priceNote: 'forever',
-    blurb: 'Everything you need to explore and build on your own.',
-    features: [
-      '1,500+ quality-gated open-source AI skills',
-      'No-code Agent Builder',
-      '11 free n8n workflow templates',
-      'Deploy to ChatGPT, Claude, Gemini',
-    ],
-    cta: { label: 'Browse the catalog', href: '/' },
-  },
-  {
-    name: 'Premium Tools',
-    price: '$29–$39',
-    priceNote: 'one-time',
-    blurb: 'Individual premium tools and bundles.',
-    features: [
-      'Advanced, ready-to-run n8n workflows',
-      'Buy once — keep the files',
-      'Instant download after checkout',
-      'Free updates',
-    ],
-    cta: { label: 'See premium tools', href: '/tools' },
-  },
-  {
-    name: 'Done-For-You Agent',
-    price: 'from $500',
-    priceNote: 'per agent',
-    blurb: 'We build your working agent for you.',
-    features: [
-      'Built and customized to your tools',
-      'Delivered within 7 days',
-      'Setup included',
-      'Handover walkthrough',
-    ],
-    cta: { label: 'Get it built', href: '/build-for-me' },
-  },
-  {
-    name: 'Enterprise / Teams',
-    price: 'Custom',
-    priceNote: '',
-    blurb: 'For agencies and teams.',
-    features: [
-      'Team access',
-      'Private skills',
-      'SLA',
-      'Custom integrations',
-    ],
-    cta: { label: 'Contact us', href: '/enterprise' },
-  },
-]
+// The live published count (same source as the homepage), rounded down to the
+// nearest hundred so "N+" is always true. Null when /api/stats is unavailable
+// so the copy falls back to a count-free phrasing — never a hardcoded number.
+function catalogCountLabel(stats) {
+  const n = Number(stats?.publishedSkills || stats?.totalSkills) || 0
+  return n >= 100 ? `${(Math.floor(n / 100) * 100).toLocaleString('en-US')}+` : null
+}
 
-export default function PricingPage() {
+export async function generateMetadata() {
+  const count = catalogCountLabel(await getStats())
+  const catalog = count ? `Browse ${count} quality-gated open-source AI skills free.` : 'Browse a quality-gated catalog of open-source AI skills free.'
+  return {
+    title: 'Pricing — Free Catalog, Tools & Done-For-You | WorkflowStacks',
+    description: `${catalog} Buy premium automation tools one-time ($29–$39). Or have us build your working agent from $500, delivered in 7 days.`,
+    alternates: { canonical: '/pricing' },
+  }
+}
+
+function buildTiers(count) {
+  return [
+    {
+      name: 'Free Catalog',
+      price: '$0',
+      priceNote: 'forever',
+      blurb: 'Everything you need to explore and build on your own.',
+      features: [
+        count ? `${count} quality-gated open-source AI skills` : 'A quality-gated catalog of open-source AI skills',
+        'No-code Agent Builder',
+        '11 free n8n workflow templates',
+        'Deploy to ChatGPT, Claude, Gemini',
+      ],
+      cta: { label: 'Browse the catalog', href: '/' },
+    },
+    {
+      name: 'Premium Tools',
+      price: '$29–$39',
+      priceNote: 'one-time',
+      blurb: 'Individual premium tools and bundles.',
+      features: [
+        'Advanced, ready-to-run n8n workflows',
+        'Buy once — keep the files',
+        'Instant download after checkout',
+        'Free updates',
+      ],
+      cta: { label: 'See premium tools', href: '/tools' },
+    },
+    {
+      name: 'Done-For-You Agent',
+      price: 'from $500',
+      priceNote: 'per agent',
+      blurb: 'We build your working agent for you.',
+      features: [
+        'Built and customized to your tools',
+        'Delivered within 7 days',
+        'Setup included',
+        'Handover walkthrough',
+      ],
+      cta: { label: 'Get it built', href: '/build-for-me' },
+    },
+    {
+      name: 'Enterprise / Teams',
+      price: 'Custom',
+      priceNote: '',
+      blurb: 'For agencies and teams.',
+      features: [
+        'Team access',
+        'Private skills',
+        'SLA',
+        'Custom integrations',
+      ],
+      cta: { label: 'Contact us', href: '/enterprise' },
+    },
+  ]
+}
+
+export default async function PricingPage() {
+  // Next dedupes this fetch with the one in generateMetadata (same URL and
+  // options in the same render), so the page costs one /api/stats call.
+  const tiers = buildTiers(catalogCountLabel(await getStats()))
   return (
     <div className="min-h-screen bg-neptune">
       <header className="border-b border-teal-500/10 bg-slate-950/80 backdrop-blur-xl">
@@ -88,7 +119,7 @@ export default function PricingPage() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {TIERS.map((tier) => (
+          {tiers.map((tier) => (
             <Card key={tier.name} className="bg-slate-900/60 border-slate-700/50 hover:border-[#C6F24E]/40 transition-all duration-300 h-full">
               <CardContent className="py-7 flex flex-col h-full">
                 <h2 className="text-white font-bold text-lg mb-1">{tier.name}</h2>

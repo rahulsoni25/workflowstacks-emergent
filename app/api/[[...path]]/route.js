@@ -6,6 +6,10 @@ import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 import { screenSubmission } from '../../../lib/content-safety';
 import { pickDailyFromDb } from '../../../lib/newsletter-pick';
+import { sendEmail, unsubscribeUrl, verifyUnsubscribeToken, startConfirmation, SENDABLE, normalizeEmail } from '../../../lib/email';
+import { redactAgent, stripPrivateFields, verifyUnlockToken, readUnlockToken } from '../../../lib/agent-access';
+import { getStripe } from '../../../lib/stripe';
+import { refundDealPurchases } from '../../../lib/deal-refunds';
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
 // including the GitHub, Groq and Resend calls below. Each cache miss is a
@@ -464,7 +468,6 @@ function applyFallback(skills) {
 // surface (email, homepage strip, /hot page, badge) agrees.
 // ---------------------------------------------------------------------------
 const SITE = 'https://workflowstacks.com';
-const RESEND_FROM = 'WorkflowStacks <newsletter@workflowstacks.com>';
 
 // Sources a signup may claim. Whitelisted so the field stays queryable:
 // /subscribers reports a per-source breakdown, which is how we learn which
@@ -548,21 +551,8 @@ function tweetUrl(text, url = null) {
   return u.toString();
 }
 
-async function sendEmail({ to, subject, html }) {
-  if (!process.env.RESEND_API_KEY) return { ok: false, error: 'RESEND_API_KEY not set' };
-  try {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-      body: JSON.stringify({ from: RESEND_FROM, to, subject, html }),
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!r.ok) return { ok: false, error: `resend ${r.status}` };
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, error: e.message };
-  }
-}
+// sendEmail lives in lib/email.js: one recipient per call, List-Unsubscribe
+// headers on every send, returns { ok, error }.
 
 async function postDiscord(content) {
   const url = process.env.DISCORD_WEBHOOK_URL;
@@ -578,18 +568,28 @@ async function postDiscord(content) {
   } catch { return false; }
 }
 
+// Why this address is on the list, from the stored `source` field (see
+// SUBSCRIBE_SOURCES). Generic when the document predates attribution.
+function subscriptionReason(source) {
+  const s = String(source || '').trim();
+  if (!s) return 'You’re receiving this because you subscribed to WorkflowStacks.';
+  if (s === 'template-download') return 'You’re receiving this because you downloaded a WorkflowStacks template and asked for more (source: template-download).';
+  if (s === 'fake-door') return 'You’re receiving this because you asked to hear when a WorkflowStacks tool ships (source: fake-door).';
+  if (s === 'cli') return 'You’re receiving this because you subscribed from the WorkflowStacks CLI (source: cli).';
+  if (s === 'mcp') return 'You’re receiving this because you subscribed through the WorkflowStacks MCP connector (source: mcp).';
+  return `You’re receiving this because you subscribed at workflowstacks.com (source: ${escapeHtml(s)}).`;
+}
+
 // Shared email footer: forward + share (the cheapest referral loop an email
-// has), read online, switch the daily send off, unsubscribe.
-function emailFooter(email, { campaign, shareText, shareUrl, readOnlineUrl = null, downloaded = false }) {
-  const enc = encodeURIComponent(email);
-  const unsubUrl = `${SITE}/unsubscribe?email=${enc}`;
-  const weeklyUrl = `${SITE}/unsubscribe?email=${enc}&mode=weekly`;
+// has), read online, switch the daily send off, unsubscribe. The unsubscribe
+// links carry the signed token from lib/email.js; the page validates it.
+function emailFooter(email, { campaign, shareText, shareUrl, readOnlineUrl = null, source = null }) {
+  const unsubUrl = unsubscribeUrl(email);
+  const weeklyUrl = unsubscribeUrl(email, { mode: 'weekly' });
   const sep = shareUrl.includes('?') ? '&' : '?';
   const fwdUrl = `mailto:?subject=${encodeURIComponent('Worth a look: ' + shareText.split('\n')[0].slice(0, 80))}&body=${encodeURIComponent(shareText + '\n\n' + shareUrl + sep + 'ref=forward')}`;
   const xUrl = tweetUrl(shareText, `${shareUrl}${sep}ref=share`);
-  const why = downloaded
-    ? 'You’re getting this because you downloaded a WorkflowStacks template.'
-    : 'You’re receiving this because you subscribed to WorkflowStacks.';
+  const why = subscriptionReason(source);
   return `
     <tr><td style="text-align:center;padding-top:22px;font-size:12px;color:#8a8a8a;line-height:1.7;">
       <a href="${fwdUrl}" style="color:#C6F24E;text-decoration:none;font-weight:600;">Forward this to a builder friend</a>
@@ -608,7 +608,7 @@ const EMAIL_BODY = 'margin:0;padding:0;background:#0f0f0f;font-family:-apple-sys
 
 // The daily email. Everything in it comes from the guide we already wrote for
 // the skill page, so there is nothing generated at send time to get wrong.
-function dailyEmailHtml(skill, reason, email) {
+function dailyEmailHtml(skill, reason, email, source = null) {
   const g = skill.use_guide || {};
   const name = skillLabel(skill);
   const what = g.whatItDoes || skill.description_human || skill.description || '';
@@ -641,7 +641,7 @@ function dailyEmailHtml(skill, reason, email) {
       <br>
       <a href="${guideUrl}" style="display:inline-block;margin-top:8px;font-size:14px;color:#888;text-decoration:underline;">View full guide</a>
     </td></tr>
-    ${emailFooter(email, { campaign: 'daily', shareText: `${name} — today's open-source AI skill on WorkflowStacks`, shareUrl: skillPath(skill) })}
+    ${emailFooter(email, { campaign: 'daily', shareText: `${name} — today's open-source AI skill on WorkflowStacks`, shareUrl: skillPath(skill), source })}
   </table>
 </body>
 </html>`;
@@ -668,7 +668,7 @@ function plainRowHtml(s, campaign, content) {
 
 // The weekly Hot / Top / Rising email. Also used (with an intro) as the
 // welcome email, so a new subscriber sees the product within a minute.
-function weeklyEmailHtml({ email, lists, issueUrl, campaign = 'weekly-hot', intro = null }) {
+function weeklyEmailHtml({ email, lists, issueUrl, campaign = 'weekly-hot', intro = null, source = null }) {
   const { hot, top, rising } = lists;
   const hotRows = hot.length
     ? hot.map((s, i) => hotRowHtml(s, i, campaign)).join('')
@@ -691,17 +691,20 @@ function weeklyEmailHtml({ email, lists, issueUrl, campaign = 'weekly-hot', intr
         <a href="${withUtm(`${SITE}/hot`, campaign, 'cta')}" style="display:inline-block;background:#C6F24E;color:#0A0C0D;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;">See the full Hot list</a>
       </div>
     </td></tr>
-    ${emailFooter(email, { campaign, shareText, shareUrl: `${SITE}/hot`, readOnlineUrl: issueUrl })}
+    ${emailFooter(email, { campaign, shareText, shareUrl: `${SITE}/hot`, readOnlineUrl: issueUrl, source })}
   </table>
 </body></html>`;
 }
 
-async function sendWelcomeEmail(database, email) {
+// Sent once, after the address confirms (see POST /confirm). `sub` is the
+// subscriber document, so the footer can say where the signup came from.
+async function sendWelcomeEmail(database, sub) {
   if (!process.env.RESEND_API_KEY) return false;
   const lists = await getWeeklyLists(database, { hotLimit: 3, topLimit: 3, risingLimit: 0 });
   const intro = 'You’re in. Every Monday you’ll get the five open-source AI skills gaining the most GitHub stars, plus the top overall and what’s new. Here’s where things stand right now — forward it to one builder who’d want it.';
-  const html = weeklyEmailHtml({ email, lists, issueUrl: `${SITE}/hot`, campaign: 'welcome', intro });
-  const r = await sendEmail({ to: email, subject: '✅ You’re in — here’s what’s hot right now', html });
+  const html = weeklyEmailHtml({ email: sub.email, lists, issueUrl: `${SITE}/hot`, campaign: 'welcome', intro, source: sub.source });
+  const r = await sendEmail({ to: sub.email, subject: '✅ You’re in — here’s what’s hot right now', html });
+  if (!r.ok) console.error('Welcome email failed for', sub.email, r.error);
   return r.ok;
 }
 
@@ -1767,7 +1770,9 @@ export async function GET(request) {
 
       const [agentsBuilt, subscriberCount, memberCount, publishedSkills] = await Promise.all([
         database.collection('agent_templates').countDocuments(),
-        database.collection('subscribers').countDocuments(),
+        // Unsubscribed and unconfirmed addresses stay in the collection now
+        // (status field), so count only the ones that actually receive mail.
+        database.collection('subscribers').countDocuments({ status: { $nin: ['pending', 'unsubscribed'] } }),
         database.collection('members').countDocuments(),
         database.collection('skills').countDocuments({ published: { $ne: false } }),
       ]);
@@ -1889,7 +1894,8 @@ export async function GET(request) {
         .sort(sortSpec)
         .limit(60)
         .toArray();
-      return Response.json({ agents });
+      // Paid blueprints never leave the server unlocked (see lib/agent-access).
+      return Response.json({ agents: agents.map((a) => stripPrivateFields(redactAgent(a))) });
     }
 
     // Match a problem (or any query) to the most relevant published skills
@@ -1984,7 +1990,7 @@ export async function GET(request) {
       return Response.json({
         deals: deals.map((d) => ({
           id: d.id, tool: d.tool, status: d.status || (d.approved === false ? 'pending' : 'open'),
-          slotsTaken: d.slotsTaken || 0, slotsTotal: d.slotsTotal,
+          slotsTaken: d.slotsTaken || 0, reservedFree: d.reservedFree || 0, slotsTotal: d.slotsTotal,
           reservations: (byDeal[d.id] || []).length, reservationEmails: byDeal[d.id] || [],
         })).sort((a, b) => b.reservations - a.reservations),
         topRequests: requests.map((r) => ({ tool: r.tool, votes: r.votes || 1 })),
@@ -2016,22 +2022,25 @@ export async function GET(request) {
       for (const r of all) {
         const st = r.status || 'new';
         if (stats[st] !== undefined) stats[st]++;
-        if (r.paid) stats.totalPaidUsd += (typeof r.paid_amount_usd === 'number' ? r.paid_amount_usd : 99);
+        // Unpriced paid rows default to the bottom of the $500+ band that
+        // /build-for-me, the builder and /pricing all quote.
+        if (r.paid) stats.totalPaidUsd += (typeof r.paid_amount_usd === 'number' ? r.paid_amount_usd : 500);
       }
       return Response.json(stats);
     }
 
-    // Group-buy / affiliate tool deals (only approved ones show publicly)
+    // Group-buy / affiliate tool deals (only approved, not cancelled, show publicly)
     if (path === '/deals') {
       const deals = await database.collection('deals')
-        .find({ approved: { $ne: false } })
+        .find({ approved: { $ne: false }, status: { $ne: 'cancelled' } })
         .sort({ featured: -1, created_at: -1 })
         .toArray();
       return Response.json({
         deals: deals.map((d) => ({
           id: d.id, tool: d.tool, category: d.category, blurb: d.blurb,
           retailPrice: d.retailPrice, groupPrice: d.groupPrice, savingsPct: d.savingsPct,
-          slotsTotal: d.slotsTotal, slotsTaken: d.slotsTaken, featured: !!d.featured,
+          // slotsTaken = paid seats (webhook); reservedFree = free "pay later" reservations
+          slotsTotal: d.slotsTotal, slotsTaken: d.slotsTaken, reservedFree: d.reservedFree || 0, featured: !!d.featured,
           dealType: d.dealType || 'groupbuy', link: d.link || null, code: d.code || null,
         })),
       });
@@ -2110,7 +2119,14 @@ export async function GET(request) {
         .find({ id: { $in: agent.skillIds } })
         .toArray();
 
-      return Response.json({ agent, skills });
+      // A paid blueprint is withheld unless ?unlock= carries the token minted
+      // by /api/stripe/verify for a paid Checkout session of this agent. Free
+      // agents are unaffected; a bad token just gets the public (redacted) doc.
+      const unlocked = verifyUnlockToken(agent.id, readUnlockToken(request));
+      const body = { agent: stripPrivateFields(unlocked ? agent : redactAgent(agent)), skills, unlocked };
+      return unlocked
+        ? Response.json(body, { headers: { 'Cache-Control': 'private, no-store' } })
+        : Response.json(body);
     }
 
     // List creator outreach leads — emails discovered by /find-creators
@@ -2196,19 +2212,25 @@ export async function GET(request) {
     if (path === '/subscribers') {
       const col = database.collection('subscribers')
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-      const [subs, total, newLast30d, bySource, byFrequency] = await Promise.all([
+      const [subs, total, active, newLast30d, bySource, byFrequency, byStatus] = await Promise.all([
         col.find({}).sort({ created_at: -1 }).limit(500).toArray(),
         col.countDocuments(),
+        col.countDocuments(SENDABLE),
         col.countDocuments({ created_at: { $gte: thirtyDaysAgo } }),
         col.aggregate([{ $group: { _id: { $ifNull: ['$source', 'unknown'] }, count: { $sum: 1 } } }, { $sort: { count: -1 } }]).toArray(),
         col.aggregate([{ $group: { _id: { $ifNull: ['$frequency', 'all'] }, count: { $sum: 1 } } }]).toArray(),
+        // No status = confirmed before double opt-in existed; counted as active.
+        col.aggregate([{ $group: { _id: { $ifNull: ['$status', 'active'] }, count: { $sum: 1 } } }]).toArray(),
       ])
       // by_source is the measurement the growth work hangs on: which surface
       // (skill page, footer, blog, /hot, CLI, creator share…) actually converts.
+      // `total` counts every document, pending and unsubscribed included;
+      // `active` is how many a send would reach.
       return Response.json({
-        subscribers: subs, count: subs.length, total, new_last_30d: newLast30d,
+        subscribers: subs, count: subs.length, total, active, new_last_30d: newLast30d,
         by_source: Object.fromEntries(bySource.map((r) => [r._id, r.count])),
         by_frequency: Object.fromEntries(byFrequency.map((r) => [r._id, r.count])),
+        by_status: Object.fromEntries(byStatus.map((r) => [r._id, r.count])),
       })
     }
 
@@ -2217,7 +2239,7 @@ export async function GET(request) {
       // and why, not a separate guess.
       const picked = await pickDailyFromDb(database)
       const view = (c) => ({ ...c.skill, pick_score: Number(c.score.toFixed(3)), pick_reason: c.reason, pick_parts: c.parts })
-      const subCount = await database.collection('subscribers').countDocuments()
+      const subCount = await database.collection('subscribers').countDocuments({ frequency: { $ne: 'weekly' }, ...SENDABLE })
       return Response.json({
         pick: picked.pick ? view(picked.pick) : null,
         candidates: picked.candidates.map(view),
@@ -2249,8 +2271,9 @@ export async function GET(request) {
       if (!dry && !process.env.RESEND_API_KEY) {
         return Response.json({ ok: false, error: 'RESEND_API_KEY not set' }, { status: 500 });
       }
-      // Subscribers who chose the Monday digest only are skipped here.
-      const subscribers = await database.collection('subscribers').find({ frequency: { $ne: 'weekly' } }).toArray();
+      // Subscribers who chose the Monday digest only are skipped here, as are
+      // unconfirmed and unsubscribed addresses (SENDABLE).
+      const subscribers = await database.collection('subscribers').find({ frequency: { $ne: 'weekly' }, ...SENDABLE }).toArray();
       if (!dry && subscribers.length === 0) {
         return Response.json({ ok: false, message: 'No subscribers yet.' });
       }
@@ -2276,9 +2299,9 @@ export async function GET(request) {
       let sentCount = 0;
       const failures = [];
       for (const sub of subscribers) {
-        const r = await sendEmail({ to: sub.email, subject, html: dailyEmailHtml(skill, reason, sub.email) });
+        const r = await sendEmail({ to: sub.email, subject, html: dailyEmailHtml(skill, reason, sub.email, sub.source) });
         if (r.ok) sentCount++;
-        else failures.push(r.error);
+        else { failures.push(r.error); console.error('Daily send failed for', sub.email, r.error); }
       }
 
       await database.collection('newsletter_sends').insertOne({
@@ -2292,25 +2315,27 @@ export async function GET(request) {
         sent_at: new Date(),
         recipient_count: sentCount,
         failed_count: failures.length,
+        first_error: failures[0] || null,
       });
 
       return Response.json({
         ok: failures.length === 0, sent: sentCount, failed: failures.length,
-        ...(failures.length ? { errors: [...new Set(failures)].slice(0, 3) } : {}),
+        ...(failures.length ? { first_error: failures[0], errors: [...new Set(failures)].slice(0, 3) } : {}),
         skill: skill.name, reason, recycled: picked.recycled,
       });
     }
 
-    // Admin: weekly digest — email the whole list the newest working templates
-    // + a few notable fresh tools. Turns one-time downloaders into repeat
-    // visitors. Called by the weekly GitHub Action (passes x-admin-secret).
+    // Admin: weekly templates digest — email the whole list the newest working
+    // templates + a few notable fresh tools. Turns one-time downloaders into
+    // repeat visitors. Called by the GitHub Action on Thursdays (passes
+    // x-admin-secret); the Hot list owns Monday and the daily goes every day.
     if (path === '/digest/send') {
       const denied = requireAdmin(request);
       if (denied) return denied;
       if (!process.env.RESEND_API_KEY) {
         return Response.json({ ok: false, error: 'RESEND_API_KEY not set' }, { status: 500 });
       }
-      const subscribers = await database.collection('subscribers').find({}).toArray();
+      const subscribers = await database.collection('subscribers').find(SENDABLE).toArray();
       if (subscribers.length === 0) return Response.json({ ok: false, message: 'No subscribers yet.' });
 
       const templates = Object.values(TEMPLATES).slice(0, 5);
@@ -2332,6 +2357,7 @@ export async function GET(request) {
         </td></tr>`).join('');
 
       let sentCount = 0;
+      const failures = [];
       for (const sub of subscribers) {
         const html = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>WorkflowStacks</title></head>
 <body style="margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#e5e5e5;">
@@ -2347,32 +2373,26 @@ export async function GET(request) {
         <a href="${withUtm('https://workflowstacks.com/templates', 'digest', 'cta')}" style="display:inline-block;background:#C6F24E;color:#0A0C0D;font-weight:600;text-decoration:none;padding:11px 22px;border-radius:8px;font-size:14px;">Browse all templates</a>
       </div>
     </td></tr>
-    ${emailFooter(sub.email, { campaign: 'digest', shareText: 'Free, working n8n templates and the fastest-growing open-source AI skills — WorkflowStacks', shareUrl: 'https://workflowstacks.com/templates', downloaded: true })}
+    ${emailFooter(sub.email, { campaign: 'digest', shareText: 'Free, working n8n templates and the fastest-growing open-source AI skills — WorkflowStacks', shareUrl: 'https://workflowstacks.com/templates', source: sub.source })}
   </table>
 </body></html>`;
-        try {
-          await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${process.env.RESEND_API_KEY}` },
-            body: JSON.stringify({
-              from: 'WorkflowStacks <newsletter@workflowstacks.com>',
-              to: sub.email,
-              subject: '🛠️ New working templates + fresh AI tools this week',
-              html,
-            }),
-          });
-          sentCount++;
-        } catch (e) {
-          console.error('Digest send error for', sub.email, e.message);
-        }
+        const r = await sendEmail({ to: sub.email, subject: '🛠️ New working templates + fresh AI tools this week', html });
+        if (r.ok) sentCount++;
+        else { failures.push(r.error); console.error('Digest send failed for', sub.email, r.error); }
       }
 
       await database.collection('newsletter_sends').insertOne({
         type: 'digest',
         sent_at: new Date(),
         recipient_count: sentCount,
+        failed_count: failures.length,
+        first_error: failures[0] || null,
       });
-      return Response.json({ ok: true, sent: sentCount, templates: templates.length, tools: freshTools.length });
+      return Response.json({
+        ok: failures.length === 0, sent: sentCount, failed: failures.length,
+        ...(failures.length ? { first_error: failures[0] } : {}),
+        templates: templates.length, tools: freshTools.length,
+      });
     }
 
     // Admin: weekly Hot / Top / New & rising digest, ranked by 7-day star
@@ -2399,15 +2419,15 @@ export async function GET(request) {
         return Response.json({ ok: true, dry: true, issue, subject, share_text: shareText, hot: hot.map(skillLabel), top: top.map(skillLabel), rising: rising.map(skillLabel) });
       }
 
-      const subscribers = await database.collection('subscribers').find({}).toArray();
+      const subscribers = await database.collection('subscribers').find(SENDABLE).toArray();
       if (subscribers.length === 0) return Response.json({ ok: false, message: 'No subscribers yet.' });
 
-      let sentCount = 0, failed = 0;
+      let sentCount = 0, failed = 0, firstError = null;
       for (const sub of subscribers) {
-        const html = weeklyEmailHtml({ email: sub.email, lists, issueUrl });
+        const html = weeklyEmailHtml({ email: sub.email, lists, issueUrl, source: sub.source });
         const r = await sendEmail({ to: sub.email, subject, html });
         if (r.ok) sentCount++;
-        else { failed++; console.error('Weekly-hot send failed for', sub.email, r.error); }
+        else { failed++; firstError = firstError || r.error; console.error('Weekly-hot send failed for', sub.email, r.error); }
       }
 
       // This week's rank on the featured skills — the README badge reads it.
@@ -2417,7 +2437,7 @@ export async function GET(request) {
       await database.collection('newsletter_sends').updateOne(
         { type: 'weekly-hot', issue },
         { $set: {
-          type: 'weekly-hot', issue, sent_at: now, recipient_count: sentCount, failed_count: failed,
+          type: 'weekly-hot', issue, sent_at: now, recipient_count: sentCount, failed_count: failed, first_error: firstError,
           hot_count: hot.length, top_count: top.length, rising_count: rising.length,
           subject, share_text: shareText, items: lists,
         } },
@@ -2425,7 +2445,11 @@ export async function GET(request) {
       );
 
       const discordPosted = await postDiscord(`${shareText}\n${issueUrl}`);
-      return Response.json({ ok: true, issue, issue_url: issueUrl, sent: sentCount, failed, hot: hot.length, top: top.length, rising: rising.length, discord_posted: discordPosted, share_text: shareText });
+      return Response.json({
+        ok: failed === 0, issue, issue_url: issueUrl, sent: sentCount, failed,
+        ...(firstError ? { first_error: firstError } : {}),
+        hot: hot.length, top: top.length, rising: rising.length, discord_posted: discordPosted, share_text: shareText,
+      });
     }
 
     // Admin: tell the creators of this week's Hot skills they were featured —
@@ -2456,10 +2480,14 @@ export async function GET(request) {
         const or = [{ skill_id: s.id }];
         if (s.creator) or.push({ creator_username: s.creator });
         const lead = await database.collection('creator_leads').findOne({ $or: or, email: { $nin: [null, ''] } });
-        const to = lead && lead.email;
+        const to = lead && normalizeEmail(lead.email);
         if (!to) { skipped++; results.push({ skill: label, rank, status: 'no-email', creator: s.creator || null }); continue; }
         if (seen.has(to)) { skipped++; results.push({ skill: label, rank, status: 'duplicate-address' }); continue; }
         seen.add(to);
+        // An address that unsubscribed (or never confirmed) hears nothing from
+        // us, creator notices included.
+        const suppressed = await database.collection('subscribers').findOne({ email: to, status: { $in: ['pending', 'unsubscribed'] } }, { projection: { _id: 1 } });
+        if (suppressed) { skipped++; results.push({ skill: label, rank, status: 'suppressed' }); continue; }
         const url = skillPath(s);
         const badgeMd = `[![Featured on WorkflowStacks](${SITE}/api/badge/${slug}.svg)](${url}?utm_source=github&utm_medium=badge)`;
         const share = `${label} is #${rank} on this week's hottest open-source AI skills (+${s.velocity_7d}★ this week) 🔥 ${url}?ref=creator`;
@@ -2855,12 +2883,21 @@ export async function POST(request) {
       if (!body.dealId || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
         return Response.json({ success: false, error: 'Valid email + deal required' }, { status: 400 });
       }
-      await database.collection('deal_interest').updateOne(
+      const deal = await database.collection('deals').findOne({ id: body.dealId });
+      if (!deal || deal.status === 'cancelled') {
+        return Response.json({ success: false, error: 'This deal is no longer open' }, { status: 400 });
+      }
+      const res = await database.collection('deal_interest').updateOne(
         { dealId: body.dealId, email },
         { $setOnInsert: { dealId: body.dealId, email, created_at: new Date() } },
         { upsert: true }
       );
-      await database.collection('deals').updateOne({ id: body.dealId }, { $inc: { slotsTaken: 1 } });
+      // Free reservations are counted apart from paid seats: `slotsTaken` is
+      // only ever moved by the Stripe webhook (paid / refunded). Only a new
+      // email counts — re-submitting the same one is not a second seat.
+      if (res.upsertedCount) {
+        await database.collection('deals').updateOne({ id: body.dealId }, { $inc: { reservedFree: 1 } });
+      }
       return Response.json({ success: true, message: "You're on the list — we'll email you when the deal unlocks." });
     }
 
@@ -3002,10 +3039,28 @@ export async function POST(request) {
       const allowed = ['tool', 'category', 'blurb', 'dealType', 'link', 'code', 'savingsPct', 'retailPrice', 'groupPrice', 'slotsTotal', 'featured', 'approved'];
       const filtered = {};
       for (const k of allowed) if (k in set) filtered[k] = set[k];
-      if (!Object.keys(filtered).length) return Response.json({ error: 'no allowed fields' }, { status: 400 });
+      // status: 'cancelled' is the one status change accepted here — it is the
+      // "deal didn't reach its target" path: hide the deal, stop new seats,
+      // refund every paid seat (lib/deal-refunds). Re-POST to finish a deal
+      // with more seats than one call refunds (`refunds.remaining`).
+      if ('status' in set && set.status !== 'cancelled') return Response.json({ error: 'invalid status' }, { status: 400 });
+      const cancel = set.status === 'cancelled';
+      if (!Object.keys(filtered).length && !cancel) return Response.json({ error: 'no allowed fields' }, { status: 400 });
+      let refunds = null;
+      if (cancel) {
+        const deal = await database.collection('deals').findOne({ id });
+        if (!deal) return Response.json({ error: 'deal not found' }, { status: 404 });
+        const stripe = getStripe();
+        if (!stripe) return Response.json({ error: 'Stripe not configured' }, { status: 500 });
+        filtered.status = 'cancelled';
+        if (!deal.cancelled_at) filtered.cancelled_at = new Date();
+        // Hide + close first so no seat is sold while refunds run.
+        await database.collection('deals').updateOne({ id }, { $set: { status: 'cancelled', cancelled_at: filtered.cancelled_at || deal.cancelled_at } });
+        refunds = await refundDealPurchases(database, stripe, id, { limit: 25 });
+      }
       filtered.admin_updated_at = new Date();
       await database.collection('deals').updateOne({ id }, { $set: filtered });
-      return Response.json({ success: true });
+      return Response.json(refunds ? { success: true, refunds } : { success: true });
     }
 
     // Admin — seed affiliate-deal placeholders (each unapproved until link is filled in)
@@ -3038,12 +3093,17 @@ export async function POST(request) {
       return Response.json({ success: true, inserted, skipped, total: affiliatePlaceholders.length });
     }
 
-    // Email subscribe — stores waitlist emails (deduped)
+    // Email subscribe — double opt-in. A new address is stored as `pending`
+    // with a confirm token and gets a confirmation email; nothing else goes
+    // out until POST /confirm flips it to `active` (which then sends the
+    // welcome email). Documents without a `status` field predate this and are
+    // treated as active everywhere (SENDABLE in lib/email.js). The rules for
+    // pending / unsubscribed addresses are in startConfirmation().
     if (path === '/subscribe') {
       const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
       const body = await request.json().catch(() => ({}));
       const tl = tooLong(body); if (tl) return Response.json({ error: tl }, { status: 400 })
-      const email = (body.email || '').toString().trim().toLowerCase();
+      const email = normalizeEmail(body.email);
       if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
         return Response.json({ success: false, error: 'Invalid email' }, { status: 400 });
       }
@@ -3056,34 +3116,82 @@ export async function POST(request) {
       const frequency = ['weekly', 'all'].includes(body.frequency) ? body.frequency : null;
       // ?ref= on share/forward links — who brought this person in.
       const ref = (body.ref || '').toString().trim().slice(0, 80);
-      const set = { last_seen_at: new Date() };
-      if (frequency) set.frequency = frequency;
-      const r = await database.collection('subscribers').updateOne(
-        { email },
-        {
-          $setOnInsert: { email, created_at: new Date(), source, ...(ref ? { referred_by: ref } : {}) },
-          ...(template ? { $addToSet: { templates_downloaded: template } } : {}),
-          $set: set,
-        },
-        { upsert: true }
-      );
-      const created = (r.upsertedCount || 0) > 0;
-      // First signup only: a welcome email carrying the current Hot list, so
-      // the product shows up in the inbox within a minute of subscribing.
-      let welcomed = false;
-      if (created) {
-        try { welcomed = await sendWelcomeEmail(database, email); }
-        catch (e) { console.error('Welcome email failed for', email, e.message); }
-      }
-      return Response.json({ success: true, created, welcomed });
+      const result = await startConfirmation(database.collection('subscribers'), {
+        email,
+        source,
+        set: frequency ? { frequency } : {},
+        setOnInsert: ref ? { referred_by: ref } : {},
+        addToSet: template ? { templates_downloaded: template } : null,
+      });
+      return Response.json({ success: true, ...result });
     }
 
-    // Email unsubscribe — removes the email from the subscribers collection
+    // Confirm a subscription: the link in the confirmation email lands on
+    // /confirm?token=…, whose server component posts the token here. Flips
+    // the address to active, drops the token, then sends the welcome email.
+    if (path === '/confirm') {
+      // The call comes from the /confirm page's server-side fetch, so every
+      // confirm shares the function's egress IP: keep this loose. The token
+      // space (16 random bytes) is what stops guessing.
+      const rl = rateLimit(request, 60, 60_000); if (rl) return rl;
+      const body = await request.json().catch(() => ({}));
+      const token = (body.token || '').toString().trim();
+      if (!/^[a-f0-9]{32}$/.test(token)) return Response.json({ ok: false, error: 'invalid_token' }, { status: 400 });
+      const col = database.collection('subscribers');
+      const sub = await col.findOne({ confirm_token: token, status: 'pending' });
+      if (!sub) return Response.json({ ok: false, error: 'invalid_token' }, { status: 404 });
+      const now = new Date();
+      await col.updateOne(
+        { _id: sub._id },
+        { $set: { status: 'active', confirmed_at: now, last_seen_at: now }, $unset: { confirm_token: '', pending_at: '' } }
+      );
+      // Only now: the welcome email carrying the current Hot list, so the
+      // product shows up in the inbox within a minute of confirming.
+      let welcomed = false;
+      try { welcomed = await sendWelcomeEmail(database, sub); }
+      catch (e) { console.error('Welcome email failed for', sub.email, e.message); }
+      return Response.json({ ok: true, email: sub.email, welcomed });
+    }
+
+    // Email unsubscribe. Marks the address `unsubscribed` rather than deleting
+    // it, so an upsert from another signup path cannot bring it back as
+    // active (a fresh signup goes through confirmation again). `t` is the
+    // signed token from lib/email.js and must verify when present.
+    //
+    // Legacy compatibility: emails sent before the tokens existed (October
+    // 2026) link here with only ?email=. Those requests are still honoured —
+    // the page never fires on load, only after the person clicks the button,
+    // so a link-scanning mail gateway cannot trigger it. Drop the untokenised
+    // path once those emails are stale.
+    //
+    // `mode: 'weekly'` is the "switch the daily send off" variant: it sets
+    // frequency to weekly on an active address instead of unsubscribing.
     if (path === '/unsubscribe') {
-      const { email } = await request.json().catch(() => ({}))
-      if (!email) return Response.json({ error: 'Email required' }, { status: 400 })
-      await database.collection('subscribers').deleteOne({ email: email.toLowerCase().trim() })
-      return Response.json({ ok: true, message: 'Unsubscribed successfully.' })
+      const rl = rateLimit(request, 10, 60_000); if (rl) return rl;
+      const body = await request.json().catch(() => ({}));
+      const email = normalizeEmail(body.email);
+      if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return Response.json({ ok: false, error: 'Email required' }, { status: 400 });
+      const t = (body.t || '').toString().trim();
+      if (t && !verifyUnsubscribeToken(email, t)) return Response.json({ ok: false, error: 'invalid_token' }, { status: 400 });
+      const col = database.collection('subscribers');
+      const now = new Date();
+      if (body.mode === 'weekly') {
+        await col.updateOne({ email, ...SENDABLE }, { $set: { frequency: 'weekly', last_seen_at: now } });
+        return Response.json({ ok: true, mode: 'weekly' });
+      }
+      // A verified token proves we mailed this address, so a suppression
+      // record is created even if no document exists; a bare email only
+      // updates one that does.
+      await col.updateOne(
+        { email },
+        {
+          $set: { status: 'unsubscribed', unsubscribed_at: now, unsubscribe_via: t ? 'link' : 'legacy-link' },
+          $unset: { confirm_token: '', pending_at: '' },
+          ...(t ? { $setOnInsert: { email, created_at: now, source: 'unsubscribe' } } : {}),
+        },
+        { upsert: Boolean(t) }
+      );
+      return Response.json({ ok: true, message: 'Unsubscribed successfully.' });
     }
 
     // Upload skill

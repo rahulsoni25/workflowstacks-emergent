@@ -6,6 +6,7 @@ import { ArrowLeft, Linkedin, CheckCircle2, UserPlus, Share2, Globe } from 'luci
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
+import { trackEvent } from '@/lib/analytics'
 
 const CATEGORIES = [
   'AI Micro-SaaS Founder', 'Developer', 'AI Influencer', 'Indie Hacker',
@@ -36,6 +37,9 @@ export default function JoinPage() {
       })
       const d = await res.json()
       if (res.ok && d.success) {
+        // Only the role and the inviter's public handle are forwarded — never
+        // the applicant's name, profile URL or country.
+        trackEvent('join_apply', { category: form.category, content_category: form.category, ...(ref ? { ref } : {}) })
         setMsg(d.message || "You're in!")
         setStatus('done')
       } else {

@@ -9,9 +9,9 @@ import { itemListSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 // This is the one entry point for all twelve, organised the way somebody
 // actually arrives at them — by who they are and what they are trying to ship.
 export const metadata = {
-  title: 'Curated AI Skill Collections — By Role and By Job | WorkflowStacks',
+  title: 'Curated AI Skill Collections by Role & Job | WorkflowStacks',
   description:
-    'Pre-picked sets of AI skills for a specific role or a specific job: starter packs, step-by-step playbooks with a stated outcome, and whole-role personas. Free, and every skill links to its source repository.',
+    'Pre-picked sets of AI skills for a role or a job: starter packs, step-by-step playbooks with a stated outcome, and whole-role personas. Free, with source links.',
   alternates: { canonical: '/collections' },
   openGraph: {
     title: 'Curated AI Skill Collections — By Role and By Job',

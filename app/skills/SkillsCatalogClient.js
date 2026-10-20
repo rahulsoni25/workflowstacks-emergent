@@ -586,8 +586,8 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                 <>
                   <div className="flex items-center justify-between rounded-[10px] border border-[#323A3C] bg-[#0A0C0D] px-4 py-3.5">
                     <span className="flex flex-col gap-0.5">
-                      <strong className="text-sm">Creator listing · one-time purchase</strong>
-                      <span className="text-[12.5px] text-text-muted">Pricing and checkout are on the listing page.</span>
+                      <strong className="text-sm">Paid creator listing</strong>
+                      <span className="text-[12.5px] text-text-muted">Checkout isn&apos;t open yet — the listing page links to the creator to buy direct.</span>
                     </span>
                     <span className="text-[22px] font-bold">${Number(sel.price)}</span>
                   </div>

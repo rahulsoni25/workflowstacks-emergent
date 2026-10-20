@@ -4,7 +4,7 @@ import { SITE_URL as BASE } from '@/lib/site-url'
 
 export const metadata = {
   title: 'Marketplace — AI Agents, Skills & MCP Servers | WorkflowStacks',
-  description: 'Browse the quality-gated catalog of open-source AI agents, Claude skills, MCP servers and prompts. Live GitHub stats, guide-quality scores, one-click install into Claude, ChatGPT or Gemini.',
+  description: 'Quality-gated open-source AI agents, Claude skills, MCP servers and prompts, with live GitHub stats and one-click install into Claude, ChatGPT or Gemini.',
   alternates: { canonical: '/skills' },
   openGraph: {
     title: 'Marketplace — AI Agents, Skills & MCP Servers | WorkflowStacks',

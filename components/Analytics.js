@@ -101,9 +101,32 @@ export default function Analytics() {
   const pathname = usePathname()
   const isAdmin = (pathname || '').startsWith('/admin')
 
-  // Declared first so the tags exist before the effects below send events.
+  // Declared first so the queue exists before the effects below send events.
+  // The tag scripts themselves load after the page is idle or on the first
+  // interaction, never during hydration: loading gtag.js, gtm.js and
+  // fbevents.js on mount put ~700 ms of main-thread work in front of the
+  // homepage's LCP on mobile (Lighthouse 83 -> 47 across the release that
+  // shipped them). Nothing is lost by waiting — trackEvent() pushes to
+  // window.dataLayer, which gtag.js replays when it arrives, and boot() sends
+  // the page_view itself.
   useEffect(() => {
-    if (!isAdmin) boot()
+    if (isAdmin) return
+    let fired = false
+    const go = () => {
+      if (fired) return
+      fired = true
+      boot()
+    }
+    const events = ['pointerdown', 'keydown', 'touchstart', 'scroll']
+    for (const e of events) window.addEventListener(e, go, { once: true, passive: true })
+    const idle = typeof window.requestIdleCallback === 'function'
+      ? window.requestIdleCallback(go, { timeout: 4000 })
+      : window.setTimeout(go, 2500)
+    return () => {
+      for (const e of events) window.removeEventListener(e, go)
+      if (typeof window.cancelIdleCallback === 'function') window.cancelIdleCallback(idle)
+      else window.clearTimeout(idle)
+    }
   }, [isAdmin])
 
   useEffect(() => {

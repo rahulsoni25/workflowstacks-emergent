@@ -54,6 +54,7 @@ export async function POST(request) {
   if (body.dealId) {
     const deal = await db.collection('deals').findOne({ id: body.dealId })
     if (!deal) return Response.json({ error: 'Deal not found' }, { status: 400 })
+    if (deal.status === 'cancelled') return Response.json({ error: 'This deal has been cancelled' }, { status: 400 })
     try {
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
@@ -97,6 +98,9 @@ export async function POST(request) {
       },
       quantity: 1,
     }],
+    // The page exchanges session_id for an unlock token at /api/stripe/verify
+    // (server-minted, HMAC over agent + session) and only then fetches the
+    // unredacted blueprint — see lib/agent-access.js.
     success_url: `${SITE_URL}/a/${agentId}?purchased=1&session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${SITE_URL}/a/${agentId}`,
     metadata: { agentId, type: 'agent', creator: agent.creatorName || '' },

@@ -95,7 +95,11 @@ export default async function HomePage() {
 
   // This week's five fastest-growing skills (GitHub stars gained in 7 days,
   // from /refresh-stars snapshots). The public preview of the Monday digest.
-  const hot = (hotData?.hot || []).slice(0, 5).map((s) => ({
+  // Slug-less entries are skipped: HomeClient links `slug || id`, and a
+  // /skills/<uuid> link from the homepage was one of the 27 UUID URLs the
+  // weekly crawl kept finding. The slug backfill now runs daily, so this
+  // filter should rarely drop anything.
+  const hot = (hotData?.hot || []).filter((s) => s.slug).slice(0, 5).map((s) => ({
     id: s.id, slug: s.slug, name: s.name, title_human: s.title_human, category: s.category,
     github_stars: s.github_stars, velocity_7d: s.velocity_7d, velocity_provisional: !!s.velocity_provisional,
   }))

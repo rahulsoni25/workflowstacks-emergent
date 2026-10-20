@@ -11,12 +11,12 @@ import { itemListSchema, breadcrumbSchema } from '@/lib/schema'
 // canonical entry point for crawlers, no shared internal-link surface, and no
 // page competing for the head term the long-tail pages sit under.
 export const metadata = {
-  title: 'What Can You Automate With AI? 16 Jobs, With Free Working Workflows',
+  title: 'What Can You Automate With AI? 16 Jobs, Free Workflows',
   description:
-    'A plain-English list of the business jobs you can hand to an AI workflow today — inbox triage, review replies, product descriptions, client reports, cold email. Each one links to a free, importable automation you can run in about 5 minutes.',
+    'Business jobs you can hand to an AI workflow today: inbox triage, review replies, product descriptions, client reports, cold email. Each links to a free automation.',
   alternates: { canonical: '/automate' },
   openGraph: {
-    title: 'What Can You Automate With AI? 16 Jobs, With Free Working Workflows',
+    title: 'What Can You Automate With AI? 16 Jobs, Free Workflows',
     description: 'Sixteen real business jobs you can automate today, each with a free working workflow behind it.',
     url: '/automate',
   },

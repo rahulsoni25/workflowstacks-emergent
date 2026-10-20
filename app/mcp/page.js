@@ -6,7 +6,7 @@ import { MCP_SERVERS } from '@/lib/mcp-servers'
 import { itemListSchema, breadcrumbSchema } from '@/lib/schema'
 
 export const metadata = {
-  title: 'MCP Servers for Claude Desktop — Copy-Paste Configs | WorkflowStacks',
+  title: 'MCP Servers for Claude Desktop — Configs | WorkflowStacks',
   description:
     'Add tools to Claude Desktop in under a minute. Verified, copy-paste MCP server configs — filesystem, GitHub, web search, browsers, databases, and more. Free.',
   alternates: { canonical: '/mcp' },

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Sparkles } from 'lucide-react'
 import WsMark from '@/components/WsMark'
 import NewsletterSignup from '@/components/NewsletterSignup'
+import { DESCRIPTION } from '@/lib/positioning'
 
 // The footer is the full site map; components/SiteHeader.js carries a
 // deliberately shorter three-group version for first-time visitors. Every
@@ -22,6 +23,7 @@ const footerLinks = {
     links: [
       { label: 'Hot this week', href: '/hot' },
       { label: 'Best by category', href: '/best' },
+      { label: 'By tool', href: '/for' },
       { label: 'Journal', href: '/blog' },
       { label: 'Newsletter', href: '/newsletter' },
       { label: 'All Skills', href: '/skills' },
@@ -95,7 +97,7 @@ export default function Footer() {
             <span className="wm text-xl text-white">workflow<span className="s" style={{ color: '#C6F24E' }}>stacks</span></span>
           </Link>
           <p className="mt-4 text-sm text-text-muted leading-relaxed">
-            The marketplace for AI skills that launch offers, rank in AI search, and automate operations. No coding required.
+            {DESCRIPTION}
           </p>
           <NewsletterSignup
             variant="inline"

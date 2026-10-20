@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Check, Wrench, Clock, KeyRound } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -14,13 +14,29 @@ const PROMISES = [
 ]
 
 const BUDGETS = ['$500–750', '$750–1,500', '$1,500+', 'Not sure yet']
+const TOP_BUDGET = '$1,500+'
+const ENTERPRISE_GOAL = 'Enterprise / team plan'
 
 export default function BuildForMeClient() {
   const [form, setForm] = useState({ name: '', email: '', goal: '', tools: '', budget: '' })
   const [state, setState] = useState('idle') // idle | sending | done | error
   const [error, setError] = useState('')
+  const [enterprise, setEnterprise] = useState(false)
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  // `/build-for-me?tier=enterprise` (the Enterprise page CTA) preselects the
+  // top budget band and prefills the goal. Read from window on mount rather
+  // than useSearchParams so the page keeps prerendering without a Suspense
+  // boundary; the submit handler reads the same query string.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('tier') !== 'enterprise') return
+      setEnterprise(true)
+      setForm((f) => ({ ...f, goal: f.goal || ENTERPRISE_GOAL, budget: f.budget || TOP_BUDGET }))
+    } catch {}
+  }, [])
 
   async function submit(e) {
     e.preventDefault()
@@ -57,12 +73,16 @@ export default function BuildForMeClient() {
       </header>
 
       <div className="container mx-auto px-4 py-16 max-w-3xl">
-        <p className="text-xs tracking-widest uppercase text-[#C6F24E] text-center mb-4 font-semibold">Done-for-you</p>
+        <p className="text-xs tracking-widest uppercase text-[#C6F24E] text-center mb-4 font-semibold">{enterprise ? 'Enterprise / teams' : 'Done-for-you'}</p>
         <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 text-center leading-tight">
           Tell us what to automate.<br />We hand you a working agent.
         </h1>
         <p className="text-lg text-text-secondary text-center mb-12 max-w-xl mx-auto">
-          Skip the setup entirely. Describe the workflow, and we build it into your tools — from <strong className="text-white">$500, one-time</strong>.
+          {enterprise ? (
+            <>Tell us about your team and what it needs — private skills, SSO, custom integrations — and we reply with a plan and a quote. Builds start from <strong className="text-white">$500, one-time</strong>.</>
+          ) : (
+            <>Skip the setup entirely. Describe the workflow, and we build it into your tools — from <strong className="text-white">$500, one-time</strong>.</>
+          )}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">

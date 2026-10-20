@@ -1138,7 +1138,9 @@ function DfyTab({ hdr, jhdr, showToast }) {
               <div className="space-y-2 min-h-[200px]">
                 {(grouped[col.id] || []).map((r) => {
                   const isOpen = expanded === r.id
-                  const tierPrice = { starter: 99, pro: 249, agency: 499 }[r.tier || 'starter']
+                  // Bands match /build-for-me and the builder ($500+); the
+                  // old $99/$249/$499 list was never what the forms offered.
+                  const tierPrice = { starter: 500, pro: 750, agency: 1500 }[r.tier || 'starter']
                   const nextCol = DFY_COLUMNS[DFY_COLUMNS.findIndex((c) => c.id === col.id) + 1]
                   return (
                     <div key={r.id} className={`${CARD} border rounded-lg p-3 text-sm`}>

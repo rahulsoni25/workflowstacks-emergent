@@ -13,6 +13,7 @@
 import { loadSkill, searchSkills, compileSkillMd, skillSlug, checkSkillSafety, SITE } from '@/lib/claude-skill'
 import { getAccessToken } from '@/lib/oauth-store'
 import { addToLibrary, removeFromLibrary, listLibrary } from '@/lib/library'
+import { recordInstall } from '@/lib/track-install-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -146,6 +147,9 @@ async function callTool(id, name, args = {}, libraryId = null) {
       return textResult(id, `"${skill.title_human || skill.name}" did not pass WorkflowStacks' automated content-safety review, so it cannot be installed.`, true)
     }
     await addToLibrary(libraryId, skill)
+    // Same install_events row the site's buttons write (channel 'mcp_install');
+    // keyed the way AddToClaude keys it so the catalog counter matches.
+    await recordInstall({ skillId: skill.slug || skill.id, channel: 'mcp_install' })
     return textResult(
       id,
       `Saved "${skill.title_human || skill.name}" to the user's library — recall it any time with list_my_skills, and load it with get_skill (slug: ${skillSlug(skill)}).`
@@ -179,6 +183,10 @@ async function callTool(id, name, args = {}, libraryId = null) {
       return textResult(id, `"${skill.title_human || skill.name}" did not pass WorkflowStacks' automated content-safety review, so it cannot be loaded.`, true)
     }
     const { markdown } = compileSkillMd(skill)
+    // Loading a skill into a conversation is the MCP channel's install
+    // (channel 'mcp_get'). Awaited so the write survives the function ending;
+    // the helper never throws, so a telemetry failure cannot fail the tool.
+    await recordInstall({ skillId: skill.slug || skill.id, channel: 'mcp_get' })
     return textResult(id, markdown + installBlock(skill))
   }
 
@@ -195,9 +203,15 @@ async function callTool(id, name, args = {}, libraryId = null) {
         signal: AbortSignal.timeout(10_000),
       })
       if (!r.ok) throw new Error(`subscribe ${r.status}`)
+      // Double opt-in: a new address gets a confirmation email and nothing
+      // else until the link in it is clicked; pending:false = already on.
+      const data = await r.json().catch(() => ({}))
+      if (data.pending === false) {
+        return textResult(id, `${email} is already subscribed to the WorkflowStacks Monday digest. This week's list: ${SITE}/hot`)
+      }
       return textResult(
         id,
-        `Subscribed ${email} to the WorkflowStacks Monday digest — the five open-source AI skills gaining the most GitHub stars each week, plus the top overall and what's new. Every email has a one-click unsubscribe. This week's list: ${SITE}/hot`
+        `Sent a confirmation email to ${email}. Tell the user to check their inbox and click "Confirm my subscription" — the WorkflowStacks Monday digest (the five open-source AI skills gaining the most GitHub stars each week, plus the top overall and what's new) only starts after that click. Every email has a one-click unsubscribe. This week's list: ${SITE}/hot`
       )
     } catch (e) {
       return textResult(id, `Could not subscribe right now (${e.message}). The user can subscribe at ${SITE}/newsletter.`, true)

@@ -2,6 +2,10 @@ import { randomUUID } from 'crypto'
 import { getStripe, PLATFORM_FEE_PCT, SITE_URL } from '@/lib/stripe'
 import { getBundle } from '@/lib/bundles'
 import { getDb } from '@/lib/mongo'
+import { releasePurchase, findPurchaseByPaymentIntent } from '@/lib/deal-refunds'
+
+// checkout.session.completed carries payment_intent as an id (not expanded).
+const paymentIntentId = (pi) => (typeof pi === 'string' ? pi : pi?.id || null)
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
 // including the GitHub, Groq and Resend calls below. Each cache miss is a
@@ -74,14 +78,19 @@ export async function POST(request) {
       return Response.json({ received: true })
     }
 
-    // Group-buy deal seat purchased
+    // Group-buy deal seat purchased. paymentIntent is what a refund needs
+    // (lib/deal-refunds). slotsTaken counts paid seats only — free
+    // reservations live in deals.reservedFree (/api/deals/join).
     if (s.metadata?.type === 'deal' && s.metadata?.dealId) {
-      await db.collection('purchases').updateOne(
+      const ins = await db.collection('purchases').updateOne(
         { sessionId: s.id },
-        { $setOnInsert: { sessionId: s.id, dealId: s.metadata.dealId, type: 'deal', tool: s.metadata.tool || null, amount: s.amount_total || 0, buyerEmail: s.customer_details?.email || null, created_at: new Date() } },
+        { $setOnInsert: { sessionId: s.id, dealId: s.metadata.dealId, type: 'deal', tool: s.metadata.tool || null, amount: s.amount_total || 0, paymentIntent: paymentIntentId(s.payment_intent), buyerEmail: s.customer_details?.email || null, created_at: new Date() } },
         { upsert: true }
       )
-      await db.collection('deals').updateOne({ id: s.metadata.dealId }, { $inc: { slotsTaken: 1, paidSeats: 1 } })
+      // Only the first delivery of this session counts a seat (Stripe retries).
+      if (ins.upsertedCount) {
+        await db.collection('deals').updateOne({ id: s.metadata.dealId }, { $inc: { slotsTaken: 1, paidSeats: 1 } })
+      }
       return Response.json({ received: true })
     }
 
@@ -102,6 +111,7 @@ export async function POST(request) {
           amount,
           platformFee,
           creatorShare,
+          paymentIntent: paymentIntentId(s.payment_intent),
           buyerEmail: s.customer_details?.email || null,
           created_at: new Date(),
         },
@@ -122,6 +132,53 @@ export async function POST(request) {
         { upsert: true }
       )
     }
+  }
+
+  // A refund issued anywhere (admin cancel, Stripe dashboard, API) — mark the
+  // purchase and, for a deal seat, give the seat back. releasePurchase is
+  // idempotent, so the admin-cancel path and this event cannot double-count.
+  // Both event types must be enabled on the webhook endpoint in Stripe.
+  if (event.type === 'charge.refunded') {
+    const charge = event.data.object
+    const db = await getDb()
+    const paymentIntent = paymentIntentId(charge.payment_intent)
+    const purchase = await findPurchaseByPaymentIntent(db, stripe, paymentIntent)
+    if (purchase) {
+      if (charge.refunded === true) {
+        await releasePurchase(db, { sessionId: purchase.sessionId }, {
+          paymentIntent,
+          refunded_at: new Date(),
+          refundId: charge.refunds?.data?.[0]?.id || null,
+          amount_refunded: charge.amount_refunded || 0,
+          refund_reason: purchase.refund_reason || 'stripe_refund',
+        })
+      } else {
+        // Partial refund: the seat stays, the amount is recorded.
+        await db.collection('purchases').updateOne(
+          { sessionId: purchase.sessionId },
+          { $set: { paymentIntent, amount_refunded: charge.amount_refunded || 0, partial_refund_at: new Date() } }
+        )
+      }
+    }
+    return Response.json({ received: true })
+  }
+
+  // Chargeback: the money is on hold, so the seat is released now rather
+  // than when the dispute closes.
+  if (event.type === 'charge.dispute.created') {
+    const dispute = event.data.object
+    const db = await getDb()
+    const paymentIntent = paymentIntentId(dispute.payment_intent)
+    const purchase = await findPurchaseByPaymentIntent(db, stripe, paymentIntent)
+    if (purchase) {
+      await releasePurchase(db, { sessionId: purchase.sessionId }, {
+        paymentIntent,
+        disputed_at: new Date(),
+        disputeId: dispute.id,
+        dispute_reason: dispute.reason || null,
+      })
+    }
+    return Response.json({ received: true })
   }
 
   return Response.json({ received: true })

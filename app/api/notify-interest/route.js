@@ -1,6 +1,11 @@
 import { MongoClient } from 'mongodb'
 import { rateLimit } from '../../../lib/rate-limit'
 import { COMING_SOON } from '../../../lib/coming-soon'
+import { startConfirmation, normalizeEmail, EMAIL_RE } from '../../../lib/email'
+
+// The confirmation email goes out through fetch() in lib/email.js, which
+// Next 14 would otherwise cache (docs/COSTS.md rule 4).
+export const fetchCache = 'default-no-store'
 
 const client = new MongoClient(process.env.MONGO_URL)
 let db
@@ -15,11 +20,12 @@ async function connectDB() {
 export async function POST(request) {
   const rl = rateLimit(request, 10, 60_000); if (rl) return rl
   const body = await request.json().catch(() => ({}))
-  const email = (body.email || '').toString().trim().toLowerCase()
+  const email = normalizeEmail(body.email)
   const tool = (body.tool || '').toString().trim().slice(0, 60)
-  if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return Response.json({ ok: false, error: 'Valid email required' }, { status: 400 })
+  if (!email || !EMAIL_RE.test(email)) return Response.json({ ok: false, error: 'Valid email required' }, { status: 400 })
   // Only accept interest for tools we actually list as coming-soon (no arbitrary keys)
-  if (!COMING_SOON.some((t) => t.slug === tool)) return Response.json({ ok: false, error: 'Unknown tool' }, { status: 400 })
+  const listed = COMING_SOON.find((t) => t.slug === tool)
+  if (!listed) return Response.json({ ok: false, error: 'Unknown tool' }, { status: 400 })
 
   const db = await connectDB()
   await db.collection('tool_interest').updateOne(
@@ -27,11 +33,15 @@ export async function POST(request) {
     { $setOnInsert: { tool, email, at: new Date() } },
     { upsert: true }
   )
-  // Also add them to the list so they hear when it ships
-  await db.collection('subscribers').updateOne(
-    { email },
-    { $setOnInsert: { email, created_at: new Date(), source: 'fake-door' }, $addToSet: { interested_in: tool } },
-    { upsert: true }
-  )
-  return Response.json({ ok: true })
+  // Also put them on the list so they hear when it ships — through the same
+  // confirmation as every other signup (source: 'fake-door', status:
+  // 'pending' until the link in the email is clicked). An address that is
+  // already active just gets the tool added to interested_in.
+  const result = await startConfirmation(db.collection('subscribers'), {
+    email,
+    source: 'fake-door',
+    addToSet: { interested_in: tool },
+    tool: listed.title || tool,
+  })
+  return Response.json({ ok: true, pending: result.pending, confirmation_sent: result.confirmation_sent })
 }
