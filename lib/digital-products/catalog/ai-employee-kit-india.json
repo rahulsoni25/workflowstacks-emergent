@@ -1,0 +1,346 @@
+{
+  "slug": "ai-employee-kit-india",
+  "status": "live",
+  "market": "IN",
+  "name": "AI Employee Kit — India Edition",
+  "card": "Ten ready-to-use AI assistants for WhatsApp businesses in India: replies, quotes, payment reminders, review replies and Reels plans, in English, Hindi and Hinglish.",
+  "seo": {
+    "title": "AI Employee Kit — India Edition | WorkflowStacks AI Kits",
+    "ogTitle": "Your AI front desk for WhatsApp, quotes, reviews and Reels",
+    "description": "Ten ready-to-use AI assistants for WhatsApp businesses in India. Replies, quotes, payment reminders, review replies and Reels plans in English, Hindi and Hinglish. ₹999, 7-day refund."
+  },
+  "price": {
+    "amount": 999,
+    "currency": "INR",
+    "label": "₹999",
+    "note": "",
+    "period": "One-time payment"
+  },
+  "checkout": {
+    "provider": "razorpay",
+    "url": ""
+  },
+  "whatsapp": {
+    "number": "971522086253",
+    "text": "Hi WorkflowStacks, I'd like to buy the AI Employee Kit — India Edition (₹999)."
+  },
+  "buy": {
+    "label": "Get the kit — ₹999",
+    "short": "Get the kit",
+    "note": {
+      "checkout": "One-time payment · 7-day no-questions refund · Works on free AI plans",
+      "whatsapp": "Order on WhatsApp — we reply with a secure payment link · 7-day no-questions refund"
+    }
+  },
+  "hero": {
+    "eyebrow": "WorkflowStacks AI Kits · India Edition",
+    "headline": "Your AI front desk for WhatsApp, quotes, reviews and Reels — in English, Hindi and Hinglish.",
+    "sub": "Ten ready-to-use AI assistants that work from **your own** prices and policies. Paste them into ChatGPT, Claude or Gemini — free or paid — and send your first reply in about 10 minutes. The assistant drafts. You check and send.",
+    "bullets": [
+      "Works with ChatGPT, Claude or Gemini — free or paid plans",
+      "A 10-minute quick start to your first reply",
+      "If you can copy and paste on WhatsApp, you can set it up"
+    ],
+    "demo": {
+      "contact": "Neha (sample customer)",
+      "status": "WhatsApp",
+      "messages": [
+        {
+          "from": "in",
+          "text": "Hi, haircut ka rate kya hai? Aur Sunday ko slot milega?",
+          "time": "7:12 pm"
+        },
+        {
+          "chip": "WhatsApp Enquiry Replier is drafting…"
+        },
+        {
+          "from": "out",
+          "text": "Namaste ji! Haircut ka rate [your price] hai. Sunday ka slot: [CHECK: Sunday availability]. Aapko kaunsa time suit karega? Bata dijiye, hum confirm karke booking kar dete hain.",
+          "time": "7:13 pm"
+        }
+      ],
+      "note": "Sample business and customer (sample — have a fluent speaker check). Your real prices replace [your price]. The owner checks every draft before sending."
+    }
+  },
+  "problem": {
+    "title": "Running a business on WhatsApp means typing all day.",
+    "quotes": [
+      "“Price kya hai?”",
+      "“Slot hai?”",
+      "“Estimate bhej do”",
+      "“I'll let you know”"
+    ],
+    "body": "Every day, the same work arrives: a three-minute voice note that needs a careful answer, a quotation you meant to send last night, a payment that's two weeks late, a Google review waiting for a reply, festival season coming with no Reels planned, and an English email to a supplier that you keep putting off.",
+    "before": {
+      "title": "Why “just using ChatGPT” gives generic answers",
+      "body": "You've probably tried ChatGPT. The answers were polite, long and generic — because it didn't know your prices, your timings, your policies, or how you talk to customers."
+    },
+    "after": {
+      "title": "What changes with this kit",
+      "body": "You tell the AI about your business **once** — prices, timings, booking, payment methods, policies, tone, languages, your top FAQs, and the things you never say or promise. Then ten assistants do the drafting, the way you would. Anything they can't confirm is marked [CHECK]."
+    }
+  },
+  "demosTitle": "See it work.",
+  "demos": [
+    {
+      "id": "voicenote",
+      "label": "Voice note → reply",
+      "inputLabel": "Typed gist of a customer's voice note (sample — have a fluent speaker check)",
+      "input": "Hello ji, woh bridal package ke baare mein poochna tha. Meri behen ki shaadi hai agle mahine end mein. Trial hota hai kya? Aur ghar pe aa sakte ho, Vijay Nagar mein rehte hain? Rate bata do please.",
+      "outputLabel": "WhatsApp Enquiry Replier",
+      "output": "Namaste ji! Aapki behen ki shaadi ke liye bahut badhai.\nBridal package: [your price]. Trial bhi hota hai: [your trial price].\nVijay Nagar mein home service available hai — travel charge [your charge].\nShaadi ki date bata dijiye, hum availability check karke trial slot fix kar dete hain.\n— Team Glow Studio",
+      "flag": "Notes for you: [CHECK: confirm the wedding date is free before promising a slot.]",
+      "note": "Sample salon in Indore (fictional). Hinglish is a sample — have a fluent speaker check. Your real prices from your Business Profile replace the brackets."
+    },
+    {
+      "id": "quote",
+      "label": "Notes → estimate",
+      "inputLabel": "The contractor's site notes (sample figures)",
+      "input": "Mr. Kulkarni, Baner, 2BHK. Walls about 1,400 sq ft, putty + primer + 2 coats, 18 per sq ft. Hall false ceiling 120 sq ft at 95. Wardrobe polish 2 nos, lump sum 6,000. 12 working days. Half advance.",
+      "outputLabel": "Quotation & Estimate Writer",
+      "output": [
+        "Wall painting: putty, primer and 2 coats — 1,400 sq ft × 18 = 25,200",
+        "False ceiling, hall — 120 sq ft × 95 = 11,400",
+        "Wardrobe polish (2 nos) — lump sum = 6,000",
+        "Subtotal: 42,600",
+        "GST as applicable — confirm rate and invoice details with your CA [CHECK]",
+        "**Total before GST: 42,600**"
+      ],
+      "flag": "Plus what's included and not included, assumptions, payment terms, validity, the working for every line — and a short WhatsApp message to send with it",
+      "note": "Sample figures from a fictional business (excerpt)."
+    },
+    {
+      "id": "reminder",
+      "label": "Overdue fees → reminder",
+      "inputLabel": "The owner's request (sample)",
+      "input": "Parent: Mrs. Verma. October fees for her 2 children, amount [amount], due on the 5th. I sent a friendly reminder on the 7th, no reply yet. Draft Stage 2 in Hinglish.",
+      "outputLabel": "Payment Reminder Assistant",
+      "output": "Namaste Mrs. Verma, 7 tareekh ko October fees ke liye message bheja tha — shayad busy time mein miss ho gaya. Dono bachchon ki fees [amount] 5 tareekh ko due thi. Koi dikkat ho ya bill ki copy chahiye toh bata dijiye. Pay karne ka link: [UPI/PAYMENT LINK]. Agar pay kar diya hai toh please ignore karein. Thank you!",
+      "flag": "Stage 2 of a polite four-step ladder. Never threatening, no legal claims — and your own link replaces [UPI/PAYMENT LINK]",
+      "note": "Sample tuition centre and parent (fictional). Hinglish is a sample — have a fluent speaker check."
+    },
+    {
+      "id": "reels",
+      "label": "Request → month of Reels",
+      "inputLabel": "The owner's request",
+      "input": "Plan next month for my salon. 3 Reels a week. Wedding season. No offers.",
+      "outputLabel": "Reels & Festival Content Planner",
+      "output": [
+        "Week 1 · Reel — Bridal trial, start to finish. Hook: close-up of the bride-to-be's reflection: “Trial day.”",
+        "Week 1 · Reel — 5 questions brides ask us. Hook: on-screen text “Sabse zyada poocha gaya sawaal...”",
+        "Week 2 · Reel — Packing the bridal kit for a home booking. Hook: hands zipping the kit: “Everything we carry to your home.”",
+        "Week 3 · Reel — Our team getting ready at 5 am for a wedding. Hook: alarm clock ringing in the dark",
+        "Week 4 · Post — A real bride's look (with her permission) [GET PERMISSION]"
+      ],
+      "flag": "Each Reel comes with a shot list, voiceover lines, a caption and hashtag ideas. Festival dates are marked [DATE — CHECK] — never made up",
+      "note": "Sample plan for a fictional salon (excerpt). Hinglish hook is a sample — have a fluent speaker check."
+    }
+  ],
+  "inside": {
+    "title": "What's inside",
+    "intro": "Ten AI assistants, each with copy-paste instructions, set-up steps for ChatGPT, Claude and Gemini, three practice examples, and tips.",
+    "items": [
+      {
+        "name": "WhatsApp Enquiry Replier",
+        "desc": "Replies under 80 words in English, Hindi or Hinglish, from your price list and FAQs."
+      },
+      {
+        "name": "Quotation & Estimate Writer",
+        "desc": "Clean quotes from rough notes, with every total's working shown."
+      },
+      {
+        "name": "Payment Reminder Assistant",
+        "desc": "A polite, four-step reminder ladder with your UPI or payment link. Never threatening."
+      },
+      {
+        "name": "Google Review Responder",
+        "desc": "Personal replies to every kind of review, and fair review requests."
+      },
+      {
+        "name": "Reels & Festival Content Planner",
+        "desc": "Monthly calendar, scripts and captions for festivals, wedding season and exam season."
+      },
+      {
+        "name": "Lead Follow-up Assistant",
+        "desc": "A Day 1, 3, 7 and 14 sequence for “I'll let you know” leads."
+      },
+      {
+        "name": "Complaint Resolver",
+        "desc": "Calm replies and clear options for you to choose from."
+      },
+      {
+        "name": "Hiring Assistant",
+        "desc": "Job posts, screening questions and interview scorecards, kept fair and job-related."
+      },
+      {
+        "name": "SOP & Staff Training Writer",
+        "desc": "Turns your voice notes into staff checklists, in Hindi or English."
+      },
+      {
+        "name": "Admin, Email & Translation Assistant",
+        "desc": "Professional English emails, plain summaries, and translations you can check."
+      }
+    ],
+    "extras": [
+      {
+        "title": "Business Profile worksheet",
+        "desc": "Fill it once, use it everywhere. You paste it into every assistant."
+      },
+      {
+        "title": "120-prompt library",
+        "desc": "Copy-paste prompts for Indian small businesses in 10 categories, as a document and a spreadsheet."
+      },
+      {
+        "title": "40 WhatsApp quick replies",
+        "desc": "In English and Hinglish, organised by situation, ready to save as shortcuts."
+      },
+      {
+        "title": "Weekly routine + privacy guide",
+        "desc": "A 30-minutes-a-week routine with a simple tracker, and what never to paste."
+      },
+      {
+        "title": "11-chapter guide",
+        "desc": "AI in plain English, choosing your AI app, writing prompts, the WhatsApp workflow, reputation, money conversations, your team, troubleshooting, your first 30 days, 50 questions answered and a glossary."
+      }
+    ]
+  },
+  "stepsTitle": "Up and running in about 10 minutes",
+  "steps": [
+    {
+      "time": "About 5 minutes",
+      "title": "Fill your Business Profile",
+      "body": "Prices, timings, booking, payment methods, policies, tone, languages, your top FAQs — and the things you never say or promise."
+    },
+    {
+      "time": "About 2 minutes",
+      "title": "Set up an assistant",
+      "body": "Copy its instructions, paste in your profile, and save it in ChatGPT, Claude or Gemini. No paid plan? Paste it into a new chat."
+    },
+    {
+      "time": "Every day",
+      "title": "Paste, check, send",
+      "body": "Paste a customer message and get a draft in the customer's language, short enough for WhatsApp, with one clear next step. Anything the assistant can't confirm is marked [CHECK] — it doesn't guess."
+    }
+  ],
+  "guardrailsTitle": "Careful by design.",
+  "guardrailsIntro": "You stay in charge: the assistant drafts, you check, you send.",
+  "guardrails": [
+    "Never invents prices, dates, policies or facts — unknowns are marked **[CHECK]**",
+    "Flags refunds, discounts, compensation and risky complaints as **OWNER DECISION**",
+    "Reminds you never to paste Aadhaar, PAN, ID numbers, card or bank details",
+    "No legal, tax, medical or investment advice — it points you to your CA, lawyer or doctor",
+    "Quotes carry “GST as applicable — confirm rate and invoice details with your CA”; the kit never states GST rates or rules",
+    "Payment reminders are never threatening and use a [UPI/PAYMENT LINK] placeholder for your own link",
+    "Adds “have a fluent speaker check” to every Hindi, Hinglish or regional-language draft",
+    "Keeps hiring fair: no criteria based on caste, religion, gender, age or region"
+  ],
+  "statsEyebrow": "",
+  "statsTitle": "",
+  "stats": [],
+  "fit": {
+    "title": "Is it for you?",
+    "yes": [
+      "Own a small business or practice with 1 to 25 people",
+      "Talk to customers on WhatsApp Business and Instagram",
+      "Run a coaching or tuition centre, clinic or diagnostic centre front desk, salon, boutique or Instagram shop, interior or repair business, travel agency, CA or consultant office, restaurant, cloud kitchen or local service — in a metro or a Tier-2/3 city",
+      "Can copy and paste on a phone"
+    ],
+    "no": [
+      "Want a bot that replies to customers automatically without a human checking",
+      "Want AI to make legal, tax, medical or financial decisions",
+      "Are looking for a promise of more sales or income — this kit drafts your messages; results depend on your business",
+      "Are a larger company that already has a CRM team and written processes for all of this"
+    ]
+  },
+  "offer": {
+    "title": "Everything in the kit",
+    "stack": [
+      {
+        "item": "**10 ready-to-use AI assistants**",
+        "detail": "copy-paste"
+      },
+      {
+        "item": "Business Profile worksheet",
+        "detail": "fill once"
+      },
+      {
+        "item": "120-prompt library",
+        "detail": "doc + spreadsheet"
+      },
+      {
+        "item": "40 WhatsApp quick replies",
+        "detail": "English + Hinglish"
+      },
+      {
+        "item": "Weekly AI routine + tracker",
+        "detail": "30 min a week"
+      },
+      {
+        "item": "Privacy & safety guide",
+        "detail": "what never to paste"
+      },
+      {
+        "item": "Quick start + 11-chapter guide",
+        "detail": "start in 10 min"
+      }
+    ],
+    "boxChecks": [
+      "ChatGPT, Claude or Gemini",
+      "English, Hindi and Hinglish",
+      "One-time payment"
+    ]
+  },
+  "refund": {
+    "title": "7-day no-questions refund",
+    "body": "Try the kit. Set up your assistants. If it isn't useful for your business, reply to your purchase email within 7 days of buying and we'll refund you in full. No forms, no questions.",
+    "short": "7-day no-questions refund"
+  },
+  "faq": [
+    {
+      "q": "Do I need a paid AI plan?",
+      "a": "No. It works on free plans of ChatGPT, Claude or Gemini — paste the instructions into a new chat. Paid plans let you save each assistant so it's ready every time."
+    },
+    {
+      "q": "I've tried ChatGPT. What's different?",
+      "a": "Your Business Profile and detailed instructions. The assistants know your prices, policies and tone, ask before guessing, and keep replies WhatsApp-short."
+    },
+    {
+      "q": "Will it reply in Hindi or Hinglish?",
+      "a": "Yes, it matches the customer's language — English, Hindi or Hinglish — and can work in regional languages on request. For non-English replies, it adds an English meaning so you can check, and reminds you to have a fluent speaker check."
+    },
+    {
+      "q": "Will it make up prices or promise things I don't offer?",
+      "a": "The assistants are instructed to stick to your profile and what you tell them, and to mark anything else as [CHECK]. AI can still make mistakes, so the kit includes a quick check to do before sending anything."
+    },
+    {
+      "q": "Does it send messages for me?",
+      "a": "No. It drafts. You check and send from your own WhatsApp or email."
+    },
+    {
+      "q": "Is my customer data safe?",
+      "a": "You choose what you paste. The kit tells you exactly what never to paste (Aadhaar, PAN, ID numbers, card or bank details, OTPs, health details with names) and how to remove names and numbers first."
+    },
+    {
+      "q": "Can it do my GST calculations?",
+      "a": "No. Quotes include the line “GST as applicable — confirm rate and invoice details with your CA [CHECK]”. The kit never states GST rates or rules."
+    },
+    {
+      "q": "I'm not technical. Can I set this up?",
+      "a": "If you can copy and paste on WhatsApp, you can set this up. The quick start takes about 10 minutes: 5 for your profile, 2 to set up the first assistant, 1 for a test message."
+    },
+    {
+      "q": "What format is the kit in?",
+      "a": "Simple text files you can open on your phone or computer, plus a spreadsheet of prompts."
+    },
+    {
+      "q": "What if it's not right for me?",
+      "a": "Reply to your purchase email within 7 days for a full refund. No questions asked."
+    }
+  ],
+  "final": {
+    "headline": "Ten assistants. Your prices. Your language.",
+    "body": "Fill your profile once, set up your first assistant in two minutes, and send your first AI-drafted reply today — checked by you."
+  },
+  "footerNote": "AI can make mistakes. The assistants draft text; you are responsible for checking and sending it. ChatGPT, Claude and Gemini are trademarks of their respective owners. WorkflowStacks AI Kits are not affiliated with WhatsApp, Meta, OpenAI, Anthropic or Google. Sample conversations on this page are fictional, and Hindi and Hinglish lines are samples.",
+  "storeTag": "India · Small businesses"
+}

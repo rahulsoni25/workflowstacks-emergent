@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 export const metadata = {
   title: 'Pricing — Free Catalog, Premium Tools & Done-For-You Agents | WorkflowStacks',
   description:
-    'Browse 1,500+ open-source AI skills free. Buy premium automation tools one-time ($29–$39). Or have us build your working agent from $500, delivered in 7 days.',
+    'Browse 1,500+ open-source AI skills free. Get a ready-made AI Kit for your business (USD 99, ₹999 in India), buy premium automation tools one-time ($29–$39), or have us build your working agent from $500, delivered in 7 days.',
   alternates: { canonical: '/pricing' },
 }
 
@@ -86,6 +86,19 @@ export default function PricingPage() {
         <p className="text-lg text-text-secondary text-center mb-14 max-w-xl mx-auto">
           The catalog, builder, and templates are free. Premium tools are one-time purchases — no subscriptions.
         </p>
+
+        {/* AI Kits: the digital-products store at /get (standalone pages, so a plain <a>). */}
+        <a href="/get" className="group mb-8 flex flex-col gap-4 rounded-2xl border border-[#C6F24E]/40 bg-[#101314] p-6 md:flex-row md:items-center md:justify-between hover:border-[#C6F24E] transition-colors">
+          <div>
+            <p className="text-xs tracking-widest uppercase text-[#C6F24E] font-semibold mb-1">New · AI Kits</p>
+            <h2 className="text-white font-bold text-xl mb-1">Ready-made AI assistants for your business</h2>
+            <p className="text-text-secondary text-sm max-w-2xl">Ten assistants, a complete guide and 120 prompts per kit, for UAE small businesses, Dubai property agents and Indian small businesses. Works with ChatGPT, Claude or Gemini.</p>
+          </div>
+          <div className="shrink-0 md:text-right">
+            <span className="block text-2xl font-extrabold text-white">USD 99 <span className="text-text-muted text-sm font-normal">/ ₹999 India · one-time</span></span>
+            <span className="inline-block mt-2 text-sm font-semibold text-[#C6F24E] group-hover:text-[#A6D62E]">See the kits →</span>
+          </div>
+        </a>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
           {TIERS.map((tier) => (
