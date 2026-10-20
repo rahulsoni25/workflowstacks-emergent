@@ -2,6 +2,12 @@ import { notFound } from 'next/navigation'
 import AgentClient from './AgentClient'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
+// Always the public doc: a paid agent comes back without its blueprint (a
+// 300-char preview only) — the API withholds it without an unlock token, and
+// this fetch never sends one, so the page stays cacheable and the SEO fields
+// (name, goal, skills) still render. AgentClient does the unlock after
+// checkout with the server-minted token. Reading searchParams here would
+// make the whole route dynamic (a function run per visit, see docs/COSTS.md).
 async function getAgent(id) {
   try {
     const res = await fetch(`${BASE}/api/agents/${id}`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
