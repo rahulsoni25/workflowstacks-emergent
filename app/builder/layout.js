@@ -12,7 +12,7 @@ export const metadata = {
 const appSchema = softwareApplicationSchema({
   name: 'WorkflowStacks AI Agent Builder',
   description:
-    'A free no-code AI agent builder. Describe your goal, pick from open-source AI skills, and generate a ready-to-run agent blueprint for Claude, ChatGPT, or Gemini — plus matching n8n workflow templates you can import and run.',
+    'A free no-code AI agent builder: describe your goal, pick open-source AI skills, and get a ready-to-run blueprint for Claude, ChatGPT or Gemini, plus n8n templates.',
   url: '/builder',
   applicationCategory: 'BusinessApplication',
   priceUsd: 0,

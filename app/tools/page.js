@@ -7,7 +7,7 @@ import { COMING_SOON } from '@/lib/coming-soon'
 import ComingSoon from './ComingSoon'
 
 export const metadata = {
-  title: 'Premium AI Tools — Lead Finder, Rank Tracker & More | WorkflowStacks',
+  title: 'Premium AI Tools — Lead Finder, Rank Tracker | WorkflowStacks',
   description:
     'Buy-once automation tools every business needs: find leads, track your Google rankings, watch competitors, catch bad reviews. Set up yourself or let us do it.',
   alternates: { canonical: '/tools' },

@@ -2,7 +2,7 @@ import LearnCreatorsClient from './LearnCreatorsClient'
 
 export const metadata = {
   title: 'For Creators — List Your AI Skill & Earn 85% | WorkflowStacks',
-  description: 'Submit your Claude Skill, MCP server, or AI agent to WorkflowStacks. Reach founders, agencies, and ecommerce teams — keep 85% of every sale. See how submission, review, and security screening work.',
+  description: 'Submit your Claude Skill, MCP server or AI agent to WorkflowStacks. Reach founders, agencies and ecommerce teams, and keep 85% of every sale.',
   alternates: { canonical: '/learn/creators' },
 }
 

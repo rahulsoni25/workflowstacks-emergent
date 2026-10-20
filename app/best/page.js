@@ -7,7 +7,7 @@ import NewsletterSignup from '@/components/NewsletterSignup'
 export const revalidate = 604800
 
 export const metadata = {
-  title: 'Best open-source AI skills by category — ranked by GitHub stars | WorkflowStacks',
+  title: 'Best Open-Source AI Skills by Category | WorkflowStacks',
   description:
     'The best open-source AI agents, Claude skills, MCP servers, prompts and automations in every category, ranked by GitHub stars and this week’s star growth.',
   alternates: { canonical: '/best' },

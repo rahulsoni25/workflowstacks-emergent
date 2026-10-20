@@ -424,7 +424,19 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
               <CardHeader><CardTitle className="text-white">Quick Actions</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 {skill.is_premium ? (
-                  <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white" size="lg">Purchase for ${skill.price}</Button>
+                  // Stripe checkout only covers bundles, deals and paid agents —
+                  // not creator listings — so the only honest CTA is the
+                  // creator's own link. Nothing here pretends to take payment.
+                  <>
+                    {(skill.source_url || skill.github_url) && (
+                      <a href={skill.source_url || skill.github_url} target="_blank" rel="noopener noreferrer" className="block">
+                        <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white" size="lg">
+                          <Github className="w-4 h-4 mr-2" />{skill.source_url && skill.source_url !== skill.github_url ? 'Buy direct from the creator' : 'View on GitHub'}
+                        </Button>
+                      </a>
+                    )}
+                    <p className="text-text-muted text-xs text-center">Paid listing — checkout isn&apos;t open yet. Follow the creator&apos;s link to buy direct.</p>
+                  </>
                 ) : (
                   <Button onClick={() => skill.github_url && window.open(skill.github_url, '_blank')} className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white shadow-lg shadow-teal-500/20" size="lg">
                     <Github className="w-4 h-4 mr-2" />Get it Free on GitHub
@@ -435,7 +447,8 @@ export default function SkillDetailClient({ skill, sourceSpec, codeflow = null, 
                     <Zap className="w-4 h-4 mr-2" />Use in Agent Builder
                   </Button>
                 </Link>
-                {skill.github_url && (
+                {/* Hidden when the premium CTA above already points at github_url. */}
+                {skill.github_url && !(skill.is_premium && (skill.source_url || skill.github_url) === skill.github_url) && (
                   <Button variant="outline" className="w-full border-slate-600 text-text-secondary hover:bg-white/5" onClick={() => window.open(skill.github_url, '_blank')}>
                     <Github className="w-4 h-4 mr-2" />View on GitHub
                   </Button>

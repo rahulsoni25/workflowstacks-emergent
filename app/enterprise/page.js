@@ -45,8 +45,12 @@ export default function EnterprisePage() {
         <Card className="bg-gradient-to-br from-teal-500/10 to-cyan-500/10 border-teal-500/30">
           <CardContent className="py-10 text-center">
             <h2 className="text-2xl font-bold text-white mb-3">Ready to Scale Your AI Operations?</h2>
-            <p className="text-text-secondary mb-6">Get in touch with our enterprise team for a custom demo and pricing.</p>
-            <Button size="lg" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 shadow-lg shadow-teal-500/20">Contact Enterprise Sales</Button>
+            <p className="text-text-secondary mb-6">Tell us what your team needs — we reply within 24 hours with a plan and a quote.</p>
+            {/* Same lead capture as /build-for-me (POST /api/dfy-request → owner
+                email); ?tier=enterprise preselects the top budget band there. */}
+            <Link href="/build-for-me?tier=enterprise" className="inline-block">
+              <Button size="lg" className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-8 shadow-lg shadow-teal-500/20">Contact Enterprise Sales</Button>
+            </Link>
           </CardContent>
         </Card>
       </div>

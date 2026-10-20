@@ -12,7 +12,7 @@ export const revalidate = 21600
 export const metadata = {
   title: 'The WorkflowStacks Journal — n8n, MCP & AI agent guides',
   description:
-    'Hands-on guides to n8n workflows, MCP servers for Claude Desktop, Claude Code, and open-source AI agents — every article checked against the actual workflow files and repos it covers.',
+    'Hands-on guides to n8n workflows, MCP servers for Claude Desktop, Claude Code and open-source AI agents, each checked against the workflow files and repos it covers.',
   alternates: { canonical: '/blog' },
 }
 

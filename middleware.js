@@ -105,12 +105,13 @@ export async function middleware(request) {
 
   // --- /{skills|packs|playbooks|personas}/{uuid} -> canonical slug, 308 ---
   //
-  // This has to happen here rather than in the page. app/loading.js is a root
-  // Suspense boundary, so every page starts streaming before its async work
-  // finishes — and a redirect() thrown after the first flush cannot change the
-  // status code. It degrades to a 200 carrying <meta http-equiv="refresh">,
-  // which is what /skills/<uuid> was serving in production. The Edge runs
-  // before any of that.
+  // This happens here rather than in the page. When a root app/loading.js
+  // existed, every page started streaming before its async work finished, so
+  // a redirect() thrown after the first flush could not change the status
+  // code and degraded to a 200 carrying <meta http-equiv="refresh">, which is
+  // what /skills/<uuid> served in production. That file was removed on
+  // 2026-10-20, but the Edge is still the cheapest place for this: no page
+  // render, no Mongo read, and the slug cache below.
   const m = pathname.match(/^\/(skills|packs|playbooks|personas)\/([^/?#]+)\/?$/)
   if (!m) return NextResponse.next()
   const [, kind, param] = m

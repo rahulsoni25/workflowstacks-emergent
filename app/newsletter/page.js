@@ -8,7 +8,7 @@ import NewsletterSignup from '@/components/NewsletterSignup'
 export const revalidate = 21600
 
 export const metadata = {
-  title: 'WorkflowStacks Weekly — the Monday digest of fast-growing AI skills',
+  title: 'WorkflowStacks Weekly — Monday digest of rising AI skills',
   description:
     'Every Monday: the five open-source AI skills gaining the most GitHub stars that week, the top overall, and what’s new. Read past issues and subscribe.',
   alternates: { canonical: '/newsletter' },

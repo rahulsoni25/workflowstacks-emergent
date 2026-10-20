@@ -6,12 +6,15 @@ import { buildCodeflow, summarize } from '@/lib/codeflow'
 import { SITE_URL as BASE } from '@/lib/site-url'
 import { rawFetch } from '@/lib/raw-fetch'
 import { getSkillDirect, getRelatedSkillsDirect } from '@/lib/skills-data'
+import { passesSkillGate } from '@/lib/skill-gate'
 
-// Note: invalid skill IDs render the not-found UI with HTTP 200 (a Next.js 14
-// App Router limitation — notFound() doesn't emit a 404 status under ISR, and
-// force-dynamic doesn't change it while tripling TTFB on valid pages). The
-// not-found page emits <meta robots noindex>, so crawlers won't index these
-// phantom URLs — the practical SEO impact is nil. Keeping ISR for fast pages.
+// Invalid skill IDs used to render the not-found UI with HTTP 200. The cause
+// was the root app/loading.js: a Suspense boundary above every page meant the
+// 200 shell had already streamed by the time notFound() threw, so the status
+// could not change (and the same for permanentRedirect(), which is why the
+// UUID -> slug 308 lives in middleware.js). That file is gone (2026-10-20), so
+// notFound() here produces a real 404. Search Console had been reporting the
+// phantom URLs as "Soft 404", each one a wasted crawl on a site that gets few.
 
 // ISR. Without generateStaticParams a dynamic segment is server-rendered on
 // EVERY request (verified live 2026-08-17: Cache-Control private/no-store,
@@ -211,10 +214,17 @@ export async function generateMetadata({ params }) {
   const title = withIntent.length <= 65 ? withIntent : `${name} | WorkflowStacks`
   const description = clip(skill.description_human || skill.description || '')
   const url = `/skills/${skill.slug || skill.id}`
+  // Only pages that pass the catalog gate ask to be indexed. The rest stay
+  // live and linked (follow) so discovery keeps working, but they no longer
+  // present 2,000 README-derived pages to Google as the site. The sitemap
+  // uses the same gate, so the indexable set and the sitemap are one list.
+  // See lib/skill-gate.js for the Search Console numbers behind this.
+  const indexable = passesSkillGate(skill)
   return {
     title,
     description,
     alternates: { canonical: url },
+    robots: indexable ? undefined : { index: false, follow: true },
     // No explicit `images`: the sibling opengraph-image.js renders a per-skill
     // card, and listing the generic site-wide /opengraph-image here overrode
     // it — every shared skill link showed the same anonymous preview.

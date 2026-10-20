@@ -383,7 +383,10 @@ export default function HomeClient({ initialSkills = [], initialStats = null, ho
 
           {/* ---------- STEP 1 ---------- */}
           {step === 1 && (
-            <div className="anim-rise mt-7 flex w-full flex-col items-center gap-[22px]">
+            {/* No entrance animation here: the h1 inside is the page's LCP
+                element, and a 0.4 s opacity ramp from 0 delays the paint
+                Lighthouse counts. The other sections keep anim-rise. */}
+            <div className="mt-7 flex w-full flex-col items-center gap-[22px]">
               <p className="m-0 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-text-muted">
                 Open-source AI skills, agents &amp; MCP servers · Claude · ChatGPT · Gemini
               </p>

@@ -12,7 +12,7 @@ import { SITE_URL as BASE } from '@/lib/site-url'
 export const metadata = {
   title: 'Learning Resources for Founders | WorkflowStacks',
   description:
-    'The most-starred learning resources on GitHub — curated lists, courses, and books for founders building with AI. Separated from our skills library so tools stay tools.',
+    'The most-starred learning resources on GitHub: curated lists, courses and books for founders building with AI, kept separate from the skills library.',
   alternates: { canonical: '/learn/resources' },
 }
 

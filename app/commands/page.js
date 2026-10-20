@@ -11,7 +11,7 @@ function starsOf(s) {
 }
 
 export const metadata = {
-  title: 'Claude Code Slash Commands — Verified, Copy-Paste | WorkflowStacks',
+  title: 'Claude Code Slash Commands — Verified | WorkflowStacks',
   description: 'Real, working Claude Code slash commands — the actual command file, not a description of one. Copy-paste into .claude/commands/. Free.',
   alternates: { canonical: '/commands' },
 }

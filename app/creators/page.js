@@ -14,9 +14,9 @@ import InviteCapture from '@/components/creators/InviteCapture'
 export const revalidate = 86400
 
 export const metadata = {
-  title: 'Creators — the builders behind the open-source AI skills catalog | WorkflowStacks',
+  title: 'Creators of Open-Source AI Skills | WorkflowStacks',
   description:
-    'Every developer and team whose open-source AI skills, MCP servers and agents are listed on WorkflowStacks. Find your GitHub username and claim your creator page with a README badge.',
+    'Every developer and team whose open-source AI skills, MCP servers and agents are listed on WorkflowStacks. Claim your creator page with a README badge.',
   alternates: { canonical: '/creators' },
 }
 

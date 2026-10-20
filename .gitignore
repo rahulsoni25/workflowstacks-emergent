@@ -128,3 +128,6 @@ _pb.html
 *.gz
 *.hdr
 *.brhdr
+
+# Scratch worktrees created by Claude Code agents
+.claude/worktrees/
