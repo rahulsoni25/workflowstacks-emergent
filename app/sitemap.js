@@ -5,7 +5,7 @@ import { OUTCOMES } from '../lib/outcomes'
 import { MCP_SERVERS } from '../lib/mcp-servers'
 import { KITS } from '../lib/kits'
 import { SLASH_COMMANDS } from '../lib/commands'
-import { passesSkillGate, SKILL_GATE_PROJECTION, SKILL_GATE_QUERY, skillLastModified } from '@/lib/skill-gate'
+import { passesSkillGate, skillPriority, SKILL_GATE_PROJECTION, SKILL_GATE_QUERY, skillLastModified } from '@/lib/skill-gate'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
 // --- Why this file gates skill pages -----------------------------------
@@ -22,10 +22,12 @@ import { SITE_URL as BASE } from '@/lib/site-url'
 // usefulness, not production method, so volume alone is a liability here.
 //
 // The gate (lib/skill-gate.js) submits only skill pages carrying our OWN
-// substantive content (a real use_guide), high rewrite quality, and enough
-// upstream notability to have genuine search demand. The same gate decides
-// which skill pages carry noindex (app/skills/[id]/page.js), so the sitemap
-// and the indexable set are one list. Pages outside it stay live and linked.
+// substantive content (a real use_guide) and high rewrite quality. The same
+// gate decides which skill pages carry noindex (app/skills/[id]/page.js), so
+// the sitemap and the indexable set are one list. Pages outside it stay live
+// and linked. The old 1,000-star floor is gone: Search Console shows the
+// pages that actually get indexed and shown are the small, specifically named
+// tools, not the famous ones (see lib/skill-gate.js for the list).
 //
 // --- lastmod ------------------------------------------------------------
 // Every entry used to carry lastModified = now, regenerated daily, so the
@@ -105,7 +107,7 @@ export default async function sitemap() {
       .limit(3000)
       .toArray()
     skillEntries = docs.filter(passesSkillGate).map((s) => {
-      const entry = { url: `${BASE}/skills/${s.slug}`, changeFrequency: 'monthly', priority: 0.5 }
+      const entry = { url: `${BASE}/skills/${s.slug}`, changeFrequency: 'monthly', priority: skillPriority(s) }
       const lastModified = skillLastModified(s)
       if (lastModified) entry.lastModified = lastModified
       return entry

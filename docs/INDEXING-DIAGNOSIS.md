@@ -14,6 +14,60 @@ number below has a file reference.
 | 2026-10-19 | Only `/` is "Submitted and indexed". `/skills`, `/skills/page/2`, `/collections`, `/bundles/lead-finder`, `/skills/browser-use` are "Discovered – not indexed" with **no crawl date**. `/templates/cold-email-personalizer`, `/automate/triage-your-inbox`, `/mcp/filesystem`, `/skills/ogcode` are "Crawled – not indexed", last crawled **23 Jul – 18 Aug**. A blog post is "URL is unknown to Google". | `reports/seo/2026-10-19.md:92-104` |
 | 2026-10-19 | 1 click / 16 impressions in 28 days. Weekly impressions: 584 (wk of 12 Aug) → 60 → 63 → 20 → … → 3. | `reports/seo/2026-10-19.md:16`, `reports/seo/2026-09-10-review.md:27` |
 
+Search Console "Page indexing" on 2026-10-20 (screenshot from the owner):
+
+| Reason | Pages | What it is here |
+|---|---|---|
+| Crawled – currently not indexed | **758**, trend rising | Fetched and rejected on quality. Was 549 on 09-28, so Google *is* crawling more, and still saying no. |
+| Discovered – currently not indexed | **516** | Known from the sitemap or links, never fetched. Crawl budget withheld. |
+| Alternate page with proper canonical tag | 35 | Fine: `/skills/<uuid>`, `www.` and `?cb=` variants pointing at the right canonical. |
+| Page with redirect | 11 | Fine: the UUID → slug 308s and www → apex. |
+| Duplicate without user-selected canonical | 6 | Pages Google sees as copies of another URL. Needs the URL list to say which. |
+| Soft 404 | 5 | Unknown skill ids served 200 (fixed on this branch: root `loading.js` removed). |
+| Duplicate, Google chose different canonical | 2 | Needs the URL list. |
+| Not found (404) | 0 | — |
+
+So roughly 840 pages have been crawled and 25 are indexed. Crawling is not
+the bottleneck; Google's judgement of the crawled pages is.
+
+### What the indexed pages have that the others don't
+
+The list of the 25 indexed URLs is not in the repository. The closest
+evidence is the 13 pages that got impressions in the 28 days to 2026-10-17
+(a page must be indexed to get an impression — `reports/seo/2026-10-19.json`,
+`gsc.top_pages_28d`):
+
+`/` · `/commands` · `/templates/ai-support-agent` · `/skills/oysterworkflow`
+(position 1) · `/skills/supoclip` · `/skills/facebook-ads-analyzer` ·
+`/skills/clippedai` · `/skills/clipper2` · `/skills/video-use` ·
+`/skills/lookml-generator` · `/skills/openclaw-marketing-skills` · two
+`/skills/<uuid>` pages.
+
+The pattern: **small, specifically named tools**, not the catalog's
+famous ones. For litellm, browser-use or langflow (`/skills/browser-use` is
+"Discovered – not indexed") Google already has GitHub plus the official docs,
+so a README-derived page is one more copy. For "oysterworkflow" or
+"supoclip" this site is one of the only pages on the web that describes the
+tool, so Google keeps it. Three of the eight are video-clip tools and two are
+marketing tools, which matches the site's stated audience.
+
+That is the opposite of the sitemap gate's old assumption (1,000+ stars =
+worth submitting), so the star floor was removed from the index gate on this
+branch (`lib/skill-gate.js`). Our own content quality (rewrite score, chars
+of guide we wrote) now decides indexability; stars only set sitemap priority.
+
+To confirm this against the real 25, export them (Page indexing → Indexed →
+"View data about indexed pages" → Export, or Performance → Pages → Export)
+and run, anywhere with network access:
+
+```
+node scripts/indexed-vs-catalog.mjs path/to/export.csv
+```
+
+It prints stars, rewrite score, guide length, category and slug/uuid for each
+indexed skill page next to the same medians for a random sample of the
+non-indexed catalog.
+
 Two different things are going on, and they need different fixes.
 
 ### 1a. "Crawled – currently not indexed" on hundreds of pages, and no return visit for 2–3 months
@@ -94,7 +148,7 @@ Two things in the code were making this worse:
 
 | Change | Files | Why |
 |---|---|---|
-| One catalog gate for both the sitemap and `robots` | `lib/skill-gate.js` (new), `app/sitemap.js`, `app/skills/[id]/page.js` | Catalog pages that fail the gate (score < 8, < 1,000 stars, < 600 chars of our guidance, no slug, not AI-relevant, dead repo) now carry `noindex,follow`. They stay live and linked. The indexable set and the sitemap are now the same ~500 URLs instead of ~500 submitted and ~2,500 indexable. |
+| One catalog gate for both the sitemap and `robots` | `lib/skill-gate.js` (new), `app/sitemap.js`, `app/skills/[id]/page.js` | Catalog pages that fail the gate (score < 8, < 600 chars of our guidance, no slug, not AI-relevant, dead repo) now carry `noindex,follow`. They stay live and linked. The indexable set and the sitemap are now the same list (~950 URLs by the counts in the old sitemap comment) instead of ~500 submitted and ~2,500 indexable. No star threshold: see §1 for why. |
 | Honest `<lastmod>` | `app/sitemap.js`, `lib/skill-gate.js` | Omitted where unknown; the rewrite date for skills; `updated_at` for posts (it was reading a field the store never returned). |
 | Sitemap reads Mongo directly | `app/sitemap.js` | No more self-fetch timeouts on a cold deploy; same pattern the blog entries already used. |
 | Real 404s | `app/loading.js` removed; comments in `app/skills/[id]/page.js`, `middleware.js` | `notFound()` now sets the status before anything streams. Soft 404s stop costing crawl budget. |
