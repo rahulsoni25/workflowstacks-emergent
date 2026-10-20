@@ -6,6 +6,9 @@ import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 import { screenSubmission } from '../../../lib/content-safety';
 import { pickDailyFromDb } from '../../../lib/newsletter-pick';
+import { redactAgent, stripPrivateFields, verifyUnlockToken, readUnlockToken } from '../../../lib/agent-access';
+import { getStripe } from '../../../lib/stripe';
+import { refundDealPurchases } from '../../../lib/deal-refunds';
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
 // including the GitHub, Groq and Resend calls below. Each cache miss is a
@@ -1889,7 +1892,8 @@ export async function GET(request) {
         .sort(sortSpec)
         .limit(60)
         .toArray();
-      return Response.json({ agents });
+      // Paid blueprints never leave the server unlocked (see lib/agent-access).
+      return Response.json({ agents: agents.map((a) => stripPrivateFields(redactAgent(a))) });
     }
 
     // Match a problem (or any query) to the most relevant published skills
@@ -1984,7 +1988,7 @@ export async function GET(request) {
       return Response.json({
         deals: deals.map((d) => ({
           id: d.id, tool: d.tool, status: d.status || (d.approved === false ? 'pending' : 'open'),
-          slotsTaken: d.slotsTaken || 0, slotsTotal: d.slotsTotal,
+          slotsTaken: d.slotsTaken || 0, reservedFree: d.reservedFree || 0, slotsTotal: d.slotsTotal,
           reservations: (byDeal[d.id] || []).length, reservationEmails: byDeal[d.id] || [],
         })).sort((a, b) => b.reservations - a.reservations),
         topRequests: requests.map((r) => ({ tool: r.tool, votes: r.votes || 1 })),
@@ -2021,17 +2025,18 @@ export async function GET(request) {
       return Response.json(stats);
     }
 
-    // Group-buy / affiliate tool deals (only approved ones show publicly)
+    // Group-buy / affiliate tool deals (only approved, not cancelled, show publicly)
     if (path === '/deals') {
       const deals = await database.collection('deals')
-        .find({ approved: { $ne: false } })
+        .find({ approved: { $ne: false }, status: { $ne: 'cancelled' } })
         .sort({ featured: -1, created_at: -1 })
         .toArray();
       return Response.json({
         deals: deals.map((d) => ({
           id: d.id, tool: d.tool, category: d.category, blurb: d.blurb,
           retailPrice: d.retailPrice, groupPrice: d.groupPrice, savingsPct: d.savingsPct,
-          slotsTotal: d.slotsTotal, slotsTaken: d.slotsTaken, featured: !!d.featured,
+          // slotsTaken = paid seats (webhook); reservedFree = free "pay later" reservations
+          slotsTotal: d.slotsTotal, slotsTaken: d.slotsTaken, reservedFree: d.reservedFree || 0, featured: !!d.featured,
           dealType: d.dealType || 'groupbuy', link: d.link || null, code: d.code || null,
         })),
       });
@@ -2110,7 +2115,14 @@ export async function GET(request) {
         .find({ id: { $in: agent.skillIds } })
         .toArray();
 
-      return Response.json({ agent, skills });
+      // A paid blueprint is withheld unless ?unlock= carries the token minted
+      // by /api/stripe/verify for a paid Checkout session of this agent. Free
+      // agents are unaffected; a bad token just gets the public (redacted) doc.
+      const unlocked = verifyUnlockToken(agent.id, readUnlockToken(request));
+      const body = { agent: stripPrivateFields(unlocked ? agent : redactAgent(agent)), skills, unlocked };
+      return unlocked
+        ? Response.json(body, { headers: { 'Cache-Control': 'private, no-store' } })
+        : Response.json(body);
     }
 
     // List creator outreach leads — emails discovered by /find-creators
@@ -2855,12 +2867,21 @@ export async function POST(request) {
       if (!body.dealId || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
         return Response.json({ success: false, error: 'Valid email + deal required' }, { status: 400 });
       }
-      await database.collection('deal_interest').updateOne(
+      const deal = await database.collection('deals').findOne({ id: body.dealId });
+      if (!deal || deal.status === 'cancelled') {
+        return Response.json({ success: false, error: 'This deal is no longer open' }, { status: 400 });
+      }
+      const res = await database.collection('deal_interest').updateOne(
         { dealId: body.dealId, email },
         { $setOnInsert: { dealId: body.dealId, email, created_at: new Date() } },
         { upsert: true }
       );
-      await database.collection('deals').updateOne({ id: body.dealId }, { $inc: { slotsTaken: 1 } });
+      // Free reservations are counted apart from paid seats: `slotsTaken` is
+      // only ever moved by the Stripe webhook (paid / refunded). Only a new
+      // email counts — re-submitting the same one is not a second seat.
+      if (res.upsertedCount) {
+        await database.collection('deals').updateOne({ id: body.dealId }, { $inc: { reservedFree: 1 } });
+      }
       return Response.json({ success: true, message: "You're on the list — we'll email you when the deal unlocks." });
     }
 
@@ -3002,10 +3023,28 @@ export async function POST(request) {
       const allowed = ['tool', 'category', 'blurb', 'dealType', 'link', 'code', 'savingsPct', 'retailPrice', 'groupPrice', 'slotsTotal', 'featured', 'approved'];
       const filtered = {};
       for (const k of allowed) if (k in set) filtered[k] = set[k];
-      if (!Object.keys(filtered).length) return Response.json({ error: 'no allowed fields' }, { status: 400 });
+      // status: 'cancelled' is the one status change accepted here — it is the
+      // "deal didn't reach its target" path: hide the deal, stop new seats,
+      // refund every paid seat (lib/deal-refunds). Re-POST to finish a deal
+      // with more seats than one call refunds (`refunds.remaining`).
+      if ('status' in set && set.status !== 'cancelled') return Response.json({ error: 'invalid status' }, { status: 400 });
+      const cancel = set.status === 'cancelled';
+      if (!Object.keys(filtered).length && !cancel) return Response.json({ error: 'no allowed fields' }, { status: 400 });
+      let refunds = null;
+      if (cancel) {
+        const deal = await database.collection('deals').findOne({ id });
+        if (!deal) return Response.json({ error: 'deal not found' }, { status: 404 });
+        const stripe = getStripe();
+        if (!stripe) return Response.json({ error: 'Stripe not configured' }, { status: 500 });
+        filtered.status = 'cancelled';
+        if (!deal.cancelled_at) filtered.cancelled_at = new Date();
+        // Hide + close first so no seat is sold while refunds run.
+        await database.collection('deals').updateOne({ id }, { $set: { status: 'cancelled', cancelled_at: filtered.cancelled_at || deal.cancelled_at } });
+        refunds = await refundDealPurchases(database, stripe, id, { limit: 25 });
+      }
       filtered.admin_updated_at = new Date();
       await database.collection('deals').updateOne({ id }, { $set: filtered });
-      return Response.json({ success: true });
+      return Response.json(refunds ? { success: true, refunds } : { success: true });
     }
 
     // Admin — seed affiliate-deal placeholders (each unapproved until link is filled in)

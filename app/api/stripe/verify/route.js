@@ -1,10 +1,18 @@
 import { getStripe } from '@/lib/stripe'
+import { unlockToken } from '@/lib/agent-access'
 
 // Confirms a Checkout Session was actually paid, so the client only records a
 // `purchase` analytics event for a real sale -- not for a reload or a
 // hand-typed ?purchased=1. Bundles already do this through /api/bundles/claim;
 // this is the same check for agent and deal checkouts, which previously
 // recorded no sale at all.
+//
+// For a paid agent this is also where the buyer gets their unlock token: the
+// session is paid and its metadata names the agent, so the server mints
+// unlockToken(agentId, sessionId) (lib/agent-access) and /api/agents/:id
+// returns the full blueprint for it. Mirrors the bundle claim token, minus
+// the database row: the token is a deterministic HMAC, so the same purchase
+// always yields the same token.
 //
 // Returns only what the purchase event needs. Never the buyer's email or any
 // other customer field. Session ids are unguessable and single-purpose.
@@ -23,14 +31,17 @@ export async function GET(request) {
   try {
     const s = await stripe.checkout.sessions.retrieve(sessionId)
     const m = s.metadata || {}
+    const paid = s.payment_status === 'paid'
+    const unlock = paid && m.type === 'agent' && m.agentId ? unlockToken(m.agentId, s.id) : null
     return Response.json({
-      paid: s.payment_status === 'paid',
+      paid,
       value: typeof s.amount_total === 'number' ? s.amount_total / 100 : 0,
       currency: (s.currency || 'usd').toUpperCase(),
       type: m.type || '',
       item_id: m.agentId || m.dealId || m.bundleId || '',
       item_name: m.tool || '',
-    })
+      ...(unlock ? { unlock } : {}),
+    }, { headers: { 'Cache-Control': 'private, no-store' } })
   } catch {
     return Response.json({ paid: false, error: 'not found' }, { status: 404 })
   }

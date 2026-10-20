@@ -2,20 +2,28 @@
 // GET /api/agents/:id/claude-skill?format=zip → installable skill package
 //
 // Loads the agent through the PUBLIC /api/agents endpoint (never Mongo
-// directly) so paid-agent blueprint redaction is inherited: if the public
-// API withholds the blueprint, this route refuses too.
+// directly) so paid-agent blueprint redaction is inherited: that endpoint
+// withholds a paid blueprint unless ?unlock= carries a valid purchase token
+// (lib/agent-access), and this route forwards the token it was given. No
+// valid token → no blueprint in the response → 403 here.
 
 import { compileAgentSkillMd, buildAgentSkillZip, checkAgentSafety, SITE } from '@/lib/claude-skill'
+import { readUnlockToken } from '@/lib/agent-access'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request, { params }) {
+  const unlock = readUnlockToken(request)
   let agent = null
   try {
-    const res = await fetch(`${SITE}/api/agents/${encodeURIComponent(params.id)}`, {
-      next: { revalidate: 300 },
-      signal: AbortSignal.timeout(10_000),
-    })
+    // A tokenised URL is unique per buyer: never let it into the fetch cache
+    // (each miss would be an ISR write that is never read back).
+    const res = await fetch(
+      `${SITE}/api/agents/${encodeURIComponent(params.id)}${unlock ? `?unlock=${encodeURIComponent(unlock)}` : ''}`,
+      unlock
+        ? { cache: 'no-store', signal: AbortSignal.timeout(10_000) }
+        : { next: { revalidate: 300 }, signal: AbortSignal.timeout(10_000) }
+    )
     if (res.ok) {
       const data = await res.json()
       agent = data?.agent || data || null

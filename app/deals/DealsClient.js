@@ -59,14 +59,15 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
   const join = async (dealId) => {
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return
     const res = await fetch('/api/deals/join', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dealId, email }) })
-    if (res.ok) { setJoined((j) => ({ ...j, [dealId]: true })); setDeals((ds) => ds.map((d) => d.id === dealId ? { ...d, slotsTaken: (d.slotsTaken || 0) + 1 } : d)); setOpenId(null); setEmail('') }
+    if (res.ok) { setJoined((j) => ({ ...j, [dealId]: true })); setDeals((ds) => ds.map((d) => d.id === dealId ? { ...d, reservedFree: (d.reservedFree || 0) + 1 } : d)); setOpenId(null); setEmail('') }
   }
 
   // Stats
   const stats = useMemo(() => {
     const gb = deals.filter((d) => d.savingsPct > 0)
     const avg = gb.length ? Math.round(gb.reduce((s, d) => s + d.savingsPct, 0) / gb.length) : 0
-    const joinedCount = deals.reduce((s, d) => s + (d.slotsTaken || 0), 0)
+    // slotsTaken = paid seats, reservedFree = free reservations (kept apart server-side)
+    const joinedCount = deals.reduce((s, d) => s + (d.slotsTaken || 0) + (d.reservedFree || 0), 0)
     const maxOff = deals.reduce((m, d) => Math.max(m, d.savingsPct || 0), 0)
     return { count: deals.length, avg, joinedCount, maxOff }
   }, [deals])
@@ -211,7 +212,7 @@ export default function DealsClient({ initialDeals = [], initialRequests = [] })
                           {savePerYr > 0 && <span className="text-emerald-400 text-sm ml-auto">save ${savePerYr}/yr</span>}
                         </div>
                         <div className="mb-1 flex items-center justify-between text-xs text-text-muted mt-3">
-                          <span className="flex items-center gap-1"><Users className="w-3 h-3" />{(d.slotsTaken || 0) === 0 ? `Be the first — ${d.slotsTotal} seats` : `${d.slotsTaken}/${d.slotsTotal} joined`}</span>
+                          <span className="flex items-center gap-1"><Users className="w-3 h-3" />{(d.slotsTaken || 0) === 0 && (d.reservedFree || 0) === 0 ? `Be the first — ${d.slotsTotal} seats` : `${d.slotsTaken || 0}/${d.slotsTotal} paid${d.reservedFree ? ` · ${d.reservedFree} reserved` : ''}`}</span>
                           <span className={pct >= 80 ? 'text-amber-400' : ''}>{pct >= 80 ? <><Clock className="w-3 h-3 inline mr-0.5" />almost there!</> : (pct > 0 ? `${pct}%` : 'open')}</span>
                         </div>
                         <div className="h-2 bg-slate-800 rounded-full overflow-hidden mb-4">
