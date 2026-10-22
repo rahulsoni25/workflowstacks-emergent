@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { ArrowLeft, Zap, CheckCircle2, Copy, Sparkles, ExternalLink, Search, X, HelpCircle, ChevronDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -26,7 +26,14 @@ const DFY_TIERS = [
   { id: 'agency', label: 'Multi-agent / white-label', price: '$1,500+', desc: 'Several agents, white-label setup, handover walkthrough' },
 ]
 
-export default function BuilderPage() {
+// useSearchParams() opts a page out of static rendering unless a Suspense
+// boundary sits above it, and Next 14 makes the missing boundary a BUILD
+// error (missing-suspense-with-csr-bailout). The root app/loading.js used to
+// be that boundary for every page; it was removed on 2026-10-20 so unknown
+// URLs get a real 404, which made /builder the one page that failed to
+// prerender — the cause of the failed 2026-10-22 production deploy. The
+// exported page wraps this component in Suspense (bottom of the file).
+function BuilderPageInner() {
   const searchParams = useSearchParams()
   const initialGoal = searchParams?.get('goal') || ''
   const [step, setStep] = useState(initialGoal ? 2 : 1)
@@ -1316,5 +1323,13 @@ export default function BuilderPage() {
         )}
       </div>
     </div>
+  )
+}
+
+export default function BuilderPage() {
+  return (
+    <Suspense fallback={null}>
+      <BuilderPageInner />
+    </Suspense>
   )
 }
