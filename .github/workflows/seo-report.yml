@@ -94,7 +94,8 @@ jobs:
             "/ai-avatar" ; do
             R=$(curl -s -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
               "$BASE_URL/api/gsc?action=inspect&url=$(printf '%s' "$BASE_URL$u" | sed 's|/|%2F|g; s|:|%3A|g')")
-            V=$(echo "$R" | jq -r '[.verdict // .inspectionResult.indexStatusResult.verdict // "?", .coverageState // .inspectionResult.indexStatusResult.coverageState // "?", .lastCrawlTime // .inspectionResult.indexStatusResult.lastCrawlTime // "?"] | join(" | ")' 2>/dev/null || echo "$R")
+            # lib/gsc.js inspect() returns the inspectionResult itself: {indexStatusResult: {...}}.
+            V=$(echo "$R" | jq -r 'if .error then "error: \(.error) \(.message // "")" else (.indexStatusResult // .inspectionResult.indexStatusResult // {}) as $i | [$i.verdict // "?", $i.coverageState // "?", $i.lastCrawlTime // "?"] | join(" | ") end' 2>/dev/null || echo "$R")
             printf '%-46s %s\n' "$u" "$V" | tee -a $GITHUB_STEP_SUMMARY
           done
           echo '```' >> $GITHUB_STEP_SUMMARY
