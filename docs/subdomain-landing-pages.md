@@ -67,6 +67,30 @@ WhatsApp message is prepared (with `need`, `has_phone`, `has_email`),
 `whatsapp_open` when the WhatsApp button is tapped, and `contact_click` with
 `channel` for the footer contact links.
 
+- **Attribution.** On arrival the page records the UTM tags, `gclid`,
+  `fbclid`, landing path and referrer in `sessionStorage` under
+  `ws_attribution`, the same key and first-touch rule as the main site
+  (`lib/analytics.js`), and adds them to every event above. When the visit
+  carries `utm_source` or `utm_campaign`, the prepared WhatsApp message ends
+  with a `Ref: source / medium / campaign` line, because the lead itself
+  lands in WhatsApp where no tag can see it. Tag every ad's final URL, e.g.
+  `https://workflowstacks.com/ai-avatar?utm_source=google&utm_medium=cpc&utm_campaign=dubai-founders`.
+- **Consent.** With `GTM_ID` set, Consent Mode v2 defaults are pushed before
+  the container loads, on the main site's rule: a choice already stored on
+  workflowstacks.com wins; otherwise denied under Global Privacy Control or in
+  an EEA / UK / CH timezone, granted elsewhere. The page has no banner, so a
+  denied visitor stays cookieless.
+
+### Before paid campaigns
+
+1. Put the container id in `GTM_ID` (the main site reads its own from the
+   `NEXT_PUBLIC_GTM_ID` env var in Vercel; this static page cannot, so it is
+   pasted here).
+2. In GTM, mark `generate_lead` (and optionally `whatsapp_open`) as the
+   conversion for Google Ads and the Meta Pixel `Lead` event.
+3. Use UTM-tagged final URLs as above; Google Ads auto-tagging adds `gclid`.
+4. Prices in ads must match the page (AED today).
+
 ## Adding another landing page
 
 1. Put the site in `public/sites/<new-dir>/` with an `index.html`. Link media
@@ -123,6 +147,12 @@ Overviews, Bing Copilot) and generative engines (ChatGPT, Perplexity, Claude):
   The graph is generated from the page by `scripts/founder-avatar-jsonld.py`
   so the FAQ markup and the visible answers cannot drift apart; run it from
   the repo root after editing the title, description, h1, prices or FAQ.
+- **Index status.** `/ai-avatar` is one of the URLs the Monday report sends
+  to Search Console URL Inspection (`scripts/seo-crawl.mjs`) and to the Core
+  Web Vitals run (`scripts/seo-cwv.mjs`), and the on-demand `seo-report`
+  workflow inspects it too, so "is Google keeping it?" has a weekly answer.
+  After a release that changes the page: run the IndexNow workflow, then
+  Search Console → URL inspection → Request indexing.
 - **Checks.** The `http-check` workflow (with `match`) confirms what is live;
   the `lighthouse` workflow reports the SEO category; the `keyword-suggest`
   workflow prints live autocomplete strings per market for choosing words.

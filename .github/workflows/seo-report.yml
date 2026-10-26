@@ -90,7 +90,8 @@ jobs:
             "/bundles/lead-finder" \
             "/blog/best-mcp-servers-claude-desktop" \
             "/skills/openclaw" \
-            "/skills/browser-use" ; do
+            "/skills/browser-use" \
+            "/ai-avatar" ; do
             R=$(curl -s -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
               "$BASE_URL/api/gsc?action=inspect&url=$(printf '%s' "$BASE_URL$u" | sed 's|/|%2F|g; s|:|%3A|g')")
             V=$(echo "$R" | jq -r '[.verdict // .inspectionResult.indexStatusResult.verdict // "?", .coverageState // .inspectionResult.indexStatusResult.coverageState // "?", .lastCrawlTime // .inspectionResult.indexStatusResult.lastCrawlTime // "?"] | join(" | ")' 2>/dev/null || echo "$R")

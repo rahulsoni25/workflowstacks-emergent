@@ -22,7 +22,7 @@ const ONLY = process.argv.includes('--only') ? process.argv[process.argv.indexOf
 
 // One representative per page type. The number that matters is the
 // per-type shape, not per-page noise.
-const PAGES = ONLY ? [ONLY] : ['/', '/skills', '/skills/ogcode', '/skills/page/2', '/templates/cold-email-personalizer', '/automate/triage-your-inbox', '/mcp/filesystem', '/blog/seo-brief-n8n-claude', '/collections']
+const PAGES = ONLY ? [ONLY] : ['/', '/skills', '/skills/ogcode', '/skills/page/2', '/templates/cold-email-personalizer', '/automate/triage-your-inbox', '/mcp/filesystem', '/blog/seo-brief-n8n-claude', '/collections', '/ai-avatar']
 
 const ms = (v) => (typeof v === 'number' ? Math.round(v) : null)
 

@@ -90,7 +90,7 @@ async function llmsTop() {
 }
 
 // One URL per page type. Indexation differs by type far more than within one.
-const INSPECT = ['/', '/skills', '/skills/page/2', '/templates/cold-email-personalizer', '/automate/triage-your-inbox', '/mcp/filesystem', '/bundles/lead-finder', '/blog/best-mcp-servers-claude-desktop', '/skills/ogcode', '/skills/browser-use', '/collections']
+const INSPECT = ['/', '/skills', '/skills/page/2', '/templates/cold-email-personalizer', '/automate/triage-your-inbox', '/mcp/filesystem', '/bundles/lead-finder', '/blog/best-mcp-servers-claude-desktop', '/skills/ogcode', '/skills/browser-use', '/collections', '/ai-avatar']
 
 async function inspectAll() {
   if (!ADMIN) return { skipped: 'no ADMIN_SECRET' }

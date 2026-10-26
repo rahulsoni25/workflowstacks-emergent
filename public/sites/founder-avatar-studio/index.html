@@ -509,8 +509,40 @@
      events still go to window.dataLayer. */
   var GTM_ID = "";
   window.dataLayer = window.dataLayer || [];
-  function track(name, params){ var o = { event: name }; if (params) for (var k in params) o[k] = params[k]; window.dataLayer.push(o); }
+
+  /* Attribution: how the visitor arrived (UTM tags, ad click ids, referrer), kept for the
+     session under the same key and first-touch rule as the main site (lib/analytics.js), so
+     a lead from a paid click can be traced to its campaign. Every event carries it. */
+  var ATTR_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'fbclid', 'ref'];
+  function clean(v){ return typeof v === 'string' ? v.replace(/[^\w\-.:\/ ]/g, '').slice(0, 120) : ''; }
+  var attr = {};
+  try {
+    attr = JSON.parse(sessionStorage.getItem('ws_attribution') || 'null');
+    if (!attr) {
+      var q = new URLSearchParams(location.search); attr = {};
+      ATTR_KEYS.forEach(function(k){ var v = clean(q.get(k)); if (v) attr[k] = v; });
+      attr.landing = clean(location.pathname);
+      var rh = document.referrer ? clean(new URL(document.referrer).hostname) : '';
+      if (rh && rh !== location.hostname) attr.referrer = rh;
+      attr.first_seen = new Date().toISOString();
+      sessionStorage.setItem('ws_attribution', JSON.stringify(attr));
+    }
+  } catch (e) { attr = attr || {}; }
+  function track(name, params){ var o = { event: name }, k; for (k in attr) o[k] = attr[k]; if (params) for (k in params) o[k] = params[k]; window.dataLayer.push(o); }
+
   if (/^GTM-[A-Z0-9]{4,12}$/.test(GTM_ID)) {
+    /* Consent Mode v2 defaults before the container loads, on the main site's rule: a choice
+       already made on workflowstacks.com wins; otherwise denied under Global Privacy Control
+       or in the EEA / UK / CH (guessed from the timezone), granted elsewhere. This page has
+       no banner of its own, so a denied visitor stays cookieless. */
+    var consent = 'granted';
+    try {
+      var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+      if (/^(Europe\/|Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)$|Arctic\/Longyearbyen$)/.test(tz)) consent = 'denied';
+    } catch (e) { consent = 'denied'; }
+    try { var stored = localStorage.getItem('ws_consent'); if (stored === 'granted' || stored === 'denied') consent = stored; } catch (e) {}
+    if (navigator.globalPrivacyControl === true) consent = 'denied';
+    (function(){ window.dataLayer.push(arguments); })('consent', 'default', { ad_storage: consent, ad_user_data: consent, ad_personalization: consent, analytics_storage: consent });
     (function(w,d,s,l,i){ w[l].push({'gtm.start': new Date().getTime(), event: 'gtm.js'}); var f = d.getElementsByTagName(s)[0], j = d.createElement(s); j.async = true; j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i; f.parentNode.insertBefore(j, f); })(window, document, 'script', 'dataLayer', GTM_ID);
   }
 
@@ -609,7 +641,10 @@
       phone ? 'WhatsApp: ' + phone : '',
       email ? 'Email: ' + email : '',
       'Looking for: ' + val('f-need'),
-      val('f-note') ? 'Notes: ' + val('f-note') : ''
+      val('f-note') ? 'Notes: ' + val('f-note') : '',
+      /* The lead lands in WhatsApp, where no tag can see it: name the campaign in the
+         message itself so a closed deal can be credited to the ad that brought it. */
+      attr.utm_source || attr.utm_campaign ? '\nRef: ' + [attr.utm_source, attr.utm_medium, attr.utm_campaign].filter(Boolean).join(' / ') : ''
     ].filter(Boolean);
     var text = lines.join('\n');
 
