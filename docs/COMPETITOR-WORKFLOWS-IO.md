@@ -514,3 +514,218 @@ Our side: `README.md`, `app/pricing/page.js`, `docs/STRATEGY.md`,
 `docs/INDEXING-DIAGNOSIS.md`, `docs/COSTS.md`, `docs/RATING-BASELINE.md`,
 `reports/seo/2026-10-26.md`, `.claude/workflows/competitor-council.js`, the
 WorkflowStacks MCP `search_skills` tool (queried 2026-10-27).
+
+---
+
+# Part 2 — Growth and marketing scorecard (added 2026-10-27)
+
+Answers the follow-up: score their channels out of 10, say whether they are
+SEO-optimised and indexed, list the link-building, organic and paid tactics
+behind the growth, and say what we do to get the same. Same sourcing rules as
+Part 1. Their pages still could not be opened from this session; website facts
+are search-result snippets. New direct sources in this part: Meta's Ad
+Library (queried through the Facebook connector), LinkedIn profile snippets
+for nine team members, and the two cloned repositories.
+
+## 12. Scorecard
+
+Scores are this analysis's judgement against the "what a 10 looks like"
+column; they are not a published rating. Channel average is unweighted.
+
+| Channel | What a 10 looks like | Workflows.io | WorkflowStacks | Evidence |
+|---|---|---|---|---|
+| Founder-led LinkedIn | Two or more founders posting 3×/week to 50K+ each, revenue attributed to it | 9 | 1 | Dan Rosenthal ~51K, Fivos Aresti ~37K followers (profile snippets); "one channel did most of the work: LinkedIn" (Dan, X, Jul 2026); 3-posts-a-week TOFU/MOFU/BOFU system (X). Ours: the footer links one X account; no LinkedIn page linked anywhere in `components/Footer.js` or the Organization schema in `app/layout.js` |
+| LinkedIn company page | 10K+ followers, weekly posts | 4 | 0 | Snippet shows "5K followers · 11-50"; only one post in the LinkedIn-posts sample (11 Sep 2026, "Looking for more GTM engineers", 18 likes); their own playbook calls the company page "a background credibility check". Ours: none found |
+| Team LinkedIn reach | Every employee an amplifier | 8 | 0 | Seven team profiles sum to ~126K followers (51K + 37K + 15K + 13K + 5K + 3K + 2K, snippet figures), which explains the "150k+ followers" claim on their site |
+| Instagram | Active account where buyers are | 1 | 0 | No company account surfaced; the only hit is a personal account for Fivos Aresti with no company content. Instagram is not where B2B GTM buyers or developers are; low priority for both sides |
+| YouTube | Channel per founder, regular uploads | 3 | 0 | Two channels exist (@Dan.Rosenthal, @FivosAresti); no subscriber counts found; never cited by them as a growth driver |
+| Email newsletter | Weekly, fixed format, lead magnets, indexed archive | 7 | 4 | Workflows Weekly: 44 Friday issues by 16 Oct 2026, "one workflow, one AI tool, one resource, one AI update", archive pages indexed, playbook downloads feed it; subscriber count unknown. Ours: Monday digest with indexed archive, double opt-in, size unknown, the only channel producing traffic peaks (`docs/STRATEGY.md` §4) |
+| Website SEO (on-page and architecture) | Keyword titles, hub-and-spoke, glossary, fresh dates | 7 | 3 | Year-stamped keyword titles, A–Z glossary, 10 playbooks, 18+ blog posts, 12 case studies, 6 service pages, Toolverse; inconsistent page dates; technical SEO not verifiable from here. Ours: structured data, gated sitemap and `/for` hubs are built, but Google rejects on quality (758 "crawled – not indexed", `docs/INDEXING-DIAGNOSIS.md`) |
+| Indexing and search visibility | Every section indexed, ranks for non-brand queries | 8 | 1 | Every section and two subdomains surfaced in search; their posts appear for generic "Claude Code outbound" queries. Ours: 25 indexed of ~840 crawled; 0 clicks / 5 impressions in the week to 2026-10-24 |
+| Backlinks and off-site authority | 50+ referring domains incl. partners and press | 7 | 1 | 31 third-party domains observed linking or listing them (§15); no press. Ours: no recorded backlinks |
+| Developer distribution (GitHub, MCP, CLI) | Active repos with adoption | 5 | 6 | 2 repos, 15 skill files, 60 stars, idle since April 2026. Ours: MCP connector, plugin marketplace, CLI, 1,026 pages, tiny audience |
+| Social proof | Case studies with numbers, logos, independent reviews | 8 | 3 | 12 case studies with figures, ~20 logos, partner badges, testimonials; no independent reviews. Ours: real install counts and "install verified" chips; no testimonials |
+| Partnerships and ecosystem | Official partner status with the tools buyers use | 8 | 1 | Clay Enterprise Partner, HeyReach and Instantly expert listings, OutboundSync partner, Builtfirst marketplace, HubSpot ecosystem listing. Ours: none |
+| Launches and earned media | Product Hunt, Hacker News, press, guest posts | 5 | 0 | Growth Unhinged guest post, LinkedIn Live milestone, GTM newsletter roundups, note.com explainer; no PH/HN/press. Ours: none yet |
+| Paid acquisition | Evidence of own paid campaigns | 1 | 0 | None found (§17). Score reflects "not used", and they grew without it |
+| **Channel average (14, unweighted)** | | **5.8** | **1.4** | Arithmetic on the rows above |
+| **Growth-engine score (judgement, weighted to channels that matter for a B2B/developer audience)** | | **8** | **2** | They picked five channels and executed them to a self-reported $3.3M ARR in ~15 months; we have the product surface and no audience |
+
+## 13. LinkedIn, Instagram, YouTube in detail
+
+LinkedIn is the engine and everything else is secondary. What they do:
+
+- **Two founders, one system.** Dan Rosenthal's published system: "3 posts a
+  week… 36 posts after 12 weeks", one top-of-funnel post for reach, one
+  middle-of-funnel for authority, one bottom-of-funnel for conversion, claiming
+  "8M+ impressions and 100+ sales calls" for the team
+  (x.com/dan__rosenthal/status/2077468324758179951). The same system is sold as
+  a service and published as a blog post ("The 90-Day LinkedIn Content Plan:
+  The Exact Posting System Behind 8M+ Impressions") and a free template
+  ("LinkedIn Content Operating System (90-Day Template)").
+- **Voice as code.** Their founder-led-marketing playbook keeps a founder's
+  voice guide as a Markdown file in GitHub, read by their LinkedIn post-writer
+  skill before drafting; cadence floor is two posts a week plus quarterly
+  long-form; the company page is "a background credibility check"; pillar four
+  is "team brand expansion" (workflows.io/blog/founder-led-marketing).
+- **Team as amplifiers.** Nine staff profiles surfaced; seven show follower
+  counts totalling ~126K. New names this pass: Monika Kitanoska (Head of GTM),
+  Levi Bom (Director of RevOps), Raphael Carandang.
+- **Three ICPs for the content**: "Agencies, Sales teams, GTM engineers"
+  (LinkedIn snippet). The third ICP is also their hiring pool, so the same
+  posts recruit and sell.
+- **Milestones as events.** $3.3M ARR announced in a LinkedIn Live on 16 Oct
+  2026; "$2M ARR in 7 months" article shared on X on 11 Jul 2026.
+- **Company page is deliberately minor**: ~5K followers (snippet), one hiring
+  post in the sample.
+
+Instagram: no company presence found. YouTube: a channel per founder, no
+numbers found, not credited for growth. Neither is where their buyers are, and
+neither should be a priority for us.
+
+## 14. Are they SEO-optimised, and are they indexed?
+
+Yes on both, with the caveat that the evidence is the search engine behind
+this session's search tool, not Google Search Console, and that no page could
+be opened to check markup, speed or canonicals.
+
+Pages surfaced by section (lower bound):
+
+| Section | URLs surfaced | Examples |
+|---|---|---|
+| Homepage and services | 7 | `/`, `/services/content`, `/services/revops`, `/services/enterprise`, `/contact-us`, `/terms-of-use`, `/blog` |
+| Case studies | 8 URLs, 12 clients named | `/customers/heyreach`, `/unipaas`, `/huzzle`, `/caravelo`, `/seam-ai`, `/meister`, `/bookyourdata`, `/freckle`; Medrio, Lexroom, FleetPulse named |
+| Playbooks (`/workflows`) | 10 | GTM Funnel (29 Jul 2026), GTM Flywheel, ABM Guide, GTM Roadmap 2026, Complete Outbound Playbook, Automated Outbound, Founder Connections (Signal), Content RAG Agent, Track Employees' LinkedIn Engagement, LinkedIn Content Operating System |
+| Blog | 18 | Founder-Led Marketing; Account-Based Marketing in 2026; GTM Stack Architecture (3-layer); How to Build a Company OS on GitHub; 2026 GTM Tool Stack (78 tools); Social Listening Playbook; LinkedIn Social Selling; Ultimate Guide on Outbound; Signal Architecture; Claude Code Skill Library; Build an Outbound AI Agent in 60 Minutes; 8 MCPs Every Sales Team Should Connect; 5 Signal-Based Outbound Plays; GTM Flywheel; 7-Step Outbound Framework (320+ meetings); GTM Motions Explained; Modern ABM Engine in 2026; 90-Day LinkedIn Content Plan |
+| Glossary (`/resources/glossary`) | 4 surfaced, A–Z index | GTM Engineer, TOFU, Buyer Signal, Cold Outbound |
+| Toolverse | 1 | `/toolverse` ("Free GTM & Sales Prospecting Tools") |
+| Newsletter subdomain | 20+ issues | newsletter.workflows.io issues #5 to #44, essays ("The 2026 GTM Roadmap", "How I Built a $250K/Mo Business in 12 Months") |
+| Careers and Notion | 6 | getstarted.workflows.io (home, careers); workflowsio.notion.site (Company OS kit, LinkedIn Content Writer, contentlead, gtm, gtm-specialist) |
+
+On-page patterns visible in titles and descriptions:
+
+- Keyword-first, year-stamped titles: "Account-Based Marketing in 2026: 8
+  Steps…", "The 2026 GTM Tool Stack: 78 Tools We Use Weekly".
+- Number- and outcome-led headlines: "8 MCPs…", "7-Step… That Booked 320+
+  Meetings", "5 GTM Agents That Replace SOPs".
+- Service titles carry partner-tool names: "RevOps — Clay & HubSpot for B2B",
+  "Enterprise Program — Clay & HubSpot".
+- A programmatic glossary ("<Term> — GTM Glossary") for definitional queries.
+- Case-study titles in the "How <Client> <result> with Workflows" form.
+- Playbook pages with "Download playbook" buttons (lead capture).
+- Hub-and-spoke: blog ↔ playbooks ↔ glossary ↔ services, with the newsletter
+  and careers on subdomains.
+- Weak spots seen: page dates that disagree with crawl metadata, a homepage
+  snapshot the search engine considers about two years old, no bios on the
+  site (Salesforge).
+
+Our side, for contrast (`reports/seo/2026-10-26.md`, `docs/INDEXING-DIAGNOSIS.md`):
+25 indexed pages of ~840 crawled; 1 click and 18 impressions in 28 days; the
+pages Google did index are small, specifically named tools. The technical
+layer (structured data, sitemap gate, `/for` hubs, `llms.txt`) is ahead of
+theirs as far as snippets show; the content and authority layers are far
+behind.
+
+## 15. Link building: the footprint and how each link was earned
+
+31 third-party domains were observed linking to or listing Workflows.io in
+search results. This is a lower bound from search, not a backlink-tool count.
+
+| How the link was earned | Domains observed |
+|---|---|
+| Partner and vendor certification pages | clay.com (Experts, Enterprise Partner), heyreach.io (Expert), instantly.ai (Experts: Dan Rosenthal), outboundsync.com (partner page, spotlight, case study), cintrifuse-capital.builtfirst.com (ABM Program), ecosystem.hubspot.com (solutions listing) |
+| Agency directories and review sites (submitted or scraped) | salesforge.ai (review + directory), getaob.com (OneGTM), zenabm.com, lunarstrategy.com, agencysource.com, pitchkitchen.com, demanddept.com, foundergrowthos.com |
+| Company databases (generated from LinkedIn presence) | seedtable.com, crunchbase.com, arr.club, zoominfo.com, unifers.ai, signalhire.com |
+| Guest post | growthunhinged.com and kylepoyar.substack.com ("An outbound playbook for 2025", 3 Dec 2025) |
+| Newsletter roundups citing founder posts | thegtmengineer.substack.com, gtmengineerschool.substack.com |
+| Open-source releases picked up by others | github.com (2 repos), note.com (Company OS explainer), becheetah.com (skill mirror) |
+| Content-analysis sites | viralbrain.ai (two founder pages) |
+| Job feeds | github.com/mariellecamba-gtm/gtm-jobs-feed |
+| Own properties cross-linking | newsletter.workflows.io, getstarted.workflows.io, workflowsio.notion.site, x.com, youtube.com, linkedin.com |
+
+Pattern: almost every link is a by-product of something else they did for
+revenue or hiring (a partner certification, a milestone post, a job ad, an
+open-source release). There is no sign of paid link placement, link exchanges
+or guest-post farms.
+
+## 16. The organic strategies they credit for the growth, in their words
+
+| Lever | Their claim | Source |
+|---|---|---|
+| Founder-led LinkedIn | "$2,000,000 ARR in 7 months, and one channel did most of the work: LinkedIn"; "the main channel that helped us grow to $3M ARR in 15 months" | Dan Rosenthal, X (11 Jul 2026) and LinkedIn profile |
+| The posting system | 3 posts/week, TOFU/MOFU/BOFU, 12-week cycles; "8M+ impressions and 100+ sales calls" | Dan Rosenthal, X; blog "90-Day LinkedIn Content Plan" |
+| Founder audience as outbound | Founders' audience of "65,000+ followers"; best play, LinkedIn connections of founders, "25.4% reply rate" | Growth Unhinged guest post; Ultimate Guide on Outbound |
+| Signal-based outbound | Reply rates "2x to 10x higher than standard outbound"; new channel "adding $500K ARR in just the first 3 months" | Signal-based plays post; Fivos Aresti 2026 recap |
+| Four-channel outbound mix | Cold calling, automated email sequences, signal-based LinkedIn, manual prospecting for tier-1 accounts | Growth Unhinged (3 Dec 2025) |
+| Free resources as lead magnets | Playbooks with downloads, Toolverse (39 categories), glossary, Friday newsletter | site and newsletter snippets |
+| Open source as distribution | Company OS kit and 10 outbound skills; READMEs end with "Follow me on LinkedIn" and "Star this repo" | cloned repositories |
+| Partner ecosystems | Clay Enterprise Partner, HeyReach/Instantly expert status, OutboundSync | directory pages |
+| Milestone PR | LinkedIn Live for $3.3M ARR (16 Oct 2026); "How we scaled Workflows to $250K/mo in 12 months, bootstrapped" (newsletter, 15 Sep 2026) | arr.club; newsletter.workflows.io |
+| Guest content | Growth Unhinged (Kyle Poyar) | growthunhinged.com |
+
+Everything in this table is self-reported; nothing has been independently
+verified.
+
+## 17. Paid marketing: what was found
+
+- **Meta Ad Library** (queried 2026-10-27 through the Facebook connector): a
+  keyword search for "Workflows.io" matched 23,205 ads containing the word
+  "workflows", none from a Workflows.io page in the first 25 results; a search
+  for "Fivos Aresti" returned 0 ads. No Facebook page ID for the company was
+  available for a page-level query.
+- **LinkedIn Ad Library and Google Ads Transparency Center**: not reachable
+  from this session.
+- **Sponsorships**: no "sponsored by" or event-sponsor mentions found.
+- **Their stance**: paid appears in their playbooks as one channel among many
+  for clients (Meta, LinkedIn, Reddit, Google, retargeting), and ZenABM lists
+  them as a LinkedIn Ads agency, but every growth claim they make is organic.
+- Conclusion: no evidence they bought their own growth. The 1/10 paid score is
+  a statement of fact, not a weakness.
+
+## 18. What we do to get this kind of growth (90 days)
+
+The order mirrors what produced their results: audience first, then proof,
+then search. Metrics come from GA4 (live since 2026-10-04) and the weekly
+Search Console report; targets reuse `docs/STRATEGY.md` §4.
+
+| Weeks | Move | Concretely | Metric |
+|---|---|---|---|
+| 1–2 | Fix the social foundations | Create the LinkedIn company page; link LinkedIn (and the X account, verified) in `components/Footer.js` and in the Organization `sameAs` in `app/layout.js`; UTM every outbound link | Referral sessions from linkedin.com in GA4 |
+| 1–12 | Founder-led LinkedIn, their system | 3 posts/week: Monday = the Hot list as a data post; Wednesday = one skill teardown or install stat ("most installed this week"); Friday = build-in-public (indexing count, installs, what shipped). Every featured creator gets a ready-to-post line to repost | Impressions and profile followers weekly; GA4 LinkedIn referrals; target 300+ views/day on a weekday |
+| 1–12 | Newsletter in their format | Keep Monday; fixed structure "one skill, one MCP server, one template, one AI update"; a lead magnet per hub (an "outbound stack" install pack) | Confirmed subscribers; Monday peak height |
+| 2–4 | GTM hub and their skills listed | Ingest both repos (Part 1 §9 item 1); `/for/gtm` hub; fix search relevance for outbound terms | Hub indexed; installs from the hub |
+| 2–6 | Creator outreach, founders first | Claim pages, README badges, the data pitch (Part 1 §9 item 2); ten creators adding the badge = ten repo backlinks | Referring domains (Search Console → Links) |
+| 3–8 | Search content they cannot write neutrally | Glossary of agentic terms (skill, MCP server, SKILL.md, plugin marketplace, Cowork) with examples from the catalogue; comparison pages ("Workflows.io's 10 outbound skills vs the alternatives"); year-stamped hub titles ("Best Claude Code skills for outbound, 2026") | Indexed pages 25 → 150+; impressions 16 → 300+ (28 days) |
+| 4–6 | Launch moment | Product Hunt + Show HN with the MCP connector (`docs/STRATEGY.md` §3 item 2); announce the result as a LinkedIn post, their way | Referring domains 0 → 20+ |
+| 4–10 | Link building the way they did it | Submit to the skills directories in `docs/STRATEGY.md` §3 item 4 and to their Toolverse; pitch one data-led guest post to a GTM or AI-tooling newsletter ("what 1,000 open-source skills show"); publish one linkable data report from stars and installs; release our own MIT starter kit whose README points back | Referring domains; guest post live |
+| 6–12 | Proof | Public install counters on hubs; honest testimonials from creators and `/build-for-me` clients; one written case study per build | Conversion on `/build-for-me` |
+| any | Paid | Optional. They grew without it. If tested, only boost a founder post that already performs organically, and judge it by GA4 referrals, not impressions | — |
+
+## 19. Watch list and open questions
+
+Watch: the LinkedIn company page follower count, new blog and glossary pages,
+the careers page, commits to both repos, any public MCP or CLI, the creator
+programme terms, Workflows Academy opening, the newsletter issue count, the
+next ARR announcement. The premium n8n template
+`templates/premium/competitor-watch.json` can watch the careers and Toolverse
+pages; a scheduled re-run of this analysis is possible on request.
+
+Still unknown: the company page's exact follower count; newsletter, YouTube
+and X audience sizes; backlink-tool counts (Ahrefs and Semrush connectors
+could not connect from here); whether playbook downloads gate on email; the
+third pillar of their founder-led playbook; anything about paid spend on
+LinkedIn.
+
+## Sources added in Part 2
+
+Meta Ad Library (Facebook connector, 2026-10-27); LinkedIn profile snippets
+for Jan Brochwicz, Marios Charalampous, Lorenzo Amadei, Martin Blanchard
+Melelli, William Hellawell, Raphael Carandang, Levi Bom and the company page
+`linkedin.com/company/workflows-io`; workflows.io pages surfaced by
+site-restricted search (blog, playbooks, glossary, customers, services,
+toolverse); newsletter.workflows.io issues #5–#44 and essays;
+workflowsio.notion.site pages; x.com/dan__rosenthal/status/2077468324758179951;
+youtube.com/@FivosAresti and @Dan.Rosenthal; instagram.com/fivosaresti;
+ecosystem.hubspot.com; the directories and databases named in §15;
+`components/Footer.js`, `app/layout.js`, `app/newsletter/page.js`,
+`app/api/[[...path]]/route.js` (subscriber count field) in this repository.
