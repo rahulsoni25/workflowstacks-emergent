@@ -257,8 +257,15 @@ async function main() {
     ),
   ]
 
+  // Never-attempted first, then oldest attempt. Without a sort, Mongo's
+  // natural order handed every run the same leading candidates -- including
+  // ones the gate already rejected -- so each daily run re-spent its quota
+  // on known rejects and progress would stall (seen 2026-10-04: the next run
+  // would have started with coding-interview-university and linux, both
+  // judged 6-7 the run before). Missing fields sort first ascending.
   const candidates = await col
     .find({ published: { $ne: false }, description_human: { $regex: TEMPLATE_RE } })
+    .sort({ backfill_attempted_at: 1, _id: 1 })
     .limit(LIMIT)
     .toArray()
 
@@ -296,6 +303,9 @@ async function main() {
           if (r.matchedCount > 0) { improved++; written = true } else { vanished++ }
         } else {
           unchanged++
+          // Judged but not written: send it to the back of the queue. A
+          // provider error (catch below) is not marked, so it retries next run.
+          if (!DRY_RUN) await col.updateOne({ id: skill.id }, { $set: { backfill_attempted_at: new Date(), backfill_last_score: score } })
         }
         rewritten++
         console.log(JSON.stringify({ slug: skill.slug || skill.id, score, stillTemplated, written }))
