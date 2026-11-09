@@ -11,10 +11,10 @@ WorkflowStacks app: one folder of plain HTML, CSS, JS and media under
 | `https://workflowstacks.com/ai-avatar` | `founder-avatar.workflowstacks.com` (once attached in Vercel) | `public/sites/founder-avatar-studio/` |
 | `https://workflowstacks.com/ai-avatar/use-cases` | none of its own; the same path works on the hostname above | `public/sites/founder-avatar-studio/use-cases/` |
 
-The use-cases page has five cases. Three carry the client's finished video:
-Al Meeraj Auto Repairing Workshop (two), Bougie Bloom and Dr. Anil Sureen. The
-other two, Mavericks Foodie House and Hermith Mana, hold an "Episode idea" card
-until their video exists.
+The use-cases page has five cases. Four carry the client's finished video:
+Al Meeraj Auto Repairing Workshop (two), Bougie Bloom, HM360° / Hermith Mana
+(one film in two cuts, 16:9 and 9:16, side by side) and Dr. Anil Sureen.
+Mavericks Foodie House holds an "Episode idea" card until its video exists.
 
 Each video is a `<video preload="none">` whose poster is an "AI Digital Twin"
 thumbnail with the same name (`.jpg`), so nothing downloads until Play. Every

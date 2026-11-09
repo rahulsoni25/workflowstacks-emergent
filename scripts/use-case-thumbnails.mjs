@@ -5,10 +5,10 @@
 // Every word on a poster is copied from the video's own on-screen text.
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
+import path from 'node:path';
 // Playwright is not a project dependency: require() finds a global install via NODE_PATH,
 // which a static ESM import would ignore.
 const { chromium } = createRequire(import.meta.url)('playwright');
-import path from 'node:path';
 const DIR = path.resolve(process.argv[2] || '.');
 const OUT = path.resolve('public/sites/founder-avatar-studio/use-cases');
 
@@ -25,6 +25,13 @@ const posters = [
   { slug: 'bougie-bloom', shape: 'h', win: '3/4', pos: '83% 50%', glow: 'rgba(229,143,176,.42)', dur: '0:13',
     eyebrow: 'Handcrafted edible blooms · Dubai', name: 'Bougie Bloom', role: '100% Belgian couverture chocolate',
     title: 'Beautifully crafted. Thoughtfully gifted.', site: 'bougiebloom.ae' },
+  // HM360°: one film, two cuts (widescreen and the WhatsApp 9:16), same close-up at 0:44.
+  { slug: 'hm360-film-16x9', shape: 'h', win: '3/4', pos: '50% 50%', glow: 'rgba(127,209,185,.40)', dur: '0:57',
+    eyebrow: 'Insurance · Investments · Will', name: 'Hermith Mana', role: 'Founder, HM360°',
+    title: 'Are there gaps between your policies?', site: 'hm360degree.com' },
+  { slug: 'hm360-film-9x16', shape: 'v', win: '16/9', pos: '50% 50%', glow: 'rgba(127,209,185,.40)', dur: '0:57',
+    eyebrow: 'Insurance · Investments · Will', name: 'Hermith Mana', role: 'Founder, HM360°',
+    title: 'Are there gaps between your policies?', chips: ['Protection', 'Wealth & future', 'Group cover', 'Will & legacy planning'] },
 ];
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
