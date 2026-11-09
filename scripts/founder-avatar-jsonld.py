@@ -75,7 +75,8 @@ graph = [
  {"@type": "WebPage", "@id": PAGE, "url": URL, "name": title, "description": desc, "inLanguage": "en",
   "isPartOf": {"@id": SITE}, "about": {"@id": SERVICE}, "mainEntity": {"@id": SERVICE}, "breadcrumb": {"@id": CRUMB}, "video": {"@id": VIDEO},
   "primaryImageOfPage": {"@type": "ImageObject", "url": MEDIA + "cinematic.jpg", "width": 800, "height": 450},
-  "datePublished": "2026-09-25", "dateModified": "2026-10-09"},
+  "relatedLink": [URL + "/use-cases"],  # the client use cases, linked from #samples, the FAQ and #close
+  "datePublished": "2026-09-25", "dateModified": "2026-11-09"},
  {"@type": "BreadcrumbList", "@id": CRUMB, "itemListElement": [
     {"@type": "ListItem", "position": 1, "name": "WorkflowStacks", "item": BASE},
     {"@type": "ListItem", "position": 2, "name": "AI Avatar Studio", "item": URL}]},

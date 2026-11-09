@@ -133,6 +133,12 @@ unmeasured), WebP exports, and the generator's palette or font swaps.
   injected by script. Same visual result, readable without JavaScript.
 - **FAQ** grew from four to ten entries; the same `<details>` rows, so the
   44px summary rows and the +/– marker are unchanged.
+- **Client use cases** (2026-11-09): under the samples, a block of five cards
+  (`.client-list`, the same 1px-gap grid as the fact cards: 1 → 2 → 5 columns)
+  deep-links each client into `/ai-avatar/use-cases`, followed by a "See all"
+  button. An eleventh FAQ entry and the closing line link there in-text
+  (underlined `--text`, amber on hover); the JSON-LD `WebPage` carries the same
+  URL as `relatedLink`.
 
 ## Re-checking
 
