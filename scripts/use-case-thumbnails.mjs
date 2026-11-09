@@ -32,6 +32,9 @@ const posters = [
   { slug: 'hm360-film-9x16', shape: 'v', win: '16/9', pos: '50% 50%', glow: 'rgba(127,209,185,.40)', dur: '0:57',
     eyebrow: 'Insurance · Investments · Will', name: 'Hermith Mana', role: 'Founder, HM360°',
     title: 'Are there gaps between your policies?', chips: ['Protection', 'Wealth & future', 'Group cover', 'Will & legacy planning'] },
+  { slug: 'mavericks-ad-film', shape: 'h', win: '3/4', pos: '50% 50%', glow: 'rgba(127,209,185,.38)', dur: '0:42',
+    eyebrow: 'Festive events · Dubai', name: 'Mavericks Foody House', role: 'Ad film',
+    title: 'Book your festive event today!' },
 ];
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
