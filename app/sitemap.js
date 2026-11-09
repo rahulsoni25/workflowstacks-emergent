@@ -69,7 +69,7 @@ const STATIC_ROUTES = [
   '/submit',
   // Standalone landing pages served from public/sites/ (see LANDING_PAGES in
   // next.config.js). Original, hand-built pages, so they rank with templates.
-  '/ai-avatar',
+  '/ai-avatar', '/ai-avatar/use-cases',
 ]
 
 // Priority tells Google which of OUR pages matter most relative to each
@@ -78,7 +78,7 @@ const STATIC_ROUTES = [
 // derivative skill pages a higher priority than hand-built templates.
 function priorityFor(path) {
   if (path === '') return 1
-  if (path.startsWith('/templates') || path.startsWith('/automate') || path === '/blog' || path === '/hot' || path === '/ai-avatar') return 0.9
+  if (path.startsWith('/templates') || path.startsWith('/automate') || path === '/blog' || path === '/hot' || path.startsWith('/ai-avatar')) return 0.9
   if (path.startsWith('/best') || path.startsWith('/for') || path === '/newsletter') return 0.8
   if (path.startsWith('/tools') || path.startsWith('/bundles') || path.startsWith('/mcp') || path.startsWith('/kits') || path.startsWith('/commands')) return 0.8
   if (path === '/skills' || path === '/pricing' || path.startsWith('/learn')) return 0.7

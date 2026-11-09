@@ -7,12 +7,20 @@
 // localhost alternative lets you preview the hostname variant at
 // http://founder-avatar.localhost:3001/ under `npm run dev`. Pages link their
 // media by absolute /sites/<dir>/… paths so one file works on both URLs.
+// `host` is optional: a page without one is served at `path` only.
 // See docs/subdomain-landing-pages.md.
 const LANDING_PAGES = [
   {
     path: '/ai-avatar',
     dir: 'founder-avatar-studio',
     host: 'founder-avatar\\.(?:workflowstacks\\.com|localhost)',
+  },
+  {
+    // Use cases of the avatar service. Nested under /ai-avatar, so the
+    // founder-avatar host's catch-all (which skips paths starting with
+    // "ai-avatar") leaves it alone and the rule for `path` serves it there too.
+    path: '/ai-avatar/use-cases',
+    dir: 'founder-avatar-studio/use-cases',
   },
 ]
 
@@ -60,7 +68,7 @@ const nextConfig = {
         { source: `/sites/${site.dir}`, destination: site.path, permanent: true },
         // On the hostname, "/" is rewritten to index.html below; /index.html
         // there folds back to "/".
-        { source: '/index.html', has: [{ type: 'host', value: site.host }], destination: '/', permanent: true },
+        ...(site.host ? [{ source: '/index.html', has: [{ type: 'host', value: site.host }], destination: '/', permanent: true }] : []),
       ]),
     ]
   },
@@ -70,10 +78,12 @@ const nextConfig = {
       // static index.html instead of a Next page (or, for "/" on a landing-
       // page host, instead of the WorkflowStacks homepage).
       beforeFiles: LANDING_PAGES.flatMap((site) => {
+        // Canonical URL on the main site.
+        const canonical = { source: site.path, destination: `/sites/${site.dir}/index.html` }
+        if (!site.host) return [canonical]
         const onHost = [{ type: 'host', value: site.host }]
         return [
-          // Canonical URL on the main site.
-          { source: site.path, destination: `/sites/${site.dir}/index.html` },
+          canonical,
           // Hostname variant: "/" is the page; every other path on that host is
           // one of the site's own files (robots.txt, sitemap.xml …). _next/
           // stays Next's, sites/ is already the real path (media lives there),

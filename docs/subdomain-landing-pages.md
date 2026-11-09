@@ -9,6 +9,13 @@ WorkflowStacks app: one folder of plain HTML, CSS, JS and media under
 | Canonical URL | Hostname variant | Folder |
 | --- | --- | --- |
 | `https://workflowstacks.com/ai-avatar` | `founder-avatar.workflowstacks.com` (once attached in Vercel) | `public/sites/founder-avatar-studio/` |
+| `https://workflowstacks.com/ai-avatar/use-cases` | none of its own; the same path works on the hostname above | `public/sites/founder-avatar-studio/use-cases/` |
+
+The use-cases page shows one use case per client business (Al Meeraj Auto, Boogle
+Blooms, Mavericks Foodie House, Hermith Mana). Each phone frame holds an
+"Episode idea" card until that client's finished video is added; the comment
+above the first case in the HTML gives the `<video>` markup to swap in. Keep
+each clip small (the hero clip is 464 KB) and store it in the same folder.
 
 ## Why a path on the main site is canonical
 
@@ -78,6 +85,9 @@ WhatsApp message is prepared (with `need`, `has_phone`, `has_email`),
    ```js
    { path: '/new-slug', dir: 'new-dir', host: 'new-name\\.(?:workflowstacks\\.com|localhost)' }
    ```
+
+   `host` is optional. Without it only the `path` rewrite and the folder
+   redirects are added, which is how `/ai-avatar/use-cases` is served.
 
 3. Add `'/new-slug'` to `STATIC_ROUTES` in `app/sitemap.js`.
 4. Optionally attach the hostname in Vercel as above.
