@@ -9,6 +9,34 @@ WorkflowStacks app: one folder of plain HTML, CSS, JS and media under
 | Canonical URL | Hostname variant | Folder |
 | --- | --- | --- |
 | `https://workflowstacks.com/ai-avatar` | `founder-avatar.workflowstacks.com` (once attached in Vercel) | `public/sites/founder-avatar-studio/` |
+| `https://workflowstacks.com/ai-avatar/use-cases` | none of its own; the same path works on the hostname above | `public/sites/founder-avatar-studio/use-cases/` |
+
+The use-cases page has five cases. Four carry the client's finished video:
+Al Meeraj Auto Repairing Workshop (two), Bougie Bloom, HM360° / Hermith Mana
+(one film in two cuts, 16:9 and 9:16, side by side) and Dr. Anil Sureen.
+Mavericks Foodie House holds an "Episode idea" card until its video exists.
+
+Each video is a `<video preload="none">` whose poster is an "AI Digital Twin"
+thumbnail with the same name (`.jpg`), so nothing downloads until Play. Every
+word on a thumbnail is copied from that video's own on-screen text.
+
+To add or change one:
+
+1. Compress the source next to the others (576×1024 for 9:16):
+
+   ```bash
+   ffmpeg -i in.mp4 -vf scale=576:1024 -c:v libx264 -preset slow -crf 28 -profile:v high \
+     -pix_fmt yuv420p -c:a aac -b:a 96k -movflags +faststart <slug>.mp4
+   ```
+
+2. Crop a clean frame to `win-<slug>.jpg`, add an entry to the list at the
+   top of `scripts/use-case-thumbnails.mjs`, and run
+   `node scripts/use-case-thumbnails.mjs <dir-with-win-images>`. It writes
+   `<slug>.jpg` here and prints where the photo window's centre sits. Set that
+   as `--px`/`--py` on the `.player` so the Play button lands on the photo,
+   then nudge it off the face (the Al Meeraj and Anil Sureen buttons sit to
+   one side).
+3. Copy a `.player` block in the HTML and point it at the new files.
 
 ## Why a path on the main site is canonical
 
@@ -78,6 +106,9 @@ WhatsApp message is prepared (with `need`, `has_phone`, `has_email`),
    ```js
    { path: '/new-slug', dir: 'new-dir', host: 'new-name\\.(?:workflowstacks\\.com|localhost)' }
    ```
+
+   `host` is optional. Without it only the `path` rewrite and the folder
+   redirects are added, which is how `/ai-avatar/use-cases` is served.
 
 3. Add `'/new-slug'` to `STATIC_ROUTES` in `app/sitemap.js`.
 4. Optionally attach the hostname in Vercel as above.
