@@ -11,11 +11,32 @@ WorkflowStacks app: one folder of plain HTML, CSS, JS and media under
 | `https://workflowstacks.com/ai-avatar` | `founder-avatar.workflowstacks.com` (once attached in Vercel) | `public/sites/founder-avatar-studio/` |
 | `https://workflowstacks.com/ai-avatar/use-cases` | none of its own; the same path works on the hostname above | `public/sites/founder-avatar-studio/use-cases/` |
 
-The use-cases page shows one use case per client business (Al Meeraj Auto, Boogle
-Blooms, Mavericks Foodie House, Hermith Mana). Each phone frame holds an
-"Episode idea" card until that client's finished video is added; the comment
-above the first case in the HTML gives the `<video>` markup to swap in. Keep
-each clip small (the hero clip is 464 KB) and store it in the same folder.
+The use-cases page has five cases. Three carry the client's finished video:
+Al Meeraj Auto Repairing Workshop (two), Bougie Bloom and Dr. Anil Sureen. The
+other two, Mavericks Foodie House and Hermith Mana, hold an "Episode idea" card
+until their video exists.
+
+Each video is a `<video preload="none">` whose poster is an "AI Digital Twin"
+thumbnail with the same name (`.jpg`), so nothing downloads until Play. Every
+word on a thumbnail is copied from that video's own on-screen text.
+
+To add or change one:
+
+1. Compress the source next to the others (576×1024 for 9:16):
+
+   ```bash
+   ffmpeg -i in.mp4 -vf scale=576:1024 -c:v libx264 -preset slow -crf 28 -profile:v high \
+     -pix_fmt yuv420p -c:a aac -b:a 96k -movflags +faststart <slug>.mp4
+   ```
+
+2. Crop a clean frame to `win-<slug>.jpg`, add an entry to the list at the
+   top of `scripts/use-case-thumbnails.mjs`, and run
+   `node scripts/use-case-thumbnails.mjs <dir-with-win-images>`. It writes
+   `<slug>.jpg` here and prints where the photo window's centre sits. Set that
+   as `--px`/`--py` on the `.player` so the Play button lands on the photo,
+   then nudge it off the face (the Al Meeraj and Anil Sureen buttons sit to
+   one side).
+3. Copy a `.player` block in the HTML and point it at the new files.
 
 ## Why a path on the main site is canonical
 

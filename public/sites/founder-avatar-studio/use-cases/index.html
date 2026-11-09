@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>AI Avatar Use Cases for Dubai Businesses | Founder Avatar Studio</title>
-<meta name="description" content="How a car workshop, a florist and a restaurant in Dubai, and a personal brand, use an AI avatar of their owner: the job each twin does and the videos it makes.">
+<title>AI Digital Twin Use Cases in Dubai, with Videos | Founder Avatar Studio</title>
+<meta name="description" content="AI digital twin use cases with the videos: a car workshop and an edible-blooms brand in Dubai, a birthday greeting, a restaurant and a personal brand.">
 <link rel="canonical" href="https://workflowstacks.com/ai-avatar/use-cases">
 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <meta name="theme-color" content="#14111C">
@@ -12,17 +12,17 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="FluoDigital">
 <meta property="og:locale" content="en_AE">
-<meta property="og:title" content="AI avatar use cases — one twin, four different jobs">
-<meta property="og:description" content="How a car workshop, a florist and a restaurant in Dubai, and a personal brand, use an AI avatar of their owner: the job each twin does and the videos it makes.">
+<meta property="og:title" content="AI Digital Twin use cases — one twin, five different jobs">
+<meta property="og:description" content="AI digital twin use cases with the videos: a car workshop and an edible-blooms brand in Dubai, a birthday greeting, a restaurant and a personal brand.">
 <meta property="og:url" content="https://workflowstacks.com/ai-avatar/use-cases">
-<meta property="og:image" content="https://workflowstacks.com/sites/founder-avatar-studio/cinematic.jpg">
-<meta property="og:image:width" content="800">
-<meta property="og:image:height" content="450">
-<meta property="og:image:alt" content="Cinematic scene produced with AI video">
+<meta property="og:image" content="https://workflowstacks.com/sites/founder-avatar-studio/use-cases/bougie-bloom.jpg">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="720">
+<meta property="og:image:alt" content="AI Digital Twin: Bougie Bloom brand film thumbnail">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="AI avatar use cases — one twin, four different jobs">
-<meta name="twitter:description" content="How a car workshop, a florist and a restaurant in Dubai, and a personal brand, use an AI avatar of their owner: the job each twin does and the videos it makes.">
-<meta name="twitter:image" content="https://workflowstacks.com/sites/founder-avatar-studio/cinematic.jpg">
+<meta name="twitter:title" content="AI Digital Twin use cases — one twin, five different jobs">
+<meta name="twitter:description" content="AI digital twin use cases with the videos: a car workshop and an edible-blooms brand in Dubai, a birthday greeting, a restaurant and a personal brand.">
+<meta name="twitter:image" content="https://workflowstacks.com/sites/founder-avatar-studio/use-cases/bougie-bloom.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap">
@@ -30,7 +30,7 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"></noscript>
 <style>
   /* Same tokens and components as /ai-avatar (docs/founder-avatar-studio-design-system.md),
-     plus the use-case index, the case layout and the episode card. */
+     plus the use-case index, the case layouts, the video player and the episode card. */
   :root{
     color-scheme: dark;
     --ground:#14111C; --surface:#1E1927; --surface2:#271F33;
@@ -38,7 +38,7 @@
     --text:#F4EEE6; --muted:#A99DB4; --dim:#8B8296;
     --tally:#FF4A1C; --amber:#F2A65A; --mint:#7FD1B9;
     --maxw:1180px; --bar-h:69px; --t:160ms;
-    /* breakpoints: sm 560 · md 720 · lg 900 · xl 960 */
+    /* breakpoints: sm 560 · md 720 · lg 900 · xl 1024 */
     --fd:"Instrument Serif",Georgia,serif;
     --fb:"Archivo","Helvetica Neue",Arial,sans-serif;
     --fm:"IBM Plex Mono",ui-monospace,Menlo,monospace;
@@ -76,12 +76,12 @@
   .bar .wrap{display:flex; align-items:center; gap:16px; justify-content:space-between; padding-block:12px}
   .mark{display:flex; align-items:center; gap:10px; font-weight:600; letter-spacing:-.01em; font-size:16px; text-decoration:none; min-height:44px}
   .dot{width:9px; height:9px; border-radius:50%; background:var(--tally); box-shadow:0 0 0 4px rgba(255,74,28,.18)}
-  .bar nav{align-items:center; gap:22px; font-size:14px; color:var(--muted)}
+  .bar nav{align-items:center; gap:20px; font-size:14px; color:var(--muted)}
   .bar nav a{display:inline-block; padding:11px 0; text-decoration:none; border-bottom:1px solid transparent; transition:color var(--t) ease}
   .bar nav a:hover{color:var(--text)}
   .bar nav a[aria-current="true"]{color:var(--text); border-bottom-color:var(--amber)}
   .hide-sm{display:none}
-  @media(min-width:900px){ .hide-sm{display:flex} }
+  @media(min-width:960px){ .hide-sm{display:flex} }
 
   .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px;
     font-family:var(--fb); font-weight:600; font-size:15px; line-height:1;
@@ -95,7 +95,7 @@
   }
   .btn:active{transform:translateY(0) scale(.98)}
   .btn-sm{padding:10px 15px; font-size:14px}
-  .btn,.bar nav a,.contact a,.index a{touch-action:manipulation}
+  .btn,.bar nav a,.contact a,.index a,.play{touch-action:manipulation}
   .actions{display:flex; flex-wrap:wrap; gap:12px; margin-top:28px}
 
   /* hero */
@@ -105,14 +105,14 @@
   .crumbs a:hover{color:var(--text)}
   .crumbs span[aria-hidden]{margin:0 8px}
   h1.hook{font-family:var(--fd); font-weight:400; font-size:clamp(44px,7.2vw,78px); line-height:1.02; letter-spacing:-.015em; margin-top:18px}
-  .h1-kw{display:block; font-family:var(--fb); font-weight:500; font-size:clamp(15px,1.6vw,18px); line-height:1.45; letter-spacing:0; color:var(--amber); margin-top:16px; max-width:34em}
+  .h1-kw{display:block; font-family:var(--fb); font-weight:500; font-size:clamp(15px,1.6vw,18px); line-height:1.45; letter-spacing:0; color:var(--amber); margin-top:16px; max-width:36em}
   .sub{color:var(--muted); font-size:clamp(17px,2vw,20px); max-width:36em; margin-top:20px}
 
   /* index of use cases */
   .index{list-style:none; margin:40px 0 0; padding:0; display:grid; gap:1px; background:var(--line); border:1px solid var(--line); grid-template-columns:1fr}
-  @media(min-width:560px){ .index{grid-template-columns:repeat(2,1fr)} }
-  @media(min-width:960px){ .index{grid-template-columns:repeat(4,1fr)} }
-  .index a{display:flex; flex-direction:column; gap:8px; height:100%; background:var(--ground); padding:24px 22px; text-decoration:none; transition:background-color var(--t) ease}
+  @media(min-width:560px){ .index{grid-template-columns:repeat(2,1fr)} .index li:last-child:nth-child(odd){grid-column:1/-1} }
+  @media(min-width:1024px){ .index{grid-template-columns:repeat(5,1fr)} .index li:last-child:nth-child(odd){grid-column:auto} }
+  .index a{display:flex; flex-direction:column; gap:8px; height:100%; background:var(--ground); padding:24px 20px; text-decoration:none; transition:background-color var(--t) ease}
   .index a:hover{background:var(--surface)}
   .i-n{font-family:var(--fd); font-size:34px; line-height:1; color:var(--amber)}
   .i-name{font-weight:600; font-size:18px; letter-spacing:-.01em; margin-top:6px}
@@ -126,24 +126,44 @@
   .said{color:var(--muted); max-width:58ch; margin-top:18px}
   section.last{border-bottom:0}
 
-  /* one use case: copy beside a phone holding the episode card */
+  /* case layouts: copy beside one phone (.case-grid), or copy above two phones / a wide screen (.case-split) */
   .case-grid{display:grid; gap:clamp(32px,5vw,56px); grid-template-columns:1fr; align-items:start}
   @media(min-width:900px){
     .case-grid{grid-template-columns:1.12fr .88fr}
     .case.flip .case-grid{grid-template-columns:.88fr 1.12fr}
-    .case.flip .stage{order:-1}
+    .case.flip .case-grid > .stage{order:-1}
   }
+  .case-split{display:grid; gap:0 clamp(32px,5vw,64px); grid-template-columns:1fr; align-items:start}
+  @media(min-width:900px){ .case-split{grid-template-columns:1.05fr .95fr} .case-split .sub-h{margin-top:4px} }
   .sub-h{font-family:var(--fm); font-weight:400; font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); margin-top:36px}
   .formats{display:grid; gap:20px; grid-template-columns:1fr; margin-top:16px}
   @media(min-width:560px){ .formats{grid-template-columns:1fr 1fr} }
+  .formats.one{grid-template-columns:1fr}
   .formats div{border-top:2px solid var(--line-strong); padding-top:14px}
   .formats div:first-child{border-top-color:var(--tally)}
   .formats h4{font-size:16px; font-weight:600}
   .formats p{color:var(--muted); font-size:15px; margin:6px 0 0}
 
   .stage{position:relative; justify-self:center; width:min(300px,78vw)}
-  @media(min-width:900px){ .stage{position:sticky; top:calc(var(--bar-h) + 24px)} }
-  .phone{position:relative; border:1px solid var(--line-strong); border-radius:22px; padding:9px; background:var(--surface2)}
+  @media(min-width:900px){ .case-grid > .stage{position:sticky; top:calc(var(--bar-h) + 24px)} }
+  .reel{display:grid; gap:36px; justify-content:center; grid-template-columns:min(300px,78vw); margin-top:44px}
+  @media(min-width:720px){ .reel{grid-template-columns:repeat(2,300px); gap:48px} }
+  .reel .stage{width:100%}
+  .phone,.screen{position:relative; border:1px solid var(--line-strong); border-radius:22px; padding:9px; background:var(--surface2)}
+  .stage.wide{width:100%; max-width:880px; margin:44px auto 0}
+
+  /* video player: the poster is the "AI Digital Twin" thumbnail. Nothing downloads until Play.
+     Without script the native controls stay on; with script a single Play button sits over
+     the thumbnail's photo window (--px/--py) and the controls appear once it plays. */
+  .player{position:relative}
+  .player video{display:block; width:100%; height:auto; aspect-ratio:9/16; object-fit:cover; border-radius:14px; background:#14111C}
+  .screen .player video{aspect-ratio:16/9}
+  .play{position:absolute; left:var(--px,50%); top:var(--py,50%); transform:translate(-50%,-50%); width:64px; height:64px; border-radius:50%;
+    border:0; background:#FF4A1C; color:#170B06; display:grid; place-items:center; cursor:pointer; box-shadow:0 0 0 8px rgba(255,74,28,.24), 0 8px 24px rgba(0,0,0,.35); transition:transform var(--t) ease}
+  @media(hover:hover){ .play:hover{transform:translate(-50%,-50%) scale(1.07)} }
+  .play svg{width:22px; height:22px; margin-left:4px}
+  .play:focus-visible{outline:3px solid #F2A65A; outline-offset:4px}
+
   /* The episode card is always the dark "screen", whichever section it sits in, so its
      colours are literal rather than tokens: #F4EEE6 on the card is 16.2:1, #F2A65A 9.2:1,
      #A99DB4 7.3:1 (measured on #14111C, the darkest stop the text sits over). */
@@ -173,13 +193,13 @@
   .contact a.v{display:inline-block; text-decoration:none; padding:9px 0; margin:-5px 0; min-height:44px; transition:color var(--t) ease}
   .contact a.v:hover{color:var(--amber)}
   @media(max-width:719px){ .formats p,.fact p,.i-job{font-size:16px} }
-  @media(prefers-reduced-motion:reduce){ .btn:hover,.btn:active{transform:none} }
+  @media(prefers-reduced-motion:reduce){ .btn:hover,.btn:active{transform:none} .play:hover{transform:translate(-50%,-50%)} }
   footer{border-top:1px solid var(--line); padding-block:30px; color:var(--dim); font-size:13.5px}
   footer .wrap{display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center}
   footer a{color:var(--muted); text-decoration:none; display:inline-block; padding:12px 0; margin:-12px 0}
   footer a:hover{color:var(--text)}
 </style>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://workflowstacks.com/#website","name":"WorkflowStacks","url":"https://workflowstacks.com"},{"@type":"Organization","@id":"https://workflowstacks.com/ai-avatar#organization","name":"FluoDigital","url":"https://workflowstacks.com/ai-avatar"},{"@type":"WebPage","@id":"https://workflowstacks.com/ai-avatar/use-cases#webpage","url":"https://workflowstacks.com/ai-avatar/use-cases","name":"AI Avatar Use Cases for Dubai Businesses | Founder Avatar Studio","description":"How a car workshop, a florist and a restaurant in Dubai, and a personal brand, use an AI avatar of their owner: the job each twin does and the videos it makes.","inLanguage":"en","isPartOf":{"@id":"https://workflowstacks.com/#website"},"about":{"@id":"https://workflowstacks.com/ai-avatar#service"},"publisher":{"@id":"https://workflowstacks.com/ai-avatar#organization"},"breadcrumb":{"@id":"https://workflowstacks.com/ai-avatar/use-cases#breadcrumb"},"mainEntity":{"@id":"https://workflowstacks.com/ai-avatar/use-cases#cases"},"datePublished":"2026-11-09","dateModified":"2026-11-09"},{"@type":"BreadcrumbList","@id":"https://workflowstacks.com/ai-avatar/use-cases#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"WorkflowStacks","item":"https://workflowstacks.com"},{"@type":"ListItem","position":2,"name":"AI Avatar Studio","item":"https://workflowstacks.com/ai-avatar"},{"@type":"ListItem","position":3,"name":"Use cases","item":"https://workflowstacks.com/ai-avatar/use-cases"}]},{"@type":"ItemList","@id":"https://workflowstacks.com/ai-avatar/use-cases#cases","name":"AI avatar use cases","numberOfItems":4,"itemListElement":[{"@type":"ListItem","position":1,"name":"Al Meeraj Auto: car repair workshop, Dubai","url":"https://workflowstacks.com/ai-avatar/use-cases#al-meeraj-auto"},{"@type":"ListItem","position":2,"name":"Boogle Blooms: florist, Dubai","url":"https://workflowstacks.com/ai-avatar/use-cases#boogle-blooms"},{"@type":"ListItem","position":3,"name":"Mavericks Foodie House: restaurant, Dubai","url":"https://workflowstacks.com/ai-avatar/use-cases#mavericks-foodie-house"},{"@type":"ListItem","position":4,"name":"Hermith Mana: personal brand","url":"https://workflowstacks.com/ai-avatar/use-cases#hermith-mana"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://workflowstacks.com/#website","name":"WorkflowStacks","url":"https://workflowstacks.com"},{"@type":"Organization","@id":"https://workflowstacks.com/ai-avatar#organization","name":"FluoDigital","url":"https://workflowstacks.com/ai-avatar"},{"@type":"WebPage","@id":"https://workflowstacks.com/ai-avatar/use-cases#webpage","url":"https://workflowstacks.com/ai-avatar/use-cases","name":"AI Digital Twin Use Cases in Dubai, with Videos | Founder Avatar Studio","description":"AI digital twin use cases with the videos: a car workshop and an edible-blooms brand in Dubai, a birthday greeting, a restaurant and a personal brand.","inLanguage":"en","isPartOf":{"@id":"https://workflowstacks.com/#website"},"about":{"@id":"https://workflowstacks.com/ai-avatar#service"},"publisher":{"@id":"https://workflowstacks.com/ai-avatar#organization"},"breadcrumb":{"@id":"https://workflowstacks.com/ai-avatar/use-cases#breadcrumb"},"mainEntity":{"@id":"https://workflowstacks.com/ai-avatar/use-cases#cases"},"video":[{"@id":"https://workflowstacks.com/ai-avatar/use-cases#video-al-meeraj-why-choose"},{"@id":"https://workflowstacks.com/ai-avatar/use-cases#video-al-meeraj-car-care-centre"},{"@id":"https://workflowstacks.com/ai-avatar/use-cases#video-bougie-bloom"},{"@id":"https://workflowstacks.com/ai-avatar/use-cases#video-anil-sureen-birthday"}],"primaryImageOfPage":{"@type":"ImageObject","url":"https://workflowstacks.com/sites/founder-avatar-studio/use-cases/bougie-bloom.jpg","width":1280,"height":720},"datePublished":"2026-11-09","dateModified":"2026-11-09"},{"@type":"BreadcrumbList","@id":"https://workflowstacks.com/ai-avatar/use-cases#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"WorkflowStacks","item":"https://workflowstacks.com"},{"@type":"ListItem","position":2,"name":"AI Avatar Studio","item":"https://workflowstacks.com/ai-avatar"},{"@type":"ListItem","position":3,"name":"Use cases","item":"https://workflowstacks.com/ai-avatar/use-cases"}]},{"@type":"ItemList","@id":"https://workflowstacks.com/ai-avatar/use-cases#cases","name":"AI digital twin use cases","numberOfItems":5,"itemListElement":[{"@type":"ListItem","position":1,"name":"Al Meeraj Auto Repairing Workshop: auto repairing workshop, Al Quoz, Dubai","url":"https://workflowstacks.com/ai-avatar/use-cases#al-meeraj-auto"},{"@type":"ListItem","position":2,"name":"Bougie Bloom: handcrafted edible blooms, Dubai","url":"https://workflowstacks.com/ai-avatar/use-cases#bougie-bloom"},{"@type":"ListItem","position":3,"name":"Mavericks Foodie House: restaurant, Dubai","url":"https://workflowstacks.com/ai-avatar/use-cases#mavericks-foodie-house"},{"@type":"ListItem","position":4,"name":"Hermith Mana: personal brand","url":"https://workflowstacks.com/ai-avatar/use-cases#hermith-mana"},{"@type":"ListItem","position":5,"name":"Dr. Anil Sureen: birthday greeting","url":"https://workflowstacks.com/ai-avatar/use-cases#anil-sureen"}]},{"@type":"VideoObject","@id":"https://workflowstacks.com/ai-avatar/use-cases#video-al-meeraj-why-choose","name":"Why people choose Al Meeraj","description":"D.K. Singh, founder of Al Meeraj Auto Repairing Workshop in Al Quoz, Dubai, presented by his AI digital twin: experience, honest repairs, warranty and a courtesy car.","thumbnailUrl":["https://workflowstacks.com/sites/founder-avatar-studio/use-cases/al-meeraj-why-choose.jpg"],"contentUrl":"https://workflowstacks.com/sites/founder-avatar-studio/use-cases/al-meeraj-why-choose.mp4","encodingFormat":"video/mp4","uploadDate":"2026-11-09","duration":"PT1M12S","width":576,"height":1024,"publisher":{"@id":"https://workflowstacks.com/ai-avatar#organization"}},{"@type":"VideoObject","@id":"https://workflowstacks.com/ai-avatar/use-cases#video-al-meeraj-car-care-centre","name":"Al Meeraj: your complete car care centre","description":"D.K. Singh's AI digital twin tours Al Meeraj Auto Repairing Workshop in Al Quoz, Dubai: all makes and models, body and paint, detailing and coatings, wheels and upholstery.","thumbnailUrl":["https://workflowstacks.com/sites/founder-avatar-studio/use-cases/al-meeraj-car-care-centre.jpg"],"contentUrl":"https://workflowstacks.com/sites/founder-avatar-studio/use-cases/al-meeraj-car-care-centre.mp4","encodingFormat":"video/mp4","uploadDate":"2026-11-09","duration":"PT1M10S","width":576,"height":1024,"publisher":{"@id":"https://workflowstacks.com/ai-avatar#organization"}},{"@type":"VideoObject","@id":"https://workflowstacks.com/ai-avatar/use-cases#video-bougie-bloom","name":"Bougie Bloom: beautifully crafted, thoughtfully gifted","description":"A festive brand film for Bougie Bloom's handcrafted edible blooms, made from 100% Belgian couverture chocolate, presented by an AI digital twin.","thumbnailUrl":["https://workflowstacks.com/sites/founder-avatar-studio/use-cases/bougie-bloom.jpg"],"contentUrl":"https://workflowstacks.com/sites/founder-avatar-studio/use-cases/bougie-bloom.mp4","encodingFormat":"video/mp4","uploadDate":"2026-11-09","duration":"PT13S","width":1024,"height":576,"publisher":{"@id":"https://workflowstacks.com/ai-avatar#organization"}},{"@type":"VideoObject","@id":"https://workflowstacks.com/ai-avatar/use-cases#video-anil-sureen-birthday","name":"Happy Birthday, Dr. Anil Sureen","description":"A birthday greeting made with Dr. Anil Sureen's AI digital twin: \"Here's to a year of greater impact.\"","thumbnailUrl":["https://workflowstacks.com/sites/founder-avatar-studio/use-cases/anil-sureen-birthday.jpg"],"contentUrl":"https://workflowstacks.com/sites/founder-avatar-studio/use-cases/anil-sureen-birthday.mp4","encodingFormat":"video/mp4","uploadDate":"2026-11-09","duration":"PT18S","width":576,"height":1024,"publisher":{"@id":"https://workflowstacks.com/ai-avatar#organization"}}]}</script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -188,9 +208,10 @@
     <a class="mark" href="/ai-avatar"><span class="dot" aria-hidden="true"></span> FluoDigital</a>
     <nav class="hide-sm" aria-label="Use cases">
       <a href="#al-meeraj-auto">Workshop</a>
-      <a href="#boogle-blooms">Florist</a>
+      <a href="#bougie-bloom">Edible blooms</a>
       <a href="#mavericks-foodie-house">Restaurant</a>
       <a href="#hermith-mana">Personal brand</a>
+      <a href="#anil-sureen">Birthday</a>
     </nav>
     <a class="btn btn-primary btn-sm" href="/ai-avatar#book" data-cta="header">Book a capture</a>
   </div>
@@ -200,75 +221,93 @@
   <section class="hero">
     <div class="wrap">
       <nav class="crumbs" aria-label="Breadcrumb"><a href="/ai-avatar">AI Avatar Studio</a><span aria-hidden="true">/</span><span aria-current="page">Use cases</span></nav>
-      <p class="eyebrow">Founder Avatar Studio · Use cases</p>
-      <h1 class="hook">One twin.<br>Four different <span class="em">jobs</span>. <span class="h1-kw">AI avatar use cases: a car workshop, a florist and a restaurant in Dubai, and a personal brand.</span></h1>
-      <p class="sub">A twin is built from one 45-minute capture of the owner's face and voice. What changes from business to business is the work it does afterwards. Here is the job it does for four of them, and the videos it is built to make.</p>
+      <p class="eyebrow">Founder Avatar Studio · AI Digital Twin use cases</p>
+      <h1 class="hook">One twin.<br>Five different <span class="em">jobs</span>. <span class="h1-kw">AI digital twin use cases: a car workshop, an edible-blooms brand and a restaurant in Dubai, a personal brand and a birthday greeting.</span></h1>
+      <p class="sub">A twin is built from one 45-minute capture of a person's face and voice. What changes from case to case is the work it does afterwards. Here are five, with the finished videos for three of them.</p>
       <ol class="index">
-        <li><a href="#al-meeraj-auto"><span class="i-n">01</span><span class="i-name">Al Meeraj Auto</span><span class="tag">Car repair workshop · Dubai</span><span class="i-job">Answers the questions customers ask before they book.</span><span class="i-go">Read the use case <span aria-hidden="true">↓</span></span></a></li>
-        <li><a href="#boogle-blooms"><span class="i-n">02</span><span class="i-name">Boogle Blooms</span><span class="tag">Florist · Dubai</span><span class="i-job">Is ready for every date that sells flowers.</span><span class="i-go">Read the use case <span aria-hidden="true">↓</span></span></a></li>
+        <li><a href="#al-meeraj-auto"><span class="i-n">01</span><span class="i-name">Al Meeraj Auto</span><span class="tag">Auto repairing workshop · Al Quoz, Dubai</span><span class="i-job">The founder tells customers why to choose the workshop.</span><span class="i-go">Watch 2 videos <span aria-hidden="true">↓</span></span></a></li>
+        <li><a href="#bougie-bloom"><span class="i-n">02</span><span class="i-name">Bougie Bloom</span><span class="tag">Handcrafted edible blooms · Dubai</span><span class="i-job">A festive brand film for the gift box.</span><span class="i-go">Watch the film <span aria-hidden="true">↓</span></span></a></li>
         <li><a href="#mavericks-foodie-house"><span class="i-n">03</span><span class="i-name">Mavericks Foodie House</span><span class="tag">Restaurant · Dubai</span><span class="i-job">Keeps up with the menu, week by week.</span><span class="i-go">Read the use case <span aria-hidden="true">↓</span></span></a></li>
         <li><a href="#hermith-mana"><span class="i-n">04</span><span class="i-name">Hermith Mana</span><span class="tag">Personal brand</span><span class="i-job">Keeps posting when the calendar fills up.</span><span class="i-go">Read the use case <span aria-hidden="true">↓</span></span></a></li>
+        <li><a href="#anil-sureen"><span class="i-n">05</span><span class="i-name">Dr. Anil Sureen</span><span class="tag">Birthday greeting</span><span class="i-job">A birthday video, ready on the day.</span><span class="i-go">Watch the video <span aria-hidden="true">↓</span></span></a></li>
       </ol>
     </div>
   </section>
 
-  <!-- Each phone holds an "Episode idea" card, not a video. When a business's finished
-       video is ready, replace its <div class="card">…</div> with
-         <video poster="/sites/founder-avatar-studio/use-cases/<slug>.jpg" muted loop playsinline preload="none" controls>
-           <source src="/sites/founder-avatar-studio/use-cases/<slug>.mp4" type="video/mp4"></video>
-       (9:16, a few hundred KB like ../hero.mp4) and change the figcaption to describe the video. -->
+  <!-- Videos: each <figure class="stage"> holds a .player — a <video preload="none"> whose
+       poster is its "AI Digital Twin" thumbnail (same name, .jpg) plus a Play button placed over
+       the thumbnail's photo window with --px/--py. Media lives beside this file. Every word on
+       a thumbnail is copied from that video's own on-screen text.
+       Cases without a finished video (03, 04) hold an "Episode idea" card instead; to add one,
+       copy a .player block from case 01 and replace the card. -->
   <section id="al-meeraj-auto" class="light case">
-    <div class="wrap case-grid">
-      <div>
-        <p class="eyebrow">Use case 01 · Car repair workshop · Dubai</p>
-        <h2 class="lede">The workshop owner answers the questions customers ask before they book.</h2>
-        <p class="said">Al Meeraj Auto is a car repair and servicing workshop in Dubai. Most of what a workshop explains, it explains again and again: what a service covers, what a warning light means, what can wait and what can't. The owner knows every answer but has no time to film them between cars. The twin gives those answers in the owner's own face and voice, and the owner approves each video from the phone before it goes out.</p>
-        <h3 class="sub-h">What the twin makes</h3>
-        <div class="formats">
-          <div><h4>Service explainers</h4><p>What a service covers, and the signs that one is due.</p></div>
-          <div><h4>Warning lights</h4><p>One dashboard light per video: what it means and whether it is safe to drive on.</p></div>
-          <div><h4>Before the summer</h4><p>AC, coolant, battery and tyre checks, ahead of the heat.</p></div>
-          <div><h4>This month at the workshop</h4><p>Offers and booking reminders, said by the owner instead of a banner.</p></div>
+    <div class="wrap">
+      <div class="case-split">
+        <div>
+          <p class="eyebrow">Use case 01 · Auto repairing workshop · Al Quoz, Dubai</p>
+          <h2 class="lede">The founder tells customers why to choose his workshop, in his own face and voice.</h2>
+          <p class="said">Al Meeraj Auto Repairing Workshop is in Al Quoz, Dubai, and its founder is D.K. Singh. Most of what a workshop explains, it explains again and again. His AI digital twin says it on video, in two films: why people choose Al Meeraj, and what "your complete car care centre" covers. Both keep the workshop's number on screen from start to finish, so a viewer can call straight from the video.</p>
         </div>
-      </div>
-      <figure class="stage">
-        <div class="phone">
-          <div class="card" style="--glow:rgba(255,74,28,.42)">
-            <span class="card-k"><i aria-hidden="true"></i> Episode idea</span>
-            <p class="card-t">The engine light is on. Can you still drive?</p>
-            <span class="card-who">Al Meeraj Auto</span>
+        <div>
+          <h3 class="sub-h">In the two videos</h3>
+          <div class="formats one">
+            <div><h4>Why people choose Al Meeraj</h4><p>Experience (26 years of automotive repair), honest repairs, a warranty of up to 25,000 km or 2 years, and a courtesy car while yours is being repaired.</p></div>
+            <div><h4>Your complete car care centre</h4><p>All makes and models (European, American, Chinese and Japanese), body and paint, detailing and coatings, wheels and upholstery.</p></div>
           </div>
         </div>
-        <div class="slate"><span>9:16</span><span>Up to 60 s</span><span>Captioned</span></div>
-        <figcaption><b>Format:</b> warning lights, one per video.</figcaption>
-      </figure>
+      </div>
+      <div class="reel">
+        <figure class="stage">
+          <div class="phone">
+            <div class="player" style="--px:80%;--py:44%">
+              <video data-name="al-meeraj-why-choose" src="/sites/founder-avatar-studio/use-cases/al-meeraj-why-choose.mp4" poster="/sites/founder-avatar-studio/use-cases/al-meeraj-why-choose.jpg" width="576" height="1024" preload="none" playsinline controls aria-label="Why people choose Al Meeraj, presented by D.K. Singh's AI digital twin"></video>
+              <button class="play" type="button" hidden aria-label="Play: Why people choose Al Meeraj, 1 minute 12 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3.5v17l15-8.5z"/></svg></button>
+            </div>
+          </div>
+          <div class="slate"><span>9:16</span><span>1:12</span><span>With sound</span></div>
+          <figcaption><b>Why people choose Al Meeraj.</b> Experience, honest repairs, warranty, courtesy car.</figcaption>
+        </figure>
+        <figure class="stage">
+          <div class="phone">
+            <div class="player" style="--px:80%;--py:44%">
+              <video data-name="al-meeraj-car-care-centre" src="/sites/founder-avatar-studio/use-cases/al-meeraj-car-care-centre.mp4" poster="/sites/founder-avatar-studio/use-cases/al-meeraj-car-care-centre.jpg" width="576" height="1024" preload="none" playsinline controls aria-label="Your complete car care centre, presented by D.K. Singh's AI digital twin"></video>
+              <button class="play" type="button" hidden aria-label="Play: Your complete car care centre, 1 minute 10 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3.5v17l15-8.5z"/></svg></button>
+            </div>
+          </div>
+          <div class="slate"><span>9:16</span><span>1:10</span><span>With sound</span></div>
+          <figcaption><b>Your complete car care centre.</b> Every service under one roof.</figcaption>
+        </figure>
+      </div>
     </div>
   </section>
 
-  <section id="boogle-blooms" class="case flip">
-    <div class="wrap case-grid">
-      <div>
-        <p class="eyebrow">Use case 02 · Florist · Dubai</p>
-        <h2 class="lede">A florist's year runs on dates. The twin is ready for every one.</h2>
-        <p class="said">Boogle Blooms is a florist in Dubai. Flowers sell around moments — birthdays, anniversaries, Mother's Day, Valentine's Day, Eid — and each one needs its own video in the week the shop is busiest, when nobody has time to stand in front of a camera. With a twin, those videos are scripted and made ahead of the rush, and go out before the orders do.</p>
-        <h3 class="sub-h">What the twin makes</h3>
-        <div class="formats">
-          <div><h4>Occasion reminders</h4><p>A few days before each date that matters, with what to order and by when.</p></div>
-          <div><h4>Which flowers, for whom</h4><p>Help choosing, so customers order with confidence instead of guessing.</p></div>
-          <div><h4>Care tips</h4><p>How to make a bouquet last longer, from the person who arranged it.</p></div>
-          <div><h4>New this week</h4><p>What has just come in, introduced by the owner.</p></div>
+  <section id="bougie-bloom" class="case">
+    <div class="wrap">
+      <div class="case-split">
+        <div>
+          <p class="eyebrow">Use case 02 · Handcrafted edible blooms · Dubai</p>
+          <h2 class="lede">Gifts sell on occasions, and every occasion deserves its own film.</h2>
+          <p class="said">Bougie Bloom (bougiebloom.ae) makes handcrafted edible blooms from 100% Belgian couverture chocolate. In this festive brand film, an AI digital twin presents the Bougie Bloom box in a candlelit hall, close-ups of the blooms follow, and it signs off on the brand line. With a twin as the presenter, the film for the next occasion is a new script rather than a new shoot.</p>
         </div>
-      </div>
-      <figure class="stage">
-        <div class="phone">
-          <div class="card" style="--glow:rgba(229,143,176,.42)">
-            <span class="card-k"><i aria-hidden="true"></i> Episode idea</span>
-            <p class="card-t">How to make your bouquet last longer.</p>
-            <span class="card-who">Boogle Blooms</span>
+        <div>
+          <h3 class="sub-h">In the film</h3>
+          <div class="formats">
+            <div><h4>The presenter</h4><p>Introduces the Bougie Bloom box in a candlelit, festive hall.</p></div>
+            <div><h4>The blooms</h4><p>Close-ups, captioned "Handcrafted edible blooms."</p></div>
+            <div><h4>The proof</h4><p>"100% Belgian couverture chocolate."</p></div>
+            <div><h4>The sign-off</h4><p>"Beautifully crafted. Thoughtfully gifted." and bougiebloom.ae.</p></div>
           </div>
         </div>
-        <div class="slate"><span>9:16</span><span>Up to 60 s</span><span>Captioned</span></div>
-        <figcaption><b>Format:</b> care tips that stay useful all year.</figcaption>
+      </div>
+      <figure class="stage wide">
+        <div class="screen">
+          <div class="player" style="--px:77.7%">
+            <video data-name="bougie-bloom" src="/sites/founder-avatar-studio/use-cases/bougie-bloom.mp4" poster="/sites/founder-avatar-studio/use-cases/bougie-bloom.jpg" width="1024" height="576" preload="none" playsinline controls aria-label="Bougie Bloom brand film, presented by an AI digital twin"></video>
+            <button class="play" type="button" hidden aria-label="Play: Bougie Bloom brand film, 13 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3.5v17l15-8.5z"/></svg></button>
+          </div>
+        </div>
+        <div class="slate"><span>16:9</span><span>0:13</span><span>With sound</span></div>
+        <figcaption><b>Beautifully crafted. Thoughtfully gifted.</b> A festive brand film for Bougie Bloom.</figcaption>
       </figure>
     </div>
   </section>
@@ -329,24 +368,51 @@
     </div>
   </section>
 
-  <section id="process" class="light">
+  <section id="anil-sureen" class="light case">
+    <div class="wrap case-grid">
+      <div>
+        <p class="eyebrow">Use case 05 · Birthday greeting</p>
+        <h2 class="lede">A birthday video, ready on the day, starring the person it celebrates.</h2>
+        <p class="said">This video celebrates Dr. Anil Sureen's birthday and is made with his AI digital twin. Birthdays, anniversaries and milestones rarely get a video of their own, because nobody can arrange a shoot in time. With a twin, a personal greeting is ready on the day.</p>
+        <h3 class="sub-h">In the video</h3>
+        <div class="formats">
+          <div><h4>The opening</h4><p>"Happy Birthday, Dr. Anil Sureen."</p></div>
+          <div><h4>The thanks</h4><p>"Thank you for inspiring us to unlock our potential."</p></div>
+          <div><h4>The encouragement</h4><p>"Lead with confidence. Grow every day."</p></div>
+          <div><h4>The wishes</h4><p>"Wishing you success, good health &amp; greater impact." It closes on "Here's to a year of greater impact."</p></div>
+        </div>
+      </div>
+      <figure class="stage">
+        <div class="phone">
+          <div class="player" style="--px:80%;--py:68%">
+            <video data-name="anil-sureen-birthday" src="/sites/founder-avatar-studio/use-cases/anil-sureen-birthday.mp4" poster="/sites/founder-avatar-studio/use-cases/anil-sureen-birthday.jpg" width="576" height="1024" preload="none" playsinline controls aria-label="Happy Birthday, Dr. Anil Sureen, made with his AI digital twin"></video>
+            <button class="play" type="button" hidden aria-label="Play: Happy Birthday, Dr. Anil Sureen, 18 seconds"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3.5v17l15-8.5z"/></svg></button>
+          </div>
+        </div>
+        <div class="slate"><span>9:16</span><span>0:18</span><span>With sound</span></div>
+        <figcaption><b>Happy Birthday, Dr. Anil Sureen.</b> Here's to a year of greater impact.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="process">
     <div class="wrap">
-      <p class="eyebrow">The same for every business</p>
+      <p class="eyebrow">The same for every case</p>
       <h2 class="lede">Different jobs. The same 45 minutes on camera.</h2>
       <p class="said">However different the business, the twin is built and run the same way.</p>
       <div class="facts">
-        <div class="fact"><div class="n">45 min</div><p>On camera, once. We direct the capture and record the owner's voice.</p></div>
+        <div class="fact"><div class="n">45 min</div><p>On camera, once. We direct the capture and record the voice.</p></div>
         <div class="fact"><div class="n">7 days</div><p>From capture to an approved twin and the first four videos scheduled.</p></div>
-        <div class="fact"><div class="n">Every video</div><p>Waits for the owner's yes, given from the phone. Nothing auto-posts.</p></div>
+        <div class="fact"><div class="n">Every video</div><p>Waits for a yes, given from the phone. Nothing auto-posts.</p></div>
       </div>
     </div>
   </section>
 
-  <section id="close" class="last">
+  <section id="close" class="light last">
     <div class="wrap close-grid">
       <div>
         <p class="eyebrow">Next step</p>
-        <h2 class="lede">Your business could be use case 05.</h2>
+        <h2 class="lede">Your business could be use case 06.</h2>
         <p class="said">Book the capture and tell us what your twin's job should be. Your first four videos go out seven days later.</p>
         <div class="actions">
           <a class="btn btn-primary" href="/ai-avatar#book" data-cta="close">Book a capture session</a>
@@ -390,6 +456,26 @@
   Array.prototype.forEach.call(document.querySelectorAll('[data-cta]'), function(a){
     a.addEventListener('click', function(){ track('cta_click', { location: a.getAttribute('data-cta'), page: 'use_cases' }); });
   });
+
+  /* Videos: the thumbnail shows until Play; native controls take over once a video starts.
+     Only one plays at a time, and a playing video pauses when scrolled out of view. */
+  var vids = Array.prototype.slice.call(document.querySelectorAll('.player video'));
+  vids.forEach(function(v){
+    var b = v.parentNode.querySelector('.play');
+    if (b) {
+      v.removeAttribute('controls'); b.hidden = false;
+      b.addEventListener('click', function(){ v.controls = true; b.hidden = true; var p = v.play(); if (p && p.catch) p.catch(function(){ b.hidden = false; }); v.focus(); });
+    }
+    v.addEventListener('play', function(){
+      if (b) b.hidden = true; v.controls = true;
+      vids.forEach(function(o){ if (o !== v && !o.paused) o.pause(); });
+      track('video_play', { video: v.getAttribute('data-name'), page: 'use_cases' });
+    });
+  });
+  if ('IntersectionObserver' in window && vids.length) {
+    var vio = new IntersectionObserver(function(es){ es.forEach(function(e){ if (!e.isIntersecting && !e.target.paused) e.target.pause(); }); }, {threshold:0});
+    vids.forEach(function(v){ vio.observe(v); });
+  }
 
   /* Header nav: mark the use case in view */
   var navLinks = document.querySelectorAll('.bar nav a[href^="#"]');
