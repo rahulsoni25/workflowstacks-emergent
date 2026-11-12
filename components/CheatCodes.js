@@ -13,6 +13,17 @@ import { useRef, useState } from 'react'
 import { CHEAT_CODE_TOOLS, CHEAT_CODES_CHECKED } from '@/lib/cheat-codes'
 import { trackEvent } from '@/lib/analytics'
 
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const DAY_MS = 86_400_000
+// Fixed formatting and no Date.now(): server and client render the same text,
+// and the page output only changes when lib/cheat-codes.js does.
+function fmtDate(iso) {
+  const [y, m, d] = iso.split('-').map(Number)
+  return `${d} ${MONTHS[m - 1]} ${y}`
+}
+const checkedMs = Date.parse(`${CHEAT_CODES_CHECKED}T00:00:00Z`)
+const isNew = (c) => Boolean(c.added) && checkedMs - Date.parse(`${c.added}T00:00:00Z`) <= 30 * DAY_MS
+
 function CodeChip({ entry, tool, copied, onCopy }) {
   const chip = (
     <span className="t-mono inline-block max-w-full break-words rounded-md border border-[#323A3C] bg-[#0A0C0D] px-2.5 py-1.5 text-[14px] font-medium text-[#C6F24E]">
@@ -134,9 +145,18 @@ export default function CheatCodes() {
               >
                 <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
                   <CodeChip entry={c} tool={tool.id} copied={copied} onCopy={onCopy} />
-                  {c.where && (
-                    <span className="t-mono whitespace-nowrap rounded border border-[#323A3C] px-2 py-[3px] text-[11px] text-text-muted">
-                      {c.where}
+                  {(c.where || isNew(c)) && (
+                    <span className="flex items-center gap-1.5">
+                      {isNew(c) && (
+                        <span className="t-mono whitespace-nowrap rounded bg-[#C6F24E] px-2 py-[3px] text-[11px] font-semibold text-[#0A0C0D]">
+                          New
+                        </span>
+                      )}
+                      {c.where && (
+                        <span className="t-mono whitespace-nowrap rounded border border-[#323A3C] px-2 py-[3px] text-[11px] text-text-muted">
+                          {c.where}
+                        </span>
+                      )}
                     </span>
                   )}
                 </div>
@@ -155,8 +175,8 @@ export default function CheatCodes() {
           </ul>
 
           <p className="t-mono m-0 mt-5 text-xs text-text-muted">
-            Checked against official docs on {CHEAT_CODES_CHECKED}. These tools ship fast. If a code has changed, the
-            Source link shows the current version.
+            Checked against official docs on {fmtDate(CHEAT_CODES_CHECKED)}. These tools ship fast. If a code has
+            changed, the Source link shows the current version.
           </p>
         </div>
       </div>
