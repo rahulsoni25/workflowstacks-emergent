@@ -12,7 +12,7 @@
 ## 🧩 Frontend skills for Claude Code
 
 The plugin marketplace also ships five standalone UI and animation skills.
-Install only the ones you need:
+In the Claude Code terminal or desktop app, install only the ones you need:
 
 ```
 /plugin marketplace add rahulsoni25/workflowstacks-emergent
@@ -25,6 +25,14 @@ Install only the ones you need:
 
 Each skill lives in `plugins/<name>/skills/<name>/SKILL.md` and lists the
 upstream sources it was verified against.
+
+Cloud sessions (claude.ai/code and the Claude app) don't support `/plugin`,
+and they don't install plugins a repository declares. They do load a
+repository's `.claude/skills/`, so `.claude/skills/<name>` symlinks to each
+skill above. Any cloud session on this repo gets all five skills
+automatically. The plugins' MCP servers aren't included in that path. To
+use the skills outside this repo, upload each skill folder to your claude.ai
+account's skills.
 
 ## ✨ Features
 
