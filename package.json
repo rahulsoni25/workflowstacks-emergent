@@ -8,7 +8,9 @@
         "dev:no-reload": "next dev --hostname 0.0.0.0 --port 3000",
         "dev:webpack": "next dev --hostname 0.0.0.0 --port 3000",
         "build": "next build",
-        "start": "next start"
+        "start": "next start",
+        "check-cheat-codes": "NODE_USE_ENV_PROXY=1 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=UNDICI-EHPA scripts/check-cheat-codes.mjs",
+        "cheat-codes-changelogs": "NODE_USE_ENV_PROXY=1 node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --disable-warning=UNDICI-EHPA scripts/cheat-codes-changelogs.mjs"
     },
     "dependencies": {
         "@hookform/resolvers": "^5.1.1",
