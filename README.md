@@ -12,7 +12,7 @@
 ## 🧩 Frontend skills for Claude Code
 
 The plugin marketplace also ships five standalone UI and animation skills.
-In the Claude Code terminal or desktop app, install only the ones you need:
+In the Claude Code terminal (CLI), install only the ones you need:
 
 ```
 /plugin marketplace add rahulsoni25/workflowstacks-emergent
