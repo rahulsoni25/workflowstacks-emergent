@@ -19,7 +19,7 @@ function CodeChip({ entry, tool, copied, onCopy }) {
       {entry.code}
     </span>
   )
-  if (entry.kind !== 'type') return chip
+  if (entry.kind !== 'copy') return chip
   const isCopied = copied === `${tool}:${entry.code}`
   return (
     <span className="flex min-w-0 items-center gap-2">
@@ -129,10 +129,17 @@ export default function CheatCodes() {
           <ul className="m-0 grid list-none grid-cols-1 gap-3 p-0 md:grid-cols-2 lg:grid-cols-3">
             {tool.codes.map((c) => (
               <li
-                key={c.code}
+                key={`${c.code}|${c.where || ''}`}
                 className="flex min-w-0 flex-col gap-3 rounded-[14px] border border-[#262B2D] bg-[#101314] p-5"
               >
-                <CodeChip entry={c} tool={tool.id} copied={copied} onCopy={onCopy} />
+                <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+                  <CodeChip entry={c} tool={tool.id} copied={copied} onCopy={onCopy} />
+                  {c.where && (
+                    <span className="t-mono whitespace-nowrap rounded border border-[#323A3C] px-2 py-[3px] text-[11px] text-text-muted">
+                      {c.where}
+                    </span>
+                  )}
+                </div>
                 <p className="m-0 text-[15px] leading-normal text-text-primary">{c.does}</p>
                 {c.note && <p className="m-0 text-[13px] leading-normal text-text-muted">{c.note}</p>}
                 <a
