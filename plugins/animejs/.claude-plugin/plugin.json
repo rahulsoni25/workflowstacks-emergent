@@ -1,0 +1,11 @@
+{
+  "name": "animejs",
+  "version": "1.0.0",
+  "description": "Anime.js v4 skill: animate, timelines, stagger, scroll-linked, draggable, SVG and split-text animations, React scope cleanup, and v3-to-v4 migration.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://animejs.com",
+  "keywords": ["animation", "animejs", "anime.js", "svg", "scroll"]
+}

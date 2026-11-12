@@ -1,0 +1,11 @@
+{
+  "name": "motion-dev",
+  "version": "1.0.0",
+  "description": "Motion (motion.dev, formerly Framer Motion) skill plus Motion's official hosted MCP server for live docs search: React, JS and Vue animation best practices.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://motion.dev",
+  "keywords": ["animation", "motion", "framer-motion", "react", "mcp"]
+}

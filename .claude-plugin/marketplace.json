@@ -9,6 +9,31 @@
       "name": "workflowstacks",
       "source": "./plugins/workflowstacks",
       "description": "The WorkflowStacks catalog inside Claude Code: search 2,000+ open-source AI skills, load any skill's instructions mid-conversation, and keep a personal skill library — via the WorkflowStacks MCP connector."
+    },
+    {
+      "name": "animejs",
+      "source": "./plugins/animejs",
+      "description": "Anime.js v4 skill: animate, timelines, stagger, scroll-linked, draggable, SVG and split-text animations, React scope cleanup, and v3-to-v4 migration."
+    },
+    {
+      "name": "motion-dev",
+      "source": "./plugins/motion-dev",
+      "description": "Motion (motion.dev, formerly Framer Motion) skill plus Motion's official hosted MCP server for live docs search: React, JS and Vue animation best practices."
+    },
+    {
+      "name": "kokonut-ui",
+      "source": "./plugins/kokonut-ui",
+      "description": "Kokonut UI skill plus the shadcn MCP server: install and customize animated React + Tailwind components from the @kokonutui registry."
+    },
+    {
+      "name": "magic-ui",
+      "source": "./plugins/magic-ui",
+      "description": "Magic UI skill plus the official Magic UI MCP server: Backlight glow, marquee, globe, shimmer buttons and 70+ animated shadcn registry components."
+    },
+    {
+      "name": "v0",
+      "source": "./plugins/v0",
+      "description": "Vercel v0 skill plus the official v0 MCP server (OAuth): generate UI and apps from prompts, fetch previews and files, and use the v0 Platform API SDK."
     }
   ]
 }

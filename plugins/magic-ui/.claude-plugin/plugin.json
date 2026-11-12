@@ -1,0 +1,11 @@
+{
+  "name": "magic-ui",
+  "version": "1.0.0",
+  "description": "Magic UI skill plus the official Magic UI MCP server: Backlight glow, marquee, globe, shimmer buttons and 70+ animated shadcn registry components.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://magicui.design",
+  "keywords": ["ui", "components", "shadcn", "tailwind", "animation", "mcp"]
+}
