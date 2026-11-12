@@ -40,7 +40,7 @@ Everything comes from the root package as named exports:
 import {
   animate, createTimeline, createTimer, createAnimatable,
   createDraggable, createScope, onScroll, stagger,
-  createSpring, cubicBezier, steps, linear, eases,
+  spring, cubicBezier, steps, linear, eases,
   utils, svg, text, engine, waapi,
 } from 'animejs';
 ```
@@ -101,7 +101,9 @@ Ease names are strings:
   Examples: `'outQuad'` and `'inOutSine'`.
 - Power form: `'out(3)'` or `'inOut(4)'`.
 - The default ease is `'out(2)'`.
-- Springs: `ease: createSpring({ mass: 1, stiffness: 100, damping: 10, velocity: 0 })`.
+- Springs: `ease: spring({ mass: 1, stiffness: 100, damping: 10, velocity: 0 })`.
+  In 4.5.0, `createSpring()` still works but is deprecated and logs a
+  console warning. Use `spring()` in new code.
   It also accepts `bounce` and `duration`.
 
 ### `createTimeline(params).add(targets, params, position)`
@@ -238,7 +240,7 @@ These come from the official migration guide (see Sources):
 |---|---|
 | `anime({ targets: 'div', ... })` | `animate('div', { ... })` |
 | `easing: 'easeOutQuad'` | `ease: 'outQuad'` |
-| `easing: 'spring(1, 80, 10, 0)'` | `ease: createSpring({ mass: 1, stiffness: 80, damping: 10, velocity: 0 })` |
+| `easing: 'spring(1, 80, 10, 0)'` | `ease: spring({ mass: 1, stiffness: 80, damping: 10, velocity: 0 })` (older v4 docs show `createSpring`, now deprecated) |
 | `direction: 'reverse'` / `'alternate'` | `reversed: true` / `alternate: true` |
 | `loop: 2` (total iterations) | `loop: 1` (number of **repeats**) |
 | `endDelay` | `loopDelay` (not applied after the final iteration) |
@@ -278,7 +280,10 @@ Everything above was verified against these sources:
   `mediaQueries`), and the `examples/` folder.
 - The "Migrating from v3 to v4" page on the GitHub wiki:
   https://github.com/juliangarnier/anime/wiki/Migrating-from-v3-to-v4
-- npm registry: `animejs` `latest` = 4.5.0.
+- npm registry: `animejs` `latest` = 4.5.0. Every import, subpath and
+  instance/timeline method named in this file was checked against the
+  installed 4.5.0 package. `createSpring()` there logs
+  "createSpring() is deprecated use spring() instead".
 
 The examples with no source listed above were written for this skill from
 those verified APIs.
