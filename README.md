@@ -9,6 +9,23 @@
 ![MongoDB](https://img.shields.io/badge/MongoDB-6.6-green?style=for-the-badge&logo=mongodb)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-blue?style=for-the-badge&logo=tailwindcss)
 
+## 🧩 Frontend skills for Claude Code
+
+The plugin marketplace also ships five standalone UI and animation skills.
+Install only the ones you need:
+
+```
+/plugin marketplace add rahulsoni25/workflowstacks-emergent
+/plugin install animejs@workflowstacks     # Anime.js v4 (no MCP server)
+/plugin install motion-dev@workflowstacks  # Motion + Motion's hosted MCP (https://mcp.motion.dev)
+/plugin install kokonut-ui@workflowstacks  # Kokonut UI + shadcn MCP (npx shadcn@latest mcp)
+/plugin install magic-ui@workflowstacks    # Magic UI (incl. Backlight) + @magicuidesign/mcp
+/plugin install v0@workflowstacks          # Vercel v0 + v0 MCP (https://v0.app/api/mcp, OAuth)
+```
+
+Each skill lives in `plugins/<name>/skills/<name>/SKILL.md` and lists the
+upstream sources it was verified against.
+
 ## ✨ Features
 
 - **🔄 Automatic GitHub Scraping** - Fetch real-time AI skills from GitHub based on topics

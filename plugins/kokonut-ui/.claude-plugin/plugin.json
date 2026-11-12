@@ -1,0 +1,11 @@
+{
+  "name": "kokonut-ui",
+  "version": "1.0.0",
+  "description": "Kokonut UI skill plus the shadcn MCP server: install and customize animated React + Tailwind components from the @kokonutui registry.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://kokonutui.com",
+  "keywords": ["ui", "components", "shadcn", "tailwind", "react", "mcp"]
+}

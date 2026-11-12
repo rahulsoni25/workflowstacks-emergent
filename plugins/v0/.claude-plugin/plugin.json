@@ -1,0 +1,11 @@
+{
+  "name": "v0",
+  "version": "1.0.0",
+  "description": "Vercel v0 skill plus the official v0 MCP server (OAuth): generate UI and apps from prompts, fetch previews and files, and use the v0 Platform API SDK.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://v0.app",
+  "keywords": ["v0", "vercel", "ui-generation", "nextjs", "mcp"]
+}
