@@ -2,17 +2,22 @@ import { notFound } from 'next/navigation'
 import StackDetailClient from './StackDetailClient'
 import { SITE_URL as BASE } from '@/lib/site-url'
 
+// ISR. `revalidate` alone did not make this cached: without generateStaticParams
+// a dynamic segment renders on every request (`next build` listed /s/[slug] as
+// ƒ, 2026-11-14). An empty list renders each stack on its first visit and
+// serves it from the cache after that. See docs/COSTS.md.
 export const revalidate = 21600
+export const dynamicParams = true
+export function generateStaticParams() { return [] }
 
+// Only a 404 means "no such stack". Any other failure throws, so ISR keeps the
+// last good page (or caches nothing) rather than storing a 404 for 6 hours.
 async function getStack(slug) {
-  try {
-    const res = await fetch(`${BASE}/api/stacks/${slug}`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
-    if (!res.ok) return null
-    const data = await res.json()
-    return data.stack ? { stack: data.stack, skills: data.skills || [] } : null
-  } catch {
-    return null
-  }
+  const res = await fetch(`${BASE}/api/stacks/${slug}`, { next: { revalidate: 21600 }, signal: AbortSignal.timeout(10_000) })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`stack ${slug}: API answered ${res.status}`)
+  const data = await res.json()
+  return data.stack ? { stack: data.stack, skills: data.skills || [] } : null
 }
 
 export async function generateMetadata({ params }) {

@@ -33,7 +33,11 @@ exists to keep both under.
 3. **No page revalidates more often than every 6 hours** (`21600`). Detail
    pages use 30 days plus on-demand `revalidatePath` from the endpoint that
    changed them. The `fetch(..., { next: { revalidate } })` values inside a page
-   count too — the lowest one wins.
+   count too — the lowest one wins. **Under a `[param]` folder, `revalidate`
+   does nothing without `generateStaticParams`**: the page renders on every
+   request. `export function generateStaticParams() { return [] }` is enough.
+   Check the route table `next build` prints: `ƒ` means a Function runs on every
+   request, `●` means cached. `/a/[id]` and `/s/[slug]` were `ƒ` until 2026-11-14.
 4. **Route handlers that call GitHub, an LLM or an email API export
    `fetchCache = 'default-no-store'`** (or are `force-dynamic`).
 5. **Pages pass the browser only what they render.** No `stars_history`, no
@@ -43,6 +47,28 @@ exists to keep both under.
    workflow calls the site more often than every 6 hours.
 
 `npm run cost-guard` (also run on every pull request) checks rules 3, 4 and 6.
+
+## Generated images (`opengraph-image.js`)
+
+An image file under a `[param]` folder is a Function run on every request,
+and a rendered PNG is large: the skill card is ~100 KB, so 13 ISR write units
+if it were cached as ISR (a whole skill page is ~6), and 150–600 ms of CPU per
+render (measured locally, 2026-11-14).
+
+- **The same image for every page** goes in a folder without a `[param]`, so it
+  is built once as a static file. Example: `app/a/opengraph-image.js`.
+- **A per-page image** reads its data directly (no self-fetch to `/api`) and sets
+  `cache-control` with `s-maxage`, so Vercel's CDN keeps it instead of the ISR
+  store. Example: `app/skills/[id]/opengraph-image.js`.
+
+## When the site answers 402 `DEPLOYMENT_DISABLED`
+
+On 2026-11-14 every path checked on `workflowstacks.com` returned
+`HTTP 402 Payment required` with `x-vercel-error: DEPLOYMENT_DISABLED` from
+`server: Vercel`. Vercel serves that error when it has disabled the deployment.
+The reason, and how to restore it, is on the team's Usage page and in Vercel's
+email to the owner. Code changes don't re-enable it. While it is disabled, the
+scheduled workflows that call the site get 402s.
 
 ## Hobby is for non-commercial use
 

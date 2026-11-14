@@ -43,6 +43,18 @@ for (const file of pageSide) {
   })
 }
 
+// Rule 3, continued — on a page under a [param] folder, `revalidate` does
+// nothing without generateStaticParams: Next renders it on every request (ƒ in
+// `next build`). /s/[slug] shipped like that. An empty list is enough.
+const DYNAMIC_SEGMENT = /\/\[[^/]+\]\//
+for (const file of pageSide.filter((f) => /(^|\/)page\.(js|jsx|ts|tsx)$/.test(rel(f)) && DYNAMIC_SEGMENT.test(rel(f)))) {
+  const src = readFileSync(file, 'utf8')
+  const line = src.split(/\r?\n/).findIndex((l) => /export const revalidate\s*=/.test(l))
+  if (line < 0 || allowed(lines(file)[line])) continue
+  if (/export\s+(async\s+)?function\s+generateStaticParams|export\s+const\s+generateStaticParams/.test(src)) continue
+  problems.push(`${rel(file)}:${line + 1}  sets revalidate under a [param] folder but has no generateStaticParams, so it renders on every request — add: export function generateStaticParams() { return [] }`)
+}
+
 // Rule 4 — a route handler that calls fetch() must not fall back on Next 14's
 // default ("auto cache"). Either the file opts out, or every call says what it
 // wants: cache: 'no-store', or an explicit next.revalidate (checked by rule 3

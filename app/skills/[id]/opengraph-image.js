@@ -2,23 +2,35 @@
 // site-wide /opengraph-image, so a share of any listing rendered an identical
 // generic card with no skill name, category or stars — thousands of URLs, one
 // preview. This renders the actual listing.
+//
+// Cost (docs/COSTS.md). `next build` lists this route as ƒ: it renders on
+// every request, about 150-600 ms of CPU for a ~100 KB PNG (measured locally
+// 2026-11-14). It is deliberately not ISR: at 13 write units per image
+// (billed per 8 KB) it would cost twice the skill page itself after every
+// deploy. Two things keep it cheap instead:
+//   - It reads Mongo directly, like the page. It used to self-fetch
+//     /api/skills/:id first: a second Function invocation, plus a data-cache
+//     write of the whole skill document.
+//   - A rendered card is kept by Vercel's CDN (s-maxage), which is not billed
+//     as ISR writes. A card drawn without data (unknown id, or the database
+//     unreachable) is not kept for long, so it can't stick.
 import { ImageResponse } from 'next/og'
-import { SITE_URL } from '@/lib/site-url'
+import { getSkillDirect } from '@/lib/skills-data'
 
 export const alt = 'WorkflowStacks skill'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
+const CACHE_FOUND = 'public, max-age=86400, s-maxage=2592000, stale-while-revalidate=86400'
+const CACHE_MISSING = 'public, max-age=0, s-maxage=3600'
+const CACHE_FAILED = 'no-store'
+
 async function getSkill(id) {
   try {
-    const res = await fetch(`${SITE_URL}/api/skills/${encodeURIComponent(id)}`, {
-      next: { revalidate: 86400 },
-      signal: AbortSignal.timeout(8_000),
-    })
-    if (!res.ok) return null
-    return (await res.json()).skill || null
+    const skill = await getSkillDirect(id)
+    return { skill, cache: skill ? CACHE_FOUND : CACHE_MISSING }
   } catch {
-    return null
+    return { skill: null, cache: CACHE_FAILED }
   }
 }
 
@@ -29,7 +41,7 @@ function fmtStars(n) {
 }
 
 export default async function SkillOgImage({ params }) {
-  const skill = await getSkill(params.id)
+  const { skill, cache } = await getSkill(params.id)
   const title = (skill?.title_human || skill?.name || 'AI skill').slice(0, 70)
   const desc = (skill?.description_human || skill?.description || '').replace(/\s+/g, ' ').slice(0, 150)
   const category = skill?.category || ''
@@ -86,6 +98,8 @@ export default async function SkillOgImage({ params }) {
         </div>
       </div>
     ),
-    { ...size }
+    // Lower-case key: it replaces ImageResponse's own default instead of being
+    // merged with it into one combined header.
+    { ...size, headers: { 'cache-control': cache } }
   )
 }

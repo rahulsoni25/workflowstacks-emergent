@@ -1,3 +1,8 @@
+// Social card for every /a/<id> agent page. It shows nothing agent-specific,
+// so it lives here, outside the [id] segment: Next prerenders it once at build
+// and serves it as a static file. Under [id] it was rendered by a Function on
+// every request (ƒ in `next build`), the same PNG each time. app/a/[id]/page.js
+// points its og:image at this route. See docs/COSTS.md.
 import { ImageResponse } from 'next/og'
 
 export const alt = 'AI agent on WorkflowStacks'
