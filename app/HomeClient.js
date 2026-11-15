@@ -21,6 +21,7 @@ import { trackInstall } from '@/lib/track-install'
 import { trackEvent } from '@/lib/analytics'
 import { homeFaqs } from '@/lib/home-faqs'
 import NewsletterSignup from '@/components/NewsletterSignup'
+import CheatCodes from '@/components/CheatCodes'
 import {
   TARGETS,
   fmt,
@@ -881,6 +882,11 @@ export default function HomeClient({ initialSkills = [], initialStats = null, ho
           </div>
         </div>
       </section>
+
+      {/* ------------------------------------------------------------------ */}
+      {/* CHEAT CODES — sourced shortcuts for Claude Code, Cowork, etc.       */}
+      {/* ------------------------------------------------------------------ */}
+      <CheatCodes />
 
       {/* ------------------------------------------------------------------ */}
       {/* HOW IT WORKS (light band)                                           */}

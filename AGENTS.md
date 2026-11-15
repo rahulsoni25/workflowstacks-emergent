@@ -13,3 +13,6 @@ to a route handler, adding a scheduled workflow, or merging to `main`.
   more often than every 6 hours.
 - Verify on production after a release, not on a preview: previews sit behind
   Vercel's login.
+- **Homepage cheat codes** (`lib/cheat-codes.js`): read `docs/CHEAT_CODES.md`
+  first. Official sources only, every entry has a verbatim `proof`, and
+  `npm run check-cheat-codes` must pass.
