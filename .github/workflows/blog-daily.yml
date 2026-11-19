@@ -65,7 +65,10 @@ jobs:
             # went green with zero sections written because the loop broke here.
             if [ "$CODE" -ge 400 ] || [ "$CODE" -lt 200 ]; then
               FAILS=$((${FAILS:-0}+1)); echo "ADVANCE FAILED — HTTP $CODE ($FAILS/3)"
-              if [ "$FAILS" -ge 3 ]; then echo "### advance failed 3x (HTTP $CODE)" >> $GITHUB_STEP_SUMMARY; echo "$R" >> $GITHUB_STEP_SUMMARY; break; fi
+              # Exit non-zero: from 14 to 18 Nov every run went green while
+              # Vercel answered 402 DEPLOYMENT_DISABLED, so the paused site and
+              # the stopped blog were invisible from the Actions tab.
+              if [ "$FAILS" -ge 3 ]; then echo "### advance failed 3x (HTTP $CODE)" >> $GITHUB_STEP_SUMMARY; echo "$R" >> $GITHUB_STEP_SUMMARY; echo "::error::Blog pipeline advance failed 3x (HTTP $CODE)"; exit 1; fi
               sleep 60; continue
             fi
             FAILS=0

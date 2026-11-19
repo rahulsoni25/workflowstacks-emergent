@@ -19,7 +19,10 @@ export const fetchCache = 'default-no-store'
 export async function GET(request) {
   const cronSecret = process.env.CRON_SECRET
   const provided = request.headers.get('authorization') || ''
-  if (cronSecret && provided !== `Bearer ${cronSecret}`) {
+  // Fail closed, like refresh-skills: with CRON_SECRET unset the old check
+  // let any anonymous request through, and each one fans out to up to 2 x 30
+  // LLM calls and 40+ page revalidations.
+  if (!cronSecret || provided !== `Bearer ${cronSecret}`) {
     return Response.json({ error: 'Unauthorized — cron secret required' }, { status: 401 })
   }
   if (!process.env.ADMIN_SECRET) {

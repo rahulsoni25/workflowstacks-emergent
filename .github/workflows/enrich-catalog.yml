@@ -1,5 +1,6 @@
 name: Enrich Catalog
-# Hits the Vercel cron endpoint every 15 minutes to keep the LLM enrichment
+# The only scheduler for enrich-batch (the duplicate 04:00 Vercel cron was
+# removed 2026-11-19). Hits the Vercel cron endpoint to keep the LLM enrichment
 # moving until 100% coverage is reached. Survives any local session reset.
 # Free (GitHub Actions free tier: 2,000 min/month, we use ~3 min/month).
 #

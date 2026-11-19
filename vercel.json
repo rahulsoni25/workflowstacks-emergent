@@ -9,10 +9,6 @@
     {
       "path": "/api/cron/security-monitor",
       "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/cron/enrich-batch",
-      "schedule": "0 4 * * *"
     }
   ],
   "routes": [

@@ -39,9 +39,21 @@ async function getSkills() {
   }
 }
 
-// Heavy fields the marketplace grid never renders — the API already strips
-// these from list responses, but keep the belt-and-braces trim for leftovers.
-const HEAVY = ['readme_preview', 'use_guide', 'description_original', 'name_original', 'rewritten_at', 'codeflow']
+// Fields the marketplace grid never renders. The list API still returns
+// stars_history (90 dated points, ~4 KB per skill) and a set of job
+// timestamps; on 2026-11-19 the /skills HTML carried them for all 48 cards and
+// weighed 457 KB against 102 KB for /skills/page/2. stars_refreshed_at moves
+// every six hours (scripts/refresh-stars.mjs), so no regeneration was ever
+// byte-identical and each one was a billed ISR write (docs/COSTS.md, rule 5).
+// None of these are read by SkillsCatalogClient or lib/skill-display.
+const HEAVY = [
+  'readme_preview', 'use_guide', 'description_original', 'name_original', 'rewritten_at', 'codeflow',
+  'stars_history', 'stars_refreshed_at', 'stars_synced_at', 'velocity_7d', 'velocity_provisional',
+  'backfill_attempted_at', 'backfill_last_score', 'slug_assigned_at', 'admin_updated_at',
+  'codeflow_at', 'codeflow_provider', 'updated_at', 'added_at', 'created_at', 'last_updated',
+  'discovered_for_query', 'hidden_reason', 'rewritten_by', 'rewrite_status', 'auto_discovered',
+  'popularity_score', 'repo_unavailable', 'source_url', 'creator_avatar', 'rewrite_trail',
+]
 function trim(s) {
   const out = {}
   for (const k in s) if (!HEAVY.includes(k)) out[k] = s[k]

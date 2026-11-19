@@ -860,7 +860,16 @@ export async function GET(request) {
         .toArray();
 
       // 3. If we have plenty of local results, return immediately.
-      if (local.length >= 6) {
+      // Anonymous callers stop here too. The GitHub fallback below inserts
+      // repos as published catalog pages, and this endpoint is public and not
+      // rate limited (nothing on the site calls it), so anyone could add up to
+      // 8 unreviewed pages per query — each one a new ISR page and a queued
+      // LLM rewrite, and more README-derived pages for Google to judge the site
+      // by. Discovery from real searches is still available to the owner via
+      // the admin-only /auto-discover-from-searches, which reads the
+      // search_queries log written above.
+      const admin = !!process.env.ADMIN_SECRET && request.headers.get('x-admin-secret') === process.env.ADMIN_SECRET;
+      if (local.length >= 6 || !admin) {
         return Response.json({ skills: applyFallback(local), query: q, discovered: 0 });
       }
 
@@ -2176,7 +2185,8 @@ export async function GET(request) {
     if (path === '/cron/security-monitor') {
       const cronSecret = process.env.CRON_SECRET
       const provided = request.headers.get('authorization') || ''
-      if (cronSecret && provided !== `Bearer ${cronSecret}`) {
+      // Fail closed: with CRON_SECRET unset this used to run for anyone.
+      if (!cronSecret || provided !== `Bearer ${cronSecret}`) {
         return Response.json({ error: 'Unauthorized — cron secret required' }, { status: 401 })
       }
       const dns = await checkDnsBaseline()
