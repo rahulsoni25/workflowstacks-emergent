@@ -1,6 +1,6 @@
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
-import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalog-gates';
+import { isSpamRepo, classifyContentType, TOOLS_ONLY, NOT_HIDDEN } from '../../../lib/catalog-gates';
 import { tokenize as tokenizeSearch } from '../../../lib/search-tokens';
 import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
@@ -1044,7 +1044,7 @@ export async function GET(request) {
       // same added_at batch timestamp. "New" here means "active on GitHub recently."
       if (searchParams.get('new') === 'true') {
         const newSkills = await database.collection('skills')
-          .find({ published: { $ne: false }, last_updated: { $exists: true }, ...TOOLS_ONLY })
+          .find({ published: { $ne: false }, last_updated: { $exists: true }, ...TOOLS_ONLY, ...NOT_HIDDEN })
           .sort({ last_updated: -1, github_stars: -1 })
           .limit(8)
           .toArray();
@@ -1054,9 +1054,11 @@ export async function GET(request) {
       // Quality gate: only show published listings (unless ?all=true).
       // Learning material lives on the /learn shelf (?type=resource), never
       // in the skills library — mega-list repos were drowning real tools.
-      let query = searchParams.get('all') === 'true' ? {} : { published: { $ne: false }, ...TOOLS_ONLY };
+      // A row with a hidden_reason stays out even if `published` was never
+      // flipped (lib/catalog-gates.js NOT_HIDDEN).
+      let query = searchParams.get('all') === 'true' ? {} : { published: { $ne: false }, ...TOOLS_ONLY, ...NOT_HIDDEN };
       if (searchParams.get('type') === 'resource') {
-        query = { published: { $ne: false }, content_type: 'resource' };
+        query = { published: { $ne: false }, content_type: 'resource', ...NOT_HIDDEN };
       }
       if (category && category !== 'all') {
         query.category = category;

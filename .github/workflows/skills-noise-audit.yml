@@ -1,0 +1,70 @@
+name: Skills noise audit (report / unpublish)
+
+# Lists published catalog rows that should not be on /skills: rows with a
+# recorded hidden_reason, and GitHub auto-ingest rows (auto_discovered) whose
+# rewrite_score is under 8 or that fail isAiRelevant(). See the header of
+# scripts/skills-noise-audit.mjs.
+#
+# How to use:
+#   1. Run with mode=report (the default). Read-only; the table is in the job
+#      log and the run summary, followed by an APPROVE_LIST=... line.
+#   2. Delete from that list the rows to keep, then run again with mode=apply
+#      and the remaining slugs in `slugs`. Only those rows, and only if they
+#      are still flagged, get published:false; then /skills is revalidated.
+#
+# Manual trigger only — no schedule. The work runs in this runner against
+# Mongo (docs/COSTS.md rule 6); the only call to the site is one POST to
+# /api/revalidate per apply run.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'report = read-only list. apply = unpublish the slugs below.'
+        type: choice
+        options: [report, apply]
+        default: report
+      slugs:
+        description: 'apply only: comma-separated slugs approved from a report run'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: skills-noise-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          # The script imports lib/skill-relevance.js, which uses ES-module
+          # syntax in a package without "type": "module". Node 22 loads it via
+          # module-syntax detection (tested; it prints a harmless
+          # MODULE_TYPELESS_PACKAGE_JSON warning).
+          node-version: 22
+      - run: npm ci
+
+      - name: Report (read-only)
+        if: ${{ inputs.mode != 'apply' }}
+        env:
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+        run: node scripts/skills-noise-audit.mjs
+
+      - name: Apply (unpublish approved slugs, revalidate /skills)
+        if: ${{ inputs.mode == 'apply' }}
+        env:
+          MONGO_URL: ${{ secrets.MONGO_URL }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          BASE_URL: https://workflowstacks.com
+          # Passed through env, not interpolated into the script, so the input
+          # text can never run as shell.
+          SLUGS: ${{ inputs.slugs }}
+        run: node scripts/skills-noise-audit.mjs --apply "--slugs=$SLUGS"
