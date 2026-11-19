@@ -1,0 +1,11 @@
+{
+  "name": "open-higgsfield",
+  "version": "1.0.0",
+  "description": "Open Higgsfield (OpenHiggsfield AI) skill: run or self-host the open-source Higgsfield AI alternative — one prompt bar for 38 image and video models with your own platform key — and extend its model catalog. No MCP server; see the skill for the upstream license caveat.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://openhiggsfield.ai",
+  "keywords": ["ai-video", "image-generation", "video-generation", "higgsfield", "nextjs", "self-hosted"]
+}

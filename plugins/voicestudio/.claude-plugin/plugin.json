@@ -1,0 +1,11 @@
+{
+  "name": "voicestudio",
+  "version": "1.0.0",
+  "description": "VoiceStudio skill plus its local MCP server: the AGPL-3.0, fully local ElevenLabs alternative — voice cloning, voice design, dubbing, dictation, transcription and audiobooks in 646 languages — with install, local API and agent-automation guidance.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://voicestudio.sh",
+  "keywords": ["tts", "voice-cloning", "dubbing", "transcription", "speech-to-text", "local-ai", "mcp"]
+}

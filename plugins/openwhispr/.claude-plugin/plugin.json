@@ -1,0 +1,11 @@
+{
+  "name": "openwhispr",
+  "version": "1.0.0",
+  "description": "OpenWhispr skill plus the hosted OpenWhispr MCP server (OAuth): the MIT, privacy-first voice-to-text dictation and meeting-notes app — local Whisper/Parakeet or BYOK cloud models — with its notes, transcription, dictionary and snippet tools, REST API and CLI.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://openwhispr.com",
+  "keywords": ["dictation", "speech-to-text", "meeting-notes", "transcription", "whisper", "parakeet", "mcp"]
+}

@@ -34,6 +34,36 @@
       "name": "v0",
       "source": "./plugins/v0",
       "description": "Vercel v0 skill plus the official v0 MCP server (OAuth): generate UI and apps from prompts, fetch previews and files, and use the v0 Platform API SDK."
+    },
+    {
+      "name": "open-higgsfield",
+      "source": "./plugins/open-higgsfield",
+      "description": "Open Higgsfield (OpenHiggsfield AI) skill: run or self-host the open-source Higgsfield AI alternative — one prompt bar for 38 image and video models with your own platform key. No MCP server; upstream repo has no license file (see the skill)."
+    },
+    {
+      "name": "voicestudio",
+      "source": "./plugins/voicestudio",
+      "description": "VoiceStudio skill plus its local MCP server (http://localhost:3900/mcp/): the AGPL-3.0, fully local ElevenLabs alternative — voice cloning, voice design, dubbing, dictation, transcription and audiobooks in 646 languages."
+    },
+    {
+      "name": "open-seo",
+      "source": "./plugins/open-seo",
+      "description": "OpenSEO skill plus the hosted OpenSEO MCP server (OAuth): keyword research, rank tracking, competitor insights, backlinks, site audits and AI visibility from the MIT-licensed Semrush/Ahrefs alternative, hosted or self-hosted with a DataForSEO key."
+    },
+    {
+      "name": "appflowy",
+      "source": "./plugins/appflowy",
+      "description": "AppFlowy skill: install the AGPL-3.0 open-source Notion alternative on desktop and mobile, self-host the AppFlowy server with Docker Compose (free tier of the commercial server), and know which parts are open source. No MCP server bundled."
+    },
+    {
+      "name": "cal-com",
+      "source": "./plugins/cal-com",
+      "description": "Cal.com skill plus the hosted Cal.com MCP server (OAuth): bookings, availability, event types and schedules from Claude, the API v2, and self-hosting Cal.diy, the MIT community edition that calcom/cal.com now redirects to."
+    },
+    {
+      "name": "openwhispr",
+      "source": "./plugins/openwhispr",
+      "description": "OpenWhispr skill plus the hosted OpenWhispr MCP server (OAuth): the MIT, privacy-first dictation and meeting-notes app — notes, transcriptions, dictionary and snippet tools, plus its REST API and CLI."
     }
   ]
 }

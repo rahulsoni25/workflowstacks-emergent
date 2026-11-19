@@ -26,6 +26,21 @@ Install only the ones you need:
 Each skill lives in `plugins/<name>/skills/<name>/SKILL.md` and lists the
 upstream sources it was verified against.
 
+## 🧰 Open-source app skills for Claude Code
+
+Six more plugins wrap popular open-source apps. Four bundle the app's own
+MCP server; each skill was verified against the upstream repository on the
+date in its Sources section:
+
+```
+/plugin install open-higgsfield@workflowstacks  # OpenHiggsfield AI image/video studio (no MCP; upstream ships no license file)
+/plugin install voicestudio@workflowstacks      # VoiceStudio local voice AI + its local MCP (http://localhost:3900/mcp/)
+/plugin install open-seo@workflowstacks         # OpenSEO + hosted OpenSEO MCP (https://app.openseo.so/mcp, OAuth)
+/plugin install appflowy@workflowstacks         # AppFlowy desktop/mobile + self-hosted server (no MCP bundled)
+/plugin install cal-com@workflowstacks          # Cal.com / Cal.diy + hosted Cal.com MCP (https://mcp.cal.com/mcp, OAuth)
+/plugin install openwhispr@workflowstacks       # OpenWhispr dictation + hosted OpenWhispr MCP (https://mcp.openwhispr.com/mcp, OAuth)
+```
+
 ## ✨ Features
 
 - **🔄 Automatic GitHub Scraping** - Fetch real-time AI skills from GitHub based on topics

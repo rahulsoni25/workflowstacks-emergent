@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "openwhispr": {
+      "type": "http",
+      "url": "https://mcp.openwhispr.com/mcp"
+    }
+  }
+}

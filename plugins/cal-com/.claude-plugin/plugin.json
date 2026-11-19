@@ -1,0 +1,11 @@
+{
+  "name": "cal-com",
+  "version": "1.0.0",
+  "description": "Cal.com skill plus the hosted Cal.com MCP server (OAuth): read bookings, check availability, book, reschedule and manage event types from Claude, use the API v2, and self-host Cal.diy — the MIT community edition that the calcom/cal.com repo now redirects to — with Docker Compose.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://cal.com",
+  "keywords": ["scheduling", "calendar", "bookings", "cal.com", "cal.diy", "self-hosted", "mcp"]
+}

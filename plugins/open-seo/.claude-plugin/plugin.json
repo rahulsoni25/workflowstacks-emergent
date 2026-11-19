@@ -1,0 +1,11 @@
+{
+  "name": "open-seo",
+  "version": "1.0.0",
+  "description": "OpenSEO skill plus the hosted OpenSEO MCP server (OAuth): keyword research, rank tracking, competitor insights, backlinks, site audits and AI visibility from the MIT-licensed Semrush/Ahrefs alternative — hosted, or self-hosted with your own DataForSEO key.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://openseo.so",
+  "keywords": ["seo", "keyword-research", "rank-tracking", "backlinks", "site-audit", "ai-visibility", "mcp"]
+}

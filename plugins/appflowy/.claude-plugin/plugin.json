@@ -1,0 +1,11 @@
+{
+  "name": "appflowy",
+  "version": "1.0.0",
+  "description": "AppFlowy skill: install the AGPL-3.0 open-source Notion alternative on desktop and mobile, self-host the AppFlowy server with Docker Compose (free tier of the commercial server), and know which parts are open source. No MCP server bundled.",
+  "author": {
+    "name": "WorkflowStacks",
+    "url": "https://workflowstacks.com"
+  },
+  "homepage": "https://appflowy.com",
+  "keywords": ["notion-alternative", "notes", "wiki", "project-management", "self-hosted", "flutter", "rust"]
+}
