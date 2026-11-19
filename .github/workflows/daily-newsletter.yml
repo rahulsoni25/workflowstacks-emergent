@@ -18,25 +18,74 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send skill of the day
+        env:
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+          DRY: ${{ inputs.dry }}
         run: |
           URL="$BASE_URL/api/newsletter/send"
-          if [ "${{ inputs.dry }}" = "true" ]; then URL="$URL?dry=true"; fi
-          RESULT=$(curl -sS --max-time 120 \
-            -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" "$URL")
-          # The rendered email is large and carries nothing the summary needs.
-          SUMMARY=$(echo "$RESULT" | jq -c 'del(.html)' 2>/dev/null || echo "$RESULT")
-          echo "Result: $SUMMARY"
+          if [ "$DRY" = "true" ]; then URL="$URL?dry=true"; fi
+          BODY=$(mktemp)
+          # No --fail: a non-2xx body (e.g. Vercel's 402 when the project is
+          # paused) is what the summary has to show. 000 = no HTTP response.
+          HTTP=$(curl -sS --max-time 120 -o "$BODY" -w '%{http_code}' \
+            -H "x-admin-secret: $ADMIN_SECRET" "$URL") || true
+          [ -n "$HTTP" ] || HTTP=000
+
+          if jq -e 'type == "object"' "$BODY" >/dev/null 2>&1; then
+            IS_JSON=true
+            OK=$(jq -r '.ok // false' "$BODY")
+            SKIPPED=$(jq -r '.skipped // false' "$BODY")
+            SENT=$(jq -r '.sent // "-"' "$BODY")
+            FAILED=$(jq -r '.failed // "-"' "$BODY")
+            # The rendered email (dry run) is large and carries nothing the
+            # summary needs.
+            echo "Result (HTTP $HTTP): $(jq -c 'del(.html)' "$BODY")"
+          else
+            IS_JSON=false; OK=false; SKIPPED=false; SENT=-; FAILED=-
+            echo "Result (HTTP $HTTP), not JSON: $(head -c 300 "$BODY")"
+          fi
+
+          # Error strings from the API mask addresses (a***@domain); `|` and
+          # line breaks are escaped so a message cannot break the table.
           {
-            echo "## Daily Newsletter"
-            echo '```'
-            echo "$SUMMARY"
-            echo '```'
+            echo "## Daily newsletter"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| HTTP status | $HTTP |"
+            echo "| ok | $OK |"
+            if [ "$DRY" = "true" ] && [ "$IS_JSON" = true ]; then
+              echo "| Dry run: would send to | $(jq -r '.wouldSendTo // "-"' "$BODY") |"
+            else
+              echo "| Sent | $SENT |"
+              echo "| Failed | $FAILED |"
+            fi
+            if [ "$IS_JSON" = true ]; then
+              jq -r '
+                def cell: tostring | gsub("[\r\n]+"; " ") | gsub("\\|"; "\\|");
+                [ (if has("rejected") then ["Refused by Resend (422 validation_error)", .rejected] else empty end),
+                  (if has("marked_invalid") then ["Marked invalid (skipped from now on)", .marked_invalid] else empty end),
+                  (if .skipped then ["Skipped", (.message // "yes")] else empty end),
+                  (if .skill then ["Skill", .skill] else empty end),
+                  (if .first_error then ["First error", .first_error] else empty end),
+                  (if (.errors | type) == "array" and (.errors | length) > 1 then ["Distinct errors", (.errors | join(" / "))] else empty end),
+                  (if .error then ["Error", .error] else empty end),
+                  (if .message and (.skipped | not) then ["Message", .message] else empty end)
+                ] | .[] | "| \(.[0]) | \(.[1] | cell) |"' "$BODY"
+            else
+              echo
+              echo "Response was not JSON (first 300 bytes):"
+              echo
+              echo '```'
+              head -c 300 "$BODY" | tr -d '`'
+              echo
+              echo '```'
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
+
           # A 200 with ok:false used to leave this job green while nothing was
           # delivered. A deliberate skip (no eligible skill) is not a failure.
-          OK=$(echo "$RESULT" | jq -r '.ok // false' 2>/dev/null || echo false)
-          SKIPPED=$(echo "$RESULT" | jq -r '.skipped // false' 2>/dev/null || echo false)
           if [ "$OK" != "true" ] && [ "$SKIPPED" != "true" ]; then
-            echo "::error::Newsletter send did not succeed"
+            echo "::error::Newsletter send did not succeed (HTTP $HTTP, sent $SENT, failed $FAILED)"
             exit 1
           fi

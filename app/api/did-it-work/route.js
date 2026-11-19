@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb'
 import { randomUUID } from 'crypto'
 import { SITE_URL as BASE } from '@/lib/site-url'
-import { sendEmail, unsubscribeUrl, SENDABLE } from '@/lib/email'
+import { sendEmail, unsubscribeUrl, SENDABLE, maskEmail } from '@/lib/email'
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
 // including the Resend call made from lib/email.js. Each cache miss is a
@@ -67,7 +67,7 @@ export async function GET(request) {
     } else {
       failed += 1
       firstError = firstError || r.error
-      console.error('did-it-work send failed for', sub.email, r.error)
+      console.error('did-it-work send failed for', maskEmail(sub.email), r.error)
     }
   }
   return Response.json({ ok: failed === 0, sent, failed, ...(firstError ? { first_error: firstError } : {}), candidates: targets.length })

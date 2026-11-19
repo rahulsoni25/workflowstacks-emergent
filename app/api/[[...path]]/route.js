@@ -6,7 +6,7 @@ import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 import { screenSubmission } from '../../../lib/content-safety';
 import { pickDailyFromDb } from '../../../lib/newsletter-pick';
-import { sendEmail, unsubscribeUrl, verifyUnsubscribeToken, startConfirmation, SENDABLE, normalizeEmail } from '../../../lib/email';
+import { sendEmail, unsubscribeUrl, verifyUnsubscribeToken, startConfirmation, SENDABLE, normalizeEmail, maskEmail, isValidationRejection, markInvalidRecipients } from '../../../lib/email';
 import { redactAgent, stripPrivateFields, verifyUnlockToken, readUnlockToken } from '../../../lib/agent-access';
 import { getStripe } from '../../../lib/stripe';
 import { refundDealPurchases } from '../../../lib/deal-refunds';
@@ -704,7 +704,7 @@ async function sendWelcomeEmail(database, sub) {
   const intro = 'You’re in. Every Monday you’ll get the five open-source AI skills gaining the most GitHub stars, plus the top overall and what’s new. Here’s where things stand right now — forward it to one builder who’d want it.';
   const html = weeklyEmailHtml({ email: sub.email, lists, issueUrl: `${SITE}/hot`, campaign: 'welcome', intro, source: sub.source });
   const r = await sendEmail({ to: sub.email, subject: '✅ You’re in — here’s what’s hot right now', html });
-  if (!r.ok) console.error('Welcome email failed for', sub.email, r.error);
+  if (!r.ok) console.error('Welcome email failed for', maskEmail(sub.email), r.error);
   return r.ok;
 }
 
@@ -1770,9 +1770,9 @@ export async function GET(request) {
 
       const [agentsBuilt, subscriberCount, memberCount, publishedSkills] = await Promise.all([
         database.collection('agent_templates').countDocuments(),
-        // Unsubscribed and unconfirmed addresses stay in the collection now
-        // (status field), so count only the ones that actually receive mail.
-        database.collection('subscribers').countDocuments({ status: { $nin: ['pending', 'unsubscribed'] } }),
+        // Unsubscribed, unconfirmed and invalid addresses stay in the
+        // collection (status field), so count only the ones that receive mail.
+        database.collection('subscribers').countDocuments(SENDABLE),
         database.collection('members').countDocuments(),
         database.collection('skills').countDocuments({ published: { $ne: false } }),
       ]);
@@ -2298,11 +2298,21 @@ export async function GET(request) {
 
       let sentCount = 0;
       const failures = [];
+      const rejected = [];
       for (const sub of subscribers) {
         const r = await sendEmail({ to: sub.email, subject, html: dailyEmailHtml(skill, reason, sub.email, sub.source) });
-        if (r.ok) sentCount++;
-        else { failures.push(r.error); console.error('Daily send failed for', sub.email, r.error); }
+        if (r.ok) { sentCount++; continue; }
+        failures.push(r.error);
+        console.error('Daily send failed for', maskEmail(sub.email), r.error);
+        if (isValidationRejection(r)) rejected.push({ _id: sub._id, email: sub.email, error: r.error });
       }
+      // Addresses Resend refused (422 validation_error) are marked invalid so
+      // every later send skips them. Only when the same email went through
+      // for someone else this run: if nobody got it, the sender or payload is
+      // at fault, not the addresses, and marking would empty the list.
+      const markedInvalid = rejected.length && sentCount > 0
+        ? await markInvalidRecipients(database.collection('subscribers'), rejected)
+        : 0;
 
       await database.collection('newsletter_sends').insertOne({
         type: 'daily',
@@ -2316,10 +2326,14 @@ export async function GET(request) {
         recipient_count: sentCount,
         failed_count: failures.length,
         first_error: failures[0] || null,
+        marked_invalid: markedInvalid,
       });
 
+      // `ok` stays false for a run with any failure, including one whose
+      // addresses were just marked invalid; the next run skips them.
       return Response.json({
         ok: failures.length === 0, sent: sentCount, failed: failures.length,
+        rejected: rejected.length, marked_invalid: markedInvalid,
         ...(failures.length ? { first_error: failures[0], errors: [...new Set(failures)].slice(0, 3) } : {}),
         skill: skill.name, reason, recycled: picked.recycled,
       });
@@ -2378,7 +2392,7 @@ export async function GET(request) {
 </body></html>`;
         const r = await sendEmail({ to: sub.email, subject: '🛠️ New working templates + fresh AI tools this week', html });
         if (r.ok) sentCount++;
-        else { failures.push(r.error); console.error('Digest send failed for', sub.email, r.error); }
+        else { failures.push(r.error); console.error('Digest send failed for', maskEmail(sub.email), r.error); }
       }
 
       await database.collection('newsletter_sends').insertOne({
@@ -2427,7 +2441,7 @@ export async function GET(request) {
         const html = weeklyEmailHtml({ email: sub.email, lists, issueUrl, source: sub.source });
         const r = await sendEmail({ to: sub.email, subject, html });
         if (r.ok) sentCount++;
-        else { failed++; firstError = firstError || r.error; console.error('Weekly-hot send failed for', sub.email, r.error); }
+        else { failed++; firstError = firstError || r.error; console.error('Weekly-hot send failed for', maskEmail(sub.email), r.error); }
       }
 
       // This week's rank on the featured skills — the README badge reads it.
@@ -2484,9 +2498,9 @@ export async function GET(request) {
         if (!to) { skipped++; results.push({ skill: label, rank, status: 'no-email', creator: s.creator || null }); continue; }
         if (seen.has(to)) { skipped++; results.push({ skill: label, rank, status: 'duplicate-address' }); continue; }
         seen.add(to);
-        // An address that unsubscribed (or never confirmed) hears nothing from
-        // us, creator notices included.
-        const suppressed = await database.collection('subscribers').findOne({ email: to, status: { $in: ['pending', 'unsubscribed'] } }, { projection: { _id: 1 } });
+        // An address that unsubscribed, never confirmed or was refused by
+        // Resend hears nothing from us, creator notices included.
+        const suppressed = await database.collection('subscribers').findOne({ email: to, status: { $in: ['pending', 'unsubscribed', 'invalid'] } }, { projection: { _id: 1 } });
         if (suppressed) { skipped++; results.push({ skill: label, rank, status: 'suppressed' }); continue; }
         const url = skillPath(s);
         const badgeMd = `[![Featured on WorkflowStacks](${SITE}/api/badge/${slug}.svg)](${url}?utm_source=github&utm_medium=badge)`;
@@ -3149,7 +3163,7 @@ export async function POST(request) {
       // product shows up in the inbox within a minute of confirming.
       let welcomed = false;
       try { welcomed = await sendWelcomeEmail(database, sub); }
-      catch (e) { console.error('Welcome email failed for', sub.email, e.message); }
+      catch (e) { console.error('Welcome email failed for', maskEmail(sub.email), e.message); }
       return Response.json({ ok: true, email: sub.email, welcomed });
     }
 

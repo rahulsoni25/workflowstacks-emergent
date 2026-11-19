@@ -1,5 +1,5 @@
 import { getDb } from '@/lib/mongo'
-import { normalizeEmail, verifyUnsubscribeToken } from '@/lib/email'
+import { normalizeEmail, verifyUnsubscribeToken, maskEmail } from '@/lib/email'
 import { SITE_URL } from '@/lib/site-url'
 
 // RFC 8058 one-click unsubscribe — the https URL in every email's
@@ -21,7 +21,7 @@ export async function POST(request) {
   // The RFC body is informational here — the token already proves this came
   // from a link we sent — so an unexpected body is logged, not refused.
   const body = await request.text().catch(() => '')
-  if (!/List-Unsubscribe=One-Click/i.test(body)) console.warn('one-click unsubscribe without RFC 8058 body for', email)
+  if (!/List-Unsubscribe=One-Click/i.test(body)) console.warn('one-click unsubscribe without RFC 8058 body for', maskEmail(email))
 
   const db = await getDb()
   const now = new Date()
