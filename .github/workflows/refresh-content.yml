@@ -31,13 +31,17 @@ jobs:
         run: |
           # Groq free tier = ~12k TPM = ~6 enrichments / minute. Sleep 62s
           # between batches so we don't get rate-limited and bail early.
+          # Loop on llmRewrites (copy the LLM actually produced), not
+          # `updated`: when the provider is down a batch rewrites nothing, and
+          # another batch would only spend calls against an outage.
           for i in $(seq 1 25); do
             R=$(curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
               "$BASE_URL/api/agent-rewrite?onlyNew=true&pending=true&top=true&limit=6") || break
-            U=$(echo "$R" | jq -r '.updated // 0')
+            L=$(echo "$R" | jq -r '.llmRewrites // 0')
+            F=$(echo "$R" | jq -r '.llmFailures // 0')
             P=$(echo "$R" | jq -r '.published // 0')
-            echo "batch $i: updated=$U published=$P"
-            [ "$U" = "0" ] && break
+            echo "batch $i: llmRewrites=$L failed=$F published=$P"
+            [ "$L" = "0" ] && break
             sleep 62
           done
 

@@ -91,7 +91,7 @@ const CLIENT_OMIT = [
   '_id', 'stars_history', 'stars_refreshed_at', 'codeflow', 'codeflow_at',
   'codeflow_provider', 'codeflow_error', 'codeflow_flow_error', 'description_original',
   'name_original', 'rewrite_trail', 'slug_assigned_at', 'updated_at', 'added_at',
-  'seo_optimized_at', 'hot_rank_at', 'mcp_config_checked',
+  'seo_optimized_at', 'hot_rank_at', 'mcp_config_checked', 'rewrite_failed_at',
 ]
 function clientSkill(skill) {
   const out = { ...skill }

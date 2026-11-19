@@ -56,6 +56,11 @@ function resolveProvider() {
 
 const PROVIDER = resolveProvider();
 
+// A skill whose LLM rewrite failed is stamped with rewrite_failed_at and left
+// out of selection for this long, so daily runs don't keep re-trying (and
+// re-paying for) the same failures. Longer than the 24h workflow interval.
+const RETRY_FAILED_AFTER_MS = 3 * 24 * 60 * 60 * 1000;
+
 // Format star count for honest social proof (no invented numbers)
 function formatStars(stars) {
   if (!stars) return '';
@@ -588,14 +593,25 @@ async function handle(request) {
 
   // pending=true selects only skills not yet rewritten by the current LLM provider,
   // so production runs can batch through all rows within the 60s function limit.
-  let query;
+  const conditions = [];
   if (searchParams.get('unpublished') === 'true') {
-    query = { published: false };
+    conditions.push({ published: false });
   } else if (searchParams.get('pending') === 'true') {
-    query = { rewritten_by: { $ne: PROVIDER.name } };
-  } else {
-    query = onlyNew ? { title_human: { $exists: false } } : {};
+    conditions.push({ rewritten_by: { $ne: PROVIDER.name } });
   }
+  // onlyNew narrows any selection above to skills that have never been
+  // rewritten. It used to be dropped whenever pending=true was also set, so the
+  // daily workflow (onlyNew=true&pending=true) selected every skill not
+  // rewritten by the current provider -- the whole catalog after a provider
+  // change.
+  if (onlyNew) conditions.push({ title_human: { $exists: false } });
+  // Skip skills whose LLM rewrite failed recently (see the catch below), so a
+  // run moves on to other skills instead of re-hitting the same ones.
+  const retryCutoff = new Date(Date.now() - RETRY_FAILED_AFTER_MS);
+  conditions.push({
+    $or: [{ rewrite_failed_at: { $exists: false } }, { rewrite_failed_at: { $lt: retryCutoff } }],
+  });
+  const query = { $and: conditions };
   // Stable order so skip/limit pagination is consistent across force re-runs
   let cursor = database.collection('skills').find(query).sort({ _id: 1 });
   const skip = parseInt(searchParams.get('skip') || '0', 10);
@@ -610,7 +626,7 @@ async function handle(request) {
   const judgeModel = searchParams.get('judge') || PROVIDER.model;
   let updated = 0;
   let llmOk = 0;
-  let fellBack = 0;
+  let llmFailed = 0;
   let publishedCount = 0;
   const errors = [];
   // Openers already in the catalog, so this batch doesn't add to a pile-up
@@ -626,9 +642,18 @@ async function handle(request) {
         by = PROVIDER.name;
         llmOk++;
       } catch (e) {
-        result = rewriteHeuristic(skill);
-        fellBack++;
+        // LLM failed (outage, rate limit, bad JSON). Leave the skill exactly
+        // as it is -- no fallback copy, no published flip, no revalidatePath,
+        // not counted as updated -- and only stamp the attempt. Writing
+        // heuristic copy with published:false here meant a provider outage
+        // unpublished and revalidated up to 25 x 6 skills per workflow run.
+        llmFailed++;
         if (errors.length < 5) errors.push(`${skill.name}: ${e.message}`);
+        await database.collection('skills').updateOne(
+          { id: skill.id },
+          { $set: { rewrite_failed_at: new Date() } }
+        );
+        return;
       }
     } else {
       result = rewriteHeuristic(skill);
@@ -663,7 +688,8 @@ async function handle(request) {
           rewrite_score: score,
           rewrite_status: published ? 'done' : 'pending',
           published
-        }
+        },
+        $unset: { rewrite_failed_at: '' }
       }
     );
     revalidateSkill(skill);
@@ -677,8 +703,10 @@ async function handle(request) {
     updated,
     published: publishedCount,
     gate: gate ? `on (>= ${gateMin})` : 'off',
+    // refresh-content.yml loops on llmRewrites: 0 means the provider produced
+    // nothing this batch (outage, or nothing left to do), so it stops.
     llmRewrites: llmOk,
-    heuristicFallbacks: useLLM ? fellBack : updated,
+    llmFailures: llmFailed,
     sampleErrors: errors,
     tip: useLLM
       ? undefined
