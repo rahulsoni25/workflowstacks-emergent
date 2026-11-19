@@ -5,22 +5,24 @@
 // POST /api/stacks    → save a stack (returns { slug })
 // GET  /api/stacks    → list public stacks (paginated, for the gallery)
 
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import { v4 as uuidv4 } from 'uuid'
 
-const client = new MongoClient(process.env.MONGO_URL)
-let db
+// Created once per cold start, after the first successful connect.
+let indexesReady = null
+
+async function ensureIndexes(db) {
+  try {
+    await db.collection('stacks').createIndex({ slug: 1 }, { unique: true })
+    await db.collection('stacks').createIndex({ createdAt: -1 })
+    await db.collection('stacks').createIndex({ public: 1, forkCount: -1 })
+  } catch {}
+}
 
 async function connectDB() {
-  if (!db) {
-    await client.connect()
-    db = client.db(process.env.DB_NAME || 'workflowstacks')
-    try {
-      await db.collection('stacks').createIndex({ slug: 1 }, { unique: true })
-      await db.collection('stacks').createIndex({ createdAt: -1 })
-      await db.collection('stacks').createIndex({ public: 1, forkCount: -1 })
-    } catch {}
-  }
+  const db = await getDb()
+  if (!indexesReady) indexesReady = ensureIndexes(db)
+  await indexesReady
   return db
 }
 

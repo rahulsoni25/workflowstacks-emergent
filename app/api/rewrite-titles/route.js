@@ -1,16 +1,3 @@
-import { MongoClient } from 'mongodb';
-
-const client = new MongoClient(process.env.MONGO_URL);
-let db;
-
-async function connectDB() {
-  if (!db) {
-    await client.connect();
-    db = client.db(process.env.DB_NAME || 'workflowstacks');
-  }
-  return db;
-}
-
 // Advanced title and description generator - Creates UNIQUE titles every time
 function generateUniqueTitle(skill) {
   const name = skill.name.toLowerCase();

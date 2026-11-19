@@ -9,7 +9,7 @@
 // This is real understanding — the LLM picks based on what each skill DOES,
 // not just keyword overlap. Quality vs the regex-only recommender is huge.
 
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import { TOOLS_ONLY } from '../../../lib/catalog-gates'
 import { rateLimit } from '../../../lib/rate-limit'
 import { matchTemplate } from '../../../lib/templates'
@@ -22,17 +22,6 @@ import { matchTemplate } from '../../../lib/templates'
 // ISR-write overage (usage window Aug 25 -> Sep 24, 2026). Nothing here needs
 // caching, so default fetch() to no-store; an explicit cache option still wins.
 export const fetchCache = 'default-no-store'
-
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-
-async function connectDB() {
-  if (!db) {
-    await client.connect()
-    db = client.db(process.env.DB_NAME || 'workflowstacks')
-  }
-  return db
-}
 
 // ---- Stage 1: candidate pre-filter (reuses search-skills logic, simplified) ----
 
@@ -206,7 +195,7 @@ export async function POST(request) {
     return Response.json({ error: 'No LLM provider configured' }, { status: 500 })
   }
 
-  const database = await connectDB()
+  const database = await getDb()
 
   // Stage 0: does a hand-built working template already solve this goal?
   // A download that runs beats any list of repos — surface it first.

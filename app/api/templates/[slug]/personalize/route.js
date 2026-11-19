@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import { getTemplate, PERSONALIZABLE_NODE } from '../../../../../lib/templates'
 import { rateLimit } from '../../../../../lib/rate-limit'
 
@@ -10,17 +10,6 @@ import { rateLimit } from '../../../../../lib/rate-limit'
 // ISR-write overage (usage window Aug 25 -> Sep 24, 2026). Nothing here needs
 // caching, so default fetch() to no-store; an explicit cache option still wins.
 export const fetchCache = 'default-no-store'
-
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-
-async function connectDB() {
-  if (!db) {
-    await client.connect()
-    db = client.db(process.env.DB_NAME || 'workflowstacks')
-  }
-  return db
-}
 
 // Every n8n expression in a prompt, e.g. {{ $json['Product Name'] }}.
 // The personalized prompt must keep ALL of them verbatim or the workflow breaks.
@@ -98,7 +87,7 @@ export async function POST(request, { params }) {
   }
 
   try {
-    const database = await connectDB()
+    const database = await getDb()
     await database.collection('template_downloads').updateOne(
       { slug: tpl.slug },
       {

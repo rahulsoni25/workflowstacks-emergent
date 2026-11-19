@@ -1,17 +1,6 @@
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import { getBundle } from '../../../../../lib/bundles'
 import { rateLimit } from '../../../../../lib/rate-limit'
-
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-
-async function connectDB() {
-  if (!db) {
-    await client.connect()
-    db = client.db(process.env.DB_NAME || 'workflowstacks')
-  }
-  return db
-}
 
 // GET /api/bundles/[slug]/download?token=...&file=...
 // Serves a purchased premium workflow. Access is gated by the per-purchase
@@ -28,7 +17,7 @@ export async function GET(request, { params }) {
   const fileKey = (searchParams.get('file') || '').trim()
   if (!token) return Response.json({ error: 'Missing access token' }, { status: 401 })
 
-  const database = await connectDB()
+  const database = await getDb()
   const purchase = await database.collection('bundle_purchases').findOne({ token, bundleId: bundle.slug })
   if (!purchase) return Response.json({ error: 'Invalid or expired access token' }, { status: 403 })
 

@@ -1,22 +1,11 @@
 // GET /api/stacks/[slug] — fetch one stack + its hydrated skills
 
-import { MongoClient } from 'mongodb'
-
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-
-async function connectDB() {
-  if (!db) {
-    await client.connect()
-    db = client.db(process.env.DB_NAME || 'workflowstacks')
-  }
-  return db
-}
+import { getDb } from '@/lib/mongo'
 
 export async function GET(_request, { params }) {
   const slug = params?.slug
   if (!slug) return Response.json({ error: 'slug required' }, { status: 400 })
-  const database = await connectDB()
+  const database = await getDb()
   const stack = await database.collection('stacks').findOne({ slug })
   if (!stack) return Response.json({ error: 'not found' }, { status: 404 })
   // Bump view count (best-effort, fire-and-forget)

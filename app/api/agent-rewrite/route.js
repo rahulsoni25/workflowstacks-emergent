@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { getDb } from '@/lib/mongo';
 import { revalidateSkill } from '@/lib/revalidate';
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
@@ -9,17 +9,6 @@ import { revalidateSkill } from '@/lib/revalidate';
 // ISR-write overage (usage window Aug 25 -> Sep 24, 2026). Nothing here needs
 // caching, so default fetch() to no-store; an explicit cache option still wins.
 export const fetchCache = 'default-no-store';
-
-const client = new MongoClient(process.env.MONGO_URL);
-let db;
-
-async function connectDB() {
-  if (!db) {
-    await client.connect();
-    db = client.db(process.env.DB_NAME || 'workflowstacks');
-  }
-  return db;
-}
 
 // Provider resolution: OpenRouter preferred (one key, many models, free tiers),
 // then native Anthropic, else free heuristic.
@@ -392,7 +381,7 @@ async function handle(request) {
   const onlyNew = searchParams.get('onlyNew') === 'true';
   const limit = parseInt(searchParams.get('limit') || '0', 10);
 
-  const database = await connectDB();
+  const database = await getDb();
 
   // Enrichment: generate the actual deliverable content for pages.
   // ?mode=enrich-skills (batched via skip/limit) | ?mode=enrich-playbooks

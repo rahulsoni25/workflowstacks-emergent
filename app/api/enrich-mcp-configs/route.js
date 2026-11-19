@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
 // including the GitHub, Groq and Resend calls below. Each cache miss is a
@@ -8,16 +8,6 @@ import { MongoClient } from 'mongodb'
 // ISR-write overage (usage window Aug 25 -> Sep 24, 2026). Nothing here needs
 // caching, so default fetch() to no-store; an explicit cache option still wins.
 export const fetchCache = 'default-no-store'
-
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-async function connectDB() {
-  if (!db) {
-    await client.connect()
-    db = client.db(process.env.DB_NAME || 'workflowstacks')
-  }
-  return db
-}
 
 function requireAdmin(request) {
   const secret = process.env.ADMIN_SECRET
@@ -101,7 +91,7 @@ export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const limit = Math.min(20, parseInt(searchParams.get('limit') || '8', 10))
 
-  const database = await connectDB()
+  const database = await getDb()
   const targets = await database.collection('skills')
     .find({ category: 'mcp-server', published: { $ne: false }, mcp_config_checked: { $ne: true } })
     .sort({ github_stars: -1 })

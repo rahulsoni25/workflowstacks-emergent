@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import { rateLimit } from '../../../lib/rate-limit'
 import { COMING_SOON } from '../../../lib/coming-soon'
 import { startConfirmation, normalizeEmail, EMAIL_RE } from '../../../lib/email'
@@ -6,13 +6,6 @@ import { startConfirmation, normalizeEmail, EMAIL_RE } from '../../../lib/email'
 // The confirmation email goes out through fetch() in lib/email.js, which
 // Next 14 would otherwise cache (docs/COSTS.md rule 4).
 export const fetchCache = 'default-no-store'
-
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-async function connectDB() {
-  if (!db) { await client.connect(); db = client.db(process.env.DB_NAME || 'workflowstacks') }
-  return db
-}
 
 // Public fake-door capture: "notify me when <unbuilt tool> ships." Each signup
 // is a demand signal for a tool that doesn't exist yet — validation BEFORE
@@ -27,7 +20,7 @@ export async function POST(request) {
   const listed = COMING_SOON.find((t) => t.slug === tool)
   if (!listed) return Response.json({ ok: false, error: 'Unknown tool' }, { status: 400 })
 
-  const db = await connectDB()
+  const db = await getDb()
   await db.collection('tool_interest').updateOne(
     { tool, email },
     { $setOnInsert: { tool, email, at: new Date() } },

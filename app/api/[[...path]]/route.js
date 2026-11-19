@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { getDb } from '@/lib/mongo';
 import { v4 as uuidv4 } from 'uuid';
 import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalog-gates';
 import { tokenize as tokenizeSearch } from '../../../lib/search-tokens';
@@ -20,45 +20,43 @@ import { refundDealPurchases } from '../../../lib/deal-refunds';
 // caching, so default fetch() to no-store; an explicit cache option still wins.
 export const fetchCache = 'default-no-store';
 
-// Explicit timeouts so a slow/unreachable Atlas connection fails fast with a
-// clear error instead of hanging the serverless function (and, at build
-// time, hanging Next.js static generation) indefinitely.
-const client = new MongoClient(process.env.MONGO_URL, {
-  serverSelectionTimeoutMS: 8000,
-  connectTimeoutMS: 8000,
-});
-let db;
+// The shared client in lib/mongo.js carries the connection timeouts and pool
+// size. Indexes are created once per cold start, after the first successful
+// connect.
+let indexesReady = null;
 
 async function connectDB() {
-  if (!db) {
-    await client.connect();
-    db = client.db(process.env.DB_NAME || 'workflowstacks');
-    // Enforce uniqueness at the DB level so duplicate repos are impossible
-    try {
-      await db.collection('skills').createIndex(
-        { github_url: 1 },
-        { unique: true, sparse: true }
-      );
-      // Covers the /api/skills default query (published + category filter,
-      // sorted by stars) so it's an index scan instead of a full collection
-      // scan + in-memory sort on every homepage/library load.
-      await db.collection('skills').createIndex(
-        { published: 1, category: 1, github_stars: -1 }
-      );
-      // The category-less case (browsing "all" categories, the default
-      // /skills load) can't use the compound index above for the sort —
-      // without this, that query fell back to an in-memory sort over the
-      // full published set, which took ~90s once the catalog passed ~2k
-      // docs and blew past the SSR fetch timeout (page silently rendered
-      // as empty).
-      await db.collection('skills').createIndex(
-        { published: 1, github_stars: -1 }
-      );
-    } catch (e) {
-      console.log('Index note:', e.message);
-    }
-  }
+  const db = await getDb();
+  if (!indexesReady) indexesReady = ensureSkillIndexes(db);
+  await indexesReady;
   return db;
+}
+
+async function ensureSkillIndexes(db) {
+  // Enforce uniqueness at the DB level so duplicate repos are impossible
+  try {
+    await db.collection('skills').createIndex(
+      { github_url: 1 },
+      { unique: true, sparse: true }
+    );
+    // Covers the /api/skills default query (published + category filter,
+    // sorted by stars) so it's an index scan instead of a full collection
+    // scan + in-memory sort on every homepage/library load.
+    await db.collection('skills').createIndex(
+      { published: 1, category: 1, github_stars: -1 }
+    );
+    // The category-less case (browsing "all" categories, the default
+    // /skills load) can't use the compound index above for the sort —
+    // without this, that query fell back to an in-memory sort over the
+    // full published set, which took ~90s once the catalog passed ~2k
+    // docs and blew past the SSR fetch timeout (page silently rendered
+    // as empty).
+    await db.collection('skills').createIndex(
+      { published: 1, github_stars: -1 }
+    );
+  } catch (e) {
+    console.log('Index note:', e.message);
+  }
 }
 
 // Admin guard for mutating/expensive endpoints. Accepts the secret via the

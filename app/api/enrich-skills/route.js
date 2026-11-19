@@ -3,7 +3,7 @@
 // what you can build with it, who it's for, a real use case, difficulty,
 // cost, and companion skills. Stored as skill.explainer.
 
-import { MongoClient } from 'mongodb';
+import { getDb } from '@/lib/mongo';
 import { revalidateSkill } from '@/lib/revalidate';
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
@@ -14,17 +14,6 @@ import { revalidateSkill } from '@/lib/revalidate';
 // ISR-write overage (usage window Aug 25 -> Sep 24, 2026). Nothing here needs
 // caching, so default fetch() to no-store; an explicit cache option still wins.
 export const fetchCache = 'default-no-store';
-
-const client = new MongoClient(process.env.MONGO_URL);
-let db;
-
-async function connectDB() {
-  if (!db) {
-    await client.connect();
-    db = client.db(process.env.DB_NAME || 'workflowstacks');
-  }
-  return db;
-}
 
 function requireAdmin(request) {
   const secret = process.env.ADMIN_SECRET;
@@ -209,7 +198,7 @@ export async function POST(request) {
     return Response.json({ error: 'No LLM provider configured (set GROQ_API_KEY, OPENROUTER_API_KEY, or ANTHROPIC_API_KEY)' }, { status: 500 });
   }
 
-  const database = await connectDB();
+  const database = await getDb();
   const skills = database.collection('skills');
 
   // Find skills to enrich: by id list, or all without explainer (unless force).
@@ -264,7 +253,7 @@ export async function POST(request) {
 export async function GET(request) {
   const denied = requireAdmin(request);
   if (denied) return denied;
-  const database = await connectDB();
+  const database = await getDb();
   const skills = database.collection('skills');
   const [total, enriched, withBestTools] = await Promise.all([
     skills.countDocuments(),

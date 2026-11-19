@@ -1,11 +1,5 @@
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-async function connectDB() {
-  if (!db) { await client.connect(); db = client.db(process.env.DB_NAME || 'workflowstacks') }
-  return db
-}
 function requireAdmin(request) {
   const secret = process.env.ADMIN_SECRET
   if (!secret || request.headers.get('x-admin-secret') !== secret) return Response.json({ error: 'Unauthorized' }, { status: 401 })
@@ -17,7 +11,7 @@ function requireAdmin(request) {
 // except the did-it-work + fake-door signals (their own endpoints).
 export async function GET(request) {
   const denied = requireAdmin(request); if (denied) return denied
-  const db = await connectDB()
+  const db = await getDb()
 
   const [dlAgg] = await db.collection('template_downloads').aggregate([
     { $group: { _id: null, downloads: { $sum: '$count' }, personalized: { $sum: { $ifNull: ['$personalized_count', 0] } } } },

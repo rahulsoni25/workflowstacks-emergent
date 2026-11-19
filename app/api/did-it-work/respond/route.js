@@ -1,11 +1,4 @@
-import { MongoClient } from 'mongodb'
-
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-async function connectDB() {
-  if (!db) { await client.connect(); db = client.db(process.env.DB_NAME || 'workflowstacks') }
-  return db
-}
+import { getDb } from '@/lib/mongo'
 
 // Public: one-click did-it-work response (token-gated to a real recipient).
 // Renders a tiny thank-you page. This is the data point that proves the
@@ -16,7 +9,7 @@ export async function GET(request) {
   const answer = searchParams.get('a') === 'worked' ? 'worked' : searchParams.get('a') === 'didnt' ? 'didnt' : null
   if (!token || !answer) return html('Thanks — but this link looks incomplete.', 400)
 
-  const db = await connectDB()
+  const db = await getDb()
   const res = await db.collection('subscribers').findOneAndUpdate(
     { dw_token: token },
     { $set: { dw_response: answer, dw_responded_at: new Date() } },

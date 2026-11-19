@@ -6,19 +6,8 @@
 // "transcription" all hit. Score-ranked. Returns matched-snippet so the UI can
 // show WHY each result is relevant.
 
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import { TOOLS_ONLY } from '../../../lib/catalog-gates'
-
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-
-async function connectDB() {
-  if (!db) {
-    await client.connect()
-    db = client.db(process.env.DB_NAME || 'workflowstacks')
-  }
-  return db
-}
 
 // Tokenize + stem the query for fuzzier matching. Drops noise words and short
 // tokens, lowercases everything, and reduces "transcribed/transcribing/transcription"
@@ -88,7 +77,7 @@ export async function POST(request) {
     return Response.json({ query: '', results: [], total: 0, message: 'Empty query' })
   }
 
-  const database = await connectDB()
+  const database = await getDb()
   const tokens = tokenize(query)
   if (tokens.length === 0) {
     return Response.json({ query, results: [], total: 0, message: 'Query too generic — add more specific words' })

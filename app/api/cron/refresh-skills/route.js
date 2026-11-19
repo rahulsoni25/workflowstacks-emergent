@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { getDb } from '@/lib/mongo';
 import { v4 as uuidv4 } from 'uuid';
 import { isSpamRepo, classifyContentType } from '../../../../lib/catalog-gates';
 
@@ -10,17 +10,6 @@ import { isSpamRepo, classifyContentType } from '../../../../lib/catalog-gates';
 // ISR-write overage (usage window Aug 25 -> Sep 24, 2026). Nothing here needs
 // caching, so default fetch() to no-store; an explicit cache option still wins.
 export const fetchCache = 'default-no-store';
-
-const client = new MongoClient(process.env.MONGO_URL);
-let db;
-
-async function connectDB() {
-  if (!db) {
-    await client.connect();
-    db = client.db(process.env.DB_NAME || 'workflowstacks');
-  }
-  return db;
-}
 
 function ghHeaders(accept = 'application/vnd.github+json') {
   const headers = { 'Accept': accept, 'User-Agent': 'WorkflowStacks' };
@@ -187,7 +176,7 @@ export async function GET(request) {
   }
 
   try {
-    const database = await connectDB();
+    const database = await getDb();
     
     // Founder-focused queries spanning every niche — trending & maintained repos
     const topicQueries = [

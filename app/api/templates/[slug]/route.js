@@ -1,17 +1,6 @@
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import { getTemplate } from '../../../../lib/templates'
 import { rateLimit } from '../../../../lib/rate-limit'
-
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-
-async function connectDB() {
-  if (!db) {
-    await client.connect()
-    db = client.db(process.env.DB_NAME || 'workflowstacks')
-  }
-  return db
-}
 
 // GET /api/templates/[slug] — download a working deliverable.
 // Downloads are the Phase-1 activation metric, so every one is counted.
@@ -24,7 +13,7 @@ export async function GET(request, { params }) {
 
   // Best-effort download counter — never blocks the download itself
   try {
-    const database = await connectDB()
+    const database = await getDb()
     await database.collection('template_downloads').updateOne(
       { slug: tpl.slug },
       { $inc: { count: 1 }, $set: { last_download_at: new Date() }, $setOnInsert: { first_download_at: new Date() } },

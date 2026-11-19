@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb'
+import { getDb } from '@/lib/mongo'
 import { randomUUID } from 'crypto'
 import { SITE_URL as BASE } from '@/lib/site-url'
 import { sendEmail, unsubscribeUrl, SENDABLE } from '@/lib/email'
@@ -12,12 +12,6 @@ import { sendEmail, unsubscribeUrl, SENDABLE } from '@/lib/email'
 // caching, so default fetch() to no-store; an explicit cache option still wins.
 export const fetchCache = 'default-no-store'
 
-const client = new MongoClient(process.env.MONGO_URL)
-let db
-async function connectDB() {
-  if (!db) { await client.connect(); db = client.db(process.env.DB_NAME || 'workflowstacks') }
-  return db
-}
 function requireAdmin(request) {
   const secret = process.env.ADMIN_SECRET
   if (!secret || request.headers.get('x-admin-secret') !== secret) return Response.json({ error: 'Unauthorized' }, { status: 401 })
@@ -32,7 +26,7 @@ export async function GET(request) {
   const denied = requireAdmin(request); if (denied) return denied
   if (!process.env.RESEND_API_KEY) return Response.json({ ok: false, error: 'RESEND_API_KEY not set' }, { status: 500 })
 
-  const db = await connectDB()
+  const db = await getDb()
   const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
   const targets = await db.collection('subscribers').find({
     source: 'template-download',
