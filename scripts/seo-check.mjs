@@ -27,9 +27,14 @@ async function get(path) {
   }
 }
 
-const titleOf = (h) => (/<title>([^<]*)<\/title>/i.exec(h) || [])[1]?.trim() || ''
+// Lengths are judged on the text a searcher sees, so decode entities first:
+// a raw "&amp;" counted as five characters and failed titles that fit.
+const decode = (s) => s
+  .replace(/&amp;/g, '&').replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"')
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+const titleOf = (h) => decode((/<title>([^<]*)<\/title>/i.exec(h) || [])[1]?.trim() || '')
 const descOf = (h) =>
-  (/<meta name="description" content="([^"]*)"/i.exec(h) || [])[1]?.trim() || ''
+  decode((/<meta name="description" content="([^"]*)"/i.exec(h) || [])[1]?.trim() || '')
 const schemaTypes = (h) => [...new Set((h.match(/"@type":"([A-Za-z]+)"/g) || []))]
 
 // ---------- Foundations ----------

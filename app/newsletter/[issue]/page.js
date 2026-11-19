@@ -5,6 +5,7 @@ import { breadcrumbSchema } from '@/lib/schema'
 import NewsletterSignup from '@/components/NewsletterSignup'
 import ShareButtons from '@/components/ShareButtons'
 import RankedSection from '@/components/RankedSection'
+import { clipText } from '@/lib/seo-text'
 
 // One archived Monday issue, rendered from the lists stored at send time.
 export const revalidate = 86400
@@ -39,8 +40,10 @@ export async function generateMetadata({ params }) {
   const names = hot.slice(0, 3).map((s) => s.title_human || s.name).join(', ')
   return {
     title: `WorkflowStacks Weekly — ${fmtIssueDate(doc.issue)}`,
+    // Lead with what the page is, then the names: the old order put three
+    // long skill names first and ran to 200-275 characters.
     description: names
-      ? `Hot this week: ${names}. The open-source AI skills gaining the most GitHub stars in the week of ${fmtIssueDate(doc.issue)}, plus the top overall and what’s new.`
+      ? clipText(`The open-source AI skills gaining the most GitHub stars in the week of ${fmtIssueDate(doc.issue)}. Hot this week: ${names}.`)
       : `The Monday digest for ${fmtIssueDate(doc.issue)}.`,
     alternates: { canonical: `/newsletter/${doc.issue}` },
   }

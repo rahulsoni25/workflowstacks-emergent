@@ -7,6 +7,7 @@ import { SITE_URL as BASE } from '@/lib/site-url'
 import { rawFetch } from '@/lib/raw-fetch'
 import { getSkillDirect, getRelatedSkillsDirect } from '@/lib/skills-data'
 import { passesSkillGate } from '@/lib/skill-gate'
+import { seoTitle, TITLE_MAX } from '@/lib/seo-text'
 
 // Invalid skill IDs used to render the not-found UI with HTTP 200. The cause
 // was the root app/loading.js: a Suspense boundary above every page meant the
@@ -210,8 +211,11 @@ export async function generateMetadata({ params }) {
   const name = skill.title_human || skill.name
   // Add the install intent when the result stays within a typical SERP title
   // width; long tool names fall back to the plain pattern.
+  // Rewritten names run to 90+ characters ("tool: what it does for whom"), so
+  // the plain pattern goes through seoTitle, which drops the brand suffix and
+  // then cuts on a clause or word boundary to stay inside the SERP.
   const withIntent = `${name} for Claude, ChatGPT & Gemini | WorkflowStacks`
-  const title = withIntent.length <= 65 ? withIntent : `${name} | WorkflowStacks`
+  const title = withIntent.length <= TITLE_MAX ? withIntent : seoTitle(name)
   // First-party proof in the snippet: installs started from this site
   // (counted server-side across browser, CLI and MCP) and the CI-verified
   // install. These numbers exist nowhere else, which is what makes the page

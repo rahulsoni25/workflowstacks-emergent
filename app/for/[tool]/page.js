@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { SITE_URL as BASE } from '@/lib/site-url'
+import { seoDescription } from '@/lib/seo-text'
 import { breadcrumbSchema } from '@/lib/schema'
 import { INSTALL_TARGETS, getInstallTarget } from '@/lib/install-targets'
 import { categoryLabel } from '@/lib/skill-display'
@@ -31,7 +32,9 @@ export async function generateMetadata({ params }) {
   if (!t) return { title: 'Not found | WorkflowStacks', robots: { index: false, follow: true } }
   return {
     title: `Open-Source AI Skills for ${t.name} | WorkflowStacks`,
-    description: `${t.blurb} Ranked by quality, with a plain-English guide and the install path for ${t.name} on every listing. Free.`.slice(0, 165),
+    // .slice(0, 165) cut mid-word; seoDescription keeps the blurb whole and
+    // drops the suffix when both don't fit.
+    description: seoDescription(t.blurb, `Ranked by quality, with a plain-English guide and the ${t.name} install path on every listing. Free.`),
     alternates: { canonical: `/for/${t.slug}` },
   }
 }

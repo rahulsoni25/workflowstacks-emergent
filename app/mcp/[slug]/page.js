@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { getMcpServer, claudeConfigBlock, MCP_SERVERS } from '@/lib/mcp-servers'
 import { softwareApplicationSchema, breadcrumbSchema } from '@/lib/schema'
 import CopyConfig from './CopyConfig'
+import { seoTitle, seoDescription } from '@/lib/seo-text'
 
 export function generateStaticParams() {
   return Object.keys(MCP_SERVERS).map((slug) => ({ slug }))
@@ -15,8 +16,8 @@ export function generateMetadata({ params }) {
   const s = getMcpServer(params.slug)
   if (!s) return {}
   return {
-    title: `${s.name} for Claude Desktop | WorkflowStacks`,
-    description: `${s.blurb} Copy-paste the config into Claude Desktop and connect ${s.name} in under a minute.`,
+    title: seoTitle(`${s.name} for Claude Desktop`),
+    description: seoDescription(s.blurb, `Copy-paste the config into Claude Desktop and connect ${s.name} in under a minute.`),
     alternates: { canonical: `/mcp/${s.slug}` },
   }
 }

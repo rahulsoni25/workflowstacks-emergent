@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { SITE_URL as BASE } from '@/lib/site-url'
 import { breadcrumbSchema } from '@/lib/schema'
+import { seoTitle, seoDescription } from '@/lib/seo-text'
 import { TYPE_CATEGORIES, FOR_CATEGORIES } from '@/lib/skill-display'
 import NewsletterSignup from '@/components/NewsletterSignup'
 import RankedSection from '@/components/RankedSection'
@@ -9,7 +10,7 @@ import RankedSection from '@/components/RankedSection'
 // Programmatic "best of" roundups, one per catalog category. They rank for
 // "best <category> …" queries, link 20+ skill pages each (the crawl found
 // most skill pages hanging off a single link), and carry the signup form.
-// Rendered on first request and refreshed daily, like skill pages.
+// Rendered on first request and refreshed weekly (docs/COSTS.md).
 export const revalidate = 604800
 export const dynamicParams = true
 export function generateStaticParams() { return [] }
@@ -27,6 +28,18 @@ async function getJson(path) {
   }
 }
 
+// Labels such as "Claude skills" and "MCP servers" already name the thing;
+// appending "AI skills" produced "Best Claude skills AI skills".
+function nounFor(label) {
+  return /\b(skills|servers|starters|tools)$/i.test(label) ? label : `${label} AI skills`
+}
+
+// Mid-sentence form: lower-case except proper nouns and acronyms, so the
+// description reads "open-source Claude skills", not "claude skills".
+function inSentence(text) {
+  return text.split(' ').map((w) => (/^(Claude|MCP|SaaS|AI)$/.test(w) ? w : w.toLowerCase())).join(' ')
+}
+
 function monthYear() {
   return new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' })
 }
@@ -35,8 +48,12 @@ export async function generateMetadata({ params }) {
   const label = LABELS[params.category]
   if (!label) return { title: 'Not found | WorkflowStacks' }
   return {
-    title: `Best ${label} AI skills (${monthYear()}) — ranked by GitHub stars | WorkflowStacks`,
-    description: `The best open-source ${label.toLowerCase()} on WorkflowStacks, ranked by GitHub stars, plus the ones gaining the most stars this week and what’s new. Updated daily from the GitHub API.`,
+    title: seoTitle(`Best ${nounFor(label)} (${monthYear()})`),
+    // The page regenerates weekly (revalidate above); it used to say "daily".
+    description: seoDescription(
+      `The best open-source ${inSentence(nounFor(label))}, ranked by GitHub stars, plus this week's fastest risers and what's new.`,
+      'Refreshed weekly.',
+    ),
     alternates: { canonical: `/best/${params.category}` },
   }
 }
@@ -63,7 +80,7 @@ export default async function BestCategoryPage({ params }) {
   const itemList = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: `Best ${label} AI skills, ranked by GitHub stars`,
+    name: `Best ${nounFor(label)}, ranked by GitHub stars`,
     url: `${BASE}/best/${category}`,
     itemListOrder: 'https://schema.org/ItemListOrderDescending',
     numberOfItems: top.length,
@@ -80,10 +97,10 @@ export default async function BestCategoryPage({ params }) {
           <div className="t-mono text-[11px] font-semibold uppercase tracking-widest text-[#C6F24E]">
             <Link href="/best" className="hover:underline">Best by category</Link> · {monthYear()}
           </div>
-          <h1 className="mt-2 text-4xl font-bold tracking-tight text-text-primary">Best {label} AI skills</h1>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight text-text-primary">Best {nounFor(label)}</h1>
           <p className="mt-3 text-[15.5px] leading-relaxed text-text-muted">
-            {total ? `${Number(total).toLocaleString('en-US')} open-source ${label.toLowerCase()} in the catalog, ` : `Open-source ${label.toLowerCase()}, `}
-            ranked by GitHub stars and refreshed daily. The Hot section uses stars gained in the last 7 days, so newer repos can appear there before they reach the top list.
+            {total ? `${Number(total).toLocaleString('en-US')} open-source ${inSentence(label)} in the catalog, ` : `Open-source ${inSentence(label)}, `}
+            ranked by GitHub stars and refreshed weekly. The Hot section uses stars gained in the last 7 days, so newer repos can appear there before they reach the top list.
           </p>
         </header>
 
@@ -102,7 +119,7 @@ export default async function BestCategoryPage({ params }) {
           <aside className="space-y-6 lg:sticky lg:top-24 lg:self-start">
             <NewsletterSignup
               source="best-page"
-              headline={`New ${label.toLowerCase()} worth knowing, every Monday.`}
+              headline={`New ${inSentence(label)} worth knowing, every Monday.`}
               sub="The five skills gaining the most GitHub stars each week, across every category. One email, unsubscribe anytime."
             />
             <div className="rounded-xl border border-[#262B2D] bg-[#101314] p-5">
@@ -115,7 +132,7 @@ export default async function BestCategoryPage({ params }) {
                 ))}
               </ul>
               <p className="mt-4 text-[13px] text-text-muted">
-                <Link href={`/skills?category=${encodeURIComponent(category)}`} className="text-[#C6F24E]">Browse all {label.toLowerCase()} →</Link>
+                <Link href={`/skills?category=${encodeURIComponent(category)}`} className="text-[#C6F24E]">Browse all {inSentence(label)} →</Link>
               </p>
             </div>
           </aside>

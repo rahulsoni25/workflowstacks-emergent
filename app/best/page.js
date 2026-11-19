@@ -53,7 +53,7 @@ export default async function BestIndexPage() {
         <header className="max-w-2xl">
           <h1 className="text-4xl font-bold tracking-tight text-text-primary">Best AI skills by category</h1>
           <p className="mt-3 text-[15.5px] leading-relaxed text-text-muted">
-            Every list is computed from GitHub data — total stars for the ranking, stars gained this week for what’s hot — and refreshed daily. No sponsored placements.
+            Every list is computed from GitHub data — total stars for the ranking, stars gained this week for what’s hot — and refreshed weekly. No sponsored placements.
           </p>
         </header>
         <div className="mt-10 grid gap-10 lg:grid-cols-[3fr_2fr]">

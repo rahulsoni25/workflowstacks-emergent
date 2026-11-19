@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { getSlashCommand, SLASH_COMMANDS } from '@/lib/commands'
 import { softwareSourceCodeSchema, breadcrumbSchema } from '@/lib/schema'
 import CopyCommand from './CopyCommand'
+import { seoTitle, seoDescription } from '@/lib/seo-text'
 
 export function generateStaticParams() {
   return Object.keys(SLASH_COMMANDS).map((slug) => ({ slug }))
@@ -15,8 +16,8 @@ export function generateMetadata({ params }) {
   const c = getSlashCommand(params.slug)
   if (!c) return {}
   return {
-    title: `${c.name} — Claude Code Slash Command | WorkflowStacks`,
-    description: `${c.blurb} Real, verified command file — copy it straight into .claude/commands/.`,
+    title: seoTitle(`${c.name} — Claude Code Slash Command`),
+    description: seoDescription(c.blurb, 'Verified command file — copy it into .claude/commands/.'),
     alternates: { canonical: `/commands/${c.slug}` },
   }
 }

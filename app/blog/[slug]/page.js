@@ -9,6 +9,7 @@ import Toc from '@/components/blog/Toc'
 import Prose from '@/components/blog/Prose'
 import PostCard from '@/components/blog/PostCard'
 import NewsletterSignup from '@/components/NewsletterSignup'
+import { seoTitle, seoDescription } from '@/lib/seo-text'
 
 export const revalidate = 21600
 // Slugs come from Mongo, not a registry — render on demand.
@@ -19,8 +20,8 @@ export async function generateMetadata({ params }) {
   const post = await getPublishedBySlug(params.slug)
   if (!post) return {}
   return {
-    title: post.meta_title || post.title,
-    description: post.meta_description || post.excerpt,
+    title: seoTitle(post.meta_title || post.title, { brand: '' }),
+    description: seoDescription(post.meta_description || post.excerpt),
     alternates: { canonical: `/blog/${post.slug}` },
     openGraph: {
       title: post.title,

@@ -11,14 +11,19 @@ export default function robots() {
       {
         // Explicitly welcome AI / answer engines (GEO) so we appear in
         // ChatGPT, Perplexity, Claude, Gemini and Google AI Overviews.
+        // Claude-SearchBot (indexing for Claude's search) and Claude-User
+        // (fetches made while answering a user) are Anthropic's current
+        // agents; Claude-Web and anthropic-ai are older names kept so the old
+        // tokens still match. A crawler obeys only its most specific group, so
+        // this group repeats every disallow from '*' — /my-agents was missing.
         userAgent: [
           'GPTBot', 'OAI-SearchBot', 'ChatGPT-User',
-          'ClaudeBot', 'Claude-Web', 'anthropic-ai',
+          'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'Claude-Web', 'anthropic-ai',
           'PerplexityBot', 'Perplexity-User',
           'Google-Extended', 'Applebot-Extended', 'Amazonbot', 'CCBot',
         ],
         allow: '/',
-        disallow: ['/api/', '/admin', '/earnings'],
+        disallow: ['/api/', '/my-agents', '/admin', '/earnings'],
       },
       {
         // Third-party SEO-tool and scraper crawlers. They send no visitors, but

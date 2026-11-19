@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { getOutcome, OUTCOMES } from '@/lib/outcomes'
 import { getTemplate } from '@/lib/templates'
 import { breadcrumbSchema } from '@/lib/schema'
+import { seoDescription } from '@/lib/seo-text'
 
 export function generateStaticParams() {
   return Object.keys(OUTCOMES).map((slug) => ({ slug }))
@@ -14,11 +15,12 @@ export function generateStaticParams() {
 export function generateMetadata({ params }) {
   const o = getOutcome(params.slug)
   if (!o) return {}
+  const description = seoDescription(o.metaDescription)
   return {
     title: o.title,
-    description: o.metaDescription,
+    description,
     alternates: { canonical: `/automate/${o.slug}` },
-    openGraph: { title: o.title, description: o.metaDescription, url: `/automate/${o.slug}` },
+    openGraph: { title: o.title, description, url: `/automate/${o.slug}` },
   }
 }
 

@@ -8,6 +8,7 @@ import { getTemplate } from '@/lib/templates'
 import { itemListSchema, breadcrumbSchema } from '@/lib/schema'
 import Breadcrumb from '@/components/Breadcrumb'
 import AssetLink from './AssetLink'
+import { seoTitle, seoDescription } from '@/lib/seo-text'
 
 // Finishing Kits — curated, link-only asset bundles matched to one specific
 // hero template's output style. See lib/kits.js for why this exists and why
@@ -20,11 +21,13 @@ export function generateStaticParams() {
 export function generateMetadata({ params }) {
   const kit = getKit(params.slug)
   if (!kit) return {}
+  const title = seoTitle(kit.title_seo, { brand: '' })
+  const description = seoDescription(kit.metaDescription)
   return {
-    title: kit.title_seo,
-    description: kit.metaDescription,
+    title,
+    description,
     alternates: { canonical: `/kits/${kit.slug}` },
-    openGraph: { title: kit.title_seo, description: kit.metaDescription, url: `/kits/${kit.slug}` },
+    openGraph: { title, description, url: `/kits/${kit.slug}` },
   }
 }
 

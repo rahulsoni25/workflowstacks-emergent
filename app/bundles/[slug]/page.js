@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { getBundle, BUNDLES } from '@/lib/bundles'
 import { productSchema, breadcrumbSchema } from '@/lib/schema'
 import BundleSalesClient from './BundleSalesClient'
+import { seoTitle, seoDescription } from '@/lib/seo-text'
 
 export function generateStaticParams() {
   return Object.keys(BUNDLES).map((slug) => ({ slug }))
@@ -11,8 +12,8 @@ export function generateMetadata({ params }) {
   const b = getBundle(params.slug)
   if (!b) return {}
   return {
-    title: `${b.title} — Premium Workflow | WorkflowStacks`,
-    description: b.description,
+    title: seoTitle(`${b.title} — Premium Workflow`),
+    description: seoDescription(b.description),
     alternates: { canonical: `/bundles/${b.slug}` },
   }
 }

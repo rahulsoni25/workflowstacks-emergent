@@ -31,7 +31,7 @@ export async function generateMetadata() {
   const catalog = count ? `Browse ${count} quality-gated open-source AI skills free.` : 'Browse a quality-gated catalog of open-source AI skills free.'
   return {
     title: 'Pricing — Free Catalog, Tools & Done-For-You | WorkflowStacks',
-    description: `${catalog} Buy premium automation tools one-time ($29–$39). Or have us build your working agent from $500, delivered in 7 days.`,
+    description: `${catalog} Premium tools are a one-time $29–$39. Done-for-you agents from $500 in 7 days.`,
     alternates: { canonical: '/pricing' },
   }
 }

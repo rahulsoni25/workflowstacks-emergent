@@ -9,6 +9,7 @@ import { outcomesForTemplate } from '@/lib/outcomes'
 import { kitForTemplate } from '@/lib/kits'
 import { softwareApplicationSchema, breadcrumbSchema } from '@/lib/schema'
 import DownloadButtons from './DownloadButtons'
+import { seoTitle, seoDescription } from '@/lib/seo-text'
 
 // Outcome-template landing pages — "download a working agent" is the new
 // magic moment. One static page per hand-built, tested template.
@@ -21,8 +22,8 @@ export function generateMetadata({ params }) {
   const tpl = getTemplate(params.slug)
   if (!tpl) return {}
   return {
-    title: `${tpl.title} — Free Working Template | WorkflowStacks`,
-    description: `${tpl.outcome} Free, importable n8n workflow — set up in ~${tpl.setup_minutes} minutes, no code.`,
+    title: seoTitle(`${tpl.title} — Free Working Template`),
+    description: seoDescription(tpl.outcome, `Free n8n workflow, ~${tpl.setup_minutes} min setup, no code.`),
     alternates: { canonical: `/templates/${tpl.slug}` },
   }
 }
