@@ -43,6 +43,19 @@ jobs:
           echo "today=$(date -u +%F)" >> $GITHUB_OUTPUT
           mkdir -p /tmp/seo
 
+      # On 16 Nov 2026 the site answered 402 (project paused) and this job still
+      # committed a report: 0 sitemap URLs, audit 4.9/10, "Payment re…" as every
+      # indexation verdict. A report about the error page is worse than none —
+      # the next week is compared against it.
+      - name: Site must be up
+        run: |
+          CODE=$(curl -s -o /tmp/seo/home.txt -w '%{http_code}' --max-time 30 "$BASE_URL/")
+          echo "home: HTTP $CODE"
+          if [ "$CODE" != "200" ]; then
+            echo "::error::$BASE_URL answered HTTP $CODE ($(head -c 80 /tmp/seo/home.txt)). No report written."
+            exit 1
+          fi
+
       - name: Search Console pulls
         run: |
           H="x-admin-secret: ${{ secrets.ADMIN_SECRET }}"

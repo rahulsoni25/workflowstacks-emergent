@@ -2298,10 +2298,30 @@ export async function GET(request) {
 
       let sentCount = 0;
       const failures = [];
+      const rejected = []; // addresses Resend refused outright (422 on the `to` field)
+      let firstDetail = null;
       for (const sub of subscribers) {
         const r = await sendEmail({ to: sub.email, subject, html: dailyEmailHtml(skill, reason, sub.email, sub.source) });
-        if (r.ok) sentCount++;
-        else { failures.push(r.error); console.error('Daily send failed for', sub.email, r.error); }
+        if (r.ok) { sentCount++; continue; }
+        console.error('Daily send failed for', sub.email, r.error, r.detail || '');
+        if (!firstDetail && r.detail) firstDetail = r.detail;
+        if (r.status === 422 && /`to`|"to"|\bto field|recipient/i.test(r.detail || '')) rejected.push(sub);
+        else failures.push(r.error);
+      }
+      // An address Resend will never accept (three leftover @example.com test
+      // rows kept this job red from 21 Sept to 20 Nov 2026) is retired instead
+      // of retried forever. Only when other sends went through in the same run:
+      // if nothing was delivered the fault is ours, not the recipients'.
+      let invalidCount = 0;
+      if (rejected.length && sentCount > 0) {
+        const now = new Date();
+        const res = await database.collection('subscribers').updateMany(
+          { _id: { $in: rejected.map((s) => s._id) } },
+          { $set: { status: 'unsubscribed', unsubscribed_at: now, unsubscribe_via: 'invalid-address' } }
+        );
+        invalidCount = res.modifiedCount;
+      } else {
+        for (const s of rejected) failures.push('resend 422');
       }
 
       await database.collection('newsletter_sends').insertOne({
@@ -2315,12 +2335,14 @@ export async function GET(request) {
         sent_at: new Date(),
         recipient_count: sentCount,
         failed_count: failures.length,
+        invalid_count: invalidCount,
         first_error: failures[0] || null,
       });
 
       return Response.json({
         ok: failures.length === 0, sent: sentCount, failed: failures.length,
-        ...(failures.length ? { first_error: failures[0], errors: [...new Set(failures)].slice(0, 3) } : {}),
+        ...(invalidCount ? { invalid_removed: invalidCount } : {}),
+        ...(failures.length ? { first_error: failures[0], errors: [...new Set(failures)].slice(0, 3), detail: firstDetail } : {}),
         skill: skill.name, reason, recycled: picked.recycled,
       });
     }
