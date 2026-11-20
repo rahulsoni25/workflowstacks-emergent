@@ -21,8 +21,8 @@ async function connectDB() {
   return db;
 }
 
-// Provider resolution: OpenRouter preferred (one key, many models, free tiers),
-// then native Anthropic, else free heuristic.
+// Provider resolution: Groq, then OpenRouter, then native Anthropic. With no
+// key the provider is 'heuristic' and every LLM mode refuses to run.
 function resolveProvider() {
   // Groq first — free tier is fast + generous (great for bulk enrichment).
   if (process.env.GROQ_API_KEY) {
@@ -31,9 +31,9 @@ function resolveProvider() {
       // llama-3.3-70b-versatile moved to Groq's Enterprise-only tier (per
       // Groq's own docs; confirmed 404 -- "does not exist or you do not have
       // access to it" -- against a free-tier key on 2026-09-29). Any call on
-      // this route with GROQ_API_KEY set would throw and silently fall back
-      // to rewriteHeuristic() -- lower-quality, non-LLM copy, indistinguishable
-      // from a "working" response since the route never fails the request.
+      // this route with GROQ_API_KEY set would throw and (at the time) silently
+      // fall back to heuristic, non-LLM copy -- indistinguishable from a
+      // "working" response since the route never failed the request.
       // openai/gpt-oss-120b confirmed live against Groq's real
       // /openai/v1/models catalog the same day.
       model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
@@ -78,12 +78,15 @@ function rewriteCandidates({ onlyNew }) {
     // LLM failed on it recently: let the next runs move on to other skills.
     { $or: [{ rewrite_failed_at: { $exists: false } }, { rewrite_failed_at: { $lt: retryCutoff } }] },
   ];
-  // onlyNew narrows any other selection to skills that have never been
-  // rewritten. It used to be dropped whenever pending=true was also set, so the
-  // daily workflow (onlyNew=true&pending=true) selected every skill not
-  // rewritten by the current provider -- the whole catalog after a provider
-  // change.
-  if (onlyNew) conditions.push({ title_human: { $exists: false } });
+  // onlyNew narrows any other selection to skills with no LLM copy: never
+  // rewritten, or still holding the heuristic copy this route used to write
+  // when the LLM failed (it no longer writes any, so those rows only shrink).
+  // It used to be dropped whenever pending=true was also set, so the daily
+  // workflow (onlyNew=true&pending=true) selected every skill not rewritten by
+  // the current provider -- the whole catalog after a provider change.
+  if (onlyNew) {
+    conditions.push({ $or: [{ title_human: { $exists: false } }, { rewritten_by: 'heuristic' }] });
+  }
   return conditions;
 }
 
@@ -357,38 +360,6 @@ async function enrichPersona(persona, skills) {
   };
 }
 
-// ---- Free heuristic fallback (no API key needed) ------------------------
-function rewriteHeuristic(skill) {
-  const name = skill.name
-    .split(/[-_]/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-  const desc = skill.description_original || skill.description || '';
-  const stars = formatStars(skill.github_stars || 0);
-
-  const hooks = {
-    'mcp-server': 'Connect your AI to real tools',
-    'claude-skill': 'Supercharge Claude',
-    'ai-agent': 'Build agents that do the work',
-    marketing: 'Grow without a marketing team',
-    sales: 'Book more meetings on autopilot',
-    'saas-starter': 'Ship your SaaS in days, not months',
-    automation: 'Automate the busywork',
-    analytics: 'Turn data into decisions',
-    support: 'Cut support tickets with AI',
-    design: 'Design faster, no designer needed',
-    prompt: 'Get better AI results instantly',
-    'founder-resource': 'A founder shortcut worth bookmarking'
-  };
-  const hook = hooks[skill.category] || 'A free tool worth your time';
-  const cleanDesc = desc.split('.')[0].substring(0, 120);
-
-  return {
-    title: `${name} — ${hook}`,
-    description: `${cleanDesc}${cleanDesc ? '. ' : ''}${stars ? stars + '.' : ''}`.trim()
-  };
-}
-
 // Simple concurrency pool
 async function pool(items, size, worker) {
   const results = [];
@@ -550,6 +521,7 @@ async function handle(request) {
     const skills = await cur.toArray();
 
     let updated = 0;
+    let llmFailed = 0;
     const scoreboard = [];
     // Small pool — free models are rate-limited
     await pool(skills, 2, async (skill) => {
@@ -575,7 +547,16 @@ async function handle(request) {
         }
         if (judged.score >= target) break;
       }
-      if (!chosen) chosen = { result: rewriteHeuristic(skill), score: 0, model: 'heuristic', reason: 'all models failed' };
+      if (!chosen) {
+        // Every model failed: same rule as the default mode -- no copy
+        // written, not counted, no revalidatePath; only stamp the attempt.
+        llmFailed++;
+        await database.collection('skills').updateOne(
+          { id: skill.id },
+          { $set: { rewrite_failed_at: new Date() } }
+        );
+        return;
+      }
 
       await database.collection('skills').updateOne(
         { id: skill.id },
@@ -589,7 +570,8 @@ async function handle(request) {
             rewrite_score: chosen.score,
             rewrite_trail: trail,
             rewritten_at: new Date()
-          }
+          },
+          $unset: { rewrite_failed_at: '' }
         }
       );
       revalidateSkill(skill);
@@ -611,9 +593,19 @@ async function handle(request) {
       judge: judgeModel,
       target,
       updated,
+      llmFailures: llmFailed,
       averageScore: Number(avg),
       scoreboard: scoreboard.sort((a, b) => b.score - a.score)
     });
+  }
+
+  // No LLM key: refuse, like the enrich modes. This mode used to write
+  // template copy with published:false instead, hiding every skill it touched.
+  if (PROVIDER.name === 'heuristic') {
+    return Response.json(
+      { error: 'Rewriting needs an LLM key (GROQ_API_KEY, OPENROUTER_API_KEY or ANTHROPIC_API_KEY)' },
+      { status: 400 }
+    );
   }
 
   // pending=true selects only skills not yet rewritten by the current LLM provider,
@@ -625,16 +617,18 @@ async function handle(request) {
     conditions.push({ rewritten_by: { $ne: PROVIDER.name } });
   }
   const query = { $and: conditions };
-  // Stable order so skip/limit pagination is consistent across force re-runs
-  let cursor = database.collection('skills').find(query).sort({ _id: 1 });
+  // ?top=true (the daily workflow sends it) takes the most-starred skills
+  // first. _id keeps the order stable so skip/limit pagination is consistent
+  // across force re-runs.
+  const sort = searchParams.get('top') === 'true' ? { github_stars: -1, _id: 1 } : { _id: 1 };
+  let cursor = database.collection('skills').find(query).sort(sort);
   const skip = parseInt(searchParams.get('skip') || '0', 10);
   if (skip > 0) cursor = cursor.skip(skip);
   if (limit > 0) cursor = cursor.limit(limit);
   const skills = await cursor.toArray();
 
-  const useLLM = PROVIDER.name !== 'heuristic';
   // Quality gate: judge each rewrite and only publish if it scores >= gateMin.
-  const gate = searchParams.get('gate') !== 'false' && useLLM;
+  const gate = searchParams.get('gate') !== 'false';
   const gateMin = Math.min(10, parseInt(searchParams.get('gateMin') || '8', 10));
   const judgeModel = searchParams.get('judge') || PROVIDER.model;
   let updated = 0;
@@ -644,38 +638,32 @@ async function handle(request) {
   const errors = [];
   // Openers already in the catalog, so this batch doesn't add to a pile-up
   // of "Get X with Y" listings that reads as templated at catalog scale.
-  const bannedOpeners = useLLM ? await recentOpeners(database) : [];
+  const bannedOpeners = await recentOpeners(database);
 
-  await pool(skills, useLLM ? 4 : 20, async (skill) => {
+  await pool(skills, 4, async (skill) => {
     let result;
-    let by = 'heuristic';
-    if (useLLM) {
-      try {
-        result = await rewriteWithLLM(skill, undefined, bannedOpeners);
-        by = PROVIDER.name;
-        llmOk++;
-      } catch (e) {
-        // LLM failed (outage, rate limit, bad JSON). Leave the skill exactly
-        // as it is -- no fallback copy, no published flip, no revalidatePath,
-        // not counted as updated -- and only stamp the attempt. Writing
-        // heuristic copy with published:false here meant a provider outage
-        // unpublished and revalidated up to 25 x 6 skills per workflow run.
-        llmFailed++;
-        if (errors.length < 5) errors.push(`${skill.name}: ${e.message}`);
-        await database.collection('skills').updateOne(
-          { id: skill.id },
-          { $set: { rewrite_failed_at: new Date() } }
-        );
-        return;
-      }
-    } else {
-      result = rewriteHeuristic(skill);
+    try {
+      result = await rewriteWithLLM(skill, undefined, bannedOpeners);
+      llmOk++;
+    } catch (e) {
+      // LLM failed (outage, rate limit, bad JSON). Leave the skill exactly
+      // as it is -- no fallback copy, no published flip, no revalidatePath,
+      // not counted as updated -- and only stamp the attempt. Writing
+      // heuristic copy with published:false here meant a provider outage
+      // unpublished and revalidated up to 25 x 6 skills per workflow run.
+      llmFailed++;
+      if (errors.length < 5) errors.push(`${skill.name}: ${e.message}`);
+      await database.collection('skills').updateOne(
+        { id: skill.id },
+        { $set: { rewrite_failed_at: new Date() } }
+      );
+      return;
     }
 
     // Quality gate — judge the rewrite; publish only if it clears the bar.
     let score = null;
     let published = true; // default-publish when gate is off
-    if (gate && by !== 'heuristic') {
+    if (gate) {
       try {
         const verdict = await judgeCopy(skill, result, judgeModel);
         score = verdict.score;
@@ -683,8 +671,6 @@ async function handle(request) {
       } catch (e) {
         published = true; // don't hide good work if the judge errors
       }
-    } else if (by === 'heuristic') {
-      published = false; // weak fallback copy stays hidden for retry
     }
     if (published) publishedCount++;
 
@@ -696,7 +682,7 @@ async function handle(request) {
           description_human: result.description,
           name_original: skill.name_original || skill.name,
           description_original: skill.description_original || skill.description,
-          rewritten_by: by,
+          rewritten_by: PROVIDER.name,
           rewritten_at: new Date(),
           rewrite_score: score,
           rewrite_status: published ? 'done' : 'pending',
@@ -711,7 +697,7 @@ async function handle(request) {
 
   return Response.json({
     success: true,
-    engine: useLLM ? `${PROVIDER.name} (${PROVIDER.model})` : 'heuristic (no LLM key set)',
+    engine: `${PROVIDER.name} (${PROVIDER.model})`,
     total: skills.length,
     updated,
     published: publishedCount,
@@ -720,10 +706,7 @@ async function handle(request) {
     // nothing this batch (outage, or nothing left to do), so it stops.
     llmRewrites: llmOk,
     llmFailures: llmFailed,
-    sampleErrors: errors,
-    tip: useLLM
-      ? undefined
-      : 'Add OPENROUTER_API_KEY (or ANTHROPIC_API_KEY) to .env.local for AI-quality, unique copy.'
+    sampleErrors: errors
   });
 }
 

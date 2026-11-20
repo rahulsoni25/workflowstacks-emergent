@@ -35,8 +35,10 @@ jobs:
           # `updated`: when the provider is down a batch rewrites nothing, and
           # another batch would only spend calls against an outage.
           for i in $(seq 1 25); do
-            R=$(curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
-              "$BASE_URL/api/agent-rewrite?onlyNew=true&pending=true&top=true&limit=6") || break
+            # --fail-with-body keeps the endpoint's error (e.g. no LLM key) in the log.
+            R=$(curl -sS --fail-with-body -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/agent-rewrite?onlyNew=true&pending=true&top=true&limit=6") \
+              || { echo "agent-rewrite failed: $R"; break; }
             L=$(echo "$R" | jq -r '.llmRewrites // 0')
             F=$(echo "$R" | jq -r '.llmFailures // 0')
             P=$(echo "$R" | jq -r '.published // 0')
