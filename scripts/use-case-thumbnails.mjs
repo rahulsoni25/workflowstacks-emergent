@@ -35,7 +35,15 @@ const posters = [
   { slug: 'mavericks-ad-film', shape: 'h', win: '3/4', pos: '50% 50%', glow: 'rgba(127,209,185,.38)', dur: '0:42',
     eyebrow: 'Festive events · Dubai', name: 'Mavericks Foody House', role: 'Ad film',
     title: 'Book your festive event today!' },
+  { slug: 'al-meeraj-episode-01', shape: 'h', win: '3/4', pos: '50% 50%', glow: 'rgba(255,74,28,.45)', dur: '0:56',
+    eyebrow: 'Al Meeraj · Al Quoz, Dubai', name: 'Al Meeraj Auto', role: 'Episode 01 · The Breakdown',
+    title: 'Book your service' },
+  { slug: 'fluodigital-digital-empire', shape: 'h', win: '3/4', pos: '88% 50%', glow: 'rgba(255,46,136,.40)', dur: '0:38',
+    eyebrow: 'A FluoDigital original', name: 'The Digital Empire', role: 'Multiply yourself',
+    title: 'Zero cameras. Zero burnout.', site: 'fluodigital.com' },
 ];
+// ONLY=slug,slug renders just those posters (the others' win-*.jpg crops need not be present).
+const ONLY = process.env.ONLY ? new Set(process.env.ONLY.split(',')) : null;
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const css = `
@@ -89,7 +97,7 @@ function html(p) {
   const b = await chromium.launch();
   const page = await b.newPage({ viewport: { width: 1400, height: 1400 }, deviceScaleFactor: 1 });
   const centers = {};
-  for (const p of posters) {
+  for (const p of posters.filter(q => !ONLY || ONLY.has(q.slug))) {
     const file = path.join(DIR, `poster-${p.slug}.html`);
     fs.writeFileSync(file, html(p));
     await page.goto('file://' + file, { waitUntil: 'networkidle' });
