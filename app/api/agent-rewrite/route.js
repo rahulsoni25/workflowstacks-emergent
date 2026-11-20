@@ -61,6 +61,32 @@ const PROVIDER = resolveProvider();
 // re-paying for) the same failures. Longer than the 24h workflow interval.
 const RETRY_FAILED_AFTER_MS = 3 * 24 * 60 * 60 * 1000;
 
+// Selection rules shared by the modes that write (default and ?best=true).
+// The judge decides `published` on every rewrite, so selecting a skill is
+// enough to publish it: skills hidden for any reason other than "awaiting a
+// rewrite" must never be selected.
+function rewriteCandidates({ onlyNew }) {
+  const retryCutoff = new Date(Date.now() - RETRY_FAILED_AFTER_MS);
+  const conditions = [
+    // User submission blocked by the content-safety screen ("never published").
+    { flagged: { $ne: true } },
+    { rewrite_status: { $ne: 'blocked' } },
+    // Spam trust gate, an admin's hidden_reason, a deleted/archived repo.
+    { hidden: { $ne: true } },
+    { hidden_reason: { $in: [null, ''] } },
+    { dead_repo: { $ne: true } },
+    // LLM failed on it recently: let the next runs move on to other skills.
+    { $or: [{ rewrite_failed_at: { $exists: false } }, { rewrite_failed_at: { $lt: retryCutoff } }] },
+  ];
+  // onlyNew narrows any other selection to skills that have never been
+  // rewritten. It used to be dropped whenever pending=true was also set, so the
+  // daily workflow (onlyNew=true&pending=true) selected every skill not
+  // rewritten by the current provider -- the whole catalog after a provider
+  // change.
+  if (onlyNew) conditions.push({ title_human: { $exists: false } });
+  return conditions;
+}
+
 // Format star count for honest social proof (no invented numbers)
 function formatStars(stars) {
   if (!stars) return '';
@@ -519,8 +545,7 @@ async function handle(request) {
     const judgeModel = searchParams.get('judge') || 'anthropic/claude-3.5-haiku';
     const target = Math.min(10, parseInt(searchParams.get('target') || '9', 10));
 
-    const q = onlyNew ? { title_human: { $exists: false } } : {};
-    let cur = database.collection('skills').find(q);
+    let cur = database.collection('skills').find({ $and: rewriteCandidates({ onlyNew }) });
     if (limit > 0) cur = cur.limit(limit);
     const skills = await cur.toArray();
 
@@ -593,24 +618,12 @@ async function handle(request) {
 
   // pending=true selects only skills not yet rewritten by the current LLM provider,
   // so production runs can batch through all rows within the 60s function limit.
-  const conditions = [];
+  const conditions = rewriteCandidates({ onlyNew });
   if (searchParams.get('unpublished') === 'true') {
     conditions.push({ published: false });
   } else if (searchParams.get('pending') === 'true') {
     conditions.push({ rewritten_by: { $ne: PROVIDER.name } });
   }
-  // onlyNew narrows any selection above to skills that have never been
-  // rewritten. It used to be dropped whenever pending=true was also set, so the
-  // daily workflow (onlyNew=true&pending=true) selected every skill not
-  // rewritten by the current provider -- the whole catalog after a provider
-  // change.
-  if (onlyNew) conditions.push({ title_human: { $exists: false } });
-  // Skip skills whose LLM rewrite failed recently (see the catch below), so a
-  // run moves on to other skills instead of re-hitting the same ones.
-  const retryCutoff = new Date(Date.now() - RETRY_FAILED_AFTER_MS);
-  conditions.push({
-    $or: [{ rewrite_failed_at: { $exists: false } }, { rewrite_failed_at: { $lt: retryCutoff } }],
-  });
   const query = { $and: conditions };
   // Stable order so skip/limit pagination is consistent across force re-runs
   let cursor = database.collection('skills').find(query).sort({ _id: 1 });
