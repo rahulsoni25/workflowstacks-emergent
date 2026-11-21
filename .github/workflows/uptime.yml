@@ -1,0 +1,87 @@
+name: Uptime
+
+# Is the site answering? From 14 to 18 Nov 2026 every page returned
+# 402 "Payment required" (Vercel had paused the project) and nothing in this
+# repo noticed: the daily jobs that call the site either stayed green or were
+# already red for another reason. This opens ONE issue when the site is down,
+# comments on it while it stays down, and closes it when the site is back —
+# GitHub emails the owner on each of those.
+#
+# Four runs a day is the most the cost guard allows for a job that calls the
+# site (docs/COSTS.md). The three URLs are CDN-cached pages, so a check costs
+# three edge requests and no function time.
+on:
+  schedule:
+    - cron: '7 */6 * * *'
+  workflow_dispatch: {}
+
+env:
+  BASE_URL: https://workflowstacks.com
+
+permissions:
+  issues: write
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe
+        id: probe
+        run: |
+          BAD=""
+          for p in / /skills /sitemap.xml; do
+            CODE=$(curl -s -o /tmp/body.txt -w '%{http_code}' --max-time 30 "$BASE_URL$p" || true)
+            echo "$p -> HTTP $CODE"
+            if [ "$CODE" != "200" ]; then
+              # One retry: a single cold start or network blip is not an outage.
+              sleep 20
+              CODE=$(curl -s -o /tmp/body.txt -w '%{http_code}' --max-time 30 "$BASE_URL$p" || true)
+              echo "$p -> HTTP $CODE (retry)"
+            fi
+            if [ "$CODE" != "200" ]; then
+              BAD="$BAD$p: HTTP $CODE ($(head -c 60 /tmp/body.txt | tr -d '\r\n`'))\n"
+            fi
+          done
+          {
+            echo "bad<<UPTIME_PROBE_END"
+            printf '%b' "$BAD"
+            echo "UPTIME_PROBE_END"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open, update or close the outage issue
+        uses: actions/github-script@v7
+        env:
+          BAD: ${{ steps.probe.outputs.bad }}
+        with:
+          script: |
+            const { owner, repo } = context.repo
+            const bad = (process.env.BAD || '').trim()
+            const now = new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC'
+            const { data: open } = await github.rest.issues.listForRepo({ owner, repo, state: 'open', labels: 'site-down', per_page: 5 })
+            if (!bad) {
+              for (const i of open) {
+                await github.rest.issues.createComment({ owner, repo, issue_number: i.number, body: `Back up at ${now}: all probes answered 200.` })
+                await github.rest.issues.update({ owner, repo, issue_number: i.number, state: 'closed' })
+              }
+              core.info('site is up')
+              return
+            }
+            const detail = '```\n' + bad + '\n```'
+            if (open.length) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: open[0].number, body: `Still down at ${now}.\n\n${detail}` })
+            } else {
+              const paused = /HTTP 402/.test(bad)
+              await github.rest.issues.create({
+                owner, repo, labels: ['site-down'],
+                title: `SITE DOWN: workflowstacks.com is not answering (${now})`,
+                body: `${detail}\n\n${paused
+                  ? 'HTTP 402 "Payment required" is what Vercel serves for a paused project: usage went over the plan\'s included amount, or the account was restricted. Open the Vercel dashboard → Usage and the project\'s banner. See docs/COSTS.md.'
+                  : 'Check the Vercel dashboard for the latest deployment and the project status.'}\n\nThis issue is commented on every six hours while the site stays down and closes itself when it is back.`,
+              })
+            }
+            core.setFailed(`site is down:\n${bad}`)
