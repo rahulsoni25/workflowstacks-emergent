@@ -2,6 +2,7 @@ import HomeClient from './HomeClient'
 import { homeFaqs } from '@/lib/home-faqs'
 import { SITE_URL as BASE } from '@/lib/site-url'
 import { isAiRelevant, qualityRank } from '@/lib/skill-relevance'
+import { passesSkillGate } from '@/lib/skill-gate'
 
 // The root layout no longer sets alternates.canonical — it silently applied
 // '/' to every route that forgot to declare one, so /help, /join and
@@ -78,9 +79,16 @@ export default async function HomePage() {
   // `category` that might have caught them files all three as `ai-agent`.
   // Ask for a wider slice, then pick on topical relevance and our own rewrite
   // quality. Still one request. See lib/skill-relevance.js.
+  //
+  // passesSkillGate (2026-11-23): the homepage is the one page Google has
+  // indexed, so these six links are the only internal links it is sure to
+  // follow. The rail used to stop at relevance and could link a page that
+  // carries noindex under lib/skill-gate.js (mcp-toolbox: score 9, but 561
+  // chars of guide against the 600 floor). Checked against the live API that
+  // day: 8 of the 60 trending candidates pass both filters, enough for six.
   const [skillsData, statsData, hotData] = await Promise.all([getJson('/api/skills?sort=trending&limit=60'), getJson('/api/stats'), getJson('/api/hot')])
   const featured = (skillsData?.skills || [])
-    .filter((s) => s.slug && !s.dead_repo && isAiRelevant(s, { strict: true }))
+    .filter((s) => s.slug && !s.dead_repo && isAiRelevant(s, { strict: true }) && passesSkillGate(s))
     .sort((a, b) => qualityRank(b) - qualityRank(a))
     .slice(0, 6)
     .map(trimSkill)
@@ -99,6 +107,10 @@ export default async function HomePage() {
   // /skills/<uuid> link from the homepage was one of the 27 UUID URLs the
   // weekly crawl kept finding. The slug backfill now runs daily, so this
   // filter should rarely drop anything.
+  // No index gate here on purpose: this strip IS the week's ranking, and
+  // filtering it would misreport it. Instead the daily
+  // /api/agent-rewrite?mode=hot-gate run (refresh-content.yml) brings these
+  // pages up to the gate. On 2026-11-23 all five linked here were noindex.
   const hot = (hotData?.hot || []).filter((s) => s.slug).slice(0, 5).map((s) => ({
     id: s.id, slug: s.slug, name: s.name, title_human: s.title_human, category: s.category,
     github_stars: s.github_stars, velocity_7d: s.velocity_7d, velocity_provisional: !!s.velocity_provisional,

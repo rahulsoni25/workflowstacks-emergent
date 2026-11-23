@@ -1,5 +1,12 @@
 import { MongoClient } from 'mongodb';
 import { revalidateSkill } from '@/lib/revalidate';
+import { passesSkillGate, SKILL_GATE } from '@/lib/skill-gate';
+import { isAiRelevant, guideRichness } from '@/lib/skill-relevance';
+import { TOOLS_ONLY } from '@/lib/catalog-gates';
+import { submitUrls } from '@/lib/indexnow';
+
+// ?mode=hot-gate tries each Hot skill at most once in this window.
+const HOT_GATE_RETRY_MS = 7 * 24 * 60 * 60 * 1000;
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
 // including the GitHub, Groq and Resend calls below. Each cache miss is a
@@ -384,7 +391,19 @@ function requireAdmin(request) {
   return null;
 }
 
+const MODES = ['enrich-skills', 'hot-gate', 'enrich-playbooks', 'enrich-personas'];
+
 async function handle(request) {
+  // Capability probe, before auth (no DB, no LLM, nothing written).
+  // refresh-content.yml runs from main the moment it merges, but this route
+  // only changes on the weekly deploy, and every deployed version before
+  // ?mode=hot-gate existed treats an unknown mode as the default rewrite
+  // (selects from the start of the catalog and can set published:false).
+  // The workflow calls this first and skips the step until it answers.
+  if (new URL(request.url).searchParams.get('probe') === 'hot-gate') {
+    return Response.json({ hotGate: true });
+  }
+
   const denied = requireAdmin(request);
   if (denied) return denied;
 
@@ -392,11 +411,16 @@ async function handle(request) {
   const onlyNew = searchParams.get('onlyNew') === 'true';
   const limit = parseInt(searchParams.get('limit') || '0', 10);
 
-  const database = await connectDB();
-
   // Enrichment: generate the actual deliverable content for pages.
   // ?mode=enrich-skills (batched via skip/limit) | ?mode=enrich-playbooks
   const mode = searchParams.get('mode');
+  // A misspelt or not-yet-deployed mode must never fall through to the
+  // default rewrite, which writes.
+  if (mode && !MODES.includes(mode)) {
+    return Response.json({ error: `unknown mode "${mode}"`, modes: MODES }, { status: 400 });
+  }
+
+  const database = await connectDB();
   if (mode === 'enrich-skills') {
     if (PROVIDER.name === 'heuristic') {
       return Response.json({ error: 'Enrichment needs an LLM key (OpenRouter/Anthropic)' }, { status: 400 });
@@ -423,6 +447,123 @@ async function handle(request) {
       }
     });
     return Response.json({ mode, processed: skills.length, enriched: done, sampleErrors: errs });
+  }
+
+  // ?mode=hot-gate -- bring this week's fastest-growing skills up to the
+  // index gate (lib/skill-gate.js).
+  //
+  // The Hot list (velocity_7d: most GitHub stars gained in 7 days) is what
+  // people are searching for this week, and the homepage -- the one page
+  // Google has indexed -- links five of them. On 2026-11-23 all five carried
+  // noindex. Of the top ten (live /api/skills/<slug>), seven had never been
+  // scored: the default rewrite below walks the catalog in _id order, ~150
+  // rows a day, so a repo ingested last week waits behind ~2,500 older ones.
+  // Two more (rea, firecrawl) had a score but a guide of 555 and 585 chars
+  // against the 600 floor.
+  //
+  // Per skill, sequentially (Groq free-tier TPM):
+  //   - copy with no passing score: rewrite + judge; write it only if it
+  //     scores >= the gate. A lower score writes nothing.
+  //   - guide under the floor: regenerate; keep whichever is longer.
+  // It never sets `published` and never selects a hidden, flagged or dead
+  // skill, so it cannot hide a page or publish one hidden on purpose.
+  // Attempts are logged in hot_gate_attempts rather than on the skill, so the
+  // page payload (and its ISR output) only changes when the content does.
+  // A page that becomes indexable is pushed to IndexNow (Bing, and through it
+  // ChatGPT search and Copilot) the same run.
+  if (mode === 'hot-gate') {
+    if (PROVIDER.name === 'heuristic') {
+      return Response.json({ error: 'hot-gate needs an LLM key' }, { status: 400 });
+    }
+    const n = Math.min(limit > 0 ? limit : 3, 6);
+    const poolSize = Math.min(Math.max(parseInt(searchParams.get('pool') || '20', 10) || 20, 5), 60);
+    const col = database.collection('skills');
+    const attempts = database.collection('hot_gate_attempts');
+    // Same base filter as the Hot list (getWeeklyLists in app/api/[[...path]]),
+    // plus the exclusions every writing mode must honour.
+    const hot = await col.find({
+      published: { $ne: false },
+      ...TOOLS_ONLY,
+      velocity_7d: { $gt: 0 },
+      slug: { $nin: [null, ''] },
+      dead_repo: { $ne: true },
+      flagged: { $ne: true },
+      hidden: { $ne: true },
+      hidden_reason: { $in: [null, ''] },
+      rewrite_status: { $ne: 'blocked' },
+    }).sort({ velocity_7d: -1, github_stars: -1 }).limit(poolSize).toArray();
+
+    const cutoff = new Date(Date.now() - HOT_GATE_RETRY_MS);
+    const recent = new Set(
+      (await attempts.find({ id: { $in: hot.map((s) => s.id) }, at: { $gte: cutoff } }, { projection: { id: 1 } }).toArray())
+        .map((a) => a.id)
+    );
+    // Relevance is judged from the upstream repo; no rewrite can change it.
+    const todo = hot.filter((s) => !passesSkillGate(s) && isAiRelevant(s) && !recent.has(s.id)).slice(0, n);
+
+    const bannedOpeners = await recentOpeners(database);
+    const results = [];
+    const nowIndexable = [];
+    for (const s of todo) {
+      const r = { slug: s.slug, velocity_7d: s.velocity_7d, scoreBefore: s.rewrite_score ?? null, guideBefore: guideRichness(s.use_guide) };
+      const $set = {};
+      const hasPassingScore = typeof s.rewrite_score === 'number' && s.rewrite_score >= SKILL_GATE.minRewriteScore;
+      if (!hasPassingScore) {
+        try {
+          const copy = await rewriteWithLLM(s, undefined, bannedOpeners);
+          // No judge override: stays on the provider's own endpoint.
+          const verdict = await judgeCopy(s, copy, undefined);
+          r.copyScore = verdict.score;
+          if (verdict.score >= SKILL_GATE.minRewriteScore) {
+            Object.assign($set, {
+              title_human: copy.title,
+              description_human: copy.description,
+              name_original: s.name_original || s.name,
+              description_original: s.description_original || s.description,
+              rewritten_by: PROVIDER.name,
+              rewritten_at: new Date(),
+              rewrite_score: verdict.score,
+              rewrite_status: 'done',
+            });
+          }
+        } catch (e) {
+          r.copyError = String(e.message || e).slice(0, 120);
+        }
+      }
+      if (r.guideBefore < SKILL_GATE.minGuideRichness) {
+        try {
+          const guide = await enrichSkillGuide($set.description_human ? { ...s, description_human: $set.description_human } : s);
+          r.guideAfter = guideRichness(guide);
+          if (r.guideAfter > r.guideBefore) $set.use_guide = guide;
+        } catch (e) {
+          r.guideError = String(e.message || e).slice(0, 120);
+        }
+      }
+      if (Object.keys($set).length) {
+        await col.updateOne({ id: s.id }, { $set });
+        revalidateSkill(s);
+      }
+      r.written = Object.keys($set);
+      r.indexable = passesSkillGate({ ...s, ...$set });
+      if (r.indexable) nowIndexable.push(`https://workflowstacks.com/skills/${s.slug}`);
+      await attempts.updateOne(
+        { id: s.id },
+        { $set: { id: s.id, slug: s.slug, at: new Date(), indexable: r.indexable, copyScore: r.copyScore ?? null, guide: r.guideAfter ?? r.guideBefore } },
+        { upsert: true }
+      );
+      results.push(r);
+    }
+    const indexnow = nowIndexable.length ? await submitUrls(nowIndexable) : null;
+    return Response.json({
+      mode,
+      engine: `${PROVIDER.name} (${PROVIDER.model})`,
+      hotConsidered: hot.length,
+      alreadyIndexable: hot.filter(passesSkillGate).length,
+      processed: todo.length,
+      nowIndexable: nowIndexable.length,
+      indexnow,
+      results,
+    });
   }
 
   if (mode === 'enrich-playbooks') {

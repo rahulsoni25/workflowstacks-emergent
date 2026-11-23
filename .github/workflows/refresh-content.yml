@@ -27,6 +27,28 @@ jobs:
             "$BASE_URL/api/reclassify" | tee /tmp/reclassify.json
           echo
 
+      - name: Bring this week's Hot skills up to the index gate
+        # The Hot list is what people search for this week and what the
+        # homepage links, but the rewrite below walks the catalog oldest-first
+        # and never reaches it: on 2026-11-23 all five Hot skills on the
+        # homepage were noindex. Runs first so it gets the Groq budget. Two
+        # calls of up to 3 skills (2-3 LLM calls each), paced like the loops
+        # below; each skill is tried at most once a week. Never fails the job.
+        # Workflows run from main on merge but the route ships with the weekly
+        # deploy, and a route without this mode treats it as the default
+        # rewrite (which writes), so the step waits for the deployed route to
+        # answer the unauthenticated probe.
+        run: |
+          P=$(curl -s --max-time 30 "$BASE_URL/api/agent-rewrite?probe=hot-gate")
+          echo "$P" | jq -e '.hotGate == true' >/dev/null 2>&1 \
+            || { echo "hot-gate not deployed yet ($P) — skipping"; exit 0; }
+          for i in 1 2; do
+            R=$(curl -sS --max-time 290 -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+              "$BASE_URL/api/agent-rewrite?mode=hot-gate&limit=3") || { echo "hot-gate failed: $R"; break; }
+            echo "$R" | head -c 2000; echo
+            echo "$R" | jq -e '.processed > 0' >/dev/null || break
+            sleep 62
+          done
       - name: Rewrite titles + descriptions (judge-gated to 8/10+)
         run: |
           # Groq free tier = ~12k TPM = ~6 enrichments / minute. Sleep 62s
