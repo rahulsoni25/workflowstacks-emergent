@@ -1,7 +1,7 @@
 import { MongoClient } from 'mongodb';
 import { v4 as uuidv4 } from 'uuid';
 import { isSpamRepo, classifyContentType, TOOLS_ONLY } from '../../../lib/catalog-gates';
-import { tokenize as tokenizeSearch } from '../../../lib/search-tokens';
+import { searchCatalog, candidatePipeline } from '../../../lib/catalog-search';
 import { rateLimit } from '../../../lib/rate-limit';
 import { TEMPLATES, matchTemplate } from '../../../lib/templates';
 import { screenSubmission } from '../../../lib/content-safety';
@@ -1065,30 +1065,6 @@ export async function GET(request) {
       if (searchParams.get('free') === 'true') {
         query.is_premium = { $ne: true };
       }
-      if (search) {
-        // Per-token matching across the fields a visitor actually thinks in.
-        // Previously the ENTIRE phrase was one regex over name/description, so
-        // any ordinary multi-word query ("scrape websites") returned nothing
-        // while its single tokens ("scraper") matched — the marketplace search
-        // box, the MCP connector and the builder all hit this path. OR across
-        // tokens and fields guarantees recall; the existing trending/stars
-        // sort keeps the best matches on top (same shape as /api/search-skills).
-        const tokens = tokenizeSearch(search);
-        const fields = ['name', 'title_human', 'description', 'description_human', 'category', 'github_topics'];
-        if (tokens.length) {
-          query.$or = tokens.flatMap((t) => {
-            const re = escapeRegex(t);
-            return fields.map((f) => ({ [f]: { $regex: re, $options: 'i' } }));
-          });
-        } else {
-          // Short/noise-only queries ("ai", "go") keep the old whole-phrase match.
-          const searchSafe = escapeRegex(search);
-          query.$or = [
-            { name: { $regex: searchSafe, $options: 'i' } },
-            { description: { $regex: searchSafe, $options: 'i' } }
-          ];
-        }
-      }
       // Optional server-side pre-filter — lets a caller like the sitemap
       // (which only wants the small slice passing its quality gate) avoid
       // fetching+discarding thousands of docs just to find a few hundred.
@@ -1113,12 +1089,9 @@ export async function GET(request) {
       // so drop them here to cut payload size and serialization time.
       const sortKey = searchParams.get('sort');
 
-      let skills, total;
-      if (sortKey === 'gems') {
-        // "Hidden gems" is a computed score (quality + freshness - fame), not
-        // a stored field, so it needs an aggregation instead of a plain sort.
-        const pipeline = [
-          { $match: query },
+      // "Hidden gems" is a computed score (quality + freshness - fame), not
+      // a stored field, so it needs aggregation stages instead of a plain sort.
+      const GEM_STAGES = [
           { $addFields: {
               _rewriteScore: { $ifNull: ['$rewrite_score', 7] },
               _stars: { $ifNull: ['$github_stars', 0] },
@@ -1148,6 +1121,52 @@ export async function GET(request) {
               ]},
           }},
           { $sort: { _gemScore: -1 } },
+      ];
+      const SORT_SPECS = {
+        trending: { popularity_score: -1, github_stars: -1 },
+        popular: { github_stars: -1 },
+        newest: { added_at: -1, created_at: -1 },
+        updated: { last_updated: -1 },
+        quality: { rewrite_score: -1, github_stars: -1 },
+      };
+      const sortSpec = SORT_SPECS[sortKey] || SORT_SPECS.trending;
+      const orderStages = sortKey === 'gems' ? GEM_STAGES : [{ $sort: sortSpec }];
+
+      // Search (marketplace box + MCP search_skills): every match is scored
+      // by lib/catalog-search.js — rare words and name hits count most, junk
+      // descriptions can't match everything, owner/repo and typos resolve.
+      // The default (trending) sort means "best match"; an explicit sort
+      // orders the relevant results by that field instead.
+      const q = (search || '').trim();
+      if (q) {
+        const found = await searchCatalog(
+          q,
+          (parsed) => col.aggregate(candidatePipeline(query, parsed, orderStages)).toArray(),
+          {
+            sortMode: !sortKey || sortKey === 'trending' ? 'relevance' : sortKey,
+            catalogSize: col.countDocuments(query).catch(() => 0),
+          }
+        );
+        const pageIds = found.results.slice(offset, offset + limit).map((d) => d._id);
+        const pageDocs = pageIds.length
+          ? await col.find({ _id: { $in: pageIds } }, { projection: LIST_PROJECTION }).toArray()
+          : [];
+        const byId = new Map(pageDocs.map((d) => [String(d._id), d]));
+        const pageSkills = pageIds.map((id) => byId.get(String(id))).filter(Boolean);
+        const total = found.results.length;
+        return Response.json({
+          skills: applyFallback(pageSkills),
+          total,
+          hasMore: offset + pageSkills.length < total,
+          match: { partial: found.partial, fuzzy: found.fuzzy, unmatched: found.unmatched },
+        });
+      }
+
+      let skills, total;
+      if (sortKey === 'gems') {
+        const pipeline = [
+          { $match: query },
+          ...GEM_STAGES,
           { $skip: offset },
           { $limit: limit },
           { $project: { ...LIST_PROJECTION, _rewriteScore: 0, _stars: 0, _lastUpdatedDate: 0, _daysAgo: 0, _freshness: 0, _fameDamp: 0, _gemScore: 0 } },
@@ -1157,48 +1176,10 @@ export async function GET(request) {
           col.countDocuments(query),
         ]);
       } else {
-        const SORT_SPECS = {
-          trending: { popularity_score: -1, github_stars: -1 },
-          popular: { github_stars: -1 },
-          newest: { added_at: -1, created_at: -1 },
-          updated: { last_updated: -1 },
-          quality: { rewrite_score: -1, github_stars: -1 },
-        };
-        const sortSpec = SORT_SPECS[sortKey] || SORT_SPECS.trending;
-        const searchTokens = search ? tokenizeSearch(search) : [];
-        if (searchTokens.length >= 1) {
-          // The OR-across-tokens query buys recall, but sorting the matches
-          // by stars alone let one common token ("automation") drown the one
-          // that carried the intent ("n8n"): a live audit of "n8n automation"
-          // got a trading bot and a Docker updater. Re-rank a bounded window
-          // by how many distinct tokens each doc matches (name/title/slug
-          // count most), then fall back to the requested sort.
-          const window = Math.min(offset + limit + 150, 400);
-          const [candidates, count] = await Promise.all([
-            col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).limit(window).toArray(),
-            col.countDocuments(query),
-          ]);
-          const scored = candidates.map((s, idx) => {
-            const strong = `${s.name || ''} ${s.title_human || ''} ${s.slug || ''}`.toLowerCase();
-            const mid = `${s.category || ''} ${(s.github_topics || []).join(' ')}`.toLowerCase();
-            const weak = `${s.description || ''} ${s.description_human || ''}`.toLowerCase();
-            let matched = 0, weight = 0;
-            for (const t of searchTokens) {
-              const inStrong = strong.includes(t), inMid = mid.includes(t), inWeak = weak.includes(t);
-              if (inStrong || inMid || inWeak) matched++;
-              weight += inStrong ? 3 : inMid ? 2 : inWeak ? 1 : 0;
-            }
-            return { s, matched, weight, idx };
-          });
-          scored.sort((a, b) => b.matched - a.matched || b.weight - a.weight || a.idx - b.idx);
-          skills = scored.slice(offset, offset + limit).map((x) => x.s);
-          total = count;
-        } else {
-          [skills, total] = await Promise.all([
-            col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).skip(offset).limit(limit).toArray(),
-            col.countDocuments(query),
-          ]);
-        }
+        [skills, total] = await Promise.all([
+          col.find(query, { projection: LIST_PROJECTION }).sort(sortSpec).skip(offset).limit(limit).toArray(),
+          col.countDocuments(query),
+        ]);
       }
 
       return Response.json({ skills: applyFallback(skills), total, hasMore: offset + skills.length < total });

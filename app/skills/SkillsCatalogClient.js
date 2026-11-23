@@ -96,6 +96,8 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
   const [skills, setSkills] = useState(initialSkills)
   const [total, setTotal] = useState(initialTotal)
   const [hasMore, setHasMore] = useState(initialHasMore)
+  // How well a search matched ({ partial, fuzzy, unmatched } from /api/skills).
+  const [match, setMatch] = useState(null)
   const [loading, setLoading] = useState(false)
   const [loadingMore, setLoadingMore] = useState(false)
 
@@ -138,12 +140,14 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
         setSkills(data.skills || [])
         setTotal(data.total || 0)
         setHasMore(!!data.hasMore)
+        setMatch(data.match || null)
       })
       .catch(() => {
         if (id !== requestId.current) return
         setSkills([])
         setTotal(0)
         setHasMore(false)
+        setMatch(null)
       })
       .finally(() => {
         if (id === requestId.current) setLoading(false)
@@ -260,6 +264,16 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
     return out
   }, [skills, noFilters])
 
+  // One honest line when a search couldn't match everything it was asked.
+  let matchNote = ''
+  if (q && match && !loading) {
+    const missing = match.unmatched?.length ? `Nothing lists “${match.unmatched.join('”, “')}”` : ''
+    if (match.fuzzy) matchNote = 'No exact match · showing similar spellings'
+    else if (missing && skills.length) matchNote = `${missing} · closest matches`
+    else if (missing) matchNote = missing
+    else if (match.partial && skills.length) matchNote = 'No listing matches every word · closest matches first'
+  }
+
   const active = []
   if (category !== 'all') active.push({ label: categoryLabel(category), clear: () => setCategory('all') })
   if (freeOnly) active.push({ label: 'Free', clear: () => setFreeOnly(false) })
@@ -277,7 +291,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
         <div className="flex flex-wrap items-baseline justify-between gap-4">
           <h1 className="m-0 text-[34px] font-bold leading-none tracking-[-0.04em]">Marketplace</h1>
           <Mono className="whitespace-nowrap text-xs text-text-muted">
-            {total ? `${total.toLocaleString()} listings` : 'Loading listings'} · GitHub stats refreshed daily · quality gate ≥ 8/10
+            {total ? `${total.toLocaleString()} listings` : q && !loading ? '0 listings' : 'Loading listings'} · GitHub stats refreshed daily · quality gate ≥ 8/10
           </Mono>
         </div>
         <div className="flex items-center gap-2 rounded-[10px] border border-[#323A3C] bg-[#101314] pl-3.5 pr-1.5 transition-colors focus-within:border-[#C6F24E]">
@@ -397,6 +411,7 @@ export default function SkillsCatalogClient({ initialSkills = [], initialTotal =
                   <span className="text-text-muted">×</span>
                 </button>
               ))}
+              {matchNote && <span>{matchNote}</span>}
             </div>
             <div className="t-mono flex items-center gap-2 text-xs text-text-muted">
               <label htmlFor="mk-sort">Sort</label>

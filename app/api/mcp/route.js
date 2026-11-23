@@ -157,21 +157,28 @@ async function callTool(id, name, args = {}, libraryId = null) {
   }
 
   if (name === 'search_skills') {
-    const results = await searchSkills({
+    const { skills: results, match } = await searchSkills({
       query: String(args.query || ''),
       category: args.category ? String(args.category) : '',
       limit: Number(args.limit) || 8,
     })
+    // Tell the model how well these fit, so it doesn't present a partial or
+    // fuzzy match as exactly what the user asked for.
+    const missing = match?.unmatched?.length ? `Nothing in the catalog mentions: ${match.unmatched.join(', ')}.` : ''
     if (!results.length) {
-      return textResult(id, `No skills matched "${args.query}". Try broader keywords, or browse ${SITE}/skills.`)
+      return textResult(id, `No skills matched "${args.query}". ${missing ? `${missing} ` : ''}Try other keywords (a product name, task, or GitHub owner/repo), or browse ${SITE}/skills.`)
     }
+    let header = `Found ${results.length} skills for "${args.query}":`
+    if (match?.fuzzy) header = `No exact match for "${args.query}"; showing ${results.length} results for similar spellings:`
+    else if (missing) header = `${missing} Closest ${results.length} matches for the rest of "${args.query}":`
+    else if (match?.partial) header = `No listing matches every word of "${args.query}"; these ${results.length} are the closest matches:`
     const lines = results.map((s) => {
       const stars = s.github_stars ? ` · ★${s.github_stars.toLocaleString('en-US')}` : ''
       return `- ${s.title_human || s.name} (slug: ${s.slug || s.id}) [${s.category}${stars}]\n  ${(s.description_human || s.description || '').slice(0, 180)}`
     })
     return textResult(
       id,
-      `Found ${results.length} skills for "${args.query}":\n\n${lines.join('\n')}\n\nCall get_skill with a slug to load its instructions.`
+      `${header}\n\n${lines.join('\n')}\n\nCall get_skill with a slug to load its instructions.`
     )
   }
 
