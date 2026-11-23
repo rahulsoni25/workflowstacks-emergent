@@ -1,5 +1,6 @@
 import { MongoClient } from 'mongodb';
 import { revalidateSkill } from '@/lib/revalidate';
+import { auditSeo, seoWorkingSetQuery, SEO_WORKING_SET_PROJECTION, SEO_WORKING_SET_MAX } from '@/lib/seo-hygiene';
 
 // Next 14 caches every fetch() in a route handler by default ("auto cache"),
 // including the GitHub, Groq and Resend calls below. Each cache miss is a
@@ -358,6 +359,18 @@ function rewriteHeuristic(skill) {
   };
 }
 
+// Ids of the live records /api/seo-optimize reports as needsRewrite: the
+// same working set and checks (lib/seo-hygiene.js), so this selects exactly
+// what the mechanical pass gave up on.
+async function seoFlaggedIds(database) {
+  const workingSet = await database.collection('skills')
+    .find(seoWorkingSetQuery())
+    .project(SEO_WORKING_SET_PROJECTION)
+    .limit(SEO_WORKING_SET_MAX)
+    .toArray();
+  return auditSeo(workingSet).filter((a) => a.needsRewrite && a.id).map((a) => a.id);
+}
+
 // Simple concurrency pool
 async function pool(items, size, worker) {
   const results = [];
@@ -586,10 +599,22 @@ async function handle(request) {
     });
   }
 
+  // ?seoFlagged=true (sent by seo-optimize.yml): only the live records that
+  // /api/seo-optimize reports as needsRewrite -- same checks, same working set
+  // and 45-day cooldown, from lib/seo-hygiene.js. The workflow used
+  // ?pending=true, which selects by `rewritten_by`: healthy live pages
+  // rewritten by another provider got picked, and thin ones rewritten by this
+  // provider never did.
+  const seoFlagged = searchParams.get('seoFlagged') === 'true';
+  let flaggedTotal;
   // pending=true selects only skills not yet rewritten by the current LLM provider,
   // so production runs can batch through all rows within the 60s function limit.
   let query;
-  if (searchParams.get('unpublished') === 'true') {
+  if (seoFlagged) {
+    const flaggedIds = await seoFlaggedIds(database);
+    flaggedTotal = flaggedIds.length;
+    query = { id: { $in: flaggedIds }, published: { $ne: false } };
+  } else if (searchParams.get('unpublished') === 'true') {
     query = { published: false };
   } else if (searchParams.get('pending') === 'true') {
     query = { rewritten_by: { $ne: PROVIDER.name } };
@@ -612,6 +637,8 @@ async function handle(request) {
   let llmOk = 0;
   let fellBack = 0;
   let publishedCount = 0;
+  let keptOldCopy = 0;
+  let judgeFailures = 0;
   const errors = [];
   // Openers already in the catalog, so this batch doesn't add to a pile-up
   // of "Get X with Y" listings that reads as templated at catalog scale.
@@ -644,9 +671,38 @@ async function handle(request) {
         published = score >= gateMin;
       } catch (e) {
         published = true; // don't hide good work if the judge errors
+        judgeFailures++;
+        if (errors.length < 5) errors.push(`${skill.name}: judge: ${e.message}`);
       }
     } else if (by === 'heuristic') {
       published = false; // weak fallback copy stays hidden for retry
+    }
+
+    // A live skill (published !== false, the site's own test) keeps its copy,
+    // rewrite_score and published flag unless the new copy was judged and
+    // cleared the gate. The verdict is about the NEW copy: a miss means
+    // "don't use it", not "take the page down" -- the old copy is the one
+    // that is live and indexed. Writing anyway also replaced rewrite_score,
+    // which lib/skill-gate.js uses for indexability and the sitemap (null on
+    // a judge error, so a rate-limited judge de-indexed the page). Same rule
+    // as scripts/rewrite-backfill.mjs. Hidden skills (new ingests awaiting
+    // their first rewrite) are unaffected: the gate still decides whether
+    // they go live.
+    const live = skill.published !== false;
+    const cleared = by !== 'heuristic' && (!gate || (score !== null && score >= gateMin));
+    if (live && !cleared) {
+      if (by === 'heuristic') return; // LLM failed: retry on a later batch
+      keptOldCopy++;
+      // seoFlagged: count the attempt against the 45-day cooldown, so later
+      // batches and runs move on to other flagged records instead of paying
+      // for this one again. Not on an LLM failure (above): that is retried.
+      if (seoFlagged) {
+        await database.collection('skills').updateOne(
+          { id: skill.id },
+          { $set: { seo_optimized_at: new Date() } }
+        );
+      }
+      return;
     }
     if (published) publishedCount++;
 
@@ -662,7 +718,8 @@ async function handle(request) {
           rewritten_at: new Date(),
           rewrite_score: score,
           rewrite_status: published ? 'done' : 'pending',
-          published
+          published,
+          ...(seoFlagged ? { seo_optimized_at: new Date() } : {})
         }
       }
     );
@@ -673,9 +730,15 @@ async function handle(request) {
   return Response.json({
     success: true,
     engine: useLLM ? `${PROVIDER.name} (${PROVIDER.model})` : 'heuristic (no LLM key set)',
+    // ?seoFlagged=true: records needing a rewrite before this batch ran.
+    ...(seoFlagged ? { seoFlagged: flaggedTotal } : {}),
     total: skills.length,
     updated,
     published: publishedCount,
+    // Live skills left exactly as they were: new copy judged below the gate,
+    // or the judge failed (judgeFailures).
+    keptOldCopy,
+    judgeFailures,
     gate: gate ? `on (>= ${gateMin})` : 'off',
     llmRewrites: llmOk,
     heuristicFallbacks: useLLM ? fellBack : updated,

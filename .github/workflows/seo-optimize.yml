@@ -61,11 +61,34 @@ jobs:
         run: |
           # Judge-gated to 9/10. Small batches: the free LLM tier rate-limits,
           # and a slow steady climb is the point — not a bulk regeneration.
+          #
+          # seoFlagged=true selects only the records the step above reported
+          # as needsRewrite (same checks: lib/seo-hygiene.js). These are all
+          # live pages, so new copy below 9/10 is dropped and the page keeps
+          # its current copy, score and published state. Every attempted
+          # record enters the 45-day cooldown, so the next batch takes new ones.
+          #
+          # Stop on llmRewrites, not updated: a batch whose copy all missed
+          # the gate updates nothing but still made progress. llmRewrites is 0
+          # only when nothing is flagged or the LLM is down.
+          #
+          # This file takes effect on merge, the route only at the next weekly
+          # release. A deployment that predates seoFlagged ignores it and picks
+          # from the whole catalog, so ask first with a request that selects
+          # nothing on either version (skip past the end): only a route that
+          # knows seoFlagged answers with that field.
+          P=$(curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
+            "$BASE_URL/api/agent-rewrite?seoFlagged=true&skip=1000000000&limit=1") \
+            || { echo "agent-rewrite probe failed; skipping the rewrite step."; exit 0; }
+          if [ "$(echo "$P" | jq -r 'has("seoFlagged")' 2>/dev/null)" != "true" ]; then
+            echo "The deployed /api/agent-rewrite predates seoFlagged; skipping the rewrite step until the next release."
+            exit 0
+          fi
           for i in 1 2 3; do
             R=$(curl -sf -H "x-admin-secret: ${{ secrets.ADMIN_SECRET }}" \
-              "$BASE_URL/api/agent-rewrite?pending=true&gateMin=9&limit=5") || break
-            echo "batch $i: $(echo "$R" | jq -c '{updated,published}' 2>/dev/null || echo "$R")"
-            [ "$(echo "$R" | jq -r '.updated // 0' 2>/dev/null)" = "0" ] && break
+              "$BASE_URL/api/agent-rewrite?seoFlagged=true&gateMin=9&limit=5") || break
+            echo "batch $i: $(echo "$R" | jq -c '{seoFlagged,updated,keptOldCopy,judgeFailures,llmRewrites,sampleErrors}' 2>/dev/null || echo "$R")"
+            [ "$(echo "$R" | jq -r '.llmRewrites // 0' 2>/dev/null)" = "0" ] && break
             sleep 62
           done
 
