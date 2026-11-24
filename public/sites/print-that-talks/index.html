@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Print That Talks — QR Video for Business Cards, Menus & Packaging in Dubai</title>
+<meta name="description" content="QR-linked video for business cards, menus, packaging, invites and more in Dubai. Scan the print, a short video plays. Made, hosted and tracked by FluoDigital, from AED 499.">
+<link rel="canonical" href="https://workflowstacks.com/print-that-talks">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta name="theme-color" content="#14111C">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='9' fill='%23FF4A1C'/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FluoDigital">
+<meta property="og:locale" content="en_AE">
+<meta property="og:title" content="Print That Talks — your print, now with a voice">
+<meta property="og:description" content="QR-linked video for business cards, menus, packaging, invites and more in Dubai. Scan the print, a short video plays. Made, hosted and tracked by FluoDigital, from AED 499.">
+<meta property="og:url" content="https://workflowstacks.com/print-that-talks">
+<meta property="og:image" content="https://workflowstacks.com/sites/print-that-talks/cards.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="670">
+<meta property="og:image:alt" content="A business card with a QR code next to a phone playing the owner's introduction video">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Print That Talks — your print, now with a voice">
+<meta name="twitter:description" content="QR-linked video for business cards, menus, packaging, invites and more in Dubai. Scan the print, a short video plays. Made, hosted and tracked by FluoDigital, from AED 499.">
+<meta name="twitter:image" content="https://workflowstacks.com/sites/print-that-talks/cards.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="image" href="/sites/print-that-talks/cards.jpg">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap"></noscript>
+<style>
+  :root{
+    color-scheme: dark;
+    --ground:#14111C; --surface:#1E1927; --surface2:#271F33;
+    --line:rgba(244,238,230,.13); --line-strong:rgba(244,238,230,.26);
+    --text:#F4EEE6; --muted:#A99DB4; --dim:#8B8296; /* 5.09:1 on ground, 4.68:1 on surface */
+    --tally:#FF4A1C; --amber:#F2A65A; --mint:#7FD1B9;
+    --maxw:1180px; --bar-h:69px; --t:160ms;
+    /* breakpoints: sm 560 · md 720 · lg 900 · xl 960 */
+    --fd:"Instrument Serif",Georgia,serif;
+    --fb:"Archivo","Helvetica Neue",Arial,sans-serif;
+    --fm:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none !important} /* the attribute must beat .plans{display:grid} and friends */
+  /* Light sections: the same tokens re-mapped, so every component rule below
+     works unchanged in either scheme. Measured on the cream (#F4EEE6): text
+     16.2:1, muted 7.6:1, dim 4.9:1, accent #8F4E0C 5.6:1 (and cream on the
+     accent 5.6:1 for the plan flag). Sections alternate dark / light from the
+     hero down; the hero stays dark because the video reads best there. */
+  section.light{
+    --ground:#F4EEE6; --surface:#FFFFFF; --surface2:#EAE3D9;
+    --line:rgba(20,17,28,.12); --line-strong:rgba(20,17,28,.5);
+    --text:#14111C; --muted:#4E4760; --dim:#6B6479; --amber:#8F4E0C;
+    background:var(--ground); color:var(--text);
+  }
+  html{scroll-padding-top:calc(var(--bar-h) + 12px + env(safe-area-inset-top,0px))}
+  @media(prefers-reduced-motion:no-preference){ html{scroll-behavior:smooth} }
+  body{
+    margin:0; background:var(--ground); color:var(--text);
+    font-family:var(--fb); font-size:17px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{width:100%; max-width:var(--maxw); margin:0 auto;
+    padding-left:max(clamp(20px,3.5vw,36px), env(safe-area-inset-left,0px)); padding-right:max(clamp(20px,3.5vw,36px), env(safe-area-inset-right,0px))}
+  h1,h2,h3{text-wrap:balance; margin:0}
+  figure{margin:0}
+  p,li,figcaption{text-wrap:pretty}
+  .skip{position:absolute; left:16px; top:-100px; z-index:60; background:var(--text); color:var(--ground); font-weight:600; padding:10px 14px; border-radius:2px; text-decoration:none}
+  .skip:focus{top:12px}
+  a{color:inherit}
+  .eyebrow{font-family:var(--fm); font-size:12px; letter-spacing:.18em; text-transform:uppercase; color:var(--amber); margin:0; text-wrap:balance}
+  .serif{font-family:var(--fd); font-weight:400; letter-spacing:-.01em; line-height:1.04}
+  .em{font-style:italic; color:var(--amber)}
+
+  /* header */
+  header.bar{position:sticky; top:env(safe-area-inset-top,0px); z-index:50;
+    background:rgba(20,17,28,.86); backdrop-filter:blur(12px); border-bottom:1px solid var(--line)}
+  .bar .wrap{display:flex; align-items:center; gap:16px; justify-content:space-between; padding-block:12px}
+  .mark{display:flex; align-items:center; gap:10px; font-weight:600; letter-spacing:-.01em; font-size:16px}
+  .dot{width:9px; height:9px; border-radius:50%; background:var(--tally); box-shadow:0 0 0 4px rgba(255,74,28,.18)}
+  /* display is owned by .hide-sm below — a `display:flex` here would outrank
+     it (.bar nav beats .hide-sm) and keep the nav visible on phones. */
+  .bar nav{align-items:center; gap:22px; font-size:14px; color:var(--muted)}
+  .bar nav a{display:inline-block; padding:11px 0; text-decoration:none; border-bottom:1px solid transparent; transition:color var(--t) ease}
+  .bar nav a:hover{color:var(--text)}
+  .bar nav a[aria-current="true"]{color:var(--text); border-bottom-color:var(--amber)}
+  .hide-sm{display:none}
+  @media(min-width:720px){ .hide-sm{display:flex} }
+
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    font-family:var(--fb); font-weight:600; font-size:15px; line-height:1;
+    padding:13px 20px; min-height:44px; border-radius:2px; border:1px solid transparent; cursor:pointer; text-decoration:none;
+    transition:transform var(--t) ease, background-color var(--t) ease, border-color var(--t) ease, filter var(--t) ease}
+  .btn-primary{background:var(--tally); color:#170B06; border-color:var(--tally)}
+  .btn-ghost{background:transparent; color:var(--text); border-color:var(--line-strong)}
+  @media(hover:hover){
+    .btn-primary:hover{transform:translateY(-1px); background:#FF5F35}
+    .btn-ghost:hover{border-color:var(--text)}
+  }
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn-primary:active{filter:brightness(.92)}
+  .btn-ghost:active{background:rgba(244,238,230,.08)}
+  .btn-sm{padding:10px 15px; font-size:14px}
+  .btn,.switch button,summary,input,select,textarea,.bar nav a,.contact a{touch-action:manipulation}
+  :focus-visible{outline:2px solid var(--amber); outline-offset:3px}
+
+  /* hero */
+  .hero{padding-block:clamp(36px,6vw,72px) clamp(40px,6vw,80px); border-bottom:1px solid var(--line)}
+  .hero-grid{display:grid; gap:clamp(32px,5vw,56px); grid-template-columns:1fr; align-items:start}
+  @media(min-width:960px){ .hero-grid{grid-template-columns:1.08fr .92fr} }
+  h1.hook{font-family:var(--fd); font-weight:400; font-size:clamp(44px,7.2vw,78px); line-height:1.02; letter-spacing:-.015em; margin-top:18px}
+  /* The plain-words line inside the h1: what the page is, for people and search engines alike. */
+  .h1-kw{display:block; font-family:var(--fb); font-weight:500; font-size:clamp(15px,1.6vw,18px); line-height:1.45; letter-spacing:0; color:var(--amber); margin-top:16px; max-width:30em}
+  .sub{color:var(--muted); font-size:clamp(17px,2vw,20px); max-width:33em; margin-top:20px}
+  .sub b{color:var(--text); font-weight:600}
+
+  /* form */
+  .form-card{margin-top:30px; background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:clamp(20px,3vw,28px)}
+  .form-card h2{font-family:var(--fb); font-size:17px; font-weight:600; letter-spacing:-.01em}
+  .form-note{color:var(--dim); font-size:13.5px; margin:6px 0 18px}
+  .fields{display:grid; gap:12px; grid-template-columns:1fr}
+  @media(min-width:560px){ .fields{grid-template-columns:1fr 1fr} .span2{grid-column:1/-1} }
+  label{display:block; font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); margin-bottom:6px}
+  input,select,textarea{width:100%; font-family:var(--fb); font-size:16px; color:var(--text); min-height:44px;
+    background:var(--ground); border:1px solid rgba(244,238,230,.40); border-radius:2px; padding:12px 13px; transition:border-color var(--t) ease}
+  textarea{resize:vertical; min-height:74px}
+  input[aria-invalid="true"]{border-color:var(--tally)}
+  input:focus,select:focus,textarea:focus{border-color:var(--amber)}
+  .opt{text-transform:none; letter-spacing:0}
+  .ferr{color:var(--tally); font-size:13.5px; margin:6px 0 0}
+  .hp{position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden}
+  .err{color:var(--tally); font-size:13.5px; margin-top:10px; min-height:1px}
+  .submit-row{display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:18px}
+  .submit-row small{color:var(--dim); font-size:13px}
+  .privacy{color:var(--dim); font-size:13px; margin:14px 0 0}
+  .privacy a{color:var(--muted); text-decoration:underline; text-underline-offset:3px; transition:color var(--t) ease; display:inline-block; padding:12px 0; margin:-12px 0}
+  .privacy a:hover{color:var(--text)}
+
+  .sent{border:1px solid var(--mint); background:rgba(127,209,185,.07); border-radius:3px; padding:22px; margin-top:30px}
+  .sent h3{font-family:var(--fb); font-size:17px; font-weight:600}
+  .sent p{color:var(--muted); font-size:15px; margin:8px 0 0}
+  .msg-box{font-family:var(--fm); font-size:13px; color:var(--muted); background:var(--ground);
+    border:1px solid var(--line); border-radius:2px; padding:14px; margin-top:14px; white-space:pre-wrap; overflow-wrap:anywhere}
+  .sent-actions{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px}
+  #copy{min-width:144px}
+
+  /* phone / video */
+  .stage{position:relative; justify-self:center; width:min(300px,78vw)}
+  @media(min-width:960px){ .stage{position:sticky; top:calc(var(--bar-h) + 24px)} }
+  @media(min-width:1200px){ .stage{width:min(340px,78vw)} }
+  .phone{position:relative; border:1px solid var(--line-strong); border-radius:22px; padding:9px; background:var(--surface2)}
+  .phone video,.phone img{display:block; width:100%; aspect-ratio:9/16; object-fit:cover; border-radius:14px; background:#000}
+  .rec{position:absolute; top:20px; left:20px; display:flex; align-items:center; gap:7px;
+    font-family:var(--fm); font-size:11px; letter-spacing:.12em; color:#fff; background:rgba(0,0,0,.45);
+    padding:5px 9px; border-radius:2px; backdrop-filter:blur(4px)}
+  .rec i{width:7px; height:7px; border-radius:50%; background:var(--tally); animation:blink 1.6s steps(1,end) infinite}
+  .vid-toggle{position:absolute; right:16px; bottom:16px; min-width:76px; min-height:44px; padding:0 12px; font-family:var(--fm); font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+    color:#fff; background:rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.35); border-radius:2px; cursor:pointer; backdrop-filter:blur(4px)}
+  @keyframes blink{50%{opacity:.25}}
+  .slate{display:flex; justify-content:space-between; gap:12px; font-family:var(--fm); font-size:11.5px;
+    letter-spacing:.08em; color:var(--dim); margin-top:12px; text-transform:uppercase}
+  .stage figcaption{color:var(--muted); font-size:14px; margin-top:12px; text-align:center}
+  .stage figcaption b{color:var(--text); font-weight:600}
+  @media(prefers-reduced-motion:reduce){ .rec i{animation:none} .btn:hover,.btn:active{transform:none} }
+
+  /* generic sections */
+  section{padding-block:clamp(52px,7vw,88px); border-bottom:1px solid var(--line)}
+  .lede{font-family:var(--fd); font-weight:400; font-size:clamp(30px,4.2vw,48px); line-height:1.08; letter-spacing:-.01em; margin-top:14px}
+  .said{color:var(--muted); max-width:56ch; margin-top:18px}
+
+  .facts{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; grid-template-columns:1fr}
+  @media(min-width:900px){ .facts{grid-template-columns:repeat(3,1fr)} }
+  .fact{background:var(--ground); padding:26px 22px}
+  .fact .n{font-family:var(--fd); font-size:clamp(28px,3.4vw,40px); line-height:1; color:var(--amber)}
+  .fact p{color:var(--muted); font-size:15px; margin:10px 0 0}
+
+  .samples{display:grid; gap:18px; grid-template-columns:1fr; margin-top:34px}
+  @media(min-width:720px){ .samples{grid-template-columns:repeat(3,1fr)} }
+  .sample{background:var(--surface); border:1px solid var(--line); border-radius:3px; overflow:hidden; display:flex; flex-direction:column}
+  .sample img{display:block; width:100%; height:auto; object-fit:cover; aspect-ratio:4/5} /* height:auto beats the intrinsic height attribute */
+  .sample .cap{padding:16px 18px}
+  .sample .cap h3{font-family:var(--fb); font-size:16px; font-weight:600}
+  .sample .cap p{color:var(--muted); font-size:14px; margin:6px 0 0}
+  .tag{font-family:var(--fm); font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim)}
+
+  .steps{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; grid-template-columns:1fr}
+  @media(min-width:900px){ .steps{grid-template-columns:repeat(3,1fr)} }
+  .step{background:var(--ground); padding:28px 24px}
+  .step .k{font-family:var(--fm); font-size:12px; letter-spacing:.16em; color:var(--amber)}
+  .step h3{font-family:var(--fb); font-size:19px; font-weight:600; margin-top:12px}
+  .step p{color:var(--muted); font-size:15px; margin:8px 0 0}
+
+  /* pricing */
+  .switch{display:inline-flex; margin-top:28px; border:1px solid var(--line-strong); border-radius:2px; flex-wrap:wrap}
+  .switch button{background:transparent; border:0; color:var(--muted); font-family:var(--fb); font-weight:600; font-size:14px;
+    padding:0 17px; min-height:44px; cursor:pointer; border-right:1px solid var(--line); transition:background-color var(--t) ease, color var(--t) ease}
+  .switch button:last-child{border-right:0}
+  .switch button:hover:not([aria-selected="true"]){color:var(--text); background:var(--surface2)}
+  .switch button:active{background:var(--surface)}
+  .switch button[aria-selected="true"]{background:var(--text); color:var(--ground)}
+  @media(max-width:419px){ .switch{display:flex; width:100%} .switch button{flex:1 1 0; padding-inline:8px; white-space:nowrap} }
+  .plans{display:grid; gap:16px; grid-template-columns:1fr; margin-top:26px}
+  @media(min-width:900px){ .plans{grid-template-columns:repeat(3,1fr)} }
+  .plan{background:var(--surface); border:1px solid var(--line); border-radius:3px; padding:26px 24px; display:flex; flex-direction:column; gap:14px}
+  .plan.feature{border-color:var(--amber)}
+  .plan .flag{font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ground); background:var(--amber); padding:4px 8px; border-radius:2px; align-self:flex-start; margin-bottom:-6px}
+  .plan .name{font-family:var(--fm); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber)}
+  .plan .price{font-family:var(--fd); font-size:44px; line-height:1; letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+  .plan .unit{font-family:var(--fb); font-size:14px; letter-spacing:0; text-transform:none; color:var(--muted)}
+  .plan ul{list-style:none; margin:0; padding:0; display:grid; gap:9px}
+  .plan li{color:var(--muted); font-size:15px; padding-left:18px; position:relative}
+  .plan li::before{content:"—"; position:absolute; left:0; color:var(--dim)}
+  .plan li b{color:var(--text); font-weight:600}
+  .fineprint{color:var(--dim); font-size:13.5px; margin-top:22px; max-width:70ch}
+
+  .flow{display:grid; gap:18px; grid-template-columns:1fr; margin-top:34px}
+  @media(min-width:900px){ .flow{grid-template-columns:repeat(4,1fr)} }
+  .flow div{border-top:2px solid var(--line-strong); padding-top:16px}
+  .flow div:first-child{border-top-color:var(--tally)}
+  .flow h3{font-family:var(--fb); font-size:16px; font-weight:600}
+  .flow p{color:var(--muted); font-size:14.5px; margin:8px 0 0}
+
+  details{border-bottom:1px solid var(--line); padding:0}
+  details summary{cursor:pointer; font-weight:600; font-size:17px; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:18px 0; min-height:44px; transition:color var(--t) ease}
+  details summary:hover,details summary:active{color:var(--amber)}
+  details summary::-webkit-details-marker{display:none}
+  details summary::after{content:"+" / ""; color:var(--amber); font-family:var(--fm)}
+  details summary:hover::after{color:var(--text)}
+  details[open] summary::after{content:"–" / ""}
+  details p{color:var(--muted); font-size:15.5px; margin:0 0 18px; max-width:66ch}
+  .section-body{margin-top:28px}
+  section.last{border-bottom:0}
+
+  .close-grid{display:grid; gap:34px; grid-template-columns:1fr; align-items:start}
+  @media(min-width:900px){ .close-grid{grid-template-columns:1fr 1fr} }
+  .contact{display:grid; gap:14px; margin-top:26px}
+  .contact > div{border-top:1px solid var(--line); padding-top:14px}
+  .contact .k{font-family:var(--fm); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--dim)}
+  .contact .v{font-size:17px; margin-top:4px; user-select:all}
+  .contact a.v{display:inline-block; text-decoration:none; padding:9px 0; margin:-5px 0; min-height:44px; transition:color var(--t) ease}
+  .contact a.v:hover{color:var(--amber)}
+  @media(max-width:719px){ .fact p,.sample .cap p,.step p,.plan li,.flow p,.sent p{font-size:16px} }
+  footer{border-top:1px solid var(--line); padding-block:30px; color:var(--dim); font-size:13.5px}
+  footer .wrap{display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between}
+</style>
+
+<style>
+  /* Print That Talks additions on top of the shared Founder Avatar Studio system */
+  .hero-fig{position:relative}
+  .hero-fig img{display:block; width:100%; height:auto; aspect-ratio:16/9; object-fit:cover; border:1px solid var(--line-strong); border-radius:3px}
+  .hero-fig figcaption{color:var(--muted); font-size:14px; margin-top:12px}
+  .hero-fig figcaption b{color:var(--text); font-weight:600}
+  .scanchip{position:absolute; left:14px; top:14px; display:flex; align-items:center; gap:8px; font-family:var(--fm); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:#fff; background:rgba(0,0,0,.55); padding:6px 10px; border-radius:2px; backdrop-filter:blur(4px)}
+  .scanchip i{width:7px; height:7px; border-radius:50%; background:var(--tally)}
+  .cta-row{display:flex; flex-wrap:wrap; gap:12px; margin-top:30px}
+  .cta-note{color:var(--dim); font-size:13.5px; margin-top:12px}
+  .cmy{display:flex; gap:4px; margin-top:22px} .cmy span{width:28px; height:4px}
+  .compare{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); margin-top:34px; grid-template-columns:1fr}
+  @media(min-width:900px){ .compare{grid-template-columns:1fr 1fr} }
+  .compare > div{background:var(--ground); padding:26px 24px}
+  .compare h3{font-family:var(--fb); font-size:17px; font-weight:600}
+  .compare ul{margin:12px 0 0; padding-left:18px; color:var(--muted); font-size:15.5px; display:grid; gap:6px}
+  .compare .yes h3{color:var(--amber)}
+  .prods{display:grid; gap:18px; grid-template-columns:1fr; margin-top:34px}
+  @media(min-width:640px){ .prods{grid-template-columns:repeat(2,1fr)} }
+  @media(min-width:960px){ .prods{grid-template-columns:repeat(3,1fr)} }
+  .prod{background:var(--surface); border:1px solid var(--line); border-radius:3px; overflow:hidden; display:flex; flex-direction:column}
+  .prod img{display:block; width:100%; height:auto; aspect-ratio:16/9; object-fit:cover}
+  .prod .cap{padding:18px 20px 22px; display:flex; flex-direction:column; gap:8px}
+  .prod h3{font-family:var(--fb); font-size:18px; font-weight:600}
+  .prod p{color:var(--muted); font-size:15px; margin:0}
+  .prod .ex{font-size:14px; color:var(--dim); border-top:1px solid var(--line); padding-top:10px; margin-top:4px}
+  .prod .ex b{color:var(--text); font-weight:600}
+  .partner{display:grid; gap:34px; grid-template-columns:1fr; align-items:start}
+  @media(min-width:900px){ .partner{grid-template-columns:1.1fr .9fr} }
+  .split{display:grid; gap:1px; background:var(--line); border:1px solid var(--line); grid-template-columns:1fr 1fr}
+  .split > div{background:var(--surface); padding:20px 18px}
+  .split h3{font-family:var(--fm); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--amber); font-weight:500}
+  .split ul{list-style:none; margin:12px 0 0; padding:0; display:grid; gap:10px; font-size:15px}
+  .twin{display:grid; gap:28px; grid-template-columns:1fr; align-items:center}
+  @media(min-width:900px){ .twin{grid-template-columns:1fr 1fr} }
+  #twin .facts{grid-template-columns:1fr}
+  @media(min-width:560px) and (max-width:899px){ #twin .facts{grid-template-columns:repeat(3,1fr)} }
+  @media(max-width:719px){ .prod p,.compare ul,.split ul{font-size:16px} }
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://workflowstacks.com/print-that-talks#webpage","url":"https://workflowstacks.com/print-that-talks","name":"Print That Talks \u2014 QR Video for Business Cards, Menus & Packaging in Dubai","description":"QR-linked video for business cards, menus, packaging, invites and more in Dubai. Scan the print, a short video plays. Made, hosted and tracked by FluoDigital, from AED 499.","inLanguage":"en","isPartOf":{"@id":"https://workflowstacks.com/#website"},"primaryImageOfPage":{"@type":"ImageObject","url":"https://workflowstacks.com/sites/print-that-talks/cards.jpg","width":1200,"height":670},"datePublished":"2026-11-24","dateModified":"2026-11-24"},{"@type":"Service","@id":"https://workflowstacks.com/print-that-talks#service","name":"Print That Talks","serviceType":"QR-linked video for printed materials","description":"QR-linked video for business cards, menus, packaging, invites and more in Dubai. Scan the print, a short video plays. Made, hosted and tracked by FluoDigital, from AED 499.","url":"https://workflowstacks.com/print-that-talks","image":"https://workflowstacks.com/sites/print-that-talks/cards.jpg","provider":{"@type":"Organization","name":"FluoDigital","url":"https://workflowstacks.com/ai-avatar","telephone":"+971522086253"},"areaServed":{"@type":"City","name":"Dubai"},"availableLanguage":["English","Arabic"],"offers":[{"@type":"Offer","name":"Link","price":"499","priceCurrency":"AED","description":"Your existing video behind a print-ready QR code, mobile video page, monthly scan report, 12 months hosting. Per video.","url":"https://workflowstacks.com/print-that-talks#pricing","priceSpecification":{"@type":"UnitPriceSpecification","price":"499","priceCurrency":"AED","valueAddedTaxIncluded":false},"availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Studio","price":"999","priceCurrency":"AED","description":"A custom video up to 30 seconds made by our editors, plus everything in Link. Per video.","url":"https://workflowstacks.com/print-that-talks#pricing","priceSpecification":{"@type":"UnitPriceSpecification","price":"999","priceCurrency":"AED","valueAddedTaxIncluded":false},"availability":"https://schema.org/InStock"},{"@type":"Offer","name":"Twin","price":"3999","priceCurrency":"AED","description":"Your digital twin from one 45-minute session and 2 videos in English or Arabic, plus everything in Studio.","url":"https://workflowstacks.com/print-that-talks#pricing","priceSpecification":{"@type":"UnitPriceSpecification","price":"3999","priceCurrency":"AED","valueAddedTaxIncluded":false},"availability":"https://schema.org/InStock"}]},{"@type":"FAQPage","@id":"https://workflowstacks.com/print-that-talks#faq","mainEntity":[{"@type":"Question","name":"Do my customers need an app?","acceptedAnswer":{"@type":"Answer","text":"No. They point their phone camera at the QR code and the video opens in the browser."}},{"@type":"Question","name":"Can I change the video after printing?","acceptedAnswer":{"@type":"Answer","text":"Yes. The QR code points to your video page, not to a fixed file, so the video can be swapped for a new offer or season and nothing needs reprinting."}},{"@type":"Question","name":"Do I pay for every printed piece?","acceptedAnswer":{"@type":"Answer","text":"No. You pay per video. The same QR code can go on 50 business cards or 5,000 boxes."}},{"@type":"Question","name":"Who owns the video?","acceptedAnswer":{"@type":"Answer","text":"You do. For a digital twin, you sign a consent form first, approve every script and video, and the twin is deleted if you stop working with us."}},{"@type":"Question","name":"How long does the video stay online?","acceptedAnswer":{"@type":"Answer","text":"12 months of hosting is included. After that it renews for AED 149 a year per QR code."}},{"@type":"Question","name":"Can it be in Arabic?","acceptedAnswer":{"@type":"Answer","text":"Yes. Any video can have an Arabic version, and with the Twin level your twin speaks both English and Arabic from one approval."}}]}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+  <div class="wrap">
+    <div class="mark"><span class="dot" aria-hidden="true"></span> Print That Talks</div>
+    <nav class="hide-sm" aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#products">What you can print</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#printers">For printers</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <a class="btn btn-primary btn-sm wa" data-src="header" href="https://wa.me/971522086253?text=Hi%20Rahul%2C%20I%27d%20like%20a%20Print%20That%20Talks%20demo.">Get a demo</a>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Print That Talks · by FluoDigital · Dubai</p>
+        <h1 class="hook">Your print,<br>now with a <span class="em">voice.</span> <span class="h1-kw">QR-linked video for business cards, menus, packaging, invites and more. Made, hosted and tracked for you.</span></h1>
+        <p class="sub">Put a small QR code on anything you print. When someone scans it with their phone camera, a short video plays: <b>you introducing yourself, your chef presenting the dish, your brand saying thank you.</b> We make the video, host it, and show you how many people watched.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary wa" data-src="hero" href="https://wa.me/971522086253?text=Hi%20Rahul%2C%20I%27d%20like%20a%20Print%20That%20Talks%20demo.">Get a free demo on WhatsApp</a>
+          <a class="btn btn-ghost" href="#products">See what you can print</a>
+        </div>
+        <p class="cta-note">No app needed. Any modern phone camera opens the video.</p>
+        <div class="cmy" aria-hidden="true"><span style="background:#33B1E6"></span><span style="background:#E84290"></span><span style="background:#F9EF5B"></span></div>
+      </div>
+      <figure class="hero-fig">
+        <img src="/sites/print-that-talks/cards.jpg" width="1200" height="670" alt="A dark business card with a small QR code on a desk, next to a phone playing a video of the business owner introducing himself" fetchpriority="high">
+        <span class="scanchip"><i aria-hidden="true"></i> Scanned · now playing</span>
+        <figcaption><b>A business card that introduces you</b>, long after the meeting ends.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="light" id="why">
+    <div class="wrap">
+      <p class="eyebrow">Why it works</p>
+      <h2 class="lede">Print gets a glance. <span class="em">Video gets a conversation.</span></h2>
+      <p class="said">A card goes in a drawer. A menu gets skimmed. A box gets thrown away. A QR video turns each of those moments into thirty seconds with you: your face, your voice, your reason to choose you.</p>
+      <div class="compare">
+        <div>
+          <h3>Ordinary print</h3>
+          <ul>
+            <li>Says the same thing to everyone, forever</li>
+            <li>A new offer means a new print run</li>
+            <li>No idea if anyone looked at it</li>
+            <li>One language per piece</li>
+          </ul>
+        </div>
+        <div class="yes">
+          <h3>Print That Talks</h3>
+          <ul>
+            <li>A real person explains, in under a minute</li>
+            <li>Change the video anytime; the printed QR code stays the same</li>
+            <li>A monthly report of how many people scanned</li>
+            <li>The same piece can play English or Arabic</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p>
+      <h2 class="lede">Four steps. <span class="em">You only do the first.</span></h2>
+      <div class="flow">
+        <div><h3>1 · Tell us what to say</h3><p>Send your own video, or your photos and a few lines about what you want people to hear. For a digital twin, give us one 45-minute session.</p></div>
+        <div><h3>2 · We make and host it</h3><p>Our in-house editors produce the video, put it on a mobile page in your brand colours, and send you a print-ready QR code file.</p></div>
+        <div><h3>3 · You print it</h3><p>Add the QR code to your cards, menus, boxes or banners, with your own printer or one of our partner print studios.</p></div>
+        <div><h3>4 · They scan, you see</h3><p>Customers point their camera and the video plays. You get a scan report every month, and can swap the video whenever your offer changes.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="light" id="products">
+    <div class="wrap">
+      <p class="eyebrow">What you can print</p>
+      <h2 class="lede">Nine ways to make print <span class="em">speak.</span></h2>
+      <p class="said">One video can go on as many printed pieces as you like. You pay per video, not per print.</p>
+      <div class="prods">
+        <article class="prod">
+          <img src="/sites/print-that-talks/cards.jpg" width="1200" height="670" loading="lazy" alt="Business card with a QR code next to a phone playing the owner's introduction video">
+          <div class="cap"><span class="tag">Professionals &amp; business owners</span><h3>Talking Business Cards</h3><p>Your card plays a 30-second introduction: who you are, what you do, and why to call you.</p><p class="ex"><b>Best for:</b> consultants, brokers, clinics, anyone who networks.</p></div>
+        </article>
+        <article class="prod">
+          <img src="/sites/print-that-talks/menus.jpg" width="1200" height="670" loading="lazy" alt="Restaurant table card with a QR code beside a plated dish, and a phone showing the chef presenting it">
+          <div class="cap"><span class="tag">Restaurants &amp; cafés</span><h3>Talking Menus</h3><p>Guests scan the table card and the chef presents tonight's signature dishes. It sells the special before the waiter arrives.</p><p class="ex"><b>Best for:</b> new openings, seasonal menus, chef-led kitchens.</p></div>
+        </article>
+        <article class="prod">
+          <img src="/sites/print-that-talks/packaging.jpg" width="1200" height="670" loading="lazy" alt="Hands opening a cream gift box with a QR code on the lid, a phone playing the founder's thank-you video">
+          <div class="cap"><span class="tag">Retail &amp; e-commerce brands</span><h3>Talking Packaging</h3><p>Open the box, scan the lid: the founder says thank you and shows how to get the best from the product.</p><p class="ex"><b>Best for:</b> D2C brands, gifting, premium products.</p></div>
+        </article>
+        <article class="prod">
+          <img src="/sites/print-that-talks/gifts.jpg" width="1200" height="670" loading="lazy" alt="Ramadan gift box with dates and a lantern, a greeting card with a QR code and a phone showing an executive's greeting">
+          <div class="cap"><span class="tag">Corporate gifting</span><h3>CEO Greeting Gifts</h3><p>Every gift card plays a personal greeting from your CEO for Ramadan, Eid or year-end. One video, hundreds of clients.</p><p class="ex"><b>Best for:</b> client gifts, employee hampers, partner thank-yous.</p></div>
+        </article>
+        <article class="prod">
+          <img src="/sites/print-that-talks/invites.jpg" width="1200" height="670" loading="lazy" alt="Printed wedding invitation with a QR code beside an envelope, a phone showing a couple's video invitation">
+          <div class="cap"><span class="tag">Weddings, launches &amp; events</span><h3>Video Invitations</h3><p>The printed invite opens the hosts inviting each guest themselves, plus the venue, timing and dress code.</p><p class="ex"><b>Best for:</b> weddings, product launches, gala dinners.</p></div>
+        </article>
+        <article class="prod">
+          <img src="/sites/print-that-talks/property.jpg" width="1200" height="670" loading="lazy" alt="Property brochure of a villa held by a window with the city skyline, a phone playing an interior walkthrough">
+          <div class="cap"><span class="tag">Real estate</span><h3>Property Brochures</h3><p>A flyer that opens a walkthrough of the home, or the agent's two-minute pitch, straight from the page.</p><p class="ex"><b>Best for:</b> off-plan launches, listings, open houses.</p></div>
+        </article>
+        <article class="prod">
+          <img src="/sites/print-that-talks/exhibition.jpg" width="1200" height="670" loading="lazy" alt="Roll-up exhibition banner with a large QR code at a trade show, a visitor scanning it to watch a pitch video">
+          <div class="cap"><span class="tag">Trade shows &amp; exhibitions</span><h3>Exhibition Kits</h3><p>Banners, standees and badges that keep pitching when your team is busy with another visitor.</p><p class="ex"><b>Best for:</b> stands, conferences, product demos.</p></div>
+        </article>
+        <article class="prod">
+          <img src="/sites/print-that-talks/certificates.jpg" width="1200" height="670" loading="lazy" alt="Certificate with a gold seal and a QR code held in hands, a phone showing a principal's congratulations">
+          <div class="cap"><span class="tag">Schools, academies &amp; training</span><h3>Talking Certificates</h3><p>A certificate or award that plays a congratulations message from the principal, coach or founder.</p><p class="ex"><b>Best for:</b> graduations, course completions, staff awards.</p></div>
+        </article>
+        <article class="prod">
+          <img src="/sites/print-that-talks/greetings.jpg" width="1200" height="670" loading="lazy" alt="Eid greeting card with a crescent and star and a QR code, a lantern and a phone playing a personal video message">
+          <div class="cap"><span class="tag">Every business</span><h3>Seasonal Greeting Cards</h3><p>Eid, Diwali or New Year cards with a personal video from you, so your greeting is remembered, not just received.</p><p class="ex"><b>Best for:</b> client lists, suppliers, your whole team.</p></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing">
+    <div class="wrap">
+      <p class="eyebrow">Pricing</p>
+      <h2 class="lede">Three levels. <span class="em">Every product.</span></h2>
+      <p class="said">Pick how the video is made. The QR code, the mobile video page, hosting and the scan report come with every level.</p>
+      <div class="plans">
+        <div class="plan">
+          <span class="name">Link</span>
+          <div class="price">AED 499 <span class="unit">per video</span></div>
+          <p style="color:var(--muted); margin:0; font-size:15px">You already have the video. We make it scannable.</p>
+          <ul>
+            <li><b>Print-ready QR code</b> file in your colours</li>
+            <li>Mobile video page with your logo and contact buttons</li>
+            <li>Monthly scan report</li>
+            <li>12 months hosting included</li>
+          </ul>
+        </div>
+        <div class="plan feature">
+          <span class="flag">Recommended</span>
+          <span class="name">Studio</span>
+          <div class="price">AED 999 <span class="unit">per video</span></div>
+          <p style="color:var(--muted); margin:0; font-size:15px">A custom video, made by our editors from your photos and clips.</p>
+          <ul>
+            <li><b>Video up to 30 seconds</b>, scripted with you</li>
+            <li>Captions, music and brand styling</li>
+            <li>Up to 2 rounds of changes</li>
+            <li>Everything in Link</li>
+          </ul>
+        </div>
+        <div class="plan">
+          <span class="name">Twin</span>
+          <div class="price">AED 3,999 <span class="unit">twin + 2 videos</span></div>
+          <p style="color:var(--muted); margin:0; font-size:15px">Your own digital twin speaks for you. No camera, no shoot day.</p>
+          <ul>
+            <li><b>Your digital twin</b> from one 45-minute session</li>
+            <li>2 videos in English or Arabic</li>
+            <li>New videos from a script, whenever you need them</li>
+            <li>Everything in Studio</li>
+          </ul>
+        </div>
+      </div>
+      <p class="fineprint">Prices exclude 5% VAT. One video can go on any number of printed pieces. Add-ons: Arabic version of any video +50% · 48-hour rush +30% · hosting after the first 12 months AED 149 a year per QR code. Digital twins are built only with your signed consent, and videos are labelled as AI where platforms require.</p>
+    </div>
+  </section>
+
+  <section class="light" id="twin">
+    <div class="wrap twin">
+      <div>
+        <p class="eyebrow">The Twin level, explained</p>
+        <h2 class="lede">What is a <span class="em">digital twin?</span></h2>
+        <p class="said">An AI video presenter built from your own face and voice. We record you once, for 45 minutes. After that, every new video is made from a script you approve, in English or Arabic, without you in front of a camera again.</p>
+        <p class="said">It is the same technology behind our <a href="/ai-avatar">Founder Avatar Studio</a>, where founders publish weekly videos without filming.</p>
+      </div>
+      <div class="facts" style="margin-top:0">
+        <div class="fact"><div class="n">45 min</div><p>One capture session is all you sit through.</p></div>
+        <div class="fact"><div class="n">7 days</div><p>From the session to an approved twin.</p></div>
+        <div class="fact"><div class="n">EN · AR</div><p>One approval, both languages, no reshoot.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="printers">
+    <div class="wrap partner">
+      <div>
+        <p class="eyebrow">For print studios</p>
+        <h2 class="lede">Run a print shop? <span class="em">Sell video with every order.</span></h2>
+        <p class="said">Offer Print That Talks to your customers as a premium add-on. They order through you, we make the video, and you print the QR code with the job. Your customer never needs a second supplier.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary wa" data-src="printers" href="https://wa.me/971522086253?text=Hi%20Rahul%2C%20I%20run%20a%20print%20studio%20and%20want%20to%20know%20about%20the%20Print%20That%20Talks%20partner%20programme.">Become a partner printer</a>
+        </div>
+      </div>
+      <div class="split">
+        <div>
+          <h3>You</h3>
+          <ul>
+            <li>Sell it under your name</li>
+            <li>Print the QR code with the job</li>
+            <li>Keep the customer relationship</li>
+            <li>Keep a margin on every video</li>
+          </ul>
+        </div>
+        <div>
+          <h3>We</h3>
+          <ul>
+            <li>Produce every video</li>
+            <li>Brand it as yours, not ours</li>
+            <li>Host it and send scan reports</li>
+            <li>Send print-ready QR files</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="light" id="faq">
+    <div class="wrap">
+      <p class="eyebrow">Questions</p>
+      <h2 class="lede">Before you <span class="em">print.</span></h2>
+      <div class="section-body">
+        <details><summary>Do my customers need an app?</summary><p>No. They point their phone camera at the QR code and the video opens in the browser.</p></details>
+        <details><summary>Can I change the video after printing?</summary><p>Yes. The QR code points to your video page, not to a fixed file, so we can swap the video for a new offer or season and nothing needs reprinting.</p></details>
+        <details><summary>Do I pay for every printed piece?</summary><p>No. You pay per video. The same QR code can go on 50 business cards or 5,000 boxes.</p></details>
+        <details><summary>How small can the QR code be?</summary><p>We send a print-ready file and test every code before it goes to print. As a rule, keep it at least 2 × 2 cm on a plain, high-contrast background.</p></details>
+        <details><summary>Who owns the video?</summary><p>You do. For a digital twin, you sign a consent form first, approve every script and video, and the twin is deleted if you stop working with us.</p></details>
+        <details><summary>How long does the video stay online?</summary><p>12 months of hosting is included. After that it renews for AED 149 a year per QR code, or you can take the video file and stop.</p></details>
+        <details><summary>Can it be in Arabic?</summary><p>Yes. Any video can have an Arabic version, and with the Twin level your twin speaks both English and Arabic from one approval.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="last" id="start">
+    <div class="wrap close-grid">
+      <div>
+        <p class="eyebrow">Start with one card</p>
+        <h2 class="lede">Your next print run <span class="em">can talk.</span></h2>
+        <p class="said">Tell us what you print and who it is for. We reply the same working day, from Dubai, with a free demo you can scan.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary wa" data-src="close" href="https://wa.me/971522086253?text=Hi%20Rahul%2C%20I%27d%20like%20a%20Print%20That%20Talks%20demo.">Get a free demo on WhatsApp</a>
+        </div>
+      </div>
+      <div class="contact">
+        <div><span class="k">WhatsApp</span><br><a class="v wa" data-src="contact" href="https://wa.me/971522086253">+971 52 208 6253</a></div>
+        <div><span class="k">Email</span><br><a class="v" href="mailto:rahulsoni25@gmail.com?subject=Print%20That%20Talks">rahulsoni25@gmail.com</a></div>
+        <div><span class="k">Studio</span><br><span class="v">Dubai Silicon Oasis</span></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Print That Talks · by FluoDigital</span>
+    <span>Powered by WorkflowStacks Digital Twin Tech · <a href="/ai-avatar">Founder Avatar Studio</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  window.dataLayer = window.dataLayer || [];
+  Array.prototype.forEach.call(document.querySelectorAll('a.wa'), function(a){
+    a.addEventListener('click', function(){ window.dataLayer.push({ event: 'contact_click', channel: 'whatsapp', page: 'print-that-talks', source: a.getAttribute('data-src') || '' }); });
+  });
+  var navLinks = document.querySelectorAll('.bar nav a[href^="#"]');
+  if ('IntersectionObserver' in window && navLinks.length) {
+    var io = new IntersectionObserver(function(es){ es.forEach(function(e){ if (!e.isIntersecting) return;
+      Array.prototype.forEach.call(navLinks, function(a){ if (a.getAttribute('href') === '#' + e.target.id) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); }); }); },
+      {rootMargin:'-40% 0px -55% 0px'});
+    Array.prototype.forEach.call(navLinks, function(a){ var t = document.querySelector(a.getAttribute('href')); if (t) io.observe(t); });
+  }
+})();
+</script>
+</body>
+</html>

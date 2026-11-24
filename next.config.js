@@ -29,6 +29,12 @@ const LANDING_PAGES = [
     path: '/rahul',
     dir: 'rahul',
   },
+  {
+    // Print That Talks: QR-linked video for printed materials (cards, menus,
+    // packaging, invites), sold direct and through partner print studios.
+    path: '/print-that-talks',
+    dir: 'print-that-talks',
+  },
 ]
 
 const nextConfig = {
