@@ -1,0 +1,15 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Soni;Rahul;;;
+FN:Rahul Soni
+ORG:FluoDigital
+TITLE:Founder & Director, FluoDigital | Founder, WorkflowStacks
+TEL;TYPE=CELL,PREF:+971522086253
+TEL;TYPE=CELL:+919769720732
+EMAIL;TYPE=WORK,PREF:rahul@fluodigital.com
+URL:https://workflowstacks.com/rahul
+URL:https://fluodigital.com
+X-SOCIALPROFILE;TYPE=linkedin:https://www.linkedin.com/in/rahulksoni
+ADR;TYPE=WORK:;;Dubai Silicon Oasis;Dubai;;;United Arab Emirates
+NOTE:Jo dikhta hai, woh bikta hai. AI digital twin videos, performance marketing and AI skills.
+END:VCARD

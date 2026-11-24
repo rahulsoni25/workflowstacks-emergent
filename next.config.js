@@ -22,6 +22,12 @@ const LANDING_PAGES = [
     path: '/ai-avatar/use-cases',
     dir: 'founder-avatar-studio/use-cases',
   },
+  {
+    // Rahul Soni's digital business card: the link behind his QR code and NFC
+    // tag. Plays the use-case videos from founder-avatar-studio/use-cases/.
+    path: '/rahul',
+    dir: 'rahul',
+  },
 ]
 
 const nextConfig = {
