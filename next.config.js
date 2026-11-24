@@ -24,7 +24,8 @@ const LANDING_PAGES = [
   },
   {
     // Rahul Soni's digital business card: the link behind his QR code and NFC
-    // tag. Plays the use-case videos from founder-avatar-studio/use-cases/.
+    // tag (futuristic "Digital Twin" design; the earlier card is classic.html).
+    // Plays the use-case videos from founder-avatar-studio/use-cases/.
     path: '/rahul',
     dir: 'rahul',
   },
