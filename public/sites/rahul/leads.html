@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Card leads</title>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--ink:#16131a;--soft:#5b5560;--red:#a3162b;--panel:#f5f2f4;--line:#e4dee2;--blue:#1f4fd1}
+@media(prefers-color-scheme:dark){:root{--bg:#121014;--ink:#f3eff4;--soft:#b9b2bd;--panel:#1d1a20;--line:#2e2a32;--blue:#7fa2ff}}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 48px}
+h1{font:400 32px/1.1 "Archivo Black",Impact,sans-serif;margin:0 0 4px}
+.sub{color:var(--soft);margin:0 0 18px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+input{font:16px Inter,sans-serif;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:46px;flex:1 1 220px}
+button,a.btn{border:0;border-radius:12px;padding:12px 16px;min-height:46px;font:600 15px Inter,sans-serif;background:var(--red);color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+button.alt{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.stat{font-weight:700}
+.list{display:grid;gap:10px}
+.lead{background:var(--panel);border-radius:16px;padding:14px 16px;display:grid;gap:4px}
+.lead .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.lead b{font-size:17px}
+.lead .when{color:var(--soft);font-size:13px;white-space:nowrap}
+.lead a{color:var(--blue);font-weight:600;text-decoration:none;margin-right:14px}
+.lead .note{color:var(--soft);font-size:15px}
+.err{color:var(--red);font-weight:600}
+.empty{color:var(--soft);padding:24px;text-align:center;background:var(--panel);border-radius:16px}
+</style></head><body>
+<div class="wrap">
+<h1>Card leads</h1>
+<p class="sub">People who swapped contacts on workflowstacks.com/rahul, newest first.</p>
+<form class="bar" id="auth"><input id="secret" type="password" placeholder="Admin secret" autocomplete="current-password" aria-label="Admin secret"><button type="submit">Open</button></form>
+<div class="bar" id="tools" hidden><span class="stat" id="count"></span><input id="q" placeholder="Search name, company, note" aria-label="Search leads"><button class="alt" id="refresh" type="button">Refresh</button><button id="csv" type="button">Download CSV</button></div>
+<p class="err" id="err" role="alert"></p>
+<div class="list" id="list"></div>
+</div>
+<script>
+{
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+let secret='',leads=[];
+try{secret=sessionStorage.getItem('card-admin')||''}catch(e){}
+const when=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleString(undefined,{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})};
+const waNum=p=>p.replace(/[^\d]/g,'');
+function render(){
+ const q=$('q').value.trim().toLowerCase();
+ const rows=leads.filter(l=>!q||[l.name,l.company,l.note,l.email,l.phone].join(' ').toLowerCase().includes(q));
+ $('count').textContent=`${leads.length} lead${leads.length===1?'':'s'}`;
+ $('list').innerHTML=rows.length?rows.map(l=>`<article class="lead"><div class="top"><b>${esc(l.name)}${l.company?` · ${esc(l.company)}`:''}</b><span class="when">${esc(when(l.at))}</span></div>
+ <div>${l.phone?`<a href="https://wa.me/${esc(waNum(l.phone))}">WhatsApp ${esc(l.phone)}</a><a href="tel:${esc(l.phone.replace(/\s/g,''))}">Call</a>`:''}${l.email?`<a href="mailto:${esc(l.email)}">${esc(l.email)}</a>`:''}</div>
+ ${l.note?`<div class="note">${esc(l.note)}</div>`:''}</article>`).join(''):`<div class="empty">${leads.length?'No leads match that search.':'No leads yet. They appear here when someone sends their details from your card.'}</div>`;
+}
+async function load(){
+ $('err').textContent='';
+ const r=await fetch('/api/card-leads',{headers:{'x-admin-secret':secret},cache:'no-store'});
+ if(r.status===401){$('err').textContent='That secret did not work.';$('tools').hidden=true;$('auth').hidden=false;return}
+ if(!r.ok){$('err').textContent='Could not load leads. Try Refresh.';return}
+ leads=(await r.json()).leads||[];
+ try{sessionStorage.setItem('card-admin',secret)}catch(e){}
+ $('auth').hidden=true;$('tools').hidden=false;render();
+}
+$('auth').addEventListener('submit',e=>{e.preventDefault();secret=$('secret').value.trim();if(secret)load()});
+$('refresh').addEventListener('click',load);
+$('q').addEventListener('input',render);
+$('csv').addEventListener('click',async()=>{const r=await fetch('/api/card-leads?format=csv',{headers:{'x-admin-secret':secret}});if(!r.ok){$('err').textContent='CSV download failed.';return}const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='card-leads.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
+if(secret)load();
+}
+</script>
+</body></html>
