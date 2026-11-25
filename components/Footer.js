@@ -66,6 +66,7 @@ const footerLinks = {
       // so it is a plain anchor rather than a client-side <Link>.
       { label: 'AI Avatar Studio', href: '/ai-avatar', plain: true },
       { label: 'AI Avatar Use Cases', href: '/ai-avatar/use-cases', plain: true },
+      { label: 'Case Studies', href: '/case-studies', plain: true },
       { label: 'API Docs', href: '/docs' },
       { label: 'Terms', href: '/terms' },
       { label: 'Privacy', href: '/privacy' },
