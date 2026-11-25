@@ -45,6 +45,15 @@ const LANDING_PAGES = [
     path: '/case-studies/zydus-liver-ki-suno',
     dir: 'case-studies/zydus-liver-ki-suno',
   },
+  { path: '/case-studies/national-pageant-performance', dir: 'case-studies/national-pageant-performance' },
+  { path: '/case-studies/city-cans-social-listening', dir: 'case-studies/city-cans-social-listening' },
+  { path: '/case-studies/china-eye-care-benchmark', dir: 'case-studies/china-eye-care-benchmark' },
+  { path: '/case-studies/celebrity-fit-tamil-nadu', dir: 'case-studies/celebrity-fit-tamil-nadu' },
+  {
+    // FluoDigital product catalogue: every service with published prices.
+    path: '/catalogue',
+    dir: 'catalogue',
+  },
 ]
 
 const nextConfig = {

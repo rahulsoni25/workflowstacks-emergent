@@ -179,6 +179,10 @@
   .cs h2{font-family:var(--fd); font-weight:400; font-size:30px; line-height:1.1; margin-top:8px}
   .cs p{color:var(--muted); font-size:15.5px; margin:10px 0 0}
   .cs .go{display:inline-block; margin-top:14px; font-weight:600; color:var(--amber)}
+  .cs .tile{display:flex; flex-direction:column; justify-content:flex-end; padding:18px; min-height:220px; background:var(--surface2); border-right:1px solid var(--line)}
+  .cs .tile b{font-family:var(--fd); font-weight:400; font-size:44px; line-height:1; color:var(--text)}
+  .cs .tile span{font-family:var(--fm); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--amber); margin-top:8px}
+  .group{font-family:var(--fm); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin:56px 0 0; padding-top:20px; border-top:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -186,7 +190,7 @@
 <header class="bar">
   <div class="wrap">
     <a class="mark" href="https://fluodigital.com"><span class="dot" aria-hidden="true"></span>FluoDigital <span class="muted" style="font-weight:400">· Case Studies</span></a>
-    <a class="btn btn-primary btn-sm" href="https://fluodigital.com/meet">Book a call</a>
+    <span style="display:flex;gap:10px"><a class="btn btn-ghost btn-sm" href="/catalogue">Catalogue</a><a class="btn btn-primary btn-sm" href="https://fluodigital.com/meet">Book a call</a></span>
   </div>
 </header>
 <main id="main">
@@ -194,15 +198,63 @@
   <div class="wrap">
     <p class="eyebrow">FluoDigital · Case studies</p>
     <h1 class="hook">The work, <span class="em">and the numbers behind it.</span>
-      <span class="h1-kw">What we did, how we did it, and what it delivered — every figure traced back to the campaign report.</span>
+      <span class="h1-kw">Performance marketing, AI avatar video and insights: what we did, how, and what it delivered, with every figure traced to its source.</span>
     </h1>
     <div class="hub">
+      <p class="group" style="grid-column:1/-1;margin-top:0;border-top:0;padding-top:0">Performance marketing</p>
       <a class="cs" href="/case-studies/zydus-liver-ki-suno">
         <img src="/sites/case-studies/zydus-liver-ki-suno/film-1.jpg" alt="Zydus #LiverKiSuno brand film featuring Ashish Vidyarthi" width="338" height="527">
         <div class="body">
           <p class="eyebrow">Zydus Lifesciences · Healthcare · India</p>
           <h2>#LiverKiSuno: 1.30 Bn impressions for a liver-health message</h2>
           <p>Brand films, ABP News expert episodes, podcasts and precision cohorts — 674.7 Mn reach, 1.27 Bn video views, 322 Mn engagements in 16 weeks.</p>
+          <span class="go">Read the case study →</span>
+        </div>
+      </a>
+      <a class="cs" href="/case-studies/national-pageant-performance">
+        <div class="tile" aria-hidden="true"><b>4,832</b><span>Leads</span></div>
+        <div class="body">
+          <p class="eyebrow">Events · Pageant · India</p>
+          <h2>A Meta funnel for a paid national pageant</h2>
+          <p>15.1 Mn impressions, 7.9 Mn reach and 732 tracked paid registrations. Remarketing registers people at a quarter of the cost of city targeting.</p>
+          <span class="go">Read the case study →</span>
+        </div>
+      </a>
+      <p class="group" style="grid-column:1/-1">AI avatar video</p>
+      <a class="cs" href="/ai-avatar/use-cases">
+        <img src="/sites/founder-avatar-studio/use-cases/al-meeraj-why-choose.jpg" alt="Al Meeraj founder D.K. Singh as an AI digital twin" width="338" height="527" loading="lazy">
+        <div class="body">
+          <p class="eyebrow">AI avatar · Dubai</p>
+          <h2>Digital twins for founders: Al Meeraj, AST Group, HM360° and more</h2>
+          <p>One 45-minute capture, then founder films, ad series and Arabic lip-sync without a camera crew.</p>
+          <span class="go">Watch the use cases →</span>
+        </div>
+      </a>
+      <p class="group" style="grid-column:1/-1">Insights &amp; research</p>
+      <a class="cs" href="/case-studies/city-cans-social-listening">
+        <div class="tile" aria-hidden="true"><b>1,847</b><span>Reels measured</span></div>
+        <div class="body">
+          <p class="eyebrow">Soft-drink brand · Social listening · India</p>
+          <h2>What each city actually talks about on Instagram</h2>
+          <p>Four markets, 60 territory cells, paid posts stripped out, and an influencer audit that found 8 of 20 handles didn’t exist.</p>
+          <span class="go">Read the case study →</span>
+        </div>
+      </a>
+      <a class="cs" href="/case-studies/china-eye-care-benchmark">
+        <div class="tile" aria-hidden="true"><b>¥26.5 bn</b><span>Category mapped</span></div>
+        <div class="body">
+          <p class="eyebrow">Global optics brand · Category intelligence · China</p>
+          <h2>How to win trust in China’s eye-care aisle</h2>
+          <p>Eight competitors taken apart across Tmall, JD, Douyin and Xiaohongshu, with every figure sourced and every gap declared.</p>
+          <span class="go">Read the case study →</span>
+        </div>
+      </a>
+      <a class="cs" href="/case-studies/celebrity-fit-tamil-nadu">
+        <div class="tile" aria-hidden="true"><b>16,311</b><span>Comments read</span></div>
+        <div class="body">
+          <p class="eyebrow">Beverage brand · Celebrity fit · Tamil Nadu</p>
+          <h2>Is a national face right for Tamil Nadu?</h2>
+          <p>Audience, comment language, peer benchmarks and box office, with a screenshot behind every claim.</p>
           <span class="go">Read the case study →</span>
         </div>
       </a>
