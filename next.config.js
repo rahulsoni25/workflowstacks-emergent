@@ -54,6 +54,12 @@ const LANDING_PAGES = [
     path: '/catalogue',
     dir: 'catalogue',
   },
+  {
+    // Pitch deck for Techies Infotech (AI avatar meeting), as a web page.
+    // noindex: prospect-specific, shared by link only; not in the sitemap.
+    path: '/techies-infotech',
+    dir: 'techies-infotech',
+  },
 ]
 
 const nextConfig = {
