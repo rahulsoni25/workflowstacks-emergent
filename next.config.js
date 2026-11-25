@@ -35,6 +35,16 @@ const LANDING_PAGES = [
     path: '/print-that-talks',
     dir: 'print-that-talks',
   },
+  {
+    // FluoDigital case studies: a hub plus one folder per case study, each
+    // with its own index.html and media (what we did, how, results).
+    path: '/case-studies',
+    dir: 'case-studies',
+  },
+  {
+    path: '/case-studies/zydus-liver-ki-suno',
+    dir: 'case-studies/zydus-liver-ki-suno',
+  },
 ]
 
 const nextConfig = {
