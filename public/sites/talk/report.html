@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Scan report · Print That Talks</title>
+<style>
+:root{--bg:#fff;--ink:#141417;--soft:#5d5d66;--acc:#0f9f92;--acc-ink:#fff;--panel:#f4f5f6;--line:#e2e4e7;--warn:#b3261e;--focus:#1f4fd1}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1012;--ink:#f1f1f4;--soft:#a8a8b3;--acc:#2ce5d4;--acc-ink:#05201d;--panel:#1a1b1f;--line:#2c2d33;--warn:#ff8a80;--focus:#7fa2ff}}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:24px 16px 56px}
+h1{font-size:28px;margin:0 0 2px;letter-spacing:-.01em}
+h2{font-size:17px;margin:0 0 10px}
+.sub{color:var(--soft);margin:0 0 18px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+select,input{font:16px system-ui,sans-serif;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:44px}
+button,a.btn{border:0;border-radius:12px;padding:10px 16px;min-height:44px;font:600 15px system-ui,sans-serif;background:var(--acc);color:var(--acc-ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+button.alt,a.alt{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.kpi{background:var(--panel);border-radius:16px;padding:16px}
+.kpi .n{font-size:34px;font-weight:800;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .l{color:var(--soft);font-size:14px}
+.card{background:var(--panel);border-radius:16px;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:12px}
+.chart{display:flex;align-items:flex-end;gap:3px;height:160px;padding-top:8px}
+.chart .b{flex:1;background:var(--acc);border-radius:4px 4px 0 0;min-height:2px;position:relative}
+.chart .b.z{background:var(--line)}
+.axis{display:flex;justify-content:space-between;color:var(--soft);font-size:12.5px;margin-top:6px}
+.rows{display:grid;gap:8px}
+.r{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;font-size:15px}
+.r .track{grid-column:1/-1;height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.r .fill{height:100%;background:var(--acc);border-radius:4px}
+.r .v{font-weight:700;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:14.5px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{color:var(--soft);font-weight:600}
+.err{color:var(--warn);font-weight:600;min-height:1.5em}
+.note{color:var(--soft);font-size:13.5px;margin-top:18px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style></head><body>
+<div class="wrap">
+<h1 id="title">Scan report</h1>
+<p class="sub" id="sub">How many people scanned your printed card, when and where.</p>
+<form class="bar" id="auth" hidden><input id="secret" type="password" placeholder="Admin secret" aria-label="Admin secret"><button type="submit">Open</button></form>
+<div class="bar" id="tools" hidden>
+<label class="sr" for="days">Period</label>
+<select id="days"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="365">Last 12 months</option></select>
+<button class="alt" id="refresh" type="button">Refresh</button><button id="csv" type="button">Download CSV</button><a class="btn alt" id="back" href="admin.html" hidden>Admin</a>
+</div>
+<p class="err" id="err" role="alert"></p>
+<div id="out"></div>
+<p class="note">Counted anonymously: approximate city (from the network), device type, language and the card it came from. No names, numbers or IP addresses are stored. Link-preview bots are not counted.</p>
+</div>
+<script>
+{
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+const P=new URLSearchParams(location.search);
+const code=(P.get('code')||'').toUpperCase(),key=P.get('key')||'';
+let secret='';try{secret=sessionStorage.getItem('talk-admin')||''}catch(e){}
+const asAdmin=!key;
+const LANG={en:'English',ar:'Arabic'};
+function q(fmt){const u=new URLSearchParams({days:$('days').value});if(code)u.set('code',code);if(key)u.set('key',key);if(fmt)u.set('format',fmt);return'/api/talk/report?'+u}
+const hdr=()=>asAdmin?{'x-admin-secret':secret}:{};
+function list(title,rows,map){
+ const max=Math.max(1,...rows.map(r=>r.n));
+ return`<section class="card"><h2>${esc(title)}</h2><div class="rows">${rows.length?rows.slice(0,8).map(r=>`<div class="r"><span>${esc(map?map(r.label):r.label)}</span><span class="v">${r.n}</span><span class="track"><span class="fill" style="width:${Math.round(r.n/max*100)}%;display:block"></span></span></div>`).join(''):'<span style="color:var(--soft)">No scans yet</span>'}</div></section>`;
+}
+function render(d){
+ if(d.card){$('title').textContent=d.card.name||d.card.code;$('sub').textContent=`Card ${d.card.code}${d.card.client?' · '+d.card.client:''} · scans of your printed QR`;document.title=`Scan report · ${d.card.name||d.card.code}`}
+ else{$('title').textContent='All Talking Codes';$('sub').textContent='Scans across every code.'}
+ const max=Math.max(1,...d.byDay.map(x=>x.n));
+ const first=d.byDay[0]?.day,last=d.byDay[d.byDay.length-1]?.day;
+ const fmt=s=>new Date(s+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short'});
+ const best=[...d.byDay].sort((a,b)=>b.n-a.n)[0];
+ $('out').innerHTML=`
+ <div class="kpis">
+  <div class="kpi"><div class="n">${d.total}</div><div class="l">Scans, ${d.days} days</div></div>
+  <div class="kpi"><div class="n">${d.unique}</div><div class="l">Different people (approx.)</div></div>
+  ${d.allTime!=null?`<div class="kpi"><div class="n">${d.allTime}</div><div class="l">Scans since the card went live</div></div>`:''}
+  <div class="kpi"><div class="n">${best&&best.n?esc(fmt(best.day)):'–'}</div><div class="l">Busiest day${best&&best.n?` (${best.n})`:''}</div></div>
+ </div>
+ <section class="card"><h2>Scans per day (Dubai time)</h2>
+  <div class="chart" role="img" aria-label="Scans per day: ${d.byDay.map(x=>x.day+' '+x.n).join(', ')}">${d.byDay.map(x=>`<span class="b${x.n?'':' z'}" title="${esc(fmt(x.day))}: ${x.n}" style="height:${Math.max(2,Math.round(x.n/max*100))}%"></span>`).join('')}</div>
+  <div class="axis"><span>${first?esc(fmt(first)):''}</span><span>${last?esc(fmt(last)):''}</span></div></section>
+ <div class="grid">
+  ${list('Top cities',d.byCity)}
+  ${list('Devices',d.byDevice)}
+  ${list('Language watched',d.byLang,l=>LANG[l]||l)}
+  ${list(d.byCode?'By code':'Where it was scanned from',d.byCode||d.bySource,l=>l==='Unknown'?'Direct / untagged':l)}
+ </div>
+ <section class="card" style="margin-top:12px"><h2>Latest scans</h2>${d.recent.length?`<div style="overflow-x:auto"><table><thead><tr><th scope="col">When</th>${d.byCode?'<th scope="col">Code</th>':''}<th scope="col">City</th><th scope="col">Device</th><th scope="col">Language</th></tr></thead><tbody>${d.recent.map(r=>`<tr><td>${esc(new Date(r.at).toLocaleString(undefined,{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}))}</td>${d.byCode?`<td>${esc(r.code)}</td>`:''}<td>${esc([r.city,r.country].filter(Boolean).join(', ')||'Unknown')}</td><td>${esc(r.device)}</td><td>${esc(LANG[r.lang]||r.lang)}</td></tr>`).join('')}</tbody></table></div>`:'<span style="color:var(--soft)">No scans in this period yet.</span>'}</section>`;
+}
+async function load(){
+ $('err').textContent='';
+ const r=await fetch(q(),{headers:hdr(),cache:'no-store'});
+ if(r.status===401){if(asAdmin){$('auth').hidden=false;$('tools').hidden=true;$('err').textContent=secret?'That secret did not work.':''}else $('err').textContent='This report link is not valid. Ask for a new one.';return}
+ if(!r.ok){$('err').textContent='Could not load the report. Try Refresh.';return}
+ if(asAdmin)try{sessionStorage.setItem('talk-admin',secret)}catch(e){}
+ $('auth').hidden=true;$('tools').hidden=false;$('back').hidden=!asAdmin;render(await r.json());
+}
+$('auth').addEventListener('submit',e=>{e.preventDefault();secret=$('secret').value.trim();if(secret)load()});
+$('days').addEventListener('change',load);$('refresh').addEventListener('click',load);
+$('csv').addEventListener('click',async()=>{const r=await fetch(q('csv'),{headers:hdr()});if(!r.ok){$('err').textContent='CSV download failed.';return}const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`scans-${code||'all'}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
+if(asAdmin&&!secret){$('auth').hidden=false}else load();
+}
+</script>
+</body></html>
