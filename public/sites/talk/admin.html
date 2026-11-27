@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Talking Codes · Admin</title>
+<style>
+:root{--bg:#fff;--ink:#141417;--soft:#5d5d66;--acc:#0f9f92;--acc-ink:#fff;--panel:#f4f5f6;--line:#e2e4e7;--warn:#b3261e;--ok:#137a3a;--focus:#1f4fd1}
+@media(prefers-color-scheme:dark){:root{--bg:#0f1012;--ink:#f1f1f4;--soft:#a8a8b3;--acc:#2ce5d4;--acc-ink:#05201d;--panel:#1a1b1f;--line:#2c2d33;--warn:#ff8a80;--ok:#6fdc94;--focus:#7fa2ff}}
+*{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:28px;margin:0 0 4px;letter-spacing:-.01em}
+h2{font-size:20px;margin:28px 0 10px}
+.sub{color:var(--soft);margin:0 0 18px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+input,textarea,select{font:16px system-ui,sans-serif;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-height:46px;width:100%}
+textarea{min-height:110px;resize:vertical}
+label{display:grid;gap:6px;font-weight:600;font-size:14px}
+label small{font-weight:400;color:var(--soft)}
+button,a.btn{border:0;border-radius:12px;padding:11px 16px;min-height:46px;font:600 15px system-ui,sans-serif;background:var(--acc);color:var(--acc-ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+button.alt,a.alt{background:var(--panel);color:var(--ink);border:1px solid var(--line)}
+button:disabled{opacity:.55;cursor:wait}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.card{background:var(--panel);border-radius:16px;padding:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border-radius:999px;padding:4px 12px;font-size:13px;font-weight:700;background:var(--panel);border:1px solid var(--line)}
+.chip.on{color:var(--ok)}.chip.off{color:var(--warn)}
+.list{display:grid;gap:10px}
+.row{background:var(--panel);border-radius:16px;padding:14px 16px;display:grid;gap:8px}
+.row .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.row b{font-size:17px}
+.code{font:700 14px ui-monospace,Menlo,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:2px 8px}
+.meta{color:var(--soft);font-size:14px}
+.acts{display:flex;flex-wrap:wrap;gap:8px}
+.acts a,.acts button{min-height:40px;padding:8px 12px;font-size:14px}
+.err{color:var(--warn);font-weight:600;min-height:1.5em}
+.okmsg{color:var(--ok);font-weight:600}
+.empty{color:var(--soft);padding:24px;text-align:center;background:var(--panel);border-radius:16px}
+.up{display:flex;gap:8px}
+.up input{flex:1}
+.up button{flex:0 0 auto}
+.inactive{opacity:.6}
+fieldset{border:0;padding:0;margin:0}
+.hint{font-size:14px;color:var(--soft);margin:6px 0 0}
+</style></head><body>
+<div class="wrap">
+<h1>Talking Codes</h1>
+<p class="sub">The QR codes behind Print That Talks. Each code always prints the same short link; swap the video here anytime without reprinting.</p>
+
+<form class="bar" id="auth"><input id="secret" type="password" placeholder="Admin secret" autocomplete="current-password" aria-label="Admin secret" style="flex:1 1 240px;width:auto"><button type="submit">Open</button></form>
+<p class="err" id="err" role="alert"></p>
+
+<div id="app" hidden>
+<div class="chips" id="status" aria-live="polite"></div>
+
+<h2 id="formTitle">New code</h2>
+<form id="form" class="card">
+<fieldset class="grid">
+<label>Card name <small>Shown on the player, e.g. AST Digital Print Center</small><input id="f-name" required maxlength="80"></label>
+<label>Client <small>For your own grouping</small><input id="f-client" maxlength="80"></label>
+<label>Headline on the player <small>Optional, e.g. A message from George</small><input id="f-title" maxlength="100"></label>
+<label>Code <small>Leave blank to generate one; can't be changed later</small><input id="f-code" maxlength="24" placeholder="e.g. AST01" autocapitalize="characters"></label>
+<label>Video (English)<div class="up"><input id="f-en" placeholder="https://… or /sites/…/video.mp4"><button class="alt" type="button" data-up="f-en" data-accept="video/*">Upload</button></div></label>
+<label>Video (Arabic) <small>Optional; adds the عربي switch</small><div class="up"><input id="f-ar" placeholder="https://…"><button class="alt" type="button" data-up="f-ar" data-accept="video/*">Upload</button></div></label>
+<label>Poster image <small>Optional still shown before play</small><div class="up"><input id="f-poster" placeholder="https://…"><button class="alt" type="button" data-up="f-poster" data-accept="image/*">Upload</button></div></label>
+<label>Greeting name <small>Optional: shows “Hi Ahmed 👋”</small><input id="f-greeting" maxlength="40"></label>
+<label>Button label <small>Optional, e.g. WhatsApp us</small><input id="f-ctaLabel" maxlength="40"></label>
+<label>Button link <small>https://, tel: or mailto:</small><input id="f-ctaUrl" placeholder="https://wa.me/9715…"></label>
+<label>WhatsApp scan alerts to <small>Owner's number with country code; blank = off</small><input id="f-alertPhone" inputmode="tel" placeholder="9715…"></label>
+<label>Alert at most every (minutes)<input id="f-alertMinutes" type="number" min="1" max="1440" value="10"></label>
+<label style="align-self:end;display:flex;gap:10px;align-items:center;font-weight:600"><input id="f-active" type="checkbox" checked style="width:22px;min-height:22px"> Active (plays when scanned)</label>
+</fieldset>
+<div class="bar" style="margin-top:14px"><button type="submit" id="save">Save code</button><button type="button" class="alt" id="reset">Clear form</button><span class="okmsg" id="saved" aria-live="polite"></span></div>
+</form>
+
+<h2>Personal greeting batch</h2>
+<form id="batch" class="card">
+<p class="hint" style="margin-top:0">Creates one code per name, each opening with “Hi &lt;name&gt; 👋”, using the card name, videos, button and alerts from the form above. Use it for VIP gift cards or invites.</p>
+<div class="grid">
+<label>Names, one per line<textarea id="b-names" placeholder="Ahmed&#10;Sara&#10;Priya"></textarea></label>
+<label>Code prefix <small>Optional, e.g. GIFT</small><input id="b-prefix" maxlength="8"></label>
+</div>
+<div class="bar" style="margin-top:14px"><button type="submit" id="bgo">Create batch</button><span class="okmsg" id="bmsg" aria-live="polite"></span></div>
+</form>
+
+<h2>All codes</h2>
+<div class="bar"><input id="q" placeholder="Search name, client, code, greeting" aria-label="Search codes" style="flex:1 1 240px;width:auto"><button class="alt" id="refresh" type="button">Refresh</button><a class="btn alt" id="allReport" href="report.html">All scans report</a><button class="alt" id="csvCodes" type="button">Codes CSV</button></div>
+<div class="list" id="list"></div>
+</div>
+</div>
+<script>
+{
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $=id=>document.getElementById(id);
+const ORIGIN=location.origin;
+let secret='',codes=[],cfg={};
+try{secret=sessionStorage.getItem('talk-admin')||''}catch(e){}
+const api=(path,opts={})=>fetch(path,{...opts,cache:'no-store',headers:{'x-admin-secret':secret,'Content-Type':'application/json',...(opts.headers||{})}});
+const when=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})};
+const link=c=>`${ORIGIN}/t/${c.code}`;
+const reportLink=c=>`${ORIGIN}/sites/talk/report.html?code=${encodeURIComponent(c.code)}&key=${encodeURIComponent(c.reportKey||'')}`;
+
+function render(){
+ const q=$('q').value.trim().toLowerCase();
+ const rows=codes.filter(c=>!q||[c.name,c.client,c.code,c.greeting,c.title].join(' ').toLowerCase().includes(q));
+ $('list').innerHTML=rows.length?rows.map(c=>`<article class="row${c.active?'':' inactive'}">
+ <div class="top"><b>${esc(c.name||'(no name)')}${c.greeting?` · Hi ${esc(c.greeting)}`:''}</b><span class="code">${esc(c.code)}</span></div>
+ <div class="meta">${c.client?esc(c.client)+' · ':''}${c.scans||0} scan${c.scans===1?'':'s'} · ${c.active?'Active':'Off'}${c.videos?.ar?' · EN + AR':''}${c.alertPhone?' · WhatsApp alerts on':''} · since ${esc(when(c.createdAt))}</div>
+ <div class="acts">
+  <a class="btn alt" href="/t/${encodeURIComponent(c.code)}?preview=1" target="_blank" rel="noopener">Preview</a>
+  <button class="alt" data-edit="${esc(c.code)}">Edit / swap video</button>
+  <a class="btn alt" href="/api/talk/qr/${encodeURIComponent(c.code)}?src=card" download="${esc(c.code)}-qr.svg">QR (SVG, print)</a>
+  <a class="btn alt" href="/api/talk/qr/${encodeURIComponent(c.code)}?src=card&format=png" download="${esc(c.code)}-qr.png">QR (PNG)</a>
+  <a class="btn alt" href="report.html?code=${encodeURIComponent(c.code)}">Report</a>
+  <button class="alt" data-copy="${esc(reportLink(c))}">Copy client report link</button>
+ </div></article>`).join(''):`<div class="empty">${codes.length?'No codes match that search.':'No codes yet. Create the first one above.'}</div>`;
+}
+function status(){
+ $('status').innerHTML=`<span class="chip ${cfg.r2?'on':'off'}">Video upload: ${cfg.r2?'ready':'not set up (paste links)'}</span><span class="chip ${cfg.whatsapp?'on':'off'}">WhatsApp alerts: ${cfg.whatsapp?'ready':'not set up'}</span><span class="chip">${codes.length} code${codes.length===1?'':'s'}</span>`;
+}
+async function load(){
+ $('err').textContent='';
+ const r=await api('/api/talk/codes');
+ if(r.status===401){$('err').textContent='That secret did not work.';$('app').hidden=true;$('auth').hidden=false;return}
+ if(!r.ok){$('err').textContent='Could not load codes. Try Refresh.';return}
+ const d=await r.json();codes=d.codes||[];cfg={r2:d.r2,whatsapp:d.whatsapp};
+ try{sessionStorage.setItem('talk-admin',secret)}catch(e){}
+ $('auth').hidden=true;$('app').hidden=false;status();render();
+}
+function formBody(){
+ return{name:$('f-name').value,client:$('f-client').value,title:$('f-title').value,greeting:$('f-greeting').value,
+  videos:{en:$('f-en').value.trim(),ar:$('f-ar').value.trim()},poster:$('f-poster').value.trim(),
+  cta:{label:$('f-ctaLabel').value,url:$('f-ctaUrl').value.trim()},alertPhone:$('f-alertPhone').value,
+  alertMinutes:Number($('f-alertMinutes').value)||10,active:$('f-active').checked};
+}
+function fill(c){
+ $('f-code').value=c?.code||'';$('f-code').disabled=Boolean(c);
+ $('f-name').value=c?.name||'';$('f-client').value=c?.client||'';$('f-title').value=c?.title||'';$('f-greeting').value=c?.greeting||'';
+ $('f-en').value=c?.videos?.en||'';$('f-ar').value=c?.videos?.ar||'';$('f-poster').value=c?.poster||'';
+ $('f-ctaLabel').value=c?.cta?.label||'';$('f-ctaUrl').value=c?.cta?.url||'';$('f-alertPhone').value=c?.alertPhone||'';
+ $('f-alertMinutes').value=c?.alertMinutes||10;$('f-active').checked=c?c.active!==false:true;
+ $('formTitle').textContent=c?`Edit ${c.code}`:'New code';$('saved').textContent='';
+}
+$('form').addEventListener('submit',async e=>{
+ e.preventDefault();$('err').textContent='';$('save').disabled=true;
+ const body=formBody();if(!$('f-code').disabled)body.code=$('f-code').value.trim();else body.code=$('f-code').value;
+ const r=await api('/api/talk/codes',{method:'POST',body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));
+ $('save').disabled=false;
+ if(!r.ok||!d.ok){$('err').textContent=d.error||'Save failed.';return}
+ $('saved').textContent=`Saved ${d.code.code}. The printed QR keeps working; scans now play this video.`;
+ fill(d.code);await load();
+});
+$('reset').addEventListener('click',()=>fill(null));
+$('batch').addEventListener('submit',async e=>{
+ e.preventDefault();$('err').textContent='';$('bmsg').textContent='';
+ const names=$('b-names').value.split('\n').map(s=>s.trim()).filter(Boolean);
+ if(!names.length){$('err').textContent='Add at least one name.';return}
+ const body={...formBody(),greetings:names,prefix:$('b-prefix').value.trim()};delete body.greeting;
+ $('bgo').disabled=true;const r=await api('/api/talk/codes',{method:'POST',body:JSON.stringify(body)});const d=await r.json().catch(()=>({}));$('bgo').disabled=false;
+ if(!r.ok||!d.ok){$('err').textContent=d.error||'Batch failed.';return}
+ $('bmsg').textContent=`Created ${d.codes.length} codes. Download “Codes CSV” for the print list.`;$('b-names').value='';await load();
+});
+$('list').addEventListener('click',async e=>{
+ const ed=e.target.closest('[data-edit]');if(ed){fill(codes.find(c=>c.code===ed.dataset.edit));$('form').scrollIntoView({behavior:'smooth'});return}
+ const cp=e.target.closest('[data-copy]');if(cp){try{await navigator.clipboard.writeText(cp.dataset.copy);cp.textContent='Copied'}catch(x){prompt('Copy this link',cp.dataset.copy)}}
+});
+document.querySelectorAll('[data-up]').forEach(b=>b.addEventListener('click',()=>{
+ if(!cfg.r2){$('err').textContent='Video upload is not set up yet. Paste a video link instead.';return}
+ const inp=document.createElement('input');inp.type='file';inp.accept=b.dataset.accept;
+ inp.onchange=async()=>{const f=inp.files[0];if(!f)return;$('err').textContent='';const label=b.textContent;b.disabled=true;b.textContent='Uploading…';
+  try{const r=await api('/api/talk/upload-url',{method:'POST',body:JSON.stringify({contentType:f.type,code:$('f-code').value})});const d=await r.json();
+   if(!r.ok||!d.ok)throw new Error(d.error||'Could not start the upload.');
+   const put=await fetch(d.uploadUrl,{method:'PUT',body:f,headers:{'Content-Type':f.type}});if(!put.ok)throw new Error('Upload failed ('+put.status+'). Check the bucket CORS rule.');
+   $(b.dataset.up).value=d.publicUrl;$('saved').textContent='Uploaded. Click Save code to make it live.';
+  }catch(x){$('err').textContent=x.message}finally{b.disabled=false;b.textContent=label}};
+ inp.click();
+}));
+$('csvCodes').addEventListener('click',()=>{
+ const cols=['code','name','client','greeting','scans','active','link','qr_svg','client_report'];
+ const cell=v=>{let s=String(v??'');if(/^[=+\-@]/.test(s))s="'"+s;return'"'+s.replace(/"/g,'""')+'"'};
+ const lines=[cols.join(','),...codes.map(c=>[c.code,c.name,c.client,c.greeting,c.scans||0,c.active,link(c),`${ORIGIN}/api/talk/qr/${c.code}?src=card`,reportLink(c)].map(cell).join(','))];
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));a.download='talking-codes.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+});
+$('auth').addEventListener('submit',e=>{e.preventDefault();secret=$('secret').value.trim();if(secret)load()});
+$('refresh').addEventListener('click',load);
+$('q').addEventListener('input',render);
+if(secret)load();
+}
+</script>
+</body></html>
