@@ -41,12 +41,12 @@ const posters = [
   { slug: 'fluodigital-digital-empire', shape: 'h', win: '3/4', pos: '88% 50%', glow: 'rgba(255,46,136,.40)', dur: '0:38',
     eyebrow: 'A FluoDigital original', name: 'The Digital Empire', role: 'Multiply yourself',
     title: 'Zero cameras. Zero burnout.', site: 'fluodigital.com' },
-  // AST (astuae.com): the founder film (16:9) and the Digital & Offset Print film (9:16).
+  // AST (astuae.com): the founder film (16:9) and the AST Digital Print Center film (9:16).
   { slug: 'ast-founder-film-16x9', shape: 'h', win: '3/4', pos: '50% 50%', glow: 'rgba(51,177,230,.40)', dur: '0:53',
     eyebrow: 'Five services. One roof.', name: 'George Ittan Maramkandathil', role: 'Founder, AST · Est. 1985',
     title: 'Leave a mark.', site: 'astuae.com' },
-  { slug: 'ast-digital-offset-print-9x16', shape: 'v', win: '16/9', pos: '70% 40%', glow: 'rgba(249,239,91,.30)', dur: '0:31',
-    eyebrow: 'What we print', name: 'AST Digital & Offset Print', role: 'Dubai',
+  { slug: 'ast-digital-print-center-9x16', shape: 'v', win: '16/9', pos: '70% 40%', glow: 'rgba(249,239,91,.30)', dur: '0:30',
+    eyebrow: 'What we print', name: 'AST Digital Print Center', role: 'Dubai',
     title: 'One print at a time.', chips: ['Personalized cards', 'Banners', 'Luxury packaging'] },
 ];
 // ONLY=slug,slug renders just those posters (the others' win-*.jpg crops need not be present).

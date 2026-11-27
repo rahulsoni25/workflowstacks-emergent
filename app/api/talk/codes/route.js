@@ -1,6 +1,6 @@
 import { getDb } from '../../../../lib/mongo'
 import {
-  CODES, CODE_RE, ensureIndexes, normCode, randomCode, newReportKey, clip, cleanMediaUrl, cleanPhone, isAdmin,
+  CODES, CODE_RE, ensureIndexes, normCode, randomCode, newReportKey, clip, cleanMediaUrl, cleanPhone, isAdmin, playableVideo,
   r2Configured, whatsappConfigured,
 } from '../../../../lib/talk'
 
@@ -54,6 +54,11 @@ export async function POST(request) {
   const coll = db.collection(CODES)
   const now = new Date()
   const fields = fieldsFrom(body)
+  for (const [lang, raw] of [['English', body.videos?.en], ['Arabic', body.videos?.ar]]) {
+    if (raw && (!cleanMediaUrl(raw) || !playableVideo(cleanMediaUrl(raw)))) {
+      return Response.json({ ok: false, error: `The ${lang} video must be a direct video file (a link ending in .mp4). YouTube, Google Drive, Instagram and web page links won't play on the card.` }, { status: 400 })
+    }
+  }
 
   // Batch: one code per name, each with its own greeting ("Hi Ahmed 👋").
   if (Array.isArray(body.greetings)) {
