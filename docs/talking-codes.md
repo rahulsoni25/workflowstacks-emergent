@@ -30,6 +30,22 @@ and the language switch (it reloads with `?sw=1`).
   `vid` is a salted hash of IP + browser + day, used only to count unique
   scanners; it rotates daily and the IP is never stored.
 
+## Hosting videos on workflowstacks.com (current setup)
+
+Until R2 is set up, client videos are files in this repo:
+
+- Use-case videos already on the site, e.g.
+  `/sites/founder-avatar-studio/use-cases/ast-digital-print-center-9x16.mp4`.
+- Videos only for a card go under `public/sites/talk/media/<client>/`.
+  Encode for phones first: 576×1024 (9:16), H.264, about 1 Mbps, AAC,
+  `-movflags +faststart` (a 30 s film is about 2 MB).
+- A new file needs a commit and a production deploy before its link works.
+  Swapping a code between files that are already on the site needs no deploy.
+
+The admin page only accepts direct video files (.mp4, .m4v, .webm, .mov).
+YouTube, Google Drive, Instagram and web-page links are refused because the
+player's `<video>` tag can't play them.
+
 ## Setup: video uploads (Cloudflare R2)
 
 Without this, paste video links instead (e.g. files under `/sites/…`).
