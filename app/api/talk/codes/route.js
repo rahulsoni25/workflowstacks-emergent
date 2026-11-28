@@ -1,7 +1,7 @@
 import { getDb } from '../../../../lib/mongo'
 import {
   CODES, CODE_RE, ensureIndexes, normCode, randomCode, newReportKey, clip, cleanMediaUrl, cleanPhone, isAdmin, playableVideo,
-  r2Configured, whatsappConfigured,
+  r2Configured, whatsappConfigured, BUILTIN_CODES,
 } from '../../../../lib/talk'
 
 // Admin API for Talking Codes (the QR codes behind Print That Talks).
@@ -43,6 +43,8 @@ export async function GET(request) {
   if (!isAdmin(request)) return Response.json({ error: 'Unauthorized' }, { status: 401 })
   const db = await getDb()
   const codes = await db.collection(CODES).find({}, { projection: { _id: 0 } }).sort({ updatedAt: -1 }).limit(2000).toArray()
+  // Built-in demo cards not yet saved in the database, so the admin sees them.
+  for (const b of Object.values(BUILTIN_CODES)) if (!codes.some((c) => c.code === b.code)) codes.push({ ...b, scans: null })
   return Response.json({ codes, r2: r2Configured(), whatsapp: whatsappConfigured() }, { headers: { 'Cache-Control': 'no-store' } })
 }
 

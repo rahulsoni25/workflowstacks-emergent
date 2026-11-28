@@ -107,14 +107,14 @@ function render(){
  const rows=codes.filter(c=>!q||[c.name,c.client,c.code,c.greeting,c.title].join(' ').toLowerCase().includes(q));
  $('list').innerHTML=rows.length?rows.map(c=>`<article class="row${c.active?'':' inactive'}">
  <div class="top"><b>${esc(c.name||'(no name)')}${c.greeting?` · Hi ${esc(c.greeting)}`:''}</b><span class="code">${esc(c.code)}</span></div>
- <div class="meta">${c.client?esc(c.client)+' · ':''}${c.scans||0} scan${c.scans===1?'':'s'} · ${c.active?'Active':'Off'}${c.videos?.ar?' · EN + AR':''}${c.alertPhone?' · WhatsApp alerts on':''} · since ${esc(when(c.createdAt))}</div>
+ <div class="meta">${c.builtin?'Built-in demo (save it to edit) · ':''}${c.client?esc(c.client)+' · ':''}${c.builtin?'':`${c.scans||0} scan${c.scans===1?'':'s'} · `}${c.active?'Active':'Off'}${c.videos?.ar?' · EN + AR':''}${c.alertPhone?' · WhatsApp alerts on':''} · since ${esc(when(c.createdAt))}</div>
  <div class="acts">
   <a class="btn alt" href="/t/${encodeURIComponent(c.code)}?preview=1" target="_blank" rel="noopener">Preview</a>
   <button class="alt" data-edit="${esc(c.code)}">Edit / swap video</button>
   <a class="btn alt" href="/api/talk/qr/${encodeURIComponent(c.code)}?src=card" download="${esc(c.code)}-qr.svg">QR (SVG, print)</a>
   <a class="btn alt" href="/api/talk/qr/${encodeURIComponent(c.code)}?src=card&format=png" download="${esc(c.code)}-qr.png">QR (PNG)</a>
   <a class="btn alt" href="report.html?code=${encodeURIComponent(c.code)}">Report</a>
-  <button class="alt" data-copy="${esc(reportLink(c))}">Copy client report link</button>
+  ${c.reportKey?`<button class="alt" data-copy="${esc(reportLink(c))}">Copy client report link</button>`:''}
  </div></article>`).join(''):`<div class="empty">${codes.length?'No codes match that search.':'No codes yet. Create the first one above.'}</div>`;
 }
 function status(){
@@ -136,7 +136,7 @@ function formBody(){
   alertMinutes:Number($('f-alertMinutes').value)||10,active:$('f-active').checked};
 }
 function fill(c){
- $('f-code').value=c?.code||'';$('f-code').disabled=Boolean(c);
+ $('f-code').value=c?.code||'';$('f-code').disabled=Boolean(c&&!c.builtin);
  $('f-name').value=c?.name||'';$('f-client').value=c?.client||'';$('f-title').value=c?.title||'';$('f-greeting').value=c?.greeting||'';
  $('f-en').value=c?.videos?.en||'';$('f-ar').value=c?.videos?.ar||'';$('f-poster').value=c?.poster||'';
  $('f-ctaLabel').value=c?.cta?.label||'';$('f-ctaUrl').value=c?.cta?.url||'';$('f-alertPhone').value=c?.alertPhone||'';
