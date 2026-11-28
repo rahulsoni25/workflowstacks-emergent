@@ -1,5 +1,5 @@
 import { getDb } from '../../../../lib/mongo'
-import { CODES, SCANS, CODE_RE, normCode, isAdmin, sameKey } from '../../../../lib/talk'
+import { SCANS, CODE_RE, normCode, isAdmin, sameKey, findCard } from '../../../../lib/talk'
 
 // Scan report for a Talking Code.
 //   Admin (x-admin-secret header): any code, or all codes when none is given.
@@ -32,14 +32,12 @@ export async function GET(request) {
   if (code && !CODE_RE.test(code)) return Response.json({ error: 'Unknown code' }, { status: 404 })
 
   const db = await getDb()
-  let card = null
-  if (code) {
-    card = await db.collection(CODES).findOne({ code }, { projection: { _id: 0 } })
-    if (!card) return Response.json({ error: 'Unknown code' }, { status: 404 })
-  }
-  if (!admin && !(card && sameKey(url.searchParams.get('key'), card.reportKey))) {
+  // Check access before saying whether a code exists.
+  let card = code ? await findCard(db, code) : null
+  if (!admin && !(card && card.reportKey && sameKey(url.searchParams.get('key'), card.reportKey))) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 })
   }
+  if (code && !card) return Response.json({ error: `There is no card with the code ${code} yet. Create it in the admin page.` }, { status: 404 })
 
   const since = new Date(Date.now() - days * 86_400_000)
   const filter = { at: { $gte: since }, ...(code ? { code } : {}) }
@@ -71,7 +69,7 @@ export async function GET(request) {
     days,
     total: scans.length,
     unique,
-    allTime: code ? (card.scans || 0) : undefined,
+    allTime: code && !card.builtin ? (card.scans || 0) : undefined,
     byDay: [...perDay.entries()].map(([day, n]) => ({ day, n })),
     byCity: count(scans, 'city'),
     byCountry: count(scans, 'country'),

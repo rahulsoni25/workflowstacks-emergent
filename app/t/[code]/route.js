@@ -1,7 +1,7 @@
 import { getDb } from '../../../lib/mongo'
 import {
   CODES, SCANS, CODE_RE, normCode, isBot, deviceOf, locationOf, visitorId,
-  prefersArabic, sendScanAlert, whatsappConfigured,
+  prefersArabic, sendScanAlert, whatsappConfigured, findCard,
 } from '../../../lib/talk'
 
 // The page behind every Print That Talks QR: workflowstacks.com/t/<CODE>.
@@ -40,8 +40,8 @@ export async function GET(request, { params }) {
   if (!CODE_RE.test(code)) return notFound()
 
   const db = await getDb()
-  const card = await db.collection(CODES).findOne({ code, active: true }, { projection: { _id: 0, reportKey: 0 } })
-  if (!card || !(card.videos?.en || card.videos?.ar)) return notFound()
+  const card = await findCard(db, code, { _id: 0, reportKey: 0 })
+  if (!card || card.active === false || !(card.videos?.en || card.videos?.ar)) return notFound()
 
   const url = new URL(request.url)
   const ua = request.headers.get('user-agent') || ''
@@ -58,10 +58,10 @@ export async function GET(request, { params }) {
     await db.collection(SCANS).insertOne({
       code, at: new Date(), ...loc, device: deviceOf(ua), lang, src, vid: visitorId(request),
     })
-    await db.collection(CODES).updateOne({ code }, { $inc: { scans: 1 } })
+    if (!card.builtin) await db.collection(CODES).updateOne({ code }, { $inc: { scans: 1 } })
 
     // WhatsApp alert, at most one per card every `alertMinutes` (default 10).
-    if (card.alertPhone && whatsappConfigured()) {
+    if (!card.builtin && card.alertPhone && whatsappConfigured()) {
       const gap = Math.max(1, Number(card.alertMinutes) || 10) * 60_000
       const claimed = await db.collection(CODES).findOneAndUpdate(
         { code, $or: [{ lastAlertAt: { $exists: false } }, { lastAlertAt: { $lt: new Date(Date.now() - gap) } }] },

@@ -98,7 +98,7 @@ async function load(){
  $('err').textContent='';
  const r=await fetch(q(),{headers:hdr(),cache:'no-store'});
  if(r.status===401){if(asAdmin){$('auth').hidden=false;$('tools').hidden=true;$('err').textContent=secret?'That secret did not work.':''}else $('err').textContent='This report link is not valid. Ask for a new one.';return}
- if(!r.ok){$('err').textContent='Could not load the report. Try Refresh.';return}
+ if(!r.ok){const e=await r.json().catch(()=>({}));$('err').textContent=e.error||'Could not load the report. Try Refresh.';return}
  if(asAdmin)try{sessionStorage.setItem('talk-admin',secret)}catch(e){}
  $('auth').hidden=true;$('tools').hidden=false;$('back').hidden=!asAdmin;render(await r.json());
 }
